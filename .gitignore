@@ -1,0 +1,59 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# FVM (SDK is pinned in .fvmrc; each member runs `fvm install`)
+.fvm/
+
+# IntelliJ / Android Studio (per-machine; see README for setup)
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code / Antigravity: share settings, extensions, launch configs only
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
+# Zed: share project settings only
+.zed/*
+!.zed/settings.json
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Local env / secrets
+.env
+.env.*
+!.env.example

@@ -1,0 +1,17 @@
+{
+  "tab_size": 2,
+  "hard_tabs": false,
+  "ensure_final_newline_on_save": true,
+  "remove_trailing_whitespace_on_save": true,
+  "file_scan_exclusions": ["**/.fvm", "**/.dart_tool", "**/build"],
+  "languages": {
+    "Dart": {
+      "format_on_save": "on",
+      "preferred_line_length": 100,
+      "wrap_guides": [100],
+      "code_actions_on_format": {
+        "source.organizeImports": true
+      }
+    }
+  }
+}
