@@ -1,0 +1,10 @@
+# Mỗi thư mục có một chủ; PR đụng vào sẽ tự động cần chủ đó review.
+# Demo: mọi feature đều là Lead. App thật: thay bằng GitHub username của từng thành viên.
+
+*                         @tiranixnguyen
+/lib/features/menu/       @tiranixnguyen
+/lib/features/detail/     @tiranixnguyen
+/lib/features/favorites/  @tiranixnguyen
+/test/features/menu/      @tiranixnguyen
+/test/features/detail/    @tiranixnguyen
+/test/features/favorites/ @tiranixnguyen
