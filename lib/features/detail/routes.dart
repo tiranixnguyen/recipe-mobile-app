@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 
-import '../../core/widgets/coming_soon_screen.dart';
+import 'presentation/detail_screen.dart';
 
 /// Đường dẫn tới màn chi tiết — feature khác dùng hàm này thay vì tự ghép chuỗi.
 String drinkLocation(String id) => '/drink/$id';
@@ -8,6 +8,6 @@ String drinkLocation(String id) => '/drink/$id';
 final detailRoutes = <RouteBase>[
   GoRoute(
     path: '/drink/:id',
-    builder: (_, _) => const ComingSoonScreen(title: 'Chi tiết'),
+    builder: (_, state) => DetailScreen(drinkId: state.pathParameters['id']!),
   ),
 ];
