@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// STUB: chưa lưu gì, chỉ để Menu và Chi tiết đặt nút vào ngay. Bản thật thay ở issue Yêu thích,
-/// giữ nguyên constructor nên chỗ dùng không phải sửa.
-class FavoriteButton extends StatelessWidget {
+import '../data/favorites_controller.dart';
+import '../strings.dart';
+
+class FavoriteButton extends ConsumerWidget {
   const FavoriteButton({super.key, required this.drinkId});
 
   final String drinkId;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isFavorite = ref.watch(favoritesProvider.select((ids) => ids.contains(drinkId)));
+
     return IconButton(
-      icon: const Icon(Icons.favorite_border),
-      tooltip: 'Yêu thích',
-      onPressed: () {},
+      icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+      color: isFavorite ? Colors.red : null,
+      tooltip: isFavorite ? FavoritesStrings.remove : FavoritesStrings.add,
+      onPressed: () => ref.read(favoritesProvider.notifier).toggle(drinkId),
     );
   }
 }
