@@ -1,0 +1,14 @@
+<!-- @dsCard group="Feedback" height=300 -->
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><title>EmptyState — preview</title></head>
+<body>
+<div id="root" class="bh-stage"></div>
+<script>
+  var B = window.BepHoaLac, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(
+    h(B.EmptyState, { title: 'Chưa lưu món nào', actionLabel: 'Tìm món để lưu', icon: 'bookmark' },
+      'Bấm biểu tượng lưu trên món bạn thích. Món đã lưu được ưu tiên khi gợi ý và lên thực đơn.'));
+</script>
+</body>
+</html>

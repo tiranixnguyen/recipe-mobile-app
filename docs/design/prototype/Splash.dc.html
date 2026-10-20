@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Khởi động</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+.big .bh-icon{width:52px;height:52px;stroke-width:1.75}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; position: relative; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+  <a href="Onboarding.dc.html" aria-label="Mở Bếp Hoà Lạc" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 0 32px 64px 32px; color: var(--ink); text-decoration: none">
+    <svg role="img" aria-label="Logo Bếp Hoà Lạc" width="120" height="120" viewBox="0 0 96 96" style="border-radius: 30px"><rect width="96" height="96" fill="#FFE3CC"></rect><g transform="translate(-2 -1)"><path d="M38 44L74 18M48 46L82 24" fill="none" stroke="#C2410C" stroke-width="5" stroke-linecap="round"></path><path d="M18 50h60a30 30 0 0 1-60 0z" fill="#2A1E16"></path></g></svg>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center">
+      <span style="font-size: 32px; line-height: 38px; font-weight: 700; letter-spacing: -.01em">Bếp Hoà Lạc</span>
+      <span style="color: var(--ink-muted); font-size: 15px; line-height: 22px">Có gì nấu nấy, ăn gì cũng có kế hoạch.</span>
+    </div>
+  </a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { theme: this.props.theme ?? 'system' };
+}
+}
+</script>
+</body>
+</html>

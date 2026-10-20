@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Góp ý và báo lỗi</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+input[type=checkbox]{accent-color:var(--chili)}
+textarea:focus,input[type=email]:focus{outline:2px solid var(--chili);outline-offset:1px}
+textarea::placeholder,input::placeholder{color:var(--ink-muted)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; align-items: center; gap: 4px; padding: 8px 16px 0 4px; height: 56px; flex-shrink: 0">
+    <a href="Settings.dc.html" aria-label="Quay lại cài đặt" style="width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+      <x-import component-from-global-scope="BepHoaLac.Icon" name="back"></x-import>
+    </a>
+    <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Góp ý &amp; báo lỗi</h1>
+  </header>
+
+  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 20px; padding: 12px 16px 16px 16px">
+    <p style="margin: 0; color: var(--ink-muted); font-size: 15px; line-height: 22px">Món nào khó làm, chỗ nào khó dùng, hay app bị lỗi, cứ nói thẳng. Nhóm đọc hết.</p>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <span id="kind" style="font-size: 13px; line-height: 18px; font-weight: 600">Bạn muốn gửi gì?</span>
+      <div role="group" aria-labelledby="kind" style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{kinds}}" as="k" hint-placeholder-count="3">
+          <x-import component-from-global-scope="BepHoaLac.Chip" selected="{{k.on}}" on-click="{{k.pick}}">{{k.label}}</x-import>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <label for="msg" style="font-size: 13px; line-height: 18px; font-weight: 600">Bạn muốn nói gì?</label>
+      <textarea id="msg" rows="5" placeholder="{{placeholder}}" style="width: 100%; resize: none; padding: 12px 14px; border: 1px solid var(--outline); border-radius: 12px; background: var(--surface-raised); color: var(--ink); font: 400 15px/22px 'Be Vietnam Pro', sans-serif"></textarea>
+      <x-import component-from-global-scope="BepHoaLac.Button" variant="secondary" icon="image">Đính kèm ảnh chụp màn hình</x-import>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <label for="mail" style="font-size: 13px; line-height: 18px; font-weight: 600">Email để nhóm trả lời <span style="color: var(--ink-muted); font-weight: 400">(không bắt buộc)</span></label>
+      <input id="mail" type="email" placeholder="ban@vidu.com" style="height: 48px; padding: 0 14px; border: 1px solid var(--outline); border-radius: 12px; background: var(--surface-raised); color: var(--ink); font: 400 15px/22px 'Be Vietnam Pro', sans-serif">
+      <label style="min-height: 44px; display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; line-height: 20px">
+        <input type="checkbox" checked="{{yes}}" style="width: 20px; height: 20px; margin: 0">
+        Gửi kèm thông tin máy (phiên bản app, Android) để dễ sửa lỗi
+      </label>
+    </section>
+  </main>
+
+  <footer style="flex-shrink: 0; padding: 12px 16px 24px 16px; border-top: 1px solid var(--line); background: var(--surface-raised)">
+    <a href="Settings.dc.html" class="bh-btn bh-btn-primary bh-btn-block bh-btn-lg" style="text-decoration: none">Gửi góp ý</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+var KINDS = [
+['bug', 'Báo lỗi', 'Ví dụ: bấm Hẹn giờ ở bước 3 thì app đứng hình.'],
+['recipe', 'Góp ý món', 'Ví dụ: thêm món dùng lò vi sóng, hoặc sửa bước của một món.'],
+['other', 'Khác', 'Bất cứ điều gì bạn muốn nhóm biết.']
+];
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { kind: 'bug' };
+}
+renderVals() {
+var self = this;
+var kind = this.state.kind;
+return {
+theme: this.props.theme ?? 'system',
+yes: true,
+placeholder: KINDS.filter(function (k) { return k[0] === kind; })[0][2],
+kinds: KINDS.map(function (k) {
+return { label: k[1], on: k[0] === kind, pick: function () { self.setState({ kind: k[0] }); } };
+})
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!-- @dsCard group="Display" height=320 -->
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><title>RecipeCard — preview</title></head>
+<body>
+<div id="root" class=""></div>
+<script>
+  var B = window.BepHoaLac, h = React.createElement;
+  function Card(p) {
+    var s = React.useState(!!p.saved);
+    return h(B.RecipeCard, Object.assign({}, p, { saved: s[0], onToggleSave: function () { s[1](!s[0]); } }));
+  }
+  var grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '16px', padding: '16px', maxWidth: '720px' };
+  ReactDOM.createRoot(document.getElementById('root')).render(h('div', { style: grid },
+    h(Card, { title: 'Trứng chiên hành', minutes: 15, servings: 1, tool: 'Bếp từ', missing: [], saved: true }),
+    h(Card, { title: 'Mì xào rau cải', minutes: 15, servings: 1, tool: 'Bếp từ', missing: ['rau cải'] }),
+    h(Card, { title: 'Trứng hấp thịt băm', minutes: 20, servings: 1, tool: 'Nồi cơm điện' })));
+</script>
+</body>
+</html>

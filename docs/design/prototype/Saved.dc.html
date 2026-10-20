@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Đã lưu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a{color:var(--chili-deep)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; align-items: center; padding: 16px 16px 8px 16px; height: 64px">
+    <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Đã lưu</h1>
+  </header>
+
+  <main style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 0 32px 64px 32px; text-align: center">
+    <div style="width: 96px; height: 96px; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); display: flex; align-items: center; justify-content: center">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"></path></svg>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Chưa lưu món nào</h2>
+      <p style="margin: 0; color: var(--ink-muted); font-size: 15px; line-height: 22px">Bấm biểu tượng lưu trên món bạn thích. Món đã lưu được ưu tiên khi gợi ý và lên thực đơn.</p>
+    </div>
+    <a href="Main.dc.html" style="height: 48px; padding: 0 24px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--chili); color: #FFFFFF; text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">Tìm món để lưu</a>
+  </main>
+
+  <nav aria-label="Điều hướng chính" style="height: 80px; flex-shrink: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface-raised); border-top: 1px solid var(--line)">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
+      <span style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5l-2 5-5 2 2-5z"></path></svg>
+      </span>
+      Khám phá
+    </a>
+    <a href="Pantry.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
+      <span style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"></rect><path d="M6 10h12M9 6v2M9 13v3"></path></svg>
+      </span>
+      Tủ đồ
+    </a>
+    <a href="MealPlan.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
+      <span style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M8 3v4M16 3v4"></path></svg>
+      </span>
+      Thực đơn
+    </a>
+    <a href="Saved.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink); text-decoration: none; font-size: 12px; line-height: 16px; font-weight: 600">
+      <span style="width: 64px; height: 32px; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); display: flex; align-items: center; justify-content: center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"></path></svg>
+      </span>
+      Đã lưu
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { theme: this.props.theme ?? 'system' };
+}
+}
+</script>
+</body>
+</html>

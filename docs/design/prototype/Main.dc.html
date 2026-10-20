@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Khám phá</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a{color:var(--chili-deep)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 8px 8px 16px; height: 64px; flex-shrink: 0">
+    <span style="display: flex; align-items: center; gap: 10px">
+      <svg aria-hidden="true" width="32" height="32" viewBox="0 0 96 96" style="border-radius: 9px; flex-shrink: 0"><rect width="96" height="96" fill="#FFE3CC"></rect><g transform="translate(-2 -1)"><path d="M38 44L74 18M48 46L82 24" fill="none" stroke="#C2410C" stroke-width="6" stroke-linecap="round"></path><path d="M18 50h60a30 30 0 0 1-60 0z" fill="#2A1E16"></path></g></svg>
+      <span style="font-size: 20px; line-height: 28px; font-weight: 700; letter-spacing: -.01em">Bếp Hoà Lạc</span>
+    </span>
+    <a href="Settings.dc.html" aria-label="Cài đặt" style="width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"></path><circle cx="16" cy="7" r="2"></circle><circle cx="10" cy="17" r="2"></circle></svg>
+    </a>
+  </header>
+
+  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 24px; padding-bottom: 16px">
+    <sc-if value="{{showResume}}" hint-placeholder-val="{{false}}">
+      <a href="CookStep.dc.html" style="margin: 0 16px -8px 16px; padding: 12px 12px 12px 16px; display: flex; align-items: center; gap: 12px; border-radius: 12px; background: var(--ink); color: var(--surface); text-decoration: none">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2M9 2h6"></path></svg>
+        <span style="flex: 1; display: flex; flex-direction: column">
+          <span style="font-size: 12px; line-height: 16px; opacity: .85">Đang nấu dở</span>
+          <span style="font-size: 15px; line-height: 22px; font-weight: 600">Trứng chiên hành · bước 2/4</span>
+        </span>
+        <span style="height: 40px; padding: 0 14px; display: flex; align-items: center; border-radius: 12px; background: var(--chili); color: #FFFFFF; font-size: 13px; line-height: 18px; font-weight: 600">Nấu tiếp</span>
+      </a>
+    </sc-if>
+    <section style="margin: 0 16px; padding: 20px; border-radius: 12px; background: var(--chili-soft); display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700; color: var(--chili-deep)">Hôm nay ăn gì?</h1>
+        <p style="margin: 0; font-size: 15px; line-height: 22px; color: var(--ink)">Gợi ý theo đồ trong tủ, bếp của bạn và bữa sắp tới.</p>
+      </div>
+      <a href="Today.dc.html" style="align-self: flex-start; height: 48px; padding: 0 20px; display: flex; align-items: center; gap: 8px; border-radius: 12px; background: var(--chili); color: #FFFFFF; text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">
+        Gợi ý cho mình
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </a>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 12px; padding: 0 16px">
+      <a href="Search.dc.html" style="height: 48px; display: flex; align-items: center; gap: 8px; padding: 0 16px; background: var(--surface-raised); border: 1px solid var(--outline); border-radius: 12px; color: var(--ink-muted); text-decoration: none; font-size: 15px; line-height: 22px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--ink)"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        Tìm món hoặc nguyên liệu
+      </a>
+      <div style="display: flex; gap: 8px; overflow: hidden">
+        <a href="Search.dc.html" style="flex-shrink: 0; height: 36px; padding: 0 14px; display: flex; align-items: center; border-radius: 999px; border: 1px solid var(--outline); color: var(--ink); text-decoration: none; font-size: 13px; line-height: 18px; font-weight: 600">Dưới 15 phút</a>
+        <a href="Search.dc.html" style="flex-shrink: 0; height: 36px; padding: 0 14px; display: flex; align-items: center; border-radius: 999px; border: 1px solid var(--outline); color: var(--ink); text-decoration: none; font-size: 13px; line-height: 18px; font-weight: 600">Nồi cơm điện</a>
+        <a href="Search.dc.html" style="flex-shrink: 0; height: 36px; padding: 0 14px; display: flex; align-items: center; border-radius: 999px; border: 1px solid var(--outline); color: var(--ink); text-decoration: none; font-size: 13px; line-height: 18px; font-weight: 600">Chay</a>
+        <a href="Search.dc.html" style="flex-shrink: 0; height: 36px; padding: 0 14px; display: flex; align-items: center; border-radius: 999px; border: 1px solid var(--outline); color: var(--ink); text-decoration: none; font-size: 13px; line-height: 18px; font-weight: 600">Bữa tối</a>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between; padding: 0 16px">
+        <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Nấu được với đồ bạn có</h2>
+        <a href="Pantry.dc.html" style="font-size: 13px; line-height: 18px; font-weight: 600; text-decoration: none">Mở tủ đồ</a>
+      </div>
+      <div style="display: flex; gap: 12px; padding: 0 16px; overflow: hidden">
+        <a href="Detail.dc.html" style="flex-shrink: 0; width: 200px; display: flex; flex-direction: column; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; color: var(--ink); text-decoration: none">
+          <div style="height: 104px; background: var(--line); display: flex; align-items: center; justify-content: center; color: var(--ink-muted); font-size: 12px; line-height: 16px; position: relative">
+            [Ảnh trứng chiên hành]
+            <span style="position: absolute; left: 8px; top: 8px; padding: 2px 8px; border-radius: 8px; background: var(--herb); color: #FFFFFF; font-size: 12px; line-height: 16px; font-weight: 600">Đủ đồ</span>
+          </div>
+          <div style="padding: 10px 12px 12px 12px; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 15px; line-height: 22px; font-weight: 600">Trứng chiên hành</span>
+            <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">15 phút · Bếp từ</span>
+          </div>
+        </a>
+        <a href="Detail.dc.html" style="flex-shrink: 0; width: 200px; display: flex; flex-direction: column; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; color: var(--ink); text-decoration: none">
+          <div style="height: 104px; background: var(--line); display: flex; align-items: center; justify-content: center; color: var(--ink-muted); font-size: 12px; line-height: 16px; position: relative">
+            [Ảnh canh cà chua trứng]
+            <span style="position: absolute; left: 8px; top: 8px; padding: 2px 8px; border-radius: 8px; background: var(--chili-soft); color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 600">Thiếu hành</span>
+          </div>
+          <div style="padding: 10px 12px 12px 12px; display: flex; flex-direction: column; gap: 2px">
+            <span style="font-size: 15px; line-height: 22px; font-weight: 600">Canh cà chua trứng</span>
+            <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">15 phút · Bếp từ</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 12px; padding: 0 16px">
+      <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Nhanh sau giờ học</h2>
+      <a href="Detail.dc.html" style="display: flex; gap: 12px; align-items: center; padding: 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
+        <div style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+          <span style="font-size: 15px; line-height: 22px; font-weight: 600">Trứng hấp nồi cơm</span>
+          <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">20 phút · 1 người · Nồi cơm điện</span>
+        </div>
+      </a>
+    </section>
+  </main>
+
+  <nav aria-label="Điều hướng chính" style="height: 80px; flex-shrink: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface-raised); border-top: 1px solid var(--line)">
+    <a href="Main.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink); text-decoration: none; font-size: 12px; line-height: 16px; font-weight: 600">
+      <span style="width: 64px; height: 32px; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); display: flex; align-items: center; justify-content: center">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5l-2 5-5 2 2-5z"></path></svg>
+      </span>
+      Khám phá
+    </a>
+    <a href="Pantry.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
+      <span style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"></rect><path d="M6 10h12M9 6v2M9 13v3"></path></svg>
+      </span>
+      Tủ đồ
+    </a>
+    <a href="MealPlan.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
+      <span style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M8 3v4M16 3v4"></path></svg>
+      </span>
+      Thực đơn
+    </a>
+    <a href="Saved.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
+      <span style="width: 64px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"></path></svg>
+      </span>
+      Đã lưu
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"showResume":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { theme: this.props.theme ?? 'system', showResume: this.props.showResume ?? false };
+}
+}
+</script>
+</body>
+</html>

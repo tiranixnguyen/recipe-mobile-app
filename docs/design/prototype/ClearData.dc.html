@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Xoá dữ liệu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a.bh-btn-secondary,a.bh-btn-secondary:hover{color:var(--ink)}
+a.bh-btn-danger,a.bh-btn-danger:hover{color:#FFFFFF}
+.ic .bh-icon{width:28px;height:28px}
+#confirm:focus{outline:2px solid var(--danger);outline-offset:1px}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; position: relative; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <div aria-hidden="true" style="flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 16px">
+    <span style="padding: 12px 0 0 40px; font-size: 20px; line-height: 28px; font-weight: 600">Cài đặt</span>
+    <div style="height: 92px; border-radius: 14px; background: var(--surface-raised); border: 1px solid var(--line)"></div>
+    <div style="height: 54px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line)"></div>
+    <div style="height: 106px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line)"></div>
+    <div style="height: 210px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line)"></div>
+    <div style="height: 54px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line)"></div>
+  </div>
+
+  <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(20, 14, 10, 0.55)">
+    <div role="alertdialog" aria-labelledby="t" aria-describedby="d" style="width: 100%; display: flex; flex-direction: column; gap: 16px; padding: 24px 20px 20px 20px; border-radius: 20px; background: var(--surface-raised)">
+      <div style="display: flex; align-items: center; gap: 12px">
+        <div class="ic" style="width: 52px; height: 52px; flex-shrink: 0; border-radius: 999px; background: var(--chili-soft); color: var(--danger-ink); display: flex; align-items: center; justify-content: center">
+          <x-import component-from-global-scope="BepHoaLac.Icon" name="trash"></x-import>
+        </div>
+        <h1 id="t" style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Xoá toàn bộ dữ liệu?</h1>
+      </div>
+      <div id="d" style="display: flex; flex-direction: column; gap: 8px; font-size: 15px; line-height: 22px">
+        <span>Những thứ sau sẽ bị xoá khỏi máy:</span>
+        <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 2px">
+          <li>Tủ đồ và danh sách đi chợ</li>
+          <li>Thực đơn ngày và tuần</li>
+          <li>Món đã lưu</li>
+          <li>Lịch sử nấu và đánh giá</li>
+          <li>Dụng cụ, chế độ ăn, giao diện đã chọn</li>
+        </ul>
+        <span style="font-weight: 600; color: var(--danger-ink)">Không có tài khoản nên không khôi phục được.</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <label for="confirm" style="font-size: 13px; line-height: 18px; font-weight: 600">Gõ <span style="font-family: ui-monospace, Menlo, monospace; padding: 1px 6px; border-radius: 6px; background: var(--chili-soft); color: var(--chili-deep)">CONFIRM DELETE</span> để mở nút xoá</label>
+        <input id="confirm" type="text" value="{{typed}}" onChange="{{onType}}" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="CONFIRM DELETE" aria-describedby="hint" style="height: 48px; padding: 0 14px; border-radius: 12px; background: var(--surface); color: var(--ink); font: 600 15px/22px ui-monospace, Menlo, monospace; letter-spacing: .04em; {{inputBorder}}">
+        <span id="hint" aria-live="polite" style="font-size: 12px; line-height: 16px; font-weight: 600; {{hintStyle}}">{{hint}}</span>
+      </div>
+
+      <div style="display: flex; gap: 12px">
+        <a href="Settings.dc.html" class="bh-btn bh-btn-secondary" style="flex: 1; padding: 0 12px; text-decoration: none">Huỷ</a>
+        <sc-if value="{{locked}}" hint-placeholder-val="{{true}}">
+          <x-import component-from-global-scope="BepHoaLac.Button" variant="danger" icon="trash" disabled="{{yes}}" block="{{yes}}" style="flex: 1">Xoá hết</x-import>
+        </sc-if>
+        <sc-if value="{{matched}}" hint-placeholder-val="{{false}}">
+          <a href="Splash.dc.html" class="bh-btn bh-btn-danger" style="flex: 1; padding: 0 12px; text-decoration: none">
+            <x-import component-from-global-scope="BepHoaLac.Icon" name="trash"></x-import>
+            Xoá hết
+          </a>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+var PHRASE = 'CONFIRM DELETE';
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { typed: '' };
+}
+renderVals() {
+var self = this;
+var typed = this.state.typed;
+var matched = typed.trim() === PHRASE;
+var started = typed.length > 0;
+return {
+theme: this.props.theme ?? 'system',
+yes: true,
+typed: typed,
+onType: function (e) { self.setState({ typed: e && e.target ? e.target.value : '' }); },
+matched: matched,
+locked: !matched,
+inputBorder: matched ? 'border: 2px solid var(--herb);' : 'border: 1px solid var(--outline);',
+hint: matched ? 'Đã khớp. Giờ bạn có thể bấm Xoá hết.' : (started ? 'Chưa khớp, gõ đúng chữ in hoa và dấu cách.' : 'Nút Xoá hết đang khoá để tránh bấm nhầm.'),
+hintStyle: matched ? 'color: var(--herb-ink);' : 'color: var(--ink-muted);'
+};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!-- @dsCard group="Actions" height=160 -->
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><title>Button — preview</title></head>
+<body>
+<div id="root" class="bh-stage"></div>
+<script>
+  var B = window.BepHoaLac, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(B.Button, { icon: 'plus' }, 'Thêm vào danh sách đi chợ'),
+    h(B.Button, { variant: 'secondary' }, 'Xem cách nấu'),
+    h(B.Button, { variant: 'ghost' }, 'Bỏ qua'),
+    h(B.Button, { disabled: true }, 'Hết nguyên liệu'),
+    h(B.Button, { variant: 'danger', icon: 'trash' }, 'Xoá hết'),
+    h(B.Button, { variant: 'danger', disabled: true }, 'Xoá hết'),
+    h('div', { style: { display: 'flex', gap: '12px', width: '100%', maxWidth: '358px' } },
+      h(B.Button, { variant: 'secondary', icon: 'back', size: 'lg', block: true }, 'Bước trước'),
+      h(B.Button, { size: 'lg', block: true }, 'Bước tiếp'))));
+</script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+{
+  "v": 3,
+  "layout": "files",
+  "createdOnFiles": { "v": 1, "at": "2026-10-19T03:43:49Z" },
+  "title": "Bếp Hoà Lạc",
+  "namespace": "BepHoaLac",
+  "libraries": [{ "name": "react", "version": "18" }, { "name": "react-dom", "version": "18" }],
+  "sections": {},
+  "groups": ["Logos"],
+  "assetGroups": {
+    "Logos": {
+      "name": "Logos",
+      "tile": "l",
+      "order": ["bep-hoa-lac-icon.svg", "bep-hoa-lac-mark.svg", "bep-hoa-lac-mark-on-dark.svg", "adaptive-foreground.svg", "adaptive-monochrome.svg"],
+      "files": {
+        "bep-hoa-lac-icon.svg": { "name": "bep-hoa-lac-icon.svg", "blob": "f37bea1a7292741aab9ef5f426175e94", "size": 347, "type": "image/svg+xml" },
+        "bep-hoa-lac-mark.svg": { "name": "bep-hoa-lac-mark.svg", "blob": "df19c073f473987c55aeccbe41ecf774", "size": 262, "type": "image/svg+xml" },
+        "bep-hoa-lac-mark-on-dark.svg": { "name": "bep-hoa-lac-mark-on-dark.svg", "blob": "3a9a72febe17da9000f362cc107053dd", "size": 262, "type": "image/svg+xml" },
+        "adaptive-foreground.svg": { "name": "adaptive-foreground.svg", "blob": "96c0fc536c8c7087036afc2ff2e9b279", "size": 331, "type": "image/svg+xml" },
+        "adaptive-monochrome.svg": { "name": "adaptive-monochrome.svg", "blob": "02b9e2a5a8ff2cf78c3cb0abed22451e", "size": 331, "type": "image/svg+xml" }
+      }
+    }
+  },
+  "blobs": {},
+  "docs": { "readme": "project/README.md", "sections": [] },
+  "lastChange": {
+    "by": "Claude",
+    "at": "2026-10-20T15:00:00Z",
+    "via": "Claude Code",
+    "note": "Thêm logo bát & đũa (hướng C): icon app, mark sáng/tối, adaptive icon Android và lớp một màu."
+  }
+}
