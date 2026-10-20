@@ -1,0 +1,625 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sổ tay người mới — Bếp Hoà Lạc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Màu lấy từ docs/design/design-system/tokens.json */
+  :root {
+    --surface: #FFF8F1; --surface-raised: #FFFFFF; --ink: #2A1E16; --ink-muted: #6E5D50;
+    --line: #EADFD3; --outline: #958170; --chili: #C2410C; --chili-soft: #FFE3CC;
+    --chili-deep: #9A3412; --herb: #2F7A3E; --herb-ink: #2F7A3E; --herb-soft: #DDF0DF;
+    --danger-ink: #B42318;
+    --space-1: 4px; --space-2: 8px; --space-4: 16px; --space-6: 24px;
+    --radius-sm: 8px; --radius-md: 12px; --radius-pill: 999px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #1A1410; --surface-raised: #26201A; --ink: #F5EDE6; --ink-muted: #BFAE9F;
+      --line: #3A3029; --outline: #8C7A6B; --chili-soft: #4A2513; --chili-deep: #FFB38A;
+      --herb-ink: #7FCB8F; --herb-soft: #1F3A25; --danger-ink: #FF8A80;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: var(--space-6); }
+  body {
+    margin: 0; background: var(--surface); color: var(--ink);
+    font: 16px/1.6 "Be Vietnam Pro", system-ui, sans-serif;
+  }
+  .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); max-width: 1180px; margin: 0 auto; }
+  nav.toc {
+    position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+    padding: var(--space-6) var(--space-4); border-right: 1px solid var(--line);
+  }
+  nav.toc .brand { font-weight: 700; font-size: 18px; margin-bottom: var(--space-4); }
+  nav.toc .brand small { display: block; font-weight: 400; color: var(--ink-muted); font-size: 13px; }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; counter-reset: toc; }
+  nav.toc li { counter-increment: toc; }
+  nav.toc a {
+    display: block; padding: 6px 10px; border-radius: var(--radius-sm);
+    color: var(--ink); text-decoration: none; font-size: 14px;
+  }
+  nav.toc a::before { content: counter(toc) ". "; color: var(--ink-muted); }
+  nav.toc a:hover { background: var(--chili-soft); color: var(--chili-deep); }
+  main { padding: var(--space-6) 40px 80px; min-width: 0; }
+  header.hero { padding: var(--space-6) 0; border-bottom: 1px solid var(--line); margin-bottom: var(--space-6); }
+  header.hero h1 { font-size: 34px; line-height: 1.2; margin: 0 0 var(--space-2); }
+  header.hero p { color: var(--ink-muted); margin: 0; }
+  section { margin-bottom: 48px; }
+  h2 {
+    font-size: 24px; margin: 0 0 var(--space-4); padding-top: var(--space-2);
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2 .num {
+    display: inline-grid; place-items: center; width: 32px; height: 32px; flex: none;
+    background: var(--chili); color: #fff; border-radius: var(--radius-md); font-size: 16px;
+  }
+  h3 { font-size: 18px; margin: var(--space-6) 0 var(--space-2); }
+  p, li { max-width: 78ch; }
+  a { color: var(--chili-deep); }
+  code, kbd, pre { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 0.88em; }
+  code { background: var(--surface-raised); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; }
+  pre {
+    background: var(--ink); color: var(--surface); border-radius: var(--radius-md);
+    padding: var(--space-4); overflow-x: auto; line-height: 1.55; margin: var(--space-2) 0 var(--space-4);
+  }
+  pre code { background: none; border: 0; padding: 0; color: inherit; }
+  pre .c { color: #BFAE9F; }
+  table { width: 100%; border-collapse: collapse; margin: var(--space-2) 0 var(--space-4); font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-muted); font-weight: 600; }
+  .card {
+    background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-md);
+    padding: var(--space-4) 20px; margin: var(--space-4) 0;
+  }
+  .card > :first-child { margin-top: 0; } .card > :last-child { margin-bottom: 0; }
+  .tip { border-left: 4px solid var(--herb); }
+  .warn { border-left: 4px solid var(--chili); }
+  .tip strong:first-child { color: var(--herb-ink); }
+  .warn strong:first-child { color: var(--chili-deep); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-4); }
+  .grid .card { margin: 0; }
+  .grid h3 { margin-top: 0; }
+  .chip {
+    display: inline-block; padding: 2px 10px; border-radius: var(--radius-pill); font-size: 13px;
+    border: 1px solid var(--outline); white-space: nowrap; font-weight: 500;
+  }
+  .chip.must { background: var(--chili-soft); color: var(--chili-deep); border-color: transparent; }
+  .chip.ok { background: var(--herb-soft); color: var(--herb-ink); border-color: transparent; }
+  dl.glossary { display: grid; grid-template-columns: max-content 1fr; gap: 6px 20px; margin: var(--space-2) 0; }
+  dl.glossary dt { font-weight: 600; }
+  dl.glossary dd { margin: 0; color: var(--ink); }
+  dl.glossary dd em { color: var(--ink-muted); font-style: normal; }
+  ol.steps { list-style: none; padding: 0; counter-reset: s; }
+  ol.steps > li { counter-increment: s; position: relative; padding-left: 48px; margin-bottom: var(--space-6); }
+  ol.steps > li::before {
+    content: counter(s); position: absolute; left: 0; top: 0; width: 32px; height: 32px;
+    display: grid; place-items: center; border-radius: 50%;
+    background: var(--chili-soft); color: var(--chili-deep); font-weight: 700;
+  }
+  ol.steps > li > strong:first-child { display: block; font-size: 17px; margin-bottom: 2px; }
+  ul.check { list-style: none; padding: 0; }
+  ul.check li { padding-left: 30px; position: relative; margin-bottom: 6px; }
+  ul.check li::before {
+    content: ""; position: absolute; left: 0; top: 4px; width: 18px; height: 18px;
+    border: 2px solid var(--outline); border-radius: 5px;
+  }
+  .flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: var(--space-4) 0; }
+  .flow span {
+    background: var(--surface-raised); border: 1px solid var(--line); border-radius: var(--radius-sm);
+    padding: 6px 12px; font-size: 14px; font-weight: 500;
+  }
+  .flow i { color: var(--ink-muted); font-style: normal; }
+  .do-dont { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+  .do-dont ul { padding-left: 20px; margin: 0; }
+  .do-dont li { margin-bottom: 6px; }
+  .issue {
+    font-size: 14px; background: var(--surface-raised); border: 1px solid var(--line);
+    border-radius: var(--radius-md); overflow: hidden; margin: var(--space-4) 0;
+  }
+  .issue .head { padding: 12px 16px; border-bottom: 1px solid var(--line); font-weight: 600; }
+  .issue .head .chip { margin-left: 4px; font-weight: 500; }
+  .issue .body { padding: 12px 16px; display: grid; grid-template-columns: 1fr 210px; gap: 20px; }
+  .issue .note { color: var(--chili-deep); font-size: 13px; font-weight: 500; }
+  .issue .side { border-left: 1px dashed var(--line); padding-left: 16px; color: var(--ink-muted); }
+  footer { color: var(--ink-muted); font-size: 14px; border-top: 1px solid var(--line); padding-top: var(--space-4); }
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    table { display: block; overflow-x: auto; }
+    td code { white-space: nowrap; }
+    nav.toc { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+    main { padding: var(--space-4); }
+    .do-dont, .issue .body { grid-template-columns: 1fr; }
+    .issue .side { border-left: 0; padding-left: 0; }
+    dl.glossary { grid-template-columns: 1fr; }
+    dl.glossary dd { margin-bottom: 8px; }
+  }
+  @media print {
+    nav.toc { display: none; } .layout { display: block; } main { padding: 0; }
+    section { break-inside: avoid-page; } pre { white-space: pre-wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<nav class="toc" aria-label="Mục lục">
+  <div class="brand">Bếp Hoà Lạc<small>Sổ tay người mới</small></div>
+  <ol>
+    <li><a href="#tom-tat">Tóm tắt 1 phút</a></li>
+    <li><a href="#ngay-dau">Ngày đầu tiên</a></li>
+    <li><a href="#cong-cu">Công cụ</a></li>
+    <li><a href="#kien-thuc">Kiến thức cần chuẩn bị</a></li>
+    <li><a href="#thuat-ngu">Thuật ngữ</a></li>
+    <li><a href="#doc-du-an">Đọc dự án</a></li>
+    <li><a href="#chon-issue">Tìm và chọn issue</a></li>
+    <li><a href="#workflow">Vòng làm một issue</a></li>
+    <li><a href="#ai-agent">Làm việc với AI agent</a></li>
+    <li><a href="#slack">Slack</a></li>
+    <li><a href="#su-co">Khi gặp sự cố</a></li>
+    <li><a href="#luat">Nên và không nên</a></li>
+    <li><a href="#lenh">Lệnh hay dùng</a></li>
+    <li><a href="#lich">Lịch 4 tuần</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="hero">
+  <h1>Sổ tay người mới</h1>
+  <p>Mọi thứ bạn cần để nhận việc đầu tiên trong dự án Bếp Hoà Lạc: thuật ngữ, công cụ, cách đọc dự án,
+  cách nhận issue, code với AI agent, mở PR và dùng Slack. Đọc một lượt khoảng 20 phút, sau đó giữ làm
+  bảng tra cứu.</p>
+</header>
+
+<!-- ============================================================ 1 -->
+<section id="tom-tat">
+  <h2><span class="num">1</span>Tóm tắt 1 phút</h2>
+  <p><strong>Bếp Hoà Lạc</strong> là app Android gợi ý món ăn cho sinh viên khu Hoà Lạc từ đồ đang có
+  trong tủ và dụng cụ trong phòng, rồi lên thực đơn ngày/tuần và danh sách đi chợ. Nhóm 5 người làm
+  MVP trong <strong>4 tuần, 19/10 → 15/11/2026</strong>.</p>
+  <div class="grid">
+    <div class="card"><h3>Luật sản phẩm</h3>
+      <ul>
+        <li><strong>Không hiển thị giá tiền</strong> ở bất kỳ đâu.</li>
+        <li>Chỉ <strong>Android</strong>.</li>
+        <li><strong>Không tài khoản</strong>: mọi dữ liệu nằm trên máy người dùng.</li>
+        <li>Công thức đóng gói sẵn, app chạy <strong>offline</strong>.</li>
+      </ul>
+    </div>
+    <div class="card"><h3>Cách nhóm làm việc</h3>
+      <ul>
+        <li>Mỗi người <strong>một feature</strong>, một thư mục riêng.</li>
+        <li>Mỗi việc là <strong>một issue</strong> trên GitHub.</li>
+        <li>Code cùng <strong>AI agent</strong> (Antigravity), nhưng bạn chịu trách nhiệm từng dòng.</li>
+        <li>Mọi thay đổi vào <code>main</code> qua <strong>PR</strong>: CI xanh + Lead duyệt.</li>
+      </ul>
+    </div>
+  </div>
+  <table>
+    <tr><th>Feature</th><th>Thư mục</th><th>Màn hình</th></tr>
+    <tr><td>Khám phá</td><td><code>features/discover</code></td><td>Trang chính, Tìm kiếm, Hôm nay ăn gì, Đã lưu</td></tr>
+    <tr><td>Nấu</td><td><code>features/cook</code></td><td>Chi tiết món, Chuẩn bị, Nấu từng bước, Hoàn thành</td></tr>
+    <tr><td>Tủ đồ &amp; gợi ý</td><td><code>features/pantry</code></td><td>Tủ đồ + bộ gợi ý món dùng chung</td></tr>
+    <tr><td>Thực đơn &amp; đi chợ</td><td><code>features/plan</code></td><td>Thực đơn ngày/tuần, Danh sách đi chợ</td></tr>
+    <tr><td>Hệ thống</td><td><code>features/system</code></td><td>Onboarding, Cài đặt, Thông báo, Góp ý, Giới thiệu, Xoá dữ liệu</td></tr>
+  </table>
+  <p>Ai phụ trách feature nào: xem cột Assignee trên
+  <a href="https://github.com/users/tiranixnguyen/projects/2">Project Recipe MVP</a>.</p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="ngay-dau">
+  <h2><span class="num">2</span>Ngày đầu tiên</h2>
+  <ul class="check">
+    <li>Nhận lời mời vào repo trên GitHub (kiểm tra email hoặc
+      <a href="https://github.com/tiranixnguyen/recipe-mobile-app/invitations">trang lời mời</a>).</li>
+    <li>Cài đủ công cụ ở <a href="#cong-cu">mục 3</a>.</li>
+    <li>Clone repo và chạy app (xem lệnh bên dưới).</li>
+    <li>Chạy thử app demo trên nhánh <code>demo</code> và đọc <code>docs/demo-flow.md</code> ở nhánh đó.</li>
+    <li>Đọc dự án theo thứ tự ở <a href="#doc-du-an">mục 6</a>.</li>
+    <li>Vào Slack (<code>#dev</code>, <code>#ci</code>, <code>#standup</code>) và gõ
+      <code>/github signin</code>, hoặc bật thông báo GitHub nếu bạn không dùng Slack (<a href="#slack">mục 10</a>).</li>
+    <li>Nhận một bài tập khởi động (issue có label <code>exercise</code>) và làm trọn một vòng issue → PR → merge.</li>
+  </ul>
+<pre><code><span class="c"># Clone và chạy lần đầu</span>
+git clone https://github.com/tiranixnguyen/recipe-mobile-app.git
+cd recipe-mobile-app
+fvm install                 <span class="c"># cài đúng Flutter theo .fvmrc</span>
+fvm flutter pub get
+fvm flutter doctor          <span class="c"># kiểm tra môi trường, sửa hết dấu ✗ phần Android</span>
+fvm flutter run             <span class="c"># chạy trên emulator hoặc điện thoại đang cắm</span>
+
+<span class="c"># Xem app demo (menu trà sữa) để hiểu cách tổ chức code</span>
+git switch demo &amp;&amp; fvm flutter pub get &amp;&amp; fvm flutter run
+git switch main</code></pre>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="cong-cu">
+  <h2><span class="num">3</span>Công cụ</h2>
+  <table>
+    <tr><th>Công cụ</th><th>Dùng để</th><th></th><th>Ghi chú cài đặt</th></tr>
+    <tr><td><strong>Git</strong></td><td>Quản lý phiên bản code</td><td><span class="chip must">bắt buộc</span></td>
+      <td>macOS: <code>xcode-select --install</code>. Windows: <a href="https://git-scm.com">git-scm.com</a>. Đặt tên/email:
+      <code>git config --global user.name "…"</code></td></tr>
+    <tr><td><strong>Tài khoản GitHub</strong></td><td>Issue, PR, review, Project</td><td><span class="chip must">bắt buộc</span></td>
+      <td>Nhận lời mời vào repo. Nên cài thêm app GitHub Mobile để nhận thông báo.</td></tr>
+    <tr><td><strong>FVM + Flutter 3.47.5</strong></td><td>Cả nhóm dùng cùng một bản Flutter</td><td><span class="chip must">bắt buộc</span></td>
+      <td><a href="https://fvm.app">fvm.app</a>. Luôn gõ <code>fvm flutter …</code>, không dùng <code>flutter</code> cài toàn máy.</td></tr>
+    <tr><td><strong>Android Studio</strong></td><td>Android SDK + emulator</td><td><span class="chip must">bắt buộc</span></td>
+      <td>Không cần code trong đó, chỉ cần SDK và một emulator API 34–35. Hoặc dùng điện thoại Android thật, bật USB debugging.</td></tr>
+    <tr><td><strong>Antigravity IDE</strong></td><td>Viết code cùng AI agent</td><td><span class="chip must">bắt buộc</span></td>
+      <td>Cài extension <em>Dart</em> + <em>Flutter</em>. Repo đã có sẵn cấu hình trong <code>.vscode/</code> (Antigravity đọc chung).</td></tr>
+    <tr><td><strong>GitHub CLI (<code>gh</code>)</strong></td><td>Xem issue, mở PR từ terminal; agent cũng dùng</td><td><span class="chip ok">nên có</span></td>
+      <td><a href="https://cli.github.com">cli.github.com</a>, rồi <code>gh auth login</code>. Không có thì làm trên web.</td></tr>
+    <tr><td><strong>Slack</strong></td><td>Thông báo, hỏi nhanh, standup</td><td><span class="chip ok">nên có</span></td>
+      <td>Không dùng cũng được — xem <a href="#slack">mục 10</a>.</td></tr>
+  </table>
+  <div class="card tip"><strong>Mẹo:</strong> sau khi cài xong, <code>fvm flutter doctor</code> phải xanh ở
+  phần Flutter và Android toolchain. Phần Xcode/Chrome báo đỏ không sao, dự án không cần.</div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="kien-thuc">
+  <h2><span class="num">4</span>Kiến thức cần chuẩn bị</h2>
+  <p>Không cần giỏi trước — AI agent viết được nhiều. Nhưng bạn phải <strong>đọc hiểu</strong> code nó viết
+  để duyệt plan và review. Ưu tiên theo thứ tự:</p>
+  <table>
+    <tr><th>Chủ đề</th><th>Cần biết tới đâu</th><th>Học ở đâu</th></tr>
+    <tr><td><strong>Git cơ bản</strong></td><td>branch, commit, push, pull, đọc thông báo conflict</td>
+      <td><a href="https://learngitbranching.js.org">learngitbranching.js.org</a> (1–2 giờ)</td></tr>
+    <tr><td><strong>Dart</strong></td><td>biến, class, <code>final</code>/<code>const</code>, null safety, <code>async</code>/<code>await</code>, list/map</td>
+      <td><a href="https://dart.dev/language">dart.dev/language</a></td></tr>
+    <tr><td><strong>Flutter widget</strong></td><td>Stateless vs Stateful, <code>Column</code>/<code>Row</code>/<code>ListView</code>, <code>Scaffold</code>, theme</td>
+      <td><a href="https://docs.flutter.dev/get-started/fundamentals">docs.flutter.dev — Fundamentals</a></td></tr>
+    <tr><td><strong>Riverpod</strong></td><td>đọc được <code>ref.watch</code>, <code>Provider</code>, <code>NotifierProvider</code></td>
+      <td><a href="https://riverpod.dev">riverpod.dev</a> — phần Getting started</td></tr>
+    <tr><td><strong>go_router</strong></td><td>route là gì, <code>context.push('/…')</code></td>
+      <td><a href="https://pub.dev/packages/go_router">pub.dev/packages/go_router</a></td></tr>
+    <tr><td><strong>Test trong Flutter</strong></td><td>đọc được unit test và widget test đơn giản</td>
+      <td><a href="https://docs.flutter.dev/testing/overview">docs.flutter.dev/testing</a></td></tr>
+    <tr><td><strong>GitHub flow</strong></td><td>issue → branch → PR → review → merge</td>
+      <td><a href="https://docs.github.com/get-started/using-github/github-flow">GitHub flow</a> + nhánh <code>demo</code></td></tr>
+  </table>
+  <div class="card tip"><strong>Cách học nhanh nhất:</strong> mở nhánh <code>demo</code>, đọc 3 feature
+  <code>menu</code>, <code>detail</code>, <code>favorites</code> (rất nhỏ), rồi hỏi agent
+  "giải thích file này dòng nào làm gì".</div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="thuat-ngu">
+  <h2><span class="num">5</span>Thuật ngữ</h2>
+
+  <h3>Git &amp; GitHub</h3>
+  <dl class="glossary">
+    <dt>Repo</dt><dd>Kho chứa toàn bộ code dự án: <code>tiranixnguyen/recipe-mobile-app</code>.</dd>
+    <dt>Branch (nhánh)</dt><dd>Một bản làm việc tách riêng. <code>main</code> là app thật; <code>demo</code> là app minh hoạ; mỗi issue bạn làm trên một nhánh mới như <code>feat/23-search</code>.</dd>
+    <dt>Commit</dt><dd>Một lần lưu thay đổi, kèm câu mô tả.</dd>
+    <dt>Push / Pull</dt><dd>Đẩy commit của bạn lên GitHub / kéo thay đổi mới nhất về máy.</dd>
+    <dt>Issue</dt><dd>Một việc cần làm, có mô tả và tiêu chí hoàn thành. Mỗi issue có số, ví dụ <code>#23</code>.</dd>
+    <dt>Label</dt><dd>Nhãn phân loại issue: <code>feature:discover</code>, <code>P0</code>, <code>size:M</code>…</dd>
+    <dt>Milestone</dt><dd>Mốc theo tuần: <em>W1 · Nền tảng &amp; component</em> … <em>W4 · Kiểm thử &amp; phát hành</em>.</dd>
+    <dt>Assignee</dt><dd>Người đang làm issue đó.</dd>
+    <dt>Project (board)</dt><dd>Bảng Kanban gom mọi issue: Todo → In Progress → Done.</dd>
+    <dt>PR (Pull Request)</dt><dd>Đề nghị gộp nhánh của bạn vào <code>main</code>. Nơi diễn ra CI và review.</dd>
+    <dt>Review / Approve</dt><dd>Người khác đọc PR, góp ý; khi ổn thì Approve (duyệt).</dd>
+    <dt>Merge</dt><dd>Gộp PR vào <code>main</code>. Viết <code>Closes #23</code> trong PR thì issue tự đóng khi merge.</dd>
+    <dt>Conflict</dt><dd>Hai người sửa cùng chỗ một file, Git không tự gộp được — phải sửa tay.</dd>
+    <dt>Rebase</dt><dd>Đặt các commit của bạn lên trên bản <code>main</code> mới nhất (cách xử lý conflict nhóm dùng).</dd>
+    <dt>CI</dt><dd>Máy chủ GitHub tự chạy format · analyze · test trên mỗi PR. Đỏ = chưa merge được.</dd>
+    <dt>CODEOWNERS</dt><dd>File quy định thư mục nào thuộc ai; PR đụng vào thư mục của người khác sẽ cần người đó duyệt.</dd>
+    <dt>Branch protection</dt><dd>Luật của <code>main</code>/<code>demo</code>: không push thẳng, phải qua PR có CI xanh và 1 approval.</dd>
+  </dl>
+
+  <h3>Flutter &amp; code</h3>
+  <dl class="glossary">
+    <dt>Flutter / Dart</dt><dd>Framework làm app / ngôn ngữ lập trình của nó.</dd>
+    <dt>FVM</dt><dd>Công cụ chọn đúng phiên bản Flutter cho dự án (ghi trong <code>.fvmrc</code>).</dd>
+    <dt>Widget</dt><dd>Mọi thứ trên màn hình đều là widget: nút, chữ, danh sách, cả màn hình.</dd>
+    <dt>Emulator</dt><dd>Điện thoại Android ảo chạy trên máy tính.</dd>
+    <dt>Package</dt><dd>Thư viện bên ngoài, khai báo trong <code>pubspec.yaml</code>. Chỉ Lead thêm package.</dd>
+    <dt>Provider (Riverpod)</dt><dd>Nơi giữ dữ liệu/trạng thái; màn hình <code>ref.watch</code> để tự cập nhật khi dữ liệu đổi.</dd>
+    <dt>Route</dt><dd>Đường dẫn tới một màn, ví dụ <code>/recipe/:id</code>.</dd>
+    <dt>Unit test / Widget test</dt><dd>Test một hàm / test một widget hay màn hình.</dd>
+    <dt>Analyze / Format</dt><dd>Kiểm tra lỗi và quy tắc code / tự sắp xếp code cho đều đẹp.</dd>
+  </dl>
+
+  <h3>Riêng dự án mình</h3>
+  <dl class="glossary">
+    <dt>Feature</dt><dd>Một cụm màn hình do một người phụ trách, nằm trong <code>lib/features/&lt;tên&gt;/</code>.</dd>
+    <dt>Public API</dt><dd>File <code>lib/features/&lt;tên&gt;/&lt;tên&gt;.dart</code>: thứ duy nhất feature khác được dùng từ feature của bạn.</dd>
+    <dt>Stub</dt><dd>Bản "giả" của public API: chạy được nhưng chưa có logic thật, để người khác dùng ngay mà không phải chờ bạn.</dd>
+    <dt>core / app</dt><dd>Phần dùng chung (model, theme, widget chung, router) — của Lead. Cần sửa thì báo Lead.</dd>
+    <dt>domain / data / presentation</dt><dd>Ba lớp trong một feature: hàm thuần (có unit test) / lưu đọc dữ liệu / màn hình.</dd>
+    <dt>LocalStore</dt><dd>Chỗ lưu dữ liệu người dùng trên máy (app không có tài khoản).</dd>
+    <dt>Design token</dt><dd>Giá trị thiết kế có tên: màu <code>chili</code>, khoảng cách <code>space-4</code>… Không mã màu cứng trong code.</dd>
+    <dt>Prototype <code>.dc.html</code></dt><dd>Bản thiết kế từng màn trong <code>docs/design/prototype/</code> — nguồn để dựng UI.</dd>
+    <dt>P0 / P1 / P2</dt><dd>Bắt buộc / nên có (cắt trước nếu trễ) / làm khi dư thời gian.</dd>
+    <dt>size:S / M / L</dt><dd>≤ nửa ngày / 1–2 ngày / ~3 ngày.</dd>
+  </dl>
+
+  <h3>Quy trình &amp; AI</h3>
+  <dl class="glossary">
+    <dt>AI agent</dt><dd>Trợ lý trong IDE tự đọc code, lập plan, sửa file, chạy lệnh (Antigravity, Claude…).</dd>
+    <dt>AGENTS.md</dt><dd>Bộ luật chung cho mọi agent và người, ở thư mục gốc repo. Agent đọc file này trước khi làm.</dd>
+    <dt>Plan</dt><dd>Danh sách việc agent định làm (file nào, test nào). <strong>Bạn duyệt plan trước khi agent code.</strong></dd>
+    <dt>Claude review</dt><dd>Bot tự đọc PR khi mở và để lại góp ý tiếng Việt. Không thay được Lead approve.</dd>
+    <dt><code>@claude</code></dt><dd>Gõ trong comment PR/issue để hỏi bot, ví dụ "@claude giải thích đoạn này".</dd>
+    <dt>Standup</dt><dd>Cập nhật ngắn mỗi sáng: hôm qua làm gì / hôm nay làm gì / vướng gì.</dd>
+    <dt>Definition of Done</dt><dd>Điều kiện để coi là xong: đủ tiêu chí issue, CI xanh, chỉ sửa thư mục của mình, đã đọc lại code AI viết.</dd>
+  </dl>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="doc-du-an">
+  <h2><span class="num">6</span>Đọc dự án</h2>
+  <p>Đọc theo thứ tự này, đừng mở <code>lib/</code> trước:</p>
+  <ol class="steps">
+    <li><strong><code>AGENTS.md</code></strong>Luật chung: kiến trúc, ranh giới feature, quy trình, Definition of Done. Agent cũng đọc file này.</li>
+    <li><strong><code>docs/backlog.md</code></strong>Toàn cảnh 4 tuần: 5 feature, các điểm nối giữa feature (public API), lịch từng tuần.</li>
+    <li><strong><code>docs/design/README.md</code> → <code>design-system/README.md</code></strong>Giọng văn, màu, chữ, component. Rồi mở prototype các màn <em>của feature bạn</em> trong <code>docs/design/prototype/</code>.</li>
+    <li><strong>Các issue của bạn</strong>Lọc trên Project theo tên bạn. Đọc hết một lượt để biết 4 tuần tới mình làm gì.</li>
+    <li><strong><code>lib/features/&lt;feature của bạn&gt;/</code></strong>Bắt đầu từ file public API <code>&lt;tên&gt;.dart</code>, rồi <code>routes.dart</code>.</li>
+    <li><strong>Nhánh <code>demo</code> + <code>docs/demo-flow.md</code></strong>App nhỏ dựng đúng theo cấu trúc trên, kèm lịch sử PR thật để xem cách nhóm làm việc.</li>
+  </ol>
+<pre><code>lib/
+  main.dart              <span class="c"># khởi động app</span>
+  app/                   <span class="c"># router, khung 4 tab, theme — Lead</span>
+  core/                  <span class="c"># model, dữ liệu, LocalStore, widget dùng chung — Lead</span>
+  features/&lt;tên&gt;/
+    &lt;tên&gt;.dart           <span class="c"># PUBLIC API — feature khác chỉ được import file này</span>
+    routes.dart          <span class="c"># route của feature</span>
+    strings.dart         <span class="c"># chữ hiển thị trên UI</span>
+    domain/              <span class="c"># hàm thuần, bắt buộc có unit test</span>
+    data/                <span class="c"># provider, đọc ghi LocalStore</span>
+    presentation/        <span class="c"># màn hình, widget</span>
+assets/data/             <span class="c"># công thức và nguyên liệu (JSON)</span>
+docs/design/             <span class="c"># thiết kế: design system + prototype 23 màn</span></code></pre>
+</section>
+
+<!-- ============================================================ 7 -->
+<section id="chon-issue">
+  <h2><span class="num">7</span>Tìm và chọn issue</h2>
+  <h3>Tìm việc của bạn</h3>
+  <ul>
+    <li>Mở <a href="https://github.com/users/tiranixnguyen/projects/2">Project Recipe MVP</a> → view <em>Việc của tôi</em>, hoặc lọc <code>assignee:@me</code>.</li>
+    <li>Terminal: <code>gh issue list --assignee @me</code>.</li>
+    <li>Việc chung (nhập công thức, test với sinh viên, bug bash) có label <code>shared</code> — ai cũng tham gia.</li>
+  </ul>
+
+  <h3>Đọc một issue</h3>
+  <div class="issue">
+    <div class="head">DSC-02 · Tìm kiếm món hoặc nguyên liệu <span class="chip">P0</span><span class="chip">size:M</span><span class="chip">feature:discover</span></div>
+    <div class="body">
+      <div>
+        <p><span class="note">① Màn nào trong thiết kế →</span> Theo <code>Search.dc.html</code>.</p>
+        <p><span class="note">② Acceptance criteria — làm đủ từng ô mới là xong:</span></p>
+        <ul class="check">
+          <li>Tìm theo tên món và nguyên liệu, không phân biệt dấu…</li>
+          <li>Chip lọc: thời gian, dụng cụ, bữa, chế độ ăn…</li>
+        </ul>
+        <p><span class="note">③ Phụ thuộc →</span> issue phải xong trước (hoặc đã có stub).</p>
+      </div>
+      <div class="side">
+        <p><strong>Milestone</strong><br>W2 · Luồng chính → làm trong tuần 2</p>
+        <p><strong>Label</strong><br>P0 = bắt buộc<br>size:M = 1–2 ngày</p>
+        <p><strong>Assignee</strong><br>người làm</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>Chọn issue nào làm trước</h3>
+  <ol>
+    <li>Thuộc <strong>milestone tuần hiện tại</strong>.</li>
+    <li><strong>P0</strong> trước <strong>P1</strong>.</li>
+    <li>Các issue <strong>Phụ thuộc</strong> đã xong, hoặc đã có stub để dùng tạm.</li>
+    <li>Issue có tên <code>…-00</code> (component + public API) luôn làm đầu tiên vì người khác chờ.</li>
+  </ol>
+  <p>Chọn xong: kéo thẻ sang <strong>In Progress</strong> trên Project. Chỉ giữ <strong>một</strong> issue In Progress tại một thời điểm.</p>
+  <div class="card warn"><strong>Đừng</strong> tự nhận issue của feature khác. Muốn giúp thì hỏi người đó hoặc Lead trước.</div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section id="workflow">
+  <h2><span class="num">8</span>Vòng làm một issue</h2>
+  <div class="flow">
+    <span>Issue</span><i>→</i><span>Branch</span><i>→</i><span>Agent: plan</span><i>→</i><span>Bạn duyệt</span><i>→</i>
+    <span>Agent: code</span><i>→</i><span>Tự kiểm tra</span><i>→</i><span>PR</span><i>→</i><span>CI + Claude review</span><i>→</i>
+    <span>Lead approve</span><i>→</i><span>Merge</span><i>→</i><span>Issue tự đóng</span>
+  </div>
+  <ol class="steps">
+    <li><strong>Lấy code mới nhất và tạo nhánh</strong>
+<pre><code>git switch main &amp;&amp; git pull
+git switch -c feat/23-search       <span class="c"># feat/&lt;số issue&gt;-&lt;mô-tả-ngắn&gt;; sửa lỗi dùng fix/…</span></code></pre></li>
+    <li><strong>Giao việc cho agent</strong>Trong Antigravity, dùng prompt mẫu ở <a href="#ai-agent">mục 9</a>. Agent sẽ đọc <code>AGENTS.md</code>, issue và prototype rồi đề xuất plan.</li>
+    <li><strong>Duyệt plan</strong>Plan chỉ được đụng thư mục feature của bạn và test của nó. Thấy <code>lib/core/</code>, <code>lib/app/</code>, <code>pubspec.yaml</code> hay feature khác → từ chối, hỏi Lead.</li>
+    <li><strong>Agent code, bạn đọc lại</strong>Đọc từng file thay đổi. Chỗ nào không hiểu, hỏi agent giải thích — đừng merge thứ mình không hiểu.</li>
+    <li><strong>Tự kiểm tra</strong>
+<pre><code>fvm dart format lib test
+fvm flutter analyze                <span class="c"># phải "No issues found"</span>
+fvm flutter test                   <span class="c"># phải "All tests passed"</span>
+fvm flutter run                    <span class="c"># bấm thử trên Android, so với prototype, chụp màn hình</span></code></pre></li>
+    <li><strong>Commit và push</strong>
+<pre><code>git add lib/features/discover test/features/discover
+git commit -m "feat(discover): search by dish or ingredient"
+git push -u origin HEAD</code></pre></li>
+    <li><strong>Mở PR</strong>Trên GitHub bấm <em>Compare &amp; pull request</em>, hoặc <code>gh pr create --base main</code>. Điền template: <code>Closes #23</code>, mô tả ngắn, <strong>ảnh chụp màn hình Android đặt cạnh prototype</strong>, tick checklist.</li>
+    <li><strong>CI và Claude review</strong>CI chạy trong vài phút (theo dõi ở tab Checks hoặc <code>#ci</code>). Claude để lại comment góp ý: mục "Cần sửa trước khi merge" thì sửa; "Gợi ý không bắt buộc" thì tuỳ bạn.</li>
+    <li><strong>Lead review và approve</strong>Sửa theo góp ý: commit thêm vào cùng nhánh rồi push — PR tự cập nhật. Không mở PR mới.</li>
+    <li><strong>Merge</strong>Khi đã có approve và CI xanh, bạn bấm <em>Merge pull request</em>. Issue tự đóng, thẻ trên Project tự sang Done, nhánh được xoá. Quay lại bước 1 với issue tiếp theo.</li>
+  </ol>
+  <div class="card tip"><strong>PR nhỏ dễ duyệt:</strong> mỗi PR một issue, nên dưới ~400 dòng. Issue <code>size:L</code> thì tách thành 2 PR.</div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section id="ai-agent">
+  <h2><span class="num">9</span>Làm việc với AI agent</h2>
+  <h3>Prompt mẫu cho Antigravity</h3>
+<pre><code>Làm issue #23 trong repo này.
+1. Đọc AGENTS.md, nội dung issue (gh issue view 23) và prototype được nhắc trong issue.
+2. Chỉ sửa trong lib/features/discover/ và test/features/discover/.
+3. Lập plan: file sẽ tạo/sửa, test sẽ viết. Dừng lại chờ mình duyệt.
+4. Code xong thì chạy fvm dart format lib test, fvm flutter analyze, fvm flutter test cho tới khi sạch.</code></pre>
+  <p>Antigravity có workflow <code>/implement-issue</code> làm đúng các bước trên (đã có trên nhánh
+  <code>demo</code>; lên <code>main</code> cùng <code>AGENTS.md</code> bản đầy đủ ở issue SET-05).</p>
+
+  <div class="grid">
+    <div class="card"><h3>Agent làm tốt</h3>
+      <ul>
+        <li>Dựng màn theo prototype</li>
+        <li>Viết test, sửa lỗi analyze</li>
+        <li>Giải thích code, lệnh, lỗi</li>
+        <li>Xử lý conflict đơn giản</li>
+      </ul>
+    </div>
+    <div class="card"><h3>Bạn phải tự kiểm</h3>
+      <ul>
+        <li>Có sửa ngoài thư mục feature không?</li>
+        <li>Có mã màu cứng thay vì token không?</li>
+        <li>Có hiện giá tiền ở đâu không? (luật: <strong>không</strong>)</li>
+        <li>Chữ trên UI đúng giọng văn: xưng "bạn", không emoji</li>
+      </ul>
+    </div>
+  </div>
+  <div class="card warn"><strong>Dấu hiệu dừng agent lại:</strong> muốn thêm package, sửa
+  <code>lib/core/</code>, xoá test đang có, tắt lint, hay "sửa tạm" bằng <code>// ignore</code>. Hỏi Lead trước.</div>
+</section>
+
+<!-- ============================================================ 10 -->
+<section id="slack">
+  <h2><span class="num">10</span>Slack</h2>
+  <p>Slack là nơi <strong>nhận thông báo</strong> và <strong>trao đổi nhanh</strong>. Mọi quyết định và việc
+  cần làm vẫn nằm trên GitHub — Slack chỉ là cửa sổ nhìn vào đó.</p>
+  <table>
+    <tr><th>Kênh</th><th>Có gì</th><th>Bạn làm gì ở đây</th></tr>
+    <tr><td><code>#dev</code></td><td>Tự động: issue mới, PR mở/merge, review, comment</td><td>Xem ai cần review, hỏi đáp chung — trả lời trong thread</td></tr>
+    <tr><td><code>#ci</code></td><td>Tự động: kết quả CI xanh/đỏ</td><td>Thấy PR của mình đỏ thì vào sửa</td></tr>
+    <tr><td><code>#standup</code></td><td>9h sáng các ngày trong tuần có lời nhắc</td><td>Trả lời theo mẫu bên dưới trước 10h</td></tr>
+  </table>
+
+  <div class="grid">
+    <div class="card"><h3>Nếu bạn dùng Slack</h3>
+      <ol>
+        <li>Vào 3 kênh trên.</li>
+        <li>Gõ <code>/github signin</code> một lần để Slack biết bạn là ai trên GitHub (được tag đúng người).</li>
+        <li>Mỗi sáng trả lời lời nhắc trong <code>#standup</code>:
+<pre><code>Hôm qua: xong DSC-00 (#21)
+Hôm nay: DSC-02 tìm kiếm (#23)
+Vướng: chưa rõ chip "Bữa" lọc theo giờ hay theo món</code></pre></li>
+        <li>Hỏi bài: nhắn trong <code>#dev</code>, kèm link issue/PR; trả lời luôn trong thread.</li>
+        <li>Tắt bớt thông báo kênh <code>#ci</code> nếu thấy ồn, chỉ để mention.</li>
+      </ol>
+    </div>
+    <div class="card"><h3>Nếu bạn không dùng Slack</h3>
+      <ol>
+        <li>Trên repo bấm <strong>Watch → Custom</strong>, chọn Issues, Pull requests để nhận thông báo qua email hoặc app GitHub Mobile.</li>
+        <li>Mỗi sáng mở Project, view <em>Việc của tôi</em>.</li>
+        <li>Standup: comment theo đúng mẫu bên trái vào <strong>issue bạn đang làm</strong> trước 10h.</li>
+        <li>Hỏi bài: comment trong issue/PR và tag <code>@tiranixnguyen</code>.</li>
+        <li>Báo Lead một lần là bạn không dùng Slack để Lead biết tìm bạn ở đâu.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="card tip"><strong>Quy tắc chung:</strong> gì liên quan một issue/PR thì viết ở issue/PR đó
+  (để còn lưu lại). Slack dùng cho câu hỏi nhanh và nhắc nhau.</div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section id="su-co">
+  <h2><span class="num">11</span>Khi gặp sự cố</h2>
+  <table>
+    <tr><th>Tình huống</th><th>Làm gì</th></tr>
+    <tr><td><strong>CI đỏ</strong></td><td>Mở tab Checks → xem bước nào lỗi. Chạy lại đúng lệnh đó ở máy (<code>fvm dart format lib test</code>, <code>fvm flutter analyze</code>, <code>fvm flutter test</code>), sửa, push lại.</td></tr>
+    <tr><td><strong>PR báo conflict / "branch is out of date"</strong></td><td>
+<pre><code>git fetch origin
+git rebase origin/main          <span class="c"># Git dừng ở file conflict</span>
+<span class="c"># sửa file (giữ cả hai phần nếu cần), rồi:</span>
+git add &lt;file&gt; &amp;&amp; git rebase --continue
+fvm flutter test
+git push --force-with-lease</code></pre>Không chắc thì nhờ agent: "giúp mình xử lý conflict này, giải thích từng chỗ".</td></tr>
+    <tr><td><strong>Claude review góp ý sai</strong></td><td>Trả lời ngay dưới comment vì sao không sửa. Bot không chặn merge; Lead quyết.</td></tr>
+    <tr><td><strong>Cần thứ ở feature khác chưa có</strong></td><td>Dùng stub trong public API của feature đó. Chưa có stub → nhắn chủ feature, ghi vào phần Phụ thuộc của PR.</td></tr>
+    <tr><td><strong>Cần sửa <code>core/</code>, thêm package</strong></td><td>Không tự sửa. Comment vào issue, tag Lead.</td></tr>
+    <tr><td><strong>Lỡ commit vào <code>main</code> ở máy</strong></td><td><code>git switch -c feat/&lt;số&gt;-&lt;tên&gt;</code> (mang commit sang nhánh mới), rồi <code>git switch main &amp;&amp; git reset --hard origin/main</code>. Không push được lên <code>main</code> đâu, đừng lo.</td></tr>
+    <tr><td><strong>Kẹt quá 2 giờ</strong></td><td>Dừng lại và hỏi — nhắn <code>#dev</code> hoặc comment issue, kèm việc đã thử. Hỏi sớm rẻ hơn trễ hạn.</td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 12 -->
+<section id="luat">
+  <h2><span class="num">12</span>Nên và không nên</h2>
+  <div class="do-dont">
+    <div class="card tip"><strong>Nên</strong>
+      <ul>
+        <li>Dùng <code>fvm flutter …</code></li>
+        <li>Mỗi issue một nhánh, một PR</li>
+        <li>Duyệt plan trước khi agent code</li>
+        <li>Đọc lại mọi dòng agent viết</li>
+        <li>Dùng token màu/khoảng cách của theme</li>
+        <li>So UI với prototype, đính ảnh vào PR</li>
+        <li>Viết test cho hàm trong <code>domain/</code></li>
+        <li>Hỏi sớm khi kẹt</li>
+      </ul>
+    </div>
+    <div class="card warn"><strong>Không nên</strong>
+      <ul>
+        <li>Hiển thị giá tiền ở bất kỳ đâu</li>
+        <li>Sửa thư mục feature của người khác</li>
+        <li>Sửa <code>core/</code>, <code>app/</code>, <code>pubspec.yaml</code> khi chưa hỏi Lead</li>
+        <li>Merge khi CI đỏ hoặc chưa được approve</li>
+        <li>Mã màu cứng như <code>Color(0xFFC2410C)</code></li>
+        <li>Commit mật khẩu, token, file keystore</li>
+        <li>Thêm code cho iOS</li>
+        <li>Merge code mà mình không hiểu</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ 13 -->
+<section id="lenh">
+  <h2><span class="num">13</span>Lệnh hay dùng</h2>
+  <table>
+    <tr><th>Muốn</th><th>Lệnh</th></tr>
+    <tr><td>Xem đang ở nhánh nào, file nào đã sửa</td><td><code>git status</code></td></tr>
+    <tr><td>Lấy code mới nhất</td><td><code>git switch main &amp;&amp; git pull</code></td></tr>
+    <tr><td>Tạo nhánh cho issue #23</td><td><code>git switch -c feat/23-search</code></td></tr>
+    <tr><td>Xem mình đã sửa gì</td><td><code>git diff</code></td></tr>
+    <tr><td>Commit</td><td><code>git add &lt;thư mục&gt; &amp;&amp; git commit -m "feat(discover): …"</code></td></tr>
+    <tr><td>Đẩy nhánh lên GitHub</td><td><code>git push -u origin HEAD</code></td></tr>
+    <tr><td>Việc của mình</td><td><code>gh issue list --assignee @me</code></td></tr>
+    <tr><td>Đọc issue #23</td><td><code>gh issue view 23</code></td></tr>
+    <tr><td>Mở PR</td><td><code>gh pr create --base main</code></td></tr>
+    <tr><td>Theo dõi CI của PR hiện tại</td><td><code>gh pr checks --watch</code></td></tr>
+    <tr><td>Mở PR trên trình duyệt</td><td><code>gh pr view --web</code></td></tr>
+    <tr><td>Cài package sau khi pull</td><td><code>fvm flutter pub get</code></td></tr>
+    <tr><td>Format · analyze · test</td><td><code>fvm dart format lib test &amp;&amp; fvm flutter analyze &amp;&amp; fvm flutter test</code></td></tr>
+    <tr><td>Chạy app</td><td><code>fvm flutter run</code> (trong lúc chạy: <kbd>r</kbd> hot reload, <kbd>R</kbd> khởi động lại)</td></tr>
+    <tr><td>App lỗi lạ sau khi pull</td><td><code>fvm flutter clean &amp;&amp; fvm flutter pub get</code></td></tr>
+  </table>
+</section>
+
+<!-- ============================================================ 14 -->
+<section id="lich">
+  <h2><span class="num">14</span>Lịch 4 tuần</h2>
+  <table>
+    <tr><th>Tuần</th><th>Mỗi feature</th><th>Cả nhóm</th></tr>
+    <tr><td><strong>W1</strong> 19–25/10<br>Nền tảng &amp; component</td><td>Component dùng chung + public API stub (hạn 24/10)</td><td>Mỗi người 3 công thức</td></tr>
+    <tr><td><strong>W2</strong> 26/10–1/11<br>Luồng chính</td><td>Màn chính của feature chạy được</td><td>Mỗi người thêm 5 công thức (≥ 40)</td></tr>
+    <tr><td><strong>W3</strong> 2–8/11<br>Hoàn thiện tính năng</td><td>Phần còn lại; bản v0.1.0 cài thử cho cả nhóm</td><td>—</td></tr>
+    <tr><td><strong>W4</strong> 9–15/11<br>Kiểm thử &amp; phát hành</td><td>Polish, test, analytics</td><td>Mỗi người mời 2 bạn dùng thử; bug bash</td></tr>
+  </table>
+  <p>Trễ thì cắt <strong>P1</strong> trước, không lấn sang tuần 5. Thấy mình sắp trễ, báo Lead càng sớm càng tốt.</p>
+</section>
+
+<footer>
+  Bếp Hoà Lạc · Sổ tay người mới · cập nhật 21/10/2026. Thấy sai hoặc thiếu? Mở issue hoặc nhắn <code>#dev</code>.
+</footer>
+</main>
+</div>
+</body>
+</html>
