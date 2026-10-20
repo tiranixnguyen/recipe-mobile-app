@@ -1,8 +1,10 @@
 # recipe_mobile_app
 
-App công thức nấu ăn giá rẻ cho sinh viên khu Hoà Lạc (ĐH FPT, ĐHQG…).
+**Bếp Hoà Lạc**: app công thức nấu ăn cho sinh viên khu Hoà Lạc (ĐH FPT, ĐHQG…), gợi ý món từ đồ có sẵn và dụng cụ trong phòng.
 
-> Trạng thái: project khởi tạo để các thành viên clone & chạy thử.
+Luật làm việc cho người và AI agent: [`AGENTS.md`](AGENTS.md). Kế hoạch: [`docs/backlog.md`](docs/backlog.md).
+
+> Trạng thái: MVP Android, 19/10 → 15/11/2026.
 
 ## Yêu cầu
 
@@ -35,7 +37,7 @@ Formatter dùng chung khai báo trong `analysis_options.yaml` (`page_width: 100`
 ## Lệnh hay dùng
 
 ```bash
-fvm dart format .                       # format code
+fvm dart format lib test                # format code
 fvm flutter analyze                     # lint
 fvm flutter test                        # chạy test
 ```
