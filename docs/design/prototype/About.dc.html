@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Giới thiệu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+.big .bh-icon{width:44px;height:44px;stroke-width:1.75}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; align-items: center; gap: 4px; padding: 8px 16px 0 4px; height: 56px; flex-shrink: 0">
+    <a href="Settings.dc.html" aria-label="Quay lại cài đặt" style="width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+      <x-import component-from-global-scope="BepHoaLac.Icon" name="back"></x-import>
+    </a>
+    <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Giới thiệu</h1>
+  </header>
+
+  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 24px; padding: 24px 16px 16px 16px">
+    <section style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+      <svg role="img" aria-label="Logo Bếp Hoà Lạc" width="96" height="96" viewBox="0 0 96 96" style="border-radius: 24px"><rect width="96" height="96" fill="#FFE3CC"></rect><g transform="translate(-2 -1)"><path d="M38 44L74 18M48 46L82 24" fill="none" stroke="#C2410C" stroke-width="5" stroke-linecap="round"></path><path d="M18 50h60a30 30 0 0 1-60 0z" fill="#2A1E16"></path></g></svg>
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 28px; line-height: 34px; font-weight: 700">Bếp Hoà Lạc</span>
+        <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">Phiên bản [1.0.0]</span>
+      </div>
+      <p style="margin: 0; max-width: 300px; color: var(--ink); font-size: 15px; line-height: 22px">App gợi ý món từ đồ bạn có và lên thực đơn cho sinh viên khu Hoà Lạc. Không cần tài khoản, mọi thứ lưu ngay trên máy bạn.</p>
+    </section>
+
+    <ul style="margin: 0; padding: 0 12px; list-style: none; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
+      <li style="min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 22px">
+        <span>Nhóm phát triển</span><span style="color: var(--ink-muted); font-weight: 600">[TÊN NHÓM]</span>
+      </li>
+      <li style="min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 22px">
+        <span>Liên hệ</span><a href="mailto:[EMAIL]" style="color: var(--chili-deep); font-weight: 600">[EMAIL]</a>
+      </li>
+      <li style="border-bottom: 1px solid var(--line)">
+        <a href="Policy.dc.html" style="min-height: 56px; display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; font-size: 15px; line-height: 22px">
+          <span style="flex: 1">Chính sách quyền riêng tư</span>
+          <span style="color: var(--ink-muted); display: flex"><x-import component-from-global-scope="BepHoaLac.Icon" name="chevron"></x-import></span>
+        </a>
+      </li>
+      <li>
+        <button style="width: 100%; min-height: 56px; display: flex; align-items: center; gap: 12px; padding: 0; border: 0; background: transparent; color: var(--ink); cursor: pointer; text-align: left; font: 400 15px/22px 'Be Vietnam Pro', sans-serif">
+          <span style="flex: 1">Giấy phép mã nguồn mở</span>
+          <span style="color: var(--ink-muted); display: flex"><x-import component-from-global-scope="BepHoaLac.Icon" name="chevron"></x-import></span>
+        </button>
+      </li>
+    </ul>
+  </main>
+
+  <footer style="flex-shrink: 0; padding: 12px 16px 24px 16px; color: var(--ink-muted); font-size: 12px; line-height: 16px; text-align: center">Làm ở Hoà Lạc, cho bếp ký túc xá.</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { theme: this.props.theme ?? 'system' };
+}
+}
+</script>
+</body>
+</html>

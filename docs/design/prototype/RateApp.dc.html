@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Đánh giá trên Google Play</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+.big .bh-icon{width:44px;height:44px;stroke-width:1.5}
+.rate .bh-icon{width:24px;height:24px}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; position: relative; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <div aria-hidden="true" style="flex: 1; display: flex; flex-direction: column; gap: 24px; padding: 40px 16px 16px 16px">
+    <section style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center">
+      <div class="big" style="width: 88px; height: 88px; border-radius: 999px; background: var(--chili-soft); color: var(--chili); display: flex; align-items: center; justify-content: center">
+        <x-import component-from-global-scope="BepHoaLac.Icon" name="bowl"></x-import>
+      </div>
+      <span style="font-size: 28px; line-height: 34px; font-weight: 700">Xong rồi! Ăn ngon nhé</span>
+      <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">Trứng chiên hành · 1 người · 4 bước</span>
+    </section>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <span class="rate" style="height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 12px; border: 1px solid var(--chili-soft); background: var(--chili-soft); color: var(--chili-deep); font-size: 15px; line-height: 22px; font-weight: 600"><x-import component-from-global-scope="BepHoaLac.Icon" name="smile"></x-import>Ngon</span>
+      <span class="rate" style="height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 12px; border: 1px solid var(--outline); background: var(--surface-raised); font-size: 15px; line-height: 22px; font-weight: 600"><x-import component-from-global-scope="BepHoaLac.Icon" name="meh"></x-import>Tạm</span>
+      <span class="rate" style="height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 12px; border: 1px solid var(--outline); background: var(--surface-raised); font-size: 15px; line-height: 22px; font-weight: 600"><x-import component-from-global-scope="BepHoaLac.Icon" name="frown"></x-import>Chê</span>
+    </div>
+  </div>
+
+  <div style="position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(20, 14, 10, 0.55)">
+    <a href="Main.dc.html" aria-label="Đóng hộp đánh giá" style="margin: 0 8px 8px 8px; height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 24px; border-radius: 24px; border: 2px dashed var(--outline); background: var(--surface-raised); color: var(--ink-muted); text-decoration: none; text-align: center">
+      <span style="font-size: 15px; line-height: 22px; font-weight: 600; color: var(--ink)">[Hộp đánh giá của Google Play]</span>
+      <span style="font-size: 13px; line-height: 18px">Do hệ thống Android hiện, app không vẽ được</span>
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { theme: this.props.theme ?? 'system' };
+}
+}
+</script>
+</body>
+</html>

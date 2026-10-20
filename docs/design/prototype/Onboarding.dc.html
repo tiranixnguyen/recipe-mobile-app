@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Làm quen</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a{color:var(--chili-deep)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 8px 8px 16px; height: 64px; flex-shrink: 0">
+    <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">Bước 1/1 · Bếp của bạn</span>
+    <a href="Main.dc.html" style="height: 48px; padding: 0 12px; display: flex; align-items: center; font-size: 15px; line-height: 22px; font-weight: 600; text-decoration: none">Bỏ qua</a>
+  </header>
+
+  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 24px; padding: 8px 16px 16px 16px">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700">Phòng bạn có gì để nấu?</h1>
+      <p style="margin: 0; color: var(--ink-muted); font-size: 15px; line-height: 22px">App chỉ gợi ý món bạn nấu được. Đổi lại lúc nào cũng được.</p>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Dụng cụ</h2>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <sc-for list="{{tools}}" as="t" hint-placeholder-count="4">
+          <button onClick="{{t.toggle}}" aria-pressed="{{t.on}}" style="height: 72px; padding: 12px; display: flex; align-items: center; gap: 10px; border-radius: 12px; text-align: left; cursor: pointer; font: 600 15px/22px 'Be Vietnam Pro', sans-serif; {{t.style}}">
+            <span style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 6px; display: flex; align-items: center; justify-content: center; {{t.boxStyle}}">
+              <sc-if value="{{t.on}}" hint-placeholder-val="{{false}}">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>
+              </sc-if>
+            </span>
+            {{t.name}}
+          </button>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Chế độ ăn</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{diets}}" as="d" hint-placeholder-count="5">
+          <button onClick="{{d.toggle}}" aria-pressed="{{d.on}}" style="height: 40px; padding: 0 16px; border-radius: 999px; cursor: pointer; font: 600 13px/18px 'Be Vietnam Pro', sans-serif; {{d.style}}">{{d.name}}</button>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+
+  <footer style="flex-shrink: 0; padding: 12px 16px 24px 16px">
+    <a href="NotifPermission.dc.html" style="height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--chili); color: #FFFFFF; text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">Xong, gợi ý món cho mình</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+var TOOLS = [['rice', 'Nồi cơm điện'], ['stove', 'Bếp từ / bếp ga'], ['micro', 'Lò vi sóng'], ['kettle', 'Ấm siêu tốc']];
+var DIETS = [['veg', 'Ăn chay'], ['nospicy', 'Không ăn cay'], ['noseafood', 'Dị ứng hải sản'], ['nopork', 'Không ăn thịt lợn'], ['light', 'Ăn nhẹ buổi tối']];
+var ON_CHIP = 'border: 1px solid var(--chili-soft); background: var(--chili-soft); color: var(--chili-deep);';
+var OFF_CHIP = 'border: 1px solid var(--outline); background: transparent; color: var(--ink);';
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { on: { rice: true, stove: true, nospicy: true } };
+}
+renderVals() {
+var self = this;
+var on = this.state.on;
+function flip(id) {
+return function () {
+var next = Object.assign({}, self.state.on);
+next[id] = !next[id];
+self.setState({ on: next });
+};
+}
+return {
+theme: this.props.theme ?? 'system',
+tools: TOOLS.map(function (t) {
+var v = !!on[t[0]];
+return {
+name: t[1], on: v, toggle: flip(t[0]),
+style: v ? 'border: 2px solid var(--chili); background: var(--surface-raised); color: var(--ink);' : 'border: 1px solid var(--outline); background: var(--surface-raised); color: var(--ink);',
+boxStyle: v ? 'background: var(--chili); border: 2px solid var(--chili);' : 'background: transparent; border: 2px solid var(--outline);'
+};
+}),
+diets: DIETS.map(function (d) {
+var v = !!on[d[0]];
+return { name: d[1], on: v, toggle: flip(d[0]), style: v ? ON_CHIP : OFF_CHIP };
+})
+};
+}
+}
+</script>
+</body>
+</html>

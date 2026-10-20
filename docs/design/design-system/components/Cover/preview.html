@@ -1,0 +1,63 @@
+<!-- @dsCard height=288 -->
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Bếp Hoà Lạc</title>
+<style>
+  html, body { margin:0; height:100%; }
+  body { background:var(--surface); color:var(--ink); font-family:var(--font-sans); overflow:hidden; }
+  .cover { position:relative; height:288px; overflow:hidden; }
+  .art { position:absolute; top:0; left:480px; width:480px; height:288px; overflow:hidden; }
+  .art svg { display:block; width:480px; height:288px; }
+  .chili { fill:var(--chili); }
+  .tint { fill:var(--chili-soft); }
+  .herb { fill:var(--herb); }
+  .deep { fill:var(--ink); }
+  .blk { rx:var(--radius-md); }
+  .small { rx:var(--radius-sm); }
+  .bowl { fill:var(--chili); }
+  .grain { fill:var(--chili-soft); }
+  .words { position:absolute; left:var(--space-6); right:var(--space-6); bottom:var(--space-6); max-width:440px; }
+  .name { margin:0; font-size:100px; line-height:.95; font-weight:700; letter-spacing:-.02em; color:var(--ink); }
+  .tag { margin:var(--space-4) 0 0 4px; font-size:14px; line-height:20px; color:var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="cover">
+<div class="art" aria-hidden="true">
+<svg viewBox="0 0 480 288" width="480" height="288">
+<!--
+  blocks      chili 168×264 bled off the top (the brand, largest) · chili-soft 152×168 (the tint) · herb 120×224 bleeding off the right (có sẵn = the promise) · ink 88×40 once (deep accent) — ≈35% of 960×288
+  arrangement one tall chili slab with satellites, bottoms on one line space-6 above the edge, space-4 gutters
+  pattern     half-rounds as rice bowls, from "mềm và thân thiện" + a cooking motif: six radius-md-family bowls (32 wide) piled on the tint, nine space-1 grains cut into the slab in chili-soft
+  scales      sides in space-2 multiples; gutters space-4; grain pitch space-6; corners radius-md, ink block radius-sm
+-->
+<rect class="chili blk" x="24" y="-24" width="168" height="288" rx="12"/>
+<rect class="tint blk" x="208" y="96" width="152" height="168" rx="12"/>
+<rect class="herb blk" x="376" y="40" width="120" height="224" rx="12"/>
+<rect class="deep small" x="272" y="40" width="88" height="40" rx="8"/>
+<path class="bowl" d="M272 136 a16 16 0 0 0 32 0 Z"/>
+<path class="bowl" d="M240 184 a16 16 0 0 0 32 0 Z"/>
+<path class="bowl" d="M296 184 a16 16 0 0 0 32 0 Z"/>
+<path class="bowl" d="M224 232 a16 16 0 0 0 32 0 Z"/>
+<path class="bowl" d="M272 232 a16 16 0 0 0 32 0 Z"/>
+<path class="bowl" d="M320 232 a16 16 0 0 0 32 0 Z"/>
+<circle class="grain" cx="72" cy="176" r="4"/>
+<circle class="grain" cx="96" cy="176" r="4"/>
+<circle class="grain" cx="120" cy="176" r="4"/>
+<circle class="grain" cx="84" cy="200" r="4"/>
+<circle class="grain" cx="108" cy="200" r="4"/>
+<circle class="grain" cx="132" cy="200" r="4"/>
+<circle class="grain" cx="72" cy="224" r="4"/>
+<circle class="grain" cx="96" cy="224" r="4"/>
+<circle class="grain" cx="120" cy="224" r="4"/>
+</svg>
+</div>
+<div class="words">
+<h1 class="name">Bếp Hoà Lạc</h1>
+<p class="tag">Có gì nấu nấy, ăn gì cũng có kế hoạch.</p>
+</div>
+</div>
+</body>
+</html>

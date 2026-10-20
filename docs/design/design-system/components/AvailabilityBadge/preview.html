@@ -1,0 +1,15 @@
+<!-- @dsCard group="Display" height=64 -->
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><title>AvailabilityBadge — preview</title></head>
+<body>
+<div id="root" class="bh-stage"></div>
+<script>
+  var B = window.BepHoaLac, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h(B.AvailabilityBadge, { missing: [] }),
+    h(B.AvailabilityBadge, { missing: ['hành lá'] }),
+    h(B.AvailabilityBadge, { missing: ['rau cải', 'tỏi'] })));
+</script>
+</body>
+</html>

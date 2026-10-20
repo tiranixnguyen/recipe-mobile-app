@@ -1,0 +1,14 @@
+<!-- @dsCard group="Cooking" height=200 -->
+<!doctype html>
+<html lang="vi">
+<head><meta charset="utf-8"><title>StepTimer — preview</title></head>
+<body>
+<div id="root" class="bh-stage-col"></div>
+<script>
+  var B = window.BepHoaLac, h = React.createElement;
+  ReactDOM.createRoot(document.getElementById('root')).render(h(React.Fragment, null,
+    h('div', null, h(B.StepTimer, { seconds: 180, label: 'Chiên mặt dưới' })),
+    h(B.StepTimer, { seconds: 8, label: 'Làm nóng dầu', autoStart: true })));
+</script>
+</body>
+</html>

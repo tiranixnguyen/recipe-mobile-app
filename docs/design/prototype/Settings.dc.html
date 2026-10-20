@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Cài đặt</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+.sw-input{position:absolute;opacity:0;width:1px;height:1px}
+.sw-input:focus-visible + .sw-track{outline:2px solid var(--chili);outline-offset:2px}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; align-items: center; gap: 4px; padding: 8px 16px 0 4px; height: 56px; flex-shrink: 0">
+    <a href="Main.dc.html" aria-label="Quay lại" style="width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+      <x-import component-from-global-scope="BepHoaLac.Icon" name="back"></x-import>
+    </a>
+    <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Cài đặt</h1>
+  </header>
+
+  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 14px; padding: 8px 16px 12px 16px">
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">Giao diện</h2>
+      <div role="radiogroup" aria-label="Giao diện" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; border: 1px solid var(--outline); border-radius: 14px; background: var(--surface-raised)">
+        <sc-for list="{{themes}}" as="t" hint-placeholder-count="3">
+          <button role="radio" aria-checked="{{t.on}}" onClick="{{t.pick}}" style="height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; border-radius: 10px; cursor: pointer; font: 600 13px/18px 'Be Vietnam Pro', sans-serif; {{t.style}}">
+            <x-import component-from-global-scope="BepHoaLac.Icon" name="{{t.icon}}"></x-import>
+            {{t.label}}
+          </button>
+        </sc-for>
+      </div>
+      <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{themeHint}}</span>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">Bếp của bạn</h2>
+      <div style="background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px">
+        <a href="Onboarding.dc.html" style="min-height: 52px; display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; font-size: 15px; line-height: 22px">
+          <x-import component-from-global-scope="BepHoaLac.Icon" name="sliders"></x-import>
+          <span style="flex: 1">Dụng cụ &amp; chế độ ăn</span>
+          <span style="color: var(--ink-muted); display: flex"><x-import component-from-global-scope="BepHoaLac.Icon" name="chevron"></x-import></span>
+        </a>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">Thông báo</h2>
+      <div style="background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px">
+        <sc-for list="{{switches}}" as="s" hint-placeholder-count="2">
+          <label style="min-height: 52px; display: flex; align-items: center; gap: 12px; cursor: pointer; position: relative; {{s.rowStyle}}">
+            <x-import component-from-global-scope="BepHoaLac.Icon" name="{{s.icon}}"></x-import>
+            <span style="flex: 1; display: flex; flex-direction: column">
+              <span style="font-size: 15px; line-height: 22px">{{s.label}}</span>
+              <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{s.note}}</span>
+            </span>
+            <input class="sw-input" type="checkbox" role="switch" checked="{{s.on}}" onChange="{{s.toggle}}">
+            <span class="sw-track" aria-hidden="true" style="width: 44px; height: 26px; flex-shrink: 0; border-radius: 999px; padding: 3px; display: flex; {{s.trackStyle}}">
+              <span style="width: 20px; height: 20px; border-radius: 999px; background: #FFFFFF"></span>
+            </span>
+          </label>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">Hỗ trợ &amp; thông tin</h2>
+      <div style="background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px">
+        <sc-for list="{{links}}" as="l" hint-placeholder-count="4">
+          <a href="{{l.href}}" style="min-height: 52px; display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; font-size: 15px; line-height: 22px; {{l.rowStyle}}">
+            <x-import component-from-global-scope="BepHoaLac.Icon" name="{{l.icon}}"></x-import>
+            <span style="flex: 1">{{l.label}}</span>
+            <span style="color: var(--ink-muted); display: flex"><x-import component-from-global-scope="BepHoaLac.Icon" name="chevron"></x-import></span>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">Dữ liệu</h2>
+      <div style="background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; padding: 0 12px">
+        <a href="ClearData.dc.html" style="min-height: 52px; display: flex; align-items: center; gap: 12px; color: var(--danger-ink); text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">
+          <x-import component-from-global-scope="BepHoaLac.Icon" name="trash"></x-import>
+          <span style="flex: 1">Xoá dữ liệu trên máy</span>
+        </a>
+      </div>
+    </section>
+
+    <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px; text-align: center">Bếp Hoà Lạc · phiên bản [1.0.0]</span>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+var THEMES = [['light', 'Sáng', 'sun'], ['dark', 'Tối', 'moon'], ['system', 'Theo hệ thống', 'device']];
+var LINKS = [
+['Feedback.dc.html', 'mail', 'Góp ý & báo lỗi'],
+['RateApp.dc.html', 'smile', 'Đánh giá trên Google Play'],
+['Policy.dc.html', 'shield', 'Chính sách quyền riêng tư'],
+['About.dc.html', 'info', 'Giới thiệu']
+];
+function systemIsDark() {
+try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } catch (e) { return false; }
+}
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { theme: null, notif: { timer: true, meal: false } };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var theme = st.theme || this.props.theme || 'system';
+var dark = theme === 'dark' || (theme === 'system' && systemIsDark());
+var SW = [
+['timer', 'timer', 'Nhắc khi hẹn giờ xong', 'Rung và báo khi đồng hồ nấu hết giờ'],
+['meal', 'bell', 'Nhắc bữa theo thực đơn', 'Trước bữa 30 phút · giờ [ĐỂ CHỌN]']
+];
+return {
+theme: theme,
+themeHint: theme === 'system' ? 'Đang theo máy: ' + (dark ? 'Tối' : 'Sáng') + '. Đổi theme của điện thoại là app đổi theo.' : 'App luôn dùng giao diện ' + (dark ? 'Tối' : 'Sáng') + '.',
+themes: THEMES.map(function (t) {
+var on = t[0] === theme;
+return {
+label: t[1], icon: t[2], on: on,
+style: on ? 'background: var(--chili-soft); color: var(--chili-deep);' : 'background: transparent; color: var(--ink);',
+pick: function () { self.setState({ theme: t[0] }); }
+};
+}),
+switches: SW.map(function (s, i) {
+var on = !!st.notif[s[0]];
+return {
+icon: s[1], label: s[2], note: s[3], on: on,
+rowStyle: i === 0 ? 'border-bottom: 1px solid var(--line);' : '',
+trackStyle: on ? 'background: var(--herb); justify-content: flex-end;' : 'background: var(--outline); justify-content: flex-start;',
+toggle: function () {
+var next = Object.assign({}, self.state.notif);
+next[s[0]] = !on;
+self.setState({ notif: next });
+}
+};
+}),
+links: LINKS.map(function (l, i) {
+return { href: l[0], icon: l[1], label: l[2], rowStyle: i < LINKS.length - 1 ? 'border-bottom: 1px solid var(--line);' : '' };
+})
+};
+}
+}
+</script>
+</body>
+</html>
