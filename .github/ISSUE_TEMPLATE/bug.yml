@@ -1,0 +1,29 @@
+name: Bug
+description: Báo lỗi — gắn label feature:* để về đúng chủ
+labels: [bug]
+body:
+  - type: textarea
+    id: steps
+    attributes:
+      label: Bước tái hiện
+      value: |
+        1.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Kỳ vọng / thực tế
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Máy Android + phiên bản
+      placeholder: Samsung A15, Android 14
+    validations:
+      required: true
+  - type: textarea
+    id: media
+    attributes:
+      label: Ảnh / video

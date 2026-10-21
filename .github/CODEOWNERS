@@ -1,0 +1,16 @@
+# Mỗi thư mục có một chủ; PR đụng vào sẽ tự động cần chủ đó review.
+# Dòng sau ghi đè dòng trước, nên `*` (Lead) chỉ áp cho phần không có chủ riêng:
+# lib/app/, lib/core/, pubspec.yaml, assets/, .github/, docs/…
+
+*                         @tiranixnguyen
+
+/lib/features/discover/   @hu666-dot
+/test/features/discover/  @hu666-dot
+/lib/features/cook/       @dtranh2005
+/test/features/cook/      @dtranh2005
+/lib/features/pantry/     @tiranixnguyen
+/test/features/pantry/    @tiranixnguyen
+/lib/features/plan/       @SeiGirl
+/test/features/plan/      @SeiGirl
+/lib/features/system/     @huytq160871
+/test/features/system/    @huytq160871
