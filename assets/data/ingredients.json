@@ -1,0 +1,17 @@
+[
+  { "id": "egg", "name": "Trứng", "group": "protein", "isBasicSpice": false },
+  { "id": "tofu", "name": "Đậu phụ", "group": "protein", "isBasicSpice": false },
+  { "id": "pork", "name": "Thịt băm", "group": "protein", "isBasicSpice": false },
+  { "id": "sausage", "name": "Xúc xích", "group": "protein", "isBasicSpice": false },
+  { "id": "tomato", "name": "Cà chua", "group": "vegetable", "isBasicSpice": false },
+  { "id": "scallion", "name": "Hành lá", "group": "vegetable", "isBasicSpice": false },
+  { "id": "greens", "name": "Rau cải", "group": "vegetable", "isBasicSpice": false },
+  { "id": "potato", "name": "Khoai tây", "group": "vegetable", "isBasicSpice": false },
+  { "id": "rice", "name": "Cơm", "group": "starch", "isBasicSpice": false },
+  { "id": "noodle", "name": "Mì gói", "group": "starch", "isBasicSpice": false },
+  { "id": "bread", "name": "Bánh mì", "group": "starch", "isBasicSpice": false },
+  { "id": "garlic", "name": "Tỏi", "group": "spice", "isBasicSpice": true },
+  { "id": "fishsauce", "name": "Nước mắm", "group": "spice", "isBasicSpice": true },
+  { "id": "oil", "name": "Dầu ăn", "group": "spice", "isBasicSpice": true },
+  { "id": "pepper", "name": "Tiêu", "group": "spice", "isBasicSpice": true }
+]

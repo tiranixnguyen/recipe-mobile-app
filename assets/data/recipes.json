@@ -1,0 +1,65 @@
+[
+  {
+    "id": "trung-chien-hanh",
+    "name": "Trứng chiên hành",
+    "description": "Món nhanh cho bữa sáng hoặc bữa trưa.",
+    "imageAsset": "assets/images/recipes/trung-chien-hanh.jpg",
+    "minutes": 15,
+    "servings": 2,
+    "tools": ["stove"],
+    "diets": ["nospicy", "noseafood", "nopork"],
+    "meals": ["breakfast", "lunch"],
+    "ingredients": [
+      { "id": "egg", "amount": 3, "unit": "quả" },
+      { "id": "scallion", "amount": 2, "unit": "nhánh" },
+      { "id": "fishsauce", "amount": 1, "unit": "muỗng canh", "optional": true, "substituteNote": "Có thể dùng muối" },
+      { "id": "oil", "amount": 1, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      { "text": "Đánh trứng với hành lá và nước mắm." },
+      { "text": "Chiên trên chảo nóng đến khi vàng.", "timerSeconds": 180 }
+    ]
+  },
+  {
+    "id": "canh-ca-chua-trung",
+    "name": "Canh cà chua trứng",
+    "description": "Canh nóng cho bữa cơm.",
+    "imageAsset": "assets/images/recipes/canh-ca-chua-trung.jpg",
+    "minutes": 15,
+    "servings": 2,
+    "tools": ["stove"],
+    "diets": ["nospicy", "noseafood", "nopork", "light"],
+    "meals": ["lunch", "dinner"],
+    "ingredients": [
+      { "id": "egg", "amount": 2, "unit": "quả" },
+      { "id": "tomato", "amount": 2, "unit": "quả" },
+      { "id": "scallion", "amount": 1, "unit": "nhánh" },
+      { "id": "fishsauce", "amount": 1, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      { "text": "Cà chua xào qua rồi cho nước vào đun sôi." },
+      { "text": "Đổ trứng vào khuấy nhẹ, nêm nước mắm.", "timerSeconds": 120 }
+    ]
+  },
+  {
+    "id": "mi-xao-rau-cai",
+    "name": "Mì xào rau cải",
+    "description": "Món mì nhanh bằng mì gói.",
+    "imageAsset": "assets/images/recipes/mi-xao-rau-cai.jpg",
+    "minutes": 15,
+    "servings": 1,
+    "tools": ["stove"],
+    "diets": ["nospicy", "noseafood", "nopork"],
+    "meals": ["lunch", "dinner"],
+    "ingredients": [
+      { "id": "noodle", "amount": 1, "unit": "gói" },
+      { "id": "greens", "amount": 100, "unit": "g" },
+      { "id": "garlic", "amount": 2, "unit": "tép" },
+      { "id": "oil", "amount": 1, "unit": "muỗng canh" }
+    ],
+    "steps": [
+      { "text": "Luộc mì theo hướng dẫn, để ráo." },
+      { "text": "Xào tỏi với rau cải, cho mì vào trộn.", "timerSeconds": 120 }
+    ]
+  }
+]

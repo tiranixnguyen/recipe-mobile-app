@@ -5,12 +5,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 ///
 /// Mỗi feature tự đặt key có tiền tố tên feature, ví dụ `pantry.items`, để không đụng nhau.
 /// Dữ liệu có cấu trúc thì tự encode JSON rồi lưu bằng [writeString].
+///
+/// State đọc từ store phải `ref.watch(localStoreProvider)` trong `build` (không `ref.read`), để khi
+/// [clearLocalDataProvider] xoá dữ liệu thì state đó dựng lại từ store rỗng.
 abstract interface class LocalStore {
   String? readString(String key);
   Future<void> writeString(String key, String value);
   List<String> readList(String key);
   Future<void> writeList(String key, List<String> value);
   Future<void> remove(String key);
+
+  /// Xoá toàn bộ dữ liệu đã lưu trên máy (dùng cho "Xoá dữ liệu" trong Cài đặt).
+  Future<void> clearAll();
 }
 
 class InMemoryLocalStore implements LocalStore {
@@ -31,6 +37,9 @@ class InMemoryLocalStore implements LocalStore {
 
   @override
   Future<void> remove(String key) async => _data.remove(key);
+
+  @override
+  Future<void> clearAll() async => _data.clear();
 }
 
 class SharedPrefsLocalStore implements LocalStore {
@@ -52,7 +61,23 @@ class SharedPrefsLocalStore implements LocalStore {
 
   @override
   Future<void> remove(String key) => _prefs.remove(key);
+
+  @override
+  Future<void> clearAll() => _prefs.clear();
 }
 
 /// Mặc định in-memory (dùng cho test); `main.dart` override bằng [SharedPrefsLocalStore].
+///
+/// Override bằng `overrideWith` (không `overrideWithValue`) để [clearLocalDataProvider] tạo được
+/// instance mới và báo cho mọi provider đang watch.
 final localStoreProvider = Provider<LocalStore>((ref) => InMemoryLocalStore());
+
+/// Xoá toàn bộ dữ liệu trên máy rồi dựng lại mọi state đang `ref.watch(localStoreProvider)`.
+///
+/// Màn Xoá dữ liệu gọi `await ref.read(clearLocalDataProvider)()` rồi `go` về Splash.
+final clearLocalDataProvider = Provider<Future<void> Function()>((ref) {
+  return () async {
+    await ref.read(localStoreProvider).clearAll();
+    ref.invalidate(localStoreProvider);
+  };
+});
