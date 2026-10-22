@@ -14,7 +14,9 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
-  late final GoRouter _router = createRouter();
+  late final GoRouter _router = createRouter(
+    isOnboarded: () => ref.read(onboardingDoneProvider),
+  );
 
   @override
   void dispose() {

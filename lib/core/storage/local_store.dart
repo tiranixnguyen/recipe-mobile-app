@@ -26,7 +26,8 @@ class InMemoryLocalStore implements LocalStore {
   List<String> readList(String key) => (_data[key] as List<String>?) ?? const [];
 
   @override
-  Future<void> writeList(String key, List<String> value) async => _data[key] = value;
+  Future<void> writeList(String key, List<String> value) async =>
+      _data[key] = List<String>.unmodifiable(value);
 
   @override
   Future<void> remove(String key) async => _data.remove(key);

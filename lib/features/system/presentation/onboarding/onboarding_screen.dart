@@ -11,6 +11,7 @@ import 'onboarding_view_model.dart';
 class OnboardingScreen extends ConsumerWidget {
   const OnboardingScreen({super.key});
 
+  // TODO(SYS-03): nút Xong đi NotifPermission (prototype `Onboarding`); Bỏ qua vẫn về Khám phá.
   Future<void> _finish(BuildContext context, WidgetRef ref) async {
     await ref.read(onboardingViewModelProvider.notifier).finish();
     if (context.mounted) context.go(discoverLocation);

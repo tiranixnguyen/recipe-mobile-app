@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Cả nhóm dùng chung; thêm package mới phải qua Lead (xem AGENTS.md).
+  # Cả nhóm dùng chung; thêm package mới phải qua Lead.
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.4.3
   go_router: ^18.1.1

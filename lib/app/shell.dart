@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
-import 'strings.dart';
+import 'tabs.dart';
 
-/// Bốn tab theo component `BottomNav`: Khám phá · Tủ đồ · Thực đơn · Đã lưu.
+/// Thanh điều hướng dưới theo component `BottomNav`, dựng từ [appTabs].
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.shell});
 
@@ -18,27 +17,13 @@ class AppShell extends StatelessWidget {
         selectedIndex: shell.currentIndex,
         onDestinationSelected: (index) =>
             shell.goBranch(index, initialLocation: index == shell.currentIndex),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Symbols.explore_rounded),
-            selectedIcon: Icon(Symbols.explore_rounded, fill: 1),
-            label: AppStrings.tabDiscover,
-          ),
-          NavigationDestination(
-            icon: Icon(Symbols.kitchen_rounded),
-            selectedIcon: Icon(Symbols.kitchen_rounded, fill: 1),
-            label: AppStrings.tabPantry,
-          ),
-          NavigationDestination(
-            icon: Icon(Symbols.calendar_month_rounded),
-            selectedIcon: Icon(Symbols.calendar_month_rounded, fill: 1),
-            label: AppStrings.tabPlan,
-          ),
-          NavigationDestination(
-            icon: Icon(Symbols.bookmark_rounded),
-            selectedIcon: Icon(Symbols.bookmark_rounded, fill: 1),
-            label: AppStrings.tabSaved,
-          ),
+        destinations: [
+          for (final tab in appTabs)
+            NavigationDestination(
+              icon: Icon(tab.icon),
+              selectedIcon: Icon(tab.icon, fill: 1),
+              label: tab.label,
+            ),
         ],
       ),
     );
