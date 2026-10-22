@@ -13,7 +13,7 @@ import 'theme_preview_screen.dart';
 const splashLocation = '/splash';
 
 /// Mở được khi chưa qua Onboarding.
-const _openLocations = {splashLocation, onboardingLocation, themePreviewLocation};
+const _openLocations = {splashLocation, onboardingLocation, if (kDebugMode) themePreviewLocation};
 
 /// Chỉ gộp routes do từng feature khai báo. Chủ feature sửa `routes.dart` của mình, không sửa file này.
 ///
