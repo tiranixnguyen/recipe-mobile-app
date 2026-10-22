@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/theme/theme.dart';
 import '../features/system/system.dart';
 import 'router.dart';
 import 'strings.dart';
@@ -26,11 +27,10 @@ class _AppState extends ConsumerState<App> {
 
   @override
   Widget build(BuildContext context) {
-    // Theme tạm; SET-15 thay bằng theme dựng từ tokens.json.
     return MaterialApp.router(
       title: AppStrings.appName,
-      theme: ThemeData(brightness: Brightness.light, fontFamily: 'Be Vietnam Pro'),
-      darkTheme: ThemeData(brightness: Brightness.dark, fontFamily: 'Be Vietnam Pro'),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: ref.watch(themeModeProvider),
       routerConfig: _router,
     );
