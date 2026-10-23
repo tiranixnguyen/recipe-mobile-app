@@ -136,9 +136,7 @@ class SettingsRow extends StatelessWidget {
               ),
               if (value != null) ...[
                 const SizedBox(width: AppSpacing.s3),
-                ExcludeSemantics(
-                  child: _Switch(value: value, onChanged: onChanged!),
-                ),
+                _Switch(value: value),
               ] else if (onTap != null && !danger) ...[
                 const SizedBox(width: AppSpacing.s3),
                 Icon(AppIcons.chevron, color: colors.inkMuted),
@@ -156,24 +154,38 @@ class SettingsRow extends StatelessWidget {
   }
 }
 
-/// Công tắc theo prototype: track `herb` khi bật, `outline` khi tắt, nút tròn trắng không viền.
+/// Công tắc theo prototype: track 44×26 `herb` khi bật, `outline` khi tắt, nút tròn trắng 20px.
+///
+/// Chỉ vẽ; bấm và semantics do cả hàng ([SettingsRow.toggle]) lo.
 class _Switch extends StatelessWidget {
-  const _Switch({required this.value, required this.onChanged});
+  const _Switch({required this.value});
 
   final bool value;
-  final ValueChanged<bool> onChanged;
+
+  static const _duration = Duration(milliseconds: 150);
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Switch(
-      value: value,
-      onChanged: onChanged,
-      activeTrackColor: colors.herb,
-      inactiveTrackColor: colors.outline,
-      thumbColor: const WidgetStatePropertyAll(Colors.white),
-      trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return AnimatedContainer(
+      duration: _duration,
+      width: 44,
+      height: 26,
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: value ? colors.herb : colors.outline,
+        borderRadius: AppRadius.pillAll,
+      ),
+      child: AnimatedAlign(
+        duration: _duration,
+        curve: Curves.easeOut,
+        alignment: value ? Alignment.centerRight : Alignment.centerLeft,
+        child: const DecoratedBox(
+          // Nút trắng như prototype (`#FFFFFF`), cùng màu chữ trên nền `herb`/`chili`.
+          decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+          child: SizedBox.square(dimension: 20),
+        ),
+      ),
     );
   }
 }

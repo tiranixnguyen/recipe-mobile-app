@@ -72,7 +72,7 @@ void main() {
 
         expect(find.byIcon(AppIcons.chevron), findsNothing);
         await tester.tap(find.text('Nhắc khi hẹn giờ xong'));
-        await tester.tap(find.byType(Switch));
+        await tester.tap(find.byType(AnimatedContainer));
         expect(changes, [false, false]);
 
         final semantics = tester.getSemantics(find.text('Nhắc khi hẹn giờ xong'));
