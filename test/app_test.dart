@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/app/app.dart';
 import 'package:recipe_mobile_app/app/splash_screen.dart';
 import 'package:recipe_mobile_app/app/theme_preview_screen.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
@@ -32,6 +33,27 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.widgetWithText(AppBar, label), findsOneWidget);
     }
+  });
+
+  testWidgets('Onboarding: chọn dụng cụ, chế độ ăn rồi Xong thì lưu và vào Khám phá', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const ProviderScope(child: App()));
+    await tester.pump(SplashScreen.duration);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Nồi cơm điện'));
+    await tester.tap(find.text('Không ăn cay'));
+    await tester.pump();
+    await tester.tap(find.text('Xong, gợi ý món cho mình'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(AppBar, 'Khám phá'), findsOneWidget);
+    final container = ProviderScope.containerOf(tester.element(find.byType(NavigationBar)));
+    expect(
+      container.read(kitchenProfileProvider),
+      const KitchenProfile(tools: {Tool.rice}, diets: {Diet.nospicy}),
+    );
   });
 
   testWidgets('đã qua Onboarding: Splash vào thẳng Khám phá', (tester) async {
