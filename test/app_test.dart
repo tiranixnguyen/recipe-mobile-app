@@ -9,6 +9,8 @@ import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
+import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
+import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
 Finder _tab(String label) =>
@@ -138,5 +140,45 @@ void main() {
     expect(find.text('Sáng'), findsOneWidget);
     expect(find.text('Tối'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Cài đặt: đổi giao diện và sửa dụng cụ & chế độ ăn', (tester) async {
+    final store = InMemoryLocalStore();
+    await store.writeString('system.onboarded', 'true');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          localStoreProvider.overrideWithValue(store),
+          appVersionProvider.overrideWith((ref) async => '1.0.0'),
+        ],
+        child: const App(),
+      ),
+    );
+    await tester.pump(SplashScreen.duration);
+    await tester.pumpAndSettle();
+
+    GoRouter.of(tester.element(find.byType(NavigationBar))).push(settingsLocation);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Tối'));
+    await tester.pumpAndSettle();
+    expect(Theme.of(tester.element(find.byType(SettingsScreen))).brightness, Brightness.dark);
+    expect(find.text('App luôn dùng giao diện Tối.'), findsOneWidget);
+
+    await tester.tap(find.text('Dụng cụ & chế độ ăn'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Lò vi sóng'));
+    await tester.pump();
+    await tester.tap(find.text('Lưu'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(SettingsScreen), findsOneWidget);
+    final container = ProviderScope.containerOf(tester.element(find.byType(SettingsScreen)));
+    expect(container.read(kitchenProfileProvider).tools, {Tool.micro});
+    expect(container.read(onboardingDoneProvider), isTrue);
+
+    await tester.scrollUntilVisible(find.text('Bếp Hoà Lạc · phiên bản 1.0.0'), 200);
+    expect(find.text('Xoá dữ liệu trên máy'), findsOneWidget);
   });
 }
