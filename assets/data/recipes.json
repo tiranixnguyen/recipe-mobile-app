@@ -7,7 +7,7 @@
     "minutes": 15,
     "servings": 2,
     "tools": ["stove"],
-    "diets": ["nospicy", "noseafood", "nopork"],
+    "diets": ["nospicy", "nopork"],
     "meals": ["breakfast", "lunch"],
     "ingredients": [
       { "id": "egg", "amount": 3, "unit": "quả" },
@@ -28,7 +28,7 @@
     "minutes": 15,
     "servings": 2,
     "tools": ["stove"],
-    "diets": ["nospicy", "noseafood", "nopork", "light"],
+    "diets": ["nospicy", "nopork", "light"],
     "meals": ["lunch", "dinner"],
     "ingredients": [
       { "id": "egg", "amount": 2, "unit": "quả" },
@@ -49,7 +49,7 @@
     "minutes": 15,
     "servings": 1,
     "tools": ["stove"],
-    "diets": ["nospicy", "noseafood", "nopork"],
+    "diets": ["nospicy"],
     "meals": ["lunch", "dinner"],
     "ingredients": [
       { "id": "noodle", "amount": 1, "unit": "gói" },

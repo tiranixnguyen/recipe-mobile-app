@@ -67,9 +67,13 @@ void main() {
 
   test('không key nào liên quan tới giá', () {
     final keys = <String>[..._keys(jsonDecode(rawIngredients)), ..._keys(jsonDecode(rawRecipes))];
+    // Tách key thành từ (camelCase, snake_case) để `giaTien`, `unit_price` bị bắt còn `giai` thì không.
     final priceKeys = keys.where((k) {
-      final lower = k.toLowerCase();
-      return lower.contains('price') || lower.contains('gia');
+      final words = k
+          .replaceAllMapped(RegExp('[A-Z]'), (m) => '_${m[0]}')
+          .toLowerCase()
+          .split(RegExp('[^a-z0-9]+'));
+      return words.any(const {'price', 'gia', 'cost'}.contains);
     });
     expect(priceKeys, isEmpty);
   });

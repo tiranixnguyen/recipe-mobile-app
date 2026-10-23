@@ -73,7 +73,7 @@ test chặn nếu nhập sai.
   "minutes": 15,
   "servings": 2,
   "tools": ["stove"],
-  "diets": ["nospicy", "noseafood", "nopork"],
+  "diets": ["nospicy", "nopork"],
   "meals": ["breakfast", "lunch"],
   "ingredients": [
     { "id": "egg", "amount": 3, "unit": "quả" },
@@ -92,8 +92,10 @@ test chặn nếu nhập sai.
   (component `Cover`) khi file không tồn tại.
 - `tools`: danh sách `Tool.id` cần có để nấu. Không rỗng.
 - `diets`: các chế độ ăn món **thoả mãn**; rỗng = không hợp chế độ nào. Người chọn chế độ X chỉ được gợi
-  ý món có X. Nhập thiếu tag thì món chỉ bị ẩn bớt, không bị gợi ý nhầm. Chỉ gắn `veg` khi chắc chắn
-  (món có trứng, mì gói… thì không gắn).
+  ý món có X. Nhập thiếu tag thì món chỉ bị ẩn bớt, không bị gợi ý nhầm. Nghi ngờ thì không gắn:
+  - `veg`: không gắn cho món có trứng, mì gói, nước mắm.
+  - `noseafood`: không gắn cho món có nước mắm (kể cả tuỳ chọn), gói gia vị mì (thường có tôm).
+  - `nopork`: không gắn cho món có gói gia vị mì (có thể có mỡ lợn).
 - `meals`: bữa phù hợp; rỗng = mọi bữa.
 - `ingredients[].id`: tham chiếu `Ingredient.id` (phải tồn tại).
 - `ingredients[].amount`: lượng cho `servings` khẩu phần chuẩn.
