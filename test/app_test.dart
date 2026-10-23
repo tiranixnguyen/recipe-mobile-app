@@ -4,8 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/app/app.dart';
 import 'package:recipe_mobile_app/app/splash_screen.dart';
+import 'package:recipe_mobile_app/app/theme_preview_screen.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
+import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 Finder _tab(String label) =>
     find.descendant(of: find.byType(NavigationBar), matching: find.text(label));
@@ -79,5 +82,39 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.widgetWithText(AppBar, 'Khám phá'), findsOneWidget);
+  });
+
+  testWidgets('chọn theme Tối thì app dùng theme tối từ token', (tester) async {
+    final store = InMemoryLocalStore();
+    await store.writeString('system.onboarded', 'true');
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [localStoreProvider.overrideWithValue(store)],
+        child: const App(),
+      ),
+    );
+    await tester.pump(SplashScreen.duration);
+    await tester.pumpAndSettle();
+
+    final container = ProviderScope.containerOf(tester.element(find.byType(NavigationBar)));
+    await container.read(themeModeProvider.notifier).set(ThemeMode.dark);
+    await tester.pumpAndSettle();
+
+    final theme = Theme.of(tester.element(find.byType(NavigationBar)));
+    expect(theme.brightness, Brightness.dark);
+    expect(theme.scaffoldBackgroundColor, AppColors.dark.surface);
+  });
+
+  testWidgets('trang xem theme mở được trước Onboarding, có cả hai theme', (tester) async {
+    await tester.pumpWidget(const ProviderScope(child: App()));
+
+    GoRouter.of(tester.element(find.byType(SplashScreen))).go(themePreviewLocation);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ThemePreviewScreen), findsOneWidget);
+    expect(find.text('Sáng'), findsOneWidget);
+    expect(find.text('Tối'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

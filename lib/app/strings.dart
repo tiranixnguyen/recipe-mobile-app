@@ -5,4 +5,7 @@ abstract final class AppStrings {
   static const tabPantry = 'Tủ đồ';
   static const tabPlan = 'Thực đơn';
   static const tabSaved = 'Đã lưu';
+  static const themePreview = 'Xem theme';
+  static const themeLight = 'Sáng';
+  static const themeDark = 'Tối';
 }

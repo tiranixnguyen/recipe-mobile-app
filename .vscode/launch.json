@@ -13,6 +13,13 @@
       "type": "dart",
       "program": "lib/main.dart",
       "flutterMode": "profile"
+    },
+    {
+      "name": "Theme preview",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--route", "/debug/theme"]
     }
   ]
 }

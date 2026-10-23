@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/theme/theme.dart';
 import '../features/discover/discover.dart';
 import '../features/system/system.dart';
 import 'strings.dart';
@@ -47,7 +48,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(AppStrings.appName, style: textTheme.headlineMedium),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.s2),
             Text(AppStrings.tagline, style: textTheme.bodyMedium),
           ],
         ),
