@@ -247,10 +247,14 @@ class _DietChip extends StatelessWidget {
           child: Container(
             height: 40,
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
-            alignment: Alignment.center,
-            child: Text(
-              label,
-              style: AppTextStyles.label.copyWith(color: selected ? colors.chiliDeep : colors.ink),
+            child: Center(
+              widthFactor: 1,
+              child: Text(
+                label,
+                style: AppTextStyles.label.copyWith(
+                  color: selected ? colors.chiliDeep : colors.ink,
+                ),
+              ),
             ),
           ),
         ),
