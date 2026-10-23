@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../../core/models/models.dart';
-import '../../../../core/theme/theme.dart';
-import '../../../../core/widgets/app_icon.dart';
-import '../../../discover/discover.dart';
-import '../../strings.dart';
-import 'onboarding_view_model.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/features/discover/discover.dart';
+import 'package:recipe_mobile_app/features/system/presentation/onboarding/onboarding_view_model.dart';
+import 'package:recipe_mobile_app/features/system/strings.dart';
 
 /// Chọn dụng cụ và chế độ ăn (prototype `Onboarding`).
 ///

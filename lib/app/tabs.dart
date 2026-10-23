@@ -1,11 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
-
-import '../core/widgets/app_icon.dart';
-import '../features/discover/discover.dart';
-import '../features/pantry/pantry.dart';
-import '../features/plan/plan.dart';
-import 'strings.dart';
+import 'package:recipe_mobile_app/app/strings.dart';
+import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/features/discover/discover.dart';
+import 'package:recipe_mobile_app/features/pantry/pantry.dart';
+import 'package:recipe_mobile_app/features/plan/plan.dart';
 
 class AppTab {
   const AppTab({required this.label, required this.icon, required this.routes});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'tabs.dart';
+import 'package:recipe_mobile_app/app/tabs.dart';
 
 /// Thanh điều hướng dưới theo component `BottomNav`, dựng từ [appTabs].
 class AppShell extends StatelessWidget {

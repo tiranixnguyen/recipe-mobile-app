@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/storage/local_store.dart';
+import 'package:recipe_mobile_app/core/storage/local_store.dart';
 
 const _themeModeKey = 'system.themeMode';
 const _onboardedKey = 'system.onboarded';

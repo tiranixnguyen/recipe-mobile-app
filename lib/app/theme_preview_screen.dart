@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../core/theme/theme.dart';
-import 'strings.dart';
+import 'package:recipe_mobile_app/app/strings.dart';
+import 'package:recipe_mobile_app/core/theme/theme.dart';
 
 /// Chỉ có ở bản debug: `fvm flutter run --route /debug/theme` hoặc nút "Xem theme" trên màn tạm.
 const themePreviewLocation = '/debug/theme';

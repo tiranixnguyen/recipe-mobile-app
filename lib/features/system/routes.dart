@@ -1,9 +1,9 @@
 import 'package:go_router/go_router.dart';
 
-import '../../core/widgets/coming_soon_screen.dart';
-import 'presentation/onboarding/onboarding_screen.dart';
-import 'presentation/settings/settings_screen.dart';
-import 'strings.dart';
+import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
+import 'package:recipe_mobile_app/features/system/presentation/onboarding/onboarding_screen.dart';
+import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
+import 'package:recipe_mobile_app/features/system/strings.dart';
 
 const onboardingLocation = '/onboarding';
 const settingsLocation = '/settings';
