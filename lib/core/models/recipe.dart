@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 
-import 'diet.dart';
-import 'meal.dart';
-import 'tool.dart';
+import 'package:recipe_mobile_app/core/models/diet.dart';
+import 'package:recipe_mobile_app/core/models/meal.dart';
+import 'package:recipe_mobile_app/core/models/tool.dart';
 
 /// Một nguyên liệu trong công thức, kèm lượng và ghi chú thay thế.
 @immutable

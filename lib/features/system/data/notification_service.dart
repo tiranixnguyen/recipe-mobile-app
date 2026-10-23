@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/models/models.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 
 /// Gửi thông báo trên máy. F2 gọi [timerDone] khi hẹn giờ nấu hết, F4 gọi [mealReminder] để nhắc
 /// bữa theo thực đơn.

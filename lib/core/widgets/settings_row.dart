@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/theme.dart';
-import 'app_icon.dart';
+import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 
 /// Một nhóm hàng cài đặt theo prototype `Settings`: tiêu đề nhỏ màu `inkMuted` phía trên, khung
 /// `surfaceRaised` viền `line`, đường kẻ giữa các hàng.

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../../../../core/theme/theme.dart';
-import '../../../../core/widgets/app_icon.dart';
-import '../../../../core/widgets/settings_row.dart';
-import '../../routes.dart';
-import '../../strings.dart';
-import 'settings_view_model.dart';
+import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/core/widgets/settings_row.dart';
+import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
+import 'package:recipe_mobile_app/features/system/routes.dart';
+import 'package:recipe_mobile_app/features/system/strings.dart';
 
 /// Cài đặt (prototype `Settings`).
 class SettingsScreen extends ConsumerWidget {

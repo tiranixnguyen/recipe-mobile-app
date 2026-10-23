@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../core/models/models.dart';
-import '../../data/kitchen_profile.dart';
-import '../../data/preferences.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/features/system/data/kitchen_profile.dart';
+import 'package:recipe_mobile_app/features/system/data/preferences.dart';
 
 /// State của màn Onboarding: dụng cụ và chế độ ăn đang chọn.
 class OnboardingState {

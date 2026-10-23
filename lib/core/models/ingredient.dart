@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 
-import 'ingredient_group.dart';
+import 'package:recipe_mobile_app/core/models/ingredient_group.dart';
 
 /// Nguyên liệu trong danh mục đóng gói sẵn (`assets/data/ingredients.json`).
 @immutable
