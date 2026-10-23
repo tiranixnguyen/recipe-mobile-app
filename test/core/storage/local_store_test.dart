@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   test('clearLocalData xoá store và dựng lại state đang watch', () async {

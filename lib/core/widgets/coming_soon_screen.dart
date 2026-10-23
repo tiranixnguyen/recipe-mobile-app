@@ -1,13 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
-// Tạm: core không được phụ thuộc app/feature, bỏ ba import này cùng nút Cài đặt và nút xem theme
-// khi màn Khám phá (DSC-01) có nút Cài đặt trên header.
-import '../../app/strings.dart';
-import '../../app/theme_preview_screen.dart';
-import '../../features/system/system.dart';
-import '../theme/theme.dart';
+// Tạm: core không được phụ thuộc app/feature. Bỏ import `app/strings`, `app/theme_preview_screen` và
+// `features/system` cùng nút Cài đặt, nút xem theme khi màn Khám phá (DSC-01) có nút Cài đặt.
+import 'package:recipe_mobile_app/app/strings.dart';
+import 'package:recipe_mobile_app/app/theme_preview_screen.dart';
+import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Màn tạm Lead tạo sẵn cho mỗi feature; chủ feature thay bằng màn thật.
 class ComingSoonScreen extends StatelessWidget {

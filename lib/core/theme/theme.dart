@@ -6,7 +6,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
+import 'package:recipe_mobile_app/core/theme/app_colors.dart';
 
 export 'app_colors.dart';
 export 'app_radius.dart';
