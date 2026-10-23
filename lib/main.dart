@@ -10,7 +10,7 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   runApp(
     ProviderScope(
-      overrides: [localStoreProvider.overrideWithValue(SharedPrefsLocalStore(prefs))],
+      overrides: [localStoreProvider.overrideWith((ref) => SharedPrefsLocalStore(prefs))],
       child: const App(),
     ),
   );
