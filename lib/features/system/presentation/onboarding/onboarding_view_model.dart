@@ -1,24 +1,56 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/models/models.dart';
+import '../../data/kitchen_profile.dart';
 import '../../data/preferences.dart';
 
-/// State của màn Onboarding. SYS-01 thêm dụng cụ và chế độ ăn đang chọn (enum `Tool`, `Diet`).
+/// State của màn Onboarding: dụng cụ và chế độ ăn đang chọn.
 class OnboardingState {
-  const OnboardingState({this.finishing = false});
+  const OnboardingState({this.tools = const {}, this.diets = const {}, this.finishing = false});
+
+  final Set<Tool> tools;
+  final Set<Diet> diets;
 
   /// Đang lưu sau khi bấm Xong / Bỏ qua — View khoá nút để không bấm hai lần.
   final bool finishing;
+
+  OnboardingState copyWith({Set<Tool>? tools, Set<Diet>? diets, bool? finishing}) =>
+      OnboardingState(
+        tools: tools ?? this.tools,
+        diets: diets ?? this.diets,
+        finishing: finishing ?? this.finishing,
+      );
 }
 
+/// Dùng cho cả lần đầu mở app và khi sửa lại từ Cài đặt; bắt đầu từ lựa chọn đã lưu.
 class OnboardingViewModel extends Notifier<OnboardingState> {
   @override
-  OnboardingState build() => const OnboardingState();
+  OnboardingState build() {
+    final profile = ref.read(kitchenProfileProvider);
+    return OnboardingState(tools: profile.tools, diets: profile.diets);
+  }
 
-  /// Ghi nhận đã qua Onboarding. View tự điều hướng sau khi xong.
-  Future<void> finish() async {
-    state = const OnboardingState(finishing: true);
+  void toggleTool(Tool tool) => state = state.copyWith(tools: _flip(state.tools, tool));
+
+  void toggleDiet(Diet diet) => state = state.copyWith(diets: _flip(state.diets, diet));
+
+  /// Lưu lựa chọn vào [kitchenProfileProvider] và ghi nhận đã qua Onboarding. View tự điều hướng.
+  Future<void> save() async {
+    state = state.copyWith(finishing: true);
+    await ref
+        .read(kitchenProfileProvider.notifier)
+        .save(KitchenProfile(tools: state.tools, diets: state.diets));
     await ref.read(onboardingDoneProvider.notifier).complete();
   }
+
+  /// Bỏ qua: không lưu lựa chọn (hồ sơ bếp để rỗng = chưa chọn), chỉ ghi nhận đã qua Onboarding.
+  Future<void> skip() async {
+    state = state.copyWith(finishing: true);
+    await ref.read(onboardingDoneProvider.notifier).complete();
+  }
+
+  static Set<T> _flip<T>(Set<T> set, T item) =>
+      set.contains(item) ? ({...set}..remove(item)) : {...set, item};
 }
 
 final onboardingViewModelProvider =
