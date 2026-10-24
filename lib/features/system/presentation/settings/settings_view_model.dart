@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
+import 'package:recipe_mobile_app/features/system/data/app_info.dart';
 import 'package:recipe_mobile_app/features/system/data/notification_prefs.dart';
 import 'package:recipe_mobile_app/features/system/data/preferences.dart';
-
-/// Phiên bản app hiện ở cuối màn Cài đặt, ví dụ `1.0.0`. Test override để khỏi gọi platform.
-final appVersionProvider = FutureProvider<String>(
-  (ref) async => (await PackageInfo.fromPlatform()).version,
-);
 
 /// Mở trang của app trên Google Play. Test override để khỏi gọi platform.
 final openStoreListingProvider = Provider<Future<void> Function()>(
