@@ -1,0 +1,144 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/core/storage/local_store.dart';
+import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/meal_slot.dart';
+import 'package:recipe_mobile_app/features/plan/plan.dart';
+import 'package:recipe_mobile_app/features/plan/presentation/plan/plan_screen.dart';
+import 'package:recipe_mobile_app/features/plan/presentation/plan/plan_view_model.dart';
+import 'package:recipe_mobile_app/features/plan/strings.dart';
+
+Recipe _recipe(String id, String name) => Recipe(
+  id: id,
+  name: name,
+  description: '',
+  imageAsset: '',
+  minutes: 15,
+  servings: 1,
+  tools: const [Tool.stove],
+  diets: const [],
+  meals: const [],
+  ingredients: const [],
+  steps: const [],
+);
+
+Future<ProviderContainer> _pump(
+  WidgetTester tester, {
+  Future<List<Recipe>> Function()? recipes,
+}) async {
+  tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+  tester.view.devicePixelRatio = 3;
+  addTearDown(tester.view.reset);
+  final router = GoRouter(
+    initialLocation: '/plan',
+    routes: [
+      GoRoute(path: '/plan', builder: (_, _) => const PlanScreen()),
+      for (final path in ['/shopping', '/recipe/:id'])
+        GoRoute(path: path, builder: (_, state) => Text('at ${state.uri}')),
+    ],
+  );
+  addTearDown(router.dispose);
+  final container = ProviderContainer(
+    overrides: [
+      localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
+      // Thứ Ba.
+      nowProvider.overrideWithValue(DateTime(2026, 10, 20, 8)),
+      recipesProvider.overrideWith(
+        (ref) =>
+            (recipes ??
+            () async => [_recipe('trung', 'Trứng chiên hành'), _recipe('canh', 'Canh cà chua')])(),
+      ),
+    ],
+  );
+  addTearDown(container.dispose);
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+    ),
+  );
+  await tester.pumpAndSettle();
+  return container;
+}
+
+Finder _emptySlots() => find.byWidgetPredicate((w) => w is MealSlot && w.title == null);
+
+void main() {
+  testWidgets('hôm nay, 3 ô trống, 0/21; Đi chợ mở danh sách', (tester) async {
+    await _pump(tester);
+
+    expect(find.text('Thứ Ba · Hôm nay'), findsOneWidget);
+    expect(find.text('Đã lên 0/21 bữa'), findsOneWidget);
+    expect(_emptySlots(), findsNWidgets(3));
+
+    await tester.tap(find.text(PlanStrings.shopping));
+    await tester.pumpAndSettle();
+    expect(find.text('at /shopping'), findsOneWidget);
+  });
+
+  testWidgets('chọn ngày khác thì đổi tiêu đề', (tester) async {
+    await _pump(tester);
+
+    await tester.tap(find.text('T5'));
+    await tester.pumpAndSettle();
+    expect(find.text('Thứ Năm'), findsOneWidget);
+  });
+
+  testWidgets('thêm món từ sheet tìm, đổi món, rồi xoá', (tester) async {
+    final container = await _pump(tester);
+
+    await tester.tap(_emptySlots().first);
+    await tester.pumpAndSettle();
+    expect(find.text(PlanStrings.pickTitle('Sáng')), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'trung');
+    await tester.pumpAndSettle();
+    expect(find.text('Canh cà chua'), findsNothing);
+    await tester.tap(find.text('Trứng chiên hành'));
+    await tester.pumpAndSettle();
+
+    expect(find.widgetWithText(MealSlot, 'Trứng chiên hành'), findsOneWidget);
+    expect(find.text('Đã lên 1/21 bữa'), findsOneWidget);
+    expect(container.read(plannedMealsProvider).single.recipeId, 'trung');
+
+    await tester.tap(find.text('Trứng chiên hành'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(PlanStrings.changeRecipe));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Canh cà chua'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(MealSlot, 'Canh cà chua'), findsOneWidget);
+
+    await tester.tap(find.text('Canh cà chua'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(PlanStrings.removeRecipe));
+    await tester.pumpAndSettle();
+    expect(_emptySlots(), findsNWidgets(3));
+    expect(container.read(plannedMealsProvider), isEmpty);
+  });
+
+  testWidgets('Xem món mở Chi tiết', (tester) async {
+    final container = await _pump(tester);
+    await container
+        .read(plannedMealsProvider.notifier)
+        .addToPlan('trung', DateTime(2026, 10, 20), Meal.dinner);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Trứng chiên hành'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(PlanStrings.viewRecipe));
+    await tester.pumpAndSettle();
+    expect(find.text('at /recipe/trung'), findsOneWidget);
+  });
+
+  testWidgets('dữ liệu lỗi thì hiện câu lỗi, vẫn đi chợ được', (tester) async {
+    await _pump(tester, recipes: () => Future.error(const FormatException('hỏng')));
+
+    expect(find.text(PlanStrings.loadError), findsOneWidget);
+    expect(find.byType(MealSlot), findsNothing);
+    expect(find.text(PlanStrings.shopping), findsOneWidget);
+  });
+}
