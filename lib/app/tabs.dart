@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
+import '../core/widgets/app_icon.dart';
 import '../features/discover/discover.dart';
 import '../features/pantry/pantry.dart';
 import '../features/plan/plan.dart';
@@ -18,8 +18,8 @@ class AppTab {
 /// Bốn tab theo component `BottomNav`; thứ tự ở đây là thứ tự trên thanh điều hướng.
 /// Router dựng branch và shell dựng nút đều từ list này.
 final appTabs = [
-  AppTab(label: AppStrings.tabDiscover, icon: Symbols.explore_rounded, routes: discoverTabRoutes),
-  AppTab(label: AppStrings.tabPantry, icon: Symbols.kitchen_rounded, routes: pantryTabRoutes),
-  AppTab(label: AppStrings.tabPlan, icon: Symbols.calendar_month_rounded, routes: planTabRoutes),
-  AppTab(label: AppStrings.tabSaved, icon: Symbols.bookmark_rounded, routes: savedTabRoutes),
+  AppTab(label: AppStrings.tabDiscover, icon: AppIcons.compass, routes: discoverTabRoutes),
+  AppTab(label: AppStrings.tabPantry, icon: AppIcons.fridge, routes: pantryTabRoutes),
+  AppTab(label: AppStrings.tabPlan, icon: AppIcons.calendar, routes: planTabRoutes),
+  AppTab(label: AppStrings.tabSaved, icon: AppIcons.bookmark, routes: savedTabRoutes),
 ];
