@@ -164,20 +164,24 @@ class _ThemePicker extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.s1),
-            child: Row(
-              children: [
-                for (final (i, (mode, label, icon)) in _options.indexed) ...[
-                  if (i > 0) const SizedBox(width: AppSpacing.s1),
-                  Expanded(
-                    child: _ThemeOption(
-                      label: label,
-                      icon: icon,
-                      selected: mode == selected,
-                      onTap: () => onChanged(mode),
+            // Ba ô cao bằng nhau kể cả khi một nhãn xuống dòng.
+            child: IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final (i, (mode, label, icon)) in _options.indexed) ...[
+                    if (i > 0) const SizedBox(width: AppSpacing.s1),
+                    Expanded(
+                      child: _ThemeOption(
+                        label: label,
+                        icon: icon,
+                        selected: mode == selected,
+                        onTap: () => onChanged(mode),
+                      ),
                     ),
-                  ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
@@ -214,15 +218,23 @@ class _ThemeOption extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          child: SizedBox(
-            height: 52,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, color: color),
-                const SizedBox(height: 2),
-                Text(label, style: AppTextStyles.label.copyWith(color: color)),
-              ],
+          // Cao tối thiểu 52 như prototype; chữ to hoặc màn hẹp thì nhãn xuống dòng, ô cao theo.
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 52),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.s1),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon, color: color),
+                  const SizedBox(height: 2),
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    style: AppTextStyles.label.copyWith(color: color),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

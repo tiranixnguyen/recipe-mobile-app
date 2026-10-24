@@ -1,7 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
+import 'package:recipe_mobile_app/features/system/presentation/about/about_screen.dart';
+import 'package:recipe_mobile_app/features/system/presentation/clear_data/clear_data_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/onboarding/onboarding_screen.dart';
+import 'package:recipe_mobile_app/features/system/presentation/policy/policy_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
 import 'package:recipe_mobile_app/features/system/strings.dart';
 
@@ -25,17 +29,21 @@ final systemRoutes = <RouteBase>[
     path: feedbackLocation,
     builder: (_, _) => const ComingSoonScreen(title: SystemStrings.feedback),
   ),
-  // TODO(SYS-04): màn Chính sách (`Policy`), Giới thiệu (`About`), Xoá dữ liệu (`ClearData`).
-  GoRoute(
-    path: policyLocation,
-    builder: (_, _) => const ComingSoonScreen(title: SystemStrings.policy),
-  ),
-  GoRoute(
-    path: aboutLocation,
-    builder: (_, _) => const ComingSoonScreen(title: SystemStrings.about),
-  ),
+  GoRoute(path: policyLocation, builder: (_, _) => const PolicyScreen()),
+  GoRoute(path: aboutLocation, builder: (_, _) => const AboutScreen()),
   GoRoute(
     path: clearDataLocation,
-    builder: (_, _) => const ComingSoonScreen(title: SystemStrings.clearData),
+    pageBuilder: (_, state) => _DialogPage(key: state.pageKey, child: const ClearDataScreen()),
   ),
 ];
+
+/// Mở [child] như hộp thoại đè lên màn trước (bấm ra ngoài hoặc back là đóng).
+class _DialogPage<T> extends Page<T> {
+  const _DialogPage({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Route<T> createRoute(BuildContext context) =>
+      DialogRoute<T>(context: context, settings: this, builder: (_) => child);
+}

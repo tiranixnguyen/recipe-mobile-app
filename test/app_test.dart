@@ -15,8 +15,8 @@ import 'package:recipe_mobile_app/features/discover/presentation/discover/discov
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
 import 'package:recipe_mobile_app/features/pantry/presentation/pantry/pantry_screen.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/plan/plan_screen.dart';
+import 'package:recipe_mobile_app/features/system/data/app_info.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
-import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Dữ liệu đóng gói đọc bằng `rootBundle` không xong trong fake async của widget test, màn có
