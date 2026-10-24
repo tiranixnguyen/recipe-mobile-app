@@ -84,6 +84,8 @@ void main() {
       testWidgets('Dừng khi đang chạy thì về chờ, không gọi onDone', (tester) async {
         await pump(tester, seconds: 45, autoStart: true);
         expect(find.text('00:45'), findsOneWidget);
+        // autoStart báo running sau frame đầu.
+        expect(statuses, [StepTimerStatus.running]);
 
         await tester.tap(find.text('Dừng'));
         await tester.pump();

@@ -17,6 +17,9 @@ enum StepTimerStatus { idle, running, done }
 /// Thời gian tính theo giờ hệ thống (lưu mốc kết thúc), nên app bị tạm dừng hay timer vẽ trễ vẫn
 /// đúng; timer bên trong chỉ để vẽ lại. Màn chủ dùng [onStatusChange] để giữ thanh đang chạy luôn
 /// hiện khi người dùng sang bước khác, và [onDone] để rung, báo.
+///
+/// Mỗi bước một StepTimer riêng (đặt `key` theo bước); đổi [seconds] khi đang chạy không dời mốc
+/// đã hẹn.
 class StepTimer extends StatefulWidget {
   const StepTimer({
     super.key,
@@ -67,7 +70,14 @@ class _StepTimerState extends State<StepTimer> {
   @override
   void initState() {
     super.initState();
-    if (widget.autoStart) _start(notify: false);
+    if (!widget.autoStart) return;
+    _start(notify: false);
+    // Báo sau frame đầu: màn cha có thể setState trong onStatusChange, không gọi được lúc đang build.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _status == StepTimerStatus.running) {
+        widget.onStatusChange?.call(StepTimerStatus.running);
+      }
+    });
   }
 
   @override
@@ -107,12 +117,13 @@ class _StepTimerState extends State<StepTimer> {
     _setStatus(StepTimerStatus.idle);
   }
 
+  /// [notify] false chỉ dùng trong `initState`: chưa build nên không setState, chưa báo ra ngoài.
   void _setStatus(StepTimerStatus status, {bool notify = true}) {
-    if (notify) {
-      setState(() => _status = status);
-    } else {
+    if (!notify) {
       _status = status;
+      return;
     }
+    setState(() => _status = status);
     widget.onStatusChange?.call(status);
   }
 
