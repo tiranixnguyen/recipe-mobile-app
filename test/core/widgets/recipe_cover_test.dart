@@ -23,7 +23,14 @@ void main() {
     void expectPlaceholder(WidgetTester tester) {
       expect(find.byIcon(AppIcons.bowl), findsOneWidget);
       expect(tester.widget<Icon>(find.byIcon(AppIcons.bowl)).color, colors.chili);
-      expect(tester.widget<ColoredBox>(find.byType(ColoredBox)).color, colors.chiliSoft);
+      expect(
+        tester
+            .widget<ColoredBox>(
+              find.descendant(of: find.byType(RecipeCover), matching: find.byType(ColoredBox)),
+            )
+            .color,
+        colors.chiliSoft,
+      );
       expect(tester.getSize(find.byType(RecipeCover)), const Size(320, 200));
     }
 
