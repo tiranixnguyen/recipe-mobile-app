@@ -13,6 +13,7 @@ import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
 import 'package:recipe_mobile_app/features/pantry/presentation/pantry/pantry_screen.dart';
+import 'package:recipe_mobile_app/features/plan/presentation/plan/plan_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
@@ -47,7 +48,7 @@ void main() {
 
     await tester.tap(_tab('Thực đơn'));
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(AppBar, 'Thực đơn'), findsOneWidget);
+    expect(find.byType(PlanScreen), findsOneWidget);
 
     await tester.tap(_tab('Đã lưu'));
     await tester.pumpAndSettle();
