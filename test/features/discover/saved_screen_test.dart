@@ -27,7 +27,11 @@ const _recipe = Recipe(
   steps: [],
 );
 
-Future<void> _pump(WidgetTester tester, {List<String> saved = const []}) async {
+Future<void> _pump(
+  WidgetTester tester, {
+  List<String> saved = const [],
+  Future<List<Recipe>> Function()? recipes,
+}) async {
   final store = InMemoryLocalStore();
   await store.writeList('discover.saved', saved);
   final router = GoRouter(
@@ -48,7 +52,7 @@ Future<void> _pump(WidgetTester tester, {List<String> saved = const []}) async {
             Ingredient(id: 'egg', name: 'Trứng', group: IngredientGroup.protein),
           ],
         ),
-        recipesProvider.overrideWith((ref) async => const [_recipe]),
+        recipesProvider.overrideWith((ref) => (recipes ?? () async => const [_recipe])()),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
@@ -85,5 +89,16 @@ void main() {
     await tester.tap(find.text('Trứng chiên hành'));
     await tester.pumpAndSettle();
     expect(find.text('at /recipe/trung-chien'), findsOneWidget);
+  });
+
+  testWidgets('dữ liệu lỗi thì hiện câu lỗi', (tester) async {
+    await _pump(
+      tester,
+      saved: ['trung-chien'],
+      recipes: () => Future.error(const FormatException('hỏng')),
+    );
+
+    expect(find.text(DiscoverStrings.loadError), findsOneWidget);
+    expect(find.byType(RecipeCard), findsNothing);
   });
 }

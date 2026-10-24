@@ -17,9 +17,6 @@ import 'package:recipe_mobile_app/features/discover/strings.dart';
 class SavedScreen extends ConsumerWidget {
   const SavedScreen({super.key});
 
-  /// Badge chỉ hiện khi đủ đồ hoặc thiếu ít, như `AvailabilityBadge` khuyên.
-  static const _maxMissingForBadge = 2;
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
@@ -68,10 +65,9 @@ class SavedScreen extends ConsumerWidget {
                       servings: recipe.servings,
                       tool: recipe.tools.firstOrNull?.shortLabel,
                       imageAsset: recipe.imageAsset,
-                      badge:
-                          availability != null && availability.missing.length <= _maxMissingForBadge
-                          ? AvailabilityBadge(missing: availability.missing)
-                          : null,
+                      badge: availability == null
+                          ? null
+                          : AvailabilityBadge(missing: availability.missing),
                       action: SaveButton(recipeId: recipe.id),
                       onTap: () => context.push(recipeLocation(recipe.id)),
                     );

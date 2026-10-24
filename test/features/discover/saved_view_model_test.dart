@@ -7,7 +7,7 @@ import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_view_model.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 
-Recipe _recipe(String id) => Recipe(
+Recipe _recipe(String id, {int missing = 1}) => Recipe(
   id: id,
   name: id,
   description: '',
@@ -17,7 +17,10 @@ Recipe _recipe(String id) => Recipe(
   tools: const [Tool.stove],
   diets: const [],
   meals: const [],
-  ingredients: const [RecipeIngredient(id: 'egg', amount: 1, unit: 'quả')],
+  ingredients: [
+    const RecipeIngredient(id: 'egg', amount: 1, unit: 'quả'),
+    for (var i = 1; i < missing; i++) RecipeIngredient(id: 'x$i', amount: 1, unit: 'g'),
+  ],
   steps: const [],
 );
 
@@ -34,7 +37,9 @@ void main() {
             Ingredient(id: 'egg', name: 'Trứng', group: IngredientGroup.protein),
           ],
         ),
-        recipesProvider.overrideWith((ref) async => [_recipe('a'), _recipe('b'), _recipe('c')]),
+        recipesProvider.overrideWith(
+          (ref) async => [_recipe('a'), _recipe('b'), _recipe('c'), _recipe('many', missing: 3)],
+        ),
       ],
     );
     sub = container.listen(savedViewModelProvider, (_, _) {});
@@ -78,5 +83,11 @@ void main() {
 
     await container.read(pantryItemsProvider.notifier).addToPantry('egg');
     expect(sub.read().requireValue.single.availability!.isReady, isTrue);
+  });
+
+  test('thiếu quá 2 thứ thì không kèm độ sẵn đồ (ẩn badge)', () async {
+    await loaded();
+    await toggle('many');
+    expect(sub.read().requireValue.single.availability, isNull);
   });
 }
