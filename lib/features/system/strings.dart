@@ -1,3 +1,5 @@
+import 'package:recipe_mobile_app/core/models/models.dart';
+
 abstract final class SystemStrings {
   static const onboardingStep = 'Bước 1/1 · Bếp của bạn';
   static const onboardingTitle = 'Phòng bạn có gì để nấu?';
@@ -25,7 +27,30 @@ abstract final class SystemStrings {
   static const notifTimer = 'Nhắc khi hẹn giờ xong';
   static const notifTimerNote = 'Rung và báo khi đồng hồ nấu hết giờ';
   static const notifMeal = 'Nhắc bữa theo thực đơn';
-  static const notifMealNote = 'Trước bữa 30 phút';
+  static String notifMealNote(Duration lead) => 'Trước bữa ${leadLabel(lead)}';
+  static const notifMealLead = 'Đổi giờ nhắc';
+  static const notifMealLeadTitle = 'Nhắc trước bữa bao lâu?';
+  static const notifMealTimes = 'Giờ bữa: sáng 7:00, trưa 11:30, tối 18:30.';
+  static String leadLabel(Duration lead) =>
+      lead.inMinutes >= 60 ? '${lead.inHours} tiếng' : '${lead.inMinutes} phút';
+  static const notifBlocked = 'Thông báo đang bị chặn. Bật lại trong cài đặt của điện thoại.';
+
+  // Nội dung thông báo.
+  static const notifTimerTitle = 'Hết giờ rồi';
+  static String notifTimerBody(String recipeTitle) => 'Đồng hồ nấu $recipeTitle đã hết giờ.';
+  static String notifMealTitle(Meal meal) => 'Sắp tới bữa ${meal.label.toLowerCase()}';
+  static String notifMealBody(String recipeTitle) => 'Thực đơn có $recipeTitle. Vào bếp thôi.';
+
+  // Xin quyền thông báo (`NotifPermission`).
+  static const notifAskTitle = 'Bật thông báo nhé?';
+  static const notifAskIntro = 'App chỉ báo khi thật sự cần, không quảng cáo.';
+  static const notifAskTimer = 'Báo khi hẹn giờ nấu xong';
+  static const notifAskTimerNote = 'Kể cả khi bạn đang mở app khác hay tắt màn hình.';
+  static const notifAskMeal = 'Nhắc bữa trong thực đơn';
+  static const notifAskMealNote = 'Một lời nhắc trước bữa bạn đã lên, giờ do bạn chọn.';
+  static const notifAllow = 'Cho phép';
+  static const notifLater = 'Để sau';
+  static const notifAskFooter = 'Đổi lại được trong Cài đặt.';
 
   static const supportSection = 'Hỗ trợ & thông tin';
   static const feedback = 'Góp ý & báo lỗi';

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/core/widgets/settings_row.dart';
+import 'package:recipe_mobile_app/features/system/data/notification_prefs.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
 import 'package:recipe_mobile_app/features/system/routes.dart';
 import 'package:recipe_mobile_app/features/system/strings.dart';
@@ -60,15 +61,24 @@ class SettingsScreen extends ConsumerWidget {
                   title: SystemStrings.notifTimer,
                   note: SystemStrings.notifTimerNote,
                   value: state.timerDone,
-                  onChanged: viewModel.setTimerDone,
+                  onChanged: (on) => _toggle(context, viewModel.setTimerDone(on)),
                 ),
                 SettingsRow.toggle(
                   icon: AppIcons.bell,
                   title: SystemStrings.notifMeal,
-                  note: SystemStrings.notifMealNote,
+                  note: SystemStrings.notifMealNote(state.mealReminderLead),
                   value: state.mealReminder,
-                  onChanged: viewModel.setMealReminder,
+                  onChanged: (on) => _toggle(context, viewModel.setMealReminder(on)),
                 ),
+                if (state.mealReminder)
+                  SettingsRow(
+                    icon: AppIcons.clock,
+                    title: SystemStrings.notifMealLead,
+                    onTap: () async {
+                      final lead = await _pickMealReminderLead(context, state.mealReminderLead);
+                      if (lead != null) await viewModel.setMealReminderLead(lead);
+                    },
+                  ),
               ],
             ),
             const SizedBox(height: AppSpacing.s4),
@@ -122,6 +132,53 @@ class SettingsScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Bật công tắc thông báo mà bị chặn quyền thì báo cho người dùng.
+Future<void> _toggle(BuildContext context, Future<bool> change) async {
+  final messenger = ScaffoldMessenger.of(context);
+  if (!await change) {
+    messenger.showSnackBar(const SnackBar(content: Text(SystemStrings.notifBlocked)));
+  }
+}
+
+/// Sheet chọn nhắc trước bữa 15 phút / 30 phút / 1 tiếng.
+Future<Duration?> _pickMealReminderLead(BuildContext context, Duration selected) {
+  final colors = context.colors;
+  return showModalBottomSheet<Duration>(
+    context: context,
+    showDragHandle: true,
+    useSafeArea: true,
+    builder: (context) => Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.s4, 0, AppSpacing.s4, AppSpacing.s1),
+          child: Text(
+            SystemStrings.notifMealLeadTitle,
+            style: AppTextStyles.title.copyWith(color: colors.ink),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.s4, 0, AppSpacing.s4, AppSpacing.s2),
+          child: Text(
+            SystemStrings.notifMealTimes,
+            style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+          ),
+        ),
+        for (final lead in NotificationPrefs.mealReminderLeads)
+          ListTile(
+            title: Text(SystemStrings.notifMealNote(lead)),
+            textColor: lead == selected ? colors.chiliDeep : colors.ink,
+            trailing: lead == selected ? Icon(AppIcons.check, color: colors.chiliDeep) : null,
+            selected: lead == selected,
+            onTap: () => Navigator.of(context).pop(lead),
+          ),
+        const SizedBox(height: AppSpacing.s2),
+      ],
+    ),
+  );
 }
 
 /// Chọn Sáng / Tối / Theo hệ thống: ba ô trong một khung viền `outline`, ô đang chọn nền `chiliSoft`.

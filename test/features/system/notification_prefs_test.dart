@@ -24,12 +24,24 @@ void main() {
     final controller = container.read(notificationPrefsProvider.notifier);
     await controller.setTimerDone(false);
     await controller.setMealReminder(true);
+    await controller.setMealReminderLead(const Duration(minutes: 15));
 
     container.invalidate(notificationPrefsProvider);
     expect(
       container.read(notificationPrefsProvider),
-      const NotificationPrefs(timerDone: false, mealReminder: true),
+      const NotificationPrefs(
+        timerDone: false,
+        mealReminder: true,
+        mealReminderLead: Duration(minutes: 15),
+      ),
     );
+  });
+
+  test('giờ nhắc lưu sai thì về mặc định 30 phút', () async {
+    await container.read(localStoreProvider).writeString('system.notif.mealLead', '45');
+    container.invalidate(notificationPrefsProvider);
+
+    expect(container.read(notificationPrefsProvider).mealReminderLead, const Duration(minutes: 30));
   });
 
   test('xoá dữ liệu đưa về mặc định', () async {

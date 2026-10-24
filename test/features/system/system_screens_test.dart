@@ -6,16 +6,23 @@ import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/features/system/data/app_info.dart';
+import 'package:recipe_mobile_app/features/system/data/notification_prefs.dart';
 import 'package:recipe_mobile_app/features/system/presentation/about/about_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/clear_data/clear_data_screen.dart';
+import 'package:recipe_mobile_app/features/system/presentation/notif_permission/notif_permission_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/onboarding/onboarding_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/policy/policy_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'fake_notification_plugin.dart';
+
 /// Cài đặt và các màn mở từ đó, trên router chỉ có route của feature Hệ thống.
-Future<ProviderContainer> _pumpSettings(WidgetTester tester) async {
+Future<ProviderContainer> _pumpSettings(
+  WidgetTester tester, {
+  FakeNotificationPlugin? plugin,
+}) async {
   // Màn điện thoại 390×844 như prototype, để Cài đặt hiện gần hết các hàng.
   tester.view
     ..physicalSize = const Size(1170, 2532)
@@ -30,6 +37,7 @@ Future<ProviderContainer> _pumpSettings(WidgetTester tester) async {
       overrides: [
         localStoreProvider.overrideWith((ref) => SharedPrefsLocalStore(prefs)),
         appVersionProvider.overrideWith((ref) async => '0.1.0'),
+        notificationPluginProvider.overrideWithValue(plugin ?? FakeNotificationPlugin()),
       ],
       child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     ),
@@ -97,5 +105,76 @@ void main() {
 
     expect(find.byType(ClearDataScreen), findsNothing);
     expect(container.read(onboardingDoneProvider), isTrue);
+  });
+
+  group('xin quyền thông báo', () {
+    Future<Future<bool?>> openPermission(WidgetTester tester) async {
+      final result = GoRouter.of(
+        tester.element(find.byType(SettingsScreen)),
+      ).push<bool>(notifPermissionLocation);
+      await tester.pumpAndSettle();
+      expect(find.byType(NotifPermissionScreen), findsOneWidget);
+      return result;
+    }
+
+    testWidgets('Cho phép: xin quyền hệ thống, đóng màn với kết quả', (tester) async {
+      final plugin = FakeNotificationPlugin(permitted: false);
+      await _pumpSettings(tester, plugin: plugin);
+      final result = await openPermission(tester);
+
+      await tester.tap(find.text('Cho phép'));
+      await tester.pumpAndSettle();
+
+      expect(await result, isTrue);
+      expect(plugin.permissionRequests, 1);
+      expect(find.byType(NotifPermissionScreen), findsNothing);
+    });
+
+    testWidgets('Để sau: không xin quyền, ghi lại lúc hỏi', (tester) async {
+      final plugin = FakeNotificationPlugin(permitted: false);
+      await _pumpSettings(tester, plugin: plugin);
+      final result = await openPermission(tester);
+
+      await tester.tap(find.text('Để sau'));
+      await tester.pumpAndSettle();
+
+      expect(await result, isFalse);
+      expect(plugin.permissionRequests, 0);
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getString('system.notif.askedAt'), isNotNull);
+    });
+  });
+
+  testWidgets('Cài đặt: bật nhắc bữa mà bị chặn quyền thì để tắt và báo', (tester) async {
+    final plugin = FakeNotificationPlugin(permitted: false, grantOnRequest: false);
+    final container = await _pumpSettings(tester, plugin: plugin);
+
+    await tester.tap(find.text('Nhắc bữa theo thực đơn'));
+    await tester.pumpAndSettle();
+
+    expect(container.read(notificationPrefsProvider).mealReminder, isFalse);
+    expect(
+      find.text('Thông báo đang bị chặn. Bật lại trong cài đặt của điện thoại.'),
+      findsOneWidget,
+    );
+    expect(find.text('Đổi giờ nhắc'), findsNothing);
+  });
+
+  testWidgets('Cài đặt: bật nhắc bữa rồi đổi giờ nhắc', (tester) async {
+    final container = await _pumpSettings(tester);
+
+    await tester.tap(find.text('Nhắc bữa theo thực đơn'));
+    await tester.pumpAndSettle();
+    expect(container.read(notificationPrefsProvider).mealReminder, isTrue);
+
+    await _open(tester, 'Đổi giờ nhắc');
+    await tester.tap(find.text('Trước bữa 1 tiếng'));
+    await tester.pumpAndSettle();
+
+    expect(
+      container.read(notificationPrefsProvider).mealReminderLead,
+      const Duration(minutes: 60),
+    );
+    expect(find.text('Trước bữa 1 tiếng'), findsOneWidget, reason: 'ghi chú dưới công tắc');
   });
 }

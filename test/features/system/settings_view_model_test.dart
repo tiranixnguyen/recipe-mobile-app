@@ -6,18 +6,23 @@ import 'package:recipe_mobile_app/features/system/data/app_info.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
+import 'fake_notification_plugin.dart';
+
 void main() {
   late ProviderContainer container;
   late ProviderSubscription<SettingsState> sub;
   late int storeOpened;
+  late FakeNotificationPlugin plugin;
 
   setUp(() {
     storeOpened = 0;
+    plugin = FakeNotificationPlugin();
     container = ProviderContainer(
       overrides: [
         localStoreProvider.overrideWithValue(InMemoryLocalStore()),
         appVersionProvider.overrideWith((ref) async => '1.2.3'),
         openStoreListingProvider.overrideWithValue(() async => storeOpened++),
+        notificationPluginProvider.overrideWithValue(plugin),
       ],
     );
     sub = container.listen(settingsViewModelProvider, (_, _) {});
@@ -50,6 +55,39 @@ void main() {
 
     expect(sub.read().timerDone, isFalse);
     expect(sub.read().mealReminder, isTrue);
+  });
+
+  test('bật thông báo khi chưa có quyền: xin quyền, được thì bật', () async {
+    plugin.permitted = false;
+
+    expect(await viewModel().setMealReminder(true), isTrue);
+    expect(plugin.permissionRequests, 1);
+    expect(sub.read().mealReminder, isTrue);
+  });
+
+  test('bật thông báo mà bị từ chối quyền: để tắt, báo false', () async {
+    await viewModel().setTimerDone(false);
+    plugin
+      ..permitted = false
+      ..grantOnRequest = false;
+
+    expect(await viewModel().setTimerDone(true), isFalse);
+    expect(await viewModel().setMealReminder(true), isFalse);
+    expect(sub.read().timerDone, isFalse);
+    expect(sub.read().mealReminder, isFalse);
+  });
+
+  test('tắt thông báo không cần xin quyền', () async {
+    plugin.permitted = false;
+
+    expect(await viewModel().setTimerDone(false), isTrue);
+    expect(plugin.permissionRequests, 0);
+  });
+
+  test('đổi giờ nhắc bữa', () async {
+    expect(sub.read().mealReminderLead, const Duration(minutes: 30));
+    await viewModel().setMealReminderLead(const Duration(minutes: 60));
+    expect(sub.read().mealReminderLead, const Duration(minutes: 60));
   });
 
   test('đánh giá app mở trang Google Play', () async {
