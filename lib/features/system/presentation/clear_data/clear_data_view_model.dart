@@ -29,7 +29,7 @@ class ClearDataViewModel extends Notifier<ClearDataState> {
   @override
   ClearDataState build() => const ClearDataState();
 
-  void type(String text) => state = ClearDataState(typed: text);
+  void type(String text) => state = ClearDataState(typed: text, clearing: state.clearing);
 
   /// Xoá toàn bộ dữ liệu trên máy. Không làm gì khi chưa gõ khớp. View tự điều hướng sau khi xong.
   Future<void> clear() async {
