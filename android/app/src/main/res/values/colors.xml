@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- chili-soft trong tokens.json, nền icon ở cả hai theme. -->
+    <color name="ic_launcher_background">#FFE3CC</color>
+    <!-- surface theme sáng. -->
+    <color name="splash_background">#FFF8F1</color>
+</resources>

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/app/strings.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/app_logo.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
@@ -43,13 +44,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(AppStrings.appName, style: textTheme.headlineMedium),
-            const SizedBox(height: AppSpacing.s2),
-            Text(AppStrings.tagline, style: textTheme.bodyMedium),
-          ],
+        child: Padding(
+          // Đẩy cụm logo lên trên tâm một chút như prototype.
+          padding: const EdgeInsets.fromLTRB(AppSpacing.s8, 0, AppSpacing.s8, 64),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const AppLogo(size: 120),
+              const SizedBox(height: AppSpacing.s5),
+              Text(AppStrings.appName, style: textTheme.headlineMedium),
+              const SizedBox(height: 6),
+              Text(AppStrings.tagline, style: textTheme.bodyMedium, textAlign: TextAlign.center),
+            ],
+          ),
         ),
       ),
     );
