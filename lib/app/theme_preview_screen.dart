@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:recipe_mobile_app/app/strings.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
+import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
+import 'package:recipe_mobile_app/core/widgets/empty_state.dart';
+import 'package:recipe_mobile_app/core/widgets/recipe_card.dart';
+import 'package:recipe_mobile_app/core/widgets/search_field.dart';
 import 'package:recipe_mobile_app/core/widgets/serving_stepper.dart';
 import 'package:recipe_mobile_app/core/widgets/step_timer.dart';
 
@@ -326,6 +330,34 @@ class _ComponentSamples extends StatelessWidget {
         ServingStepper(value: 2, onChanged: (_) {}),
         const StepTimer(seconds: 180, label: 'Chiên mặt dưới'),
         const StepTimer(seconds: 165, label: 'Luộc trứng', autoStart: true),
+        Wrap(
+          spacing: AppSpacing.s2,
+          runSpacing: AppSpacing.s2,
+          children: [
+            AppChip(label: 'Dưới 15 phút', icon: AppIcons.clock, selected: false, onTap: () {}),
+            AppChip(label: 'Nồi cơm điện', icon: AppIcons.bowl, selected: true, onTap: () {}),
+          ],
+        ),
+        const SearchField(readOnly: true),
+        SizedBox(
+          width: 320,
+          child: RecipeCard(
+            title: 'Trứng chiên hành',
+            minutes: 15,
+            servings: 1,
+            tool: 'Bếp từ',
+            badge: const AvailabilityBadge(missing: ['hành lá']),
+            action: IconButton.filled(onPressed: () {}, icon: const Icon(AppIcons.bookmark)),
+            onTap: () {},
+          ),
+        ),
+        EmptyState(
+          icon: AppIcons.bookmark,
+          title: 'Chưa lưu món nào',
+          message: 'Bấm biểu tượng lưu trên món bạn thích.',
+          actionLabel: 'Xem gợi ý',
+          onAction: () {},
+        ),
       ],
     );
   }
