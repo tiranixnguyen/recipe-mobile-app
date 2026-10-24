@@ -5,21 +5,30 @@ import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/app/app.dart';
 import 'package:recipe_mobile_app/app/splash_screen.dart';
 import 'package:recipe_mobile_app/app/theme_preview_screen.dart';
+import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
 import 'package:recipe_mobile_app/features/pantry/presentation/pantry/pantry_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
+
+/// Dữ liệu đóng gói đọc bằng `rootBundle` không xong trong fake async của widget test, màn có
+/// spinner sẽ làm `pumpAndSettle` treo; dữ liệu thật đã có `bundled_data_test.dart`.
+final _dataOverrides = [
+  recipesProvider.overrideWith((ref) async => const <Recipe>[]),
+  ingredientsProvider.overrideWith((ref) async => const <Ingredient>[]),
+];
 
 Finder _tab(String label) =>
     find.descendant(of: find.byType(NavigationBar), matching: find.text(label));
 
 void main() {
   testWidgets('lần đầu: Splash → Onboarding → Khám phá, chuyển được 4 tab', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: App()));
+    await tester.pumpWidget(ProviderScope(overrides: _dataOverrides, child: const App()));
     expect(find.byType(SplashScreen), findsOneWidget);
 
     await tester.pump(SplashScreen.duration);
@@ -29,7 +38,7 @@ void main() {
     await tester.tap(find.text('Bỏ qua'));
     await tester.pumpAndSettle();
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.widgetWithText(AppBar, 'Khám phá'), findsOneWidget);
+    expect(find.byType(DiscoverScreen), findsOneWidget);
 
     await tester.tap(_tab('Tủ đồ'));
     await tester.pumpAndSettle();
@@ -45,7 +54,7 @@ void main() {
   testWidgets('Onboarding: chọn dụng cụ, chế độ ăn rồi Xong thì lưu và vào Khám phá', (
     tester,
   ) async {
-    await tester.pumpWidget(const ProviderScope(child: App()));
+    await tester.pumpWidget(ProviderScope(overrides: _dataOverrides, child: const App()));
     await tester.pump(SplashScreen.duration);
     await tester.pumpAndSettle();
 
@@ -55,7 +64,7 @@ void main() {
     await tester.tap(find.text('Xong, gợi ý món cho mình'));
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(AppBar, 'Khám phá'), findsOneWidget);
+    expect(find.byType(DiscoverScreen), findsOneWidget);
     final container = ProviderScope.containerOf(tester.element(find.byType(NavigationBar)));
     expect(
       container.read(kitchenProfileProvider),
@@ -69,7 +78,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [localStoreProvider.overrideWithValue(store)],
+        overrides: [..._dataOverrides, localStoreProvider.overrideWithValue(store)],
         child: const App(),
       ),
     );
@@ -81,7 +90,7 @@ void main() {
   });
 
   testWidgets('chưa qua Onboarding: mở thẳng route khác vẫn bị đưa về Onboarding', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: App()));
+    await tester.pumpWidget(ProviderScope(overrides: _dataOverrides, child: const App()));
 
     GoRouter.of(tester.element(find.byType(SplashScreen))).go('/pantry');
     await tester.pumpAndSettle();
@@ -96,7 +105,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [localStoreProvider.overrideWithValue(store)],
+        overrides: [..._dataOverrides, localStoreProvider.overrideWithValue(store)],
         child: const App(),
       ),
     );
@@ -110,7 +119,7 @@ void main() {
     await tester.pageBack();
     await tester.pumpAndSettle();
     expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.widgetWithText(AppBar, 'Khám phá'), findsOneWidget);
+    expect(find.byType(DiscoverScreen), findsOneWidget);
   });
 
   testWidgets('chọn theme Tối thì app dùng theme tối từ token', (tester) async {
@@ -119,7 +128,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [localStoreProvider.overrideWithValue(store)],
+        overrides: [..._dataOverrides, localStoreProvider.overrideWithValue(store)],
         child: const App(),
       ),
     );
@@ -136,7 +145,7 @@ void main() {
   });
 
   testWidgets('trang xem theme mở được trước Onboarding, có cả hai theme', (tester) async {
-    await tester.pumpWidget(const ProviderScope(child: App()));
+    await tester.pumpWidget(ProviderScope(overrides: _dataOverrides, child: const App()));
 
     GoRouter.of(tester.element(find.byType(SplashScreen))).go(themePreviewLocation);
     await tester.pumpAndSettle();
@@ -154,6 +163,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          ..._dataOverrides,
           localStoreProvider.overrideWithValue(store),
           appVersionProvider.overrideWith((ref) async => '1.0.0'),
         ],

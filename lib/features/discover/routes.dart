@@ -1,20 +1,30 @@
 import 'package:go_router/go_router.dart';
 
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 
 const discoverLocation = '/';
+const todayLocation = '/today';
 
-/// Đường dẫn tới màn Tìm kiếm, có thể kèm từ khoá — feature khác dùng hàm này thay vì tự ghép chuỗi.
-String searchLocation({String? query}) =>
-    Uri(path: '/search', queryParameters: query == null ? null : {'q': query}).toString();
+/// Đường dẫn tới màn Tìm kiếm — feature khác dùng hàm này thay vì tự ghép chuỗi.
+///
+/// Có thể kèm từ khoá và bộ lọc mở sẵn: `q`, `maxMinutes`, `tool`, `diet`, `meal` (id của enum).
+String searchLocation({String? query, int? maxMinutes, Tool? tool, Diet? diet, Meal? meal}) {
+  final params = {
+    'q': ?query,
+    'maxMinutes': ?maxMinutes?.toString(),
+    'tool': ?tool?.id,
+    'diet': ?diet?.id,
+    'meal': ?meal?.id,
+  };
+  return Uri(path: '/search', queryParameters: params.isEmpty ? null : params).toString();
+}
 
 /// Tab Khám phá (prototype `Main`).
 final discoverTabRoutes = <RouteBase>[
-  GoRoute(
-    path: discoverLocation,
-    builder: (_, _) => const ComingSoonScreen(title: DiscoverStrings.title),
-  ),
+  GoRoute(path: discoverLocation, builder: (_, _) => const DiscoverScreen()),
 ];
 
 /// Tab Đã lưu (prototype `Saved`).
@@ -32,7 +42,7 @@ final discoverRoutes = <RouteBase>[
     builder: (_, _) => const ComingSoonScreen(title: DiscoverStrings.search),
   ),
   GoRoute(
-    path: '/today',
+    path: todayLocation,
     builder: (_, _) => const ComingSoonScreen(title: DiscoverStrings.today),
   ),
 ];
