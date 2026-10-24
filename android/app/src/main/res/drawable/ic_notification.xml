@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icon nhỏ trên thanh thông báo: logo monochrome (adaptive-monochrome.svg) cắt sát hình.
+     Android chỉ dùng kênh alpha nên tô trắng. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="72"
+    android:viewportHeight="72">
+    <group
+        android:translateX="-14"
+        android:translateY="-13">
+        <path
+            android:pathData="M38,44L74,18M48,46L82,24"
+            android:strokeColor="#FFFFFF"
+            android:strokeWidth="6"
+            android:strokeLineCap="round" />
+        <path
+            android:pathData="M18,50h60a30,30 0,0 1,-60 0z"
+            android:fillColor="#FFFFFF" />
+    </group>
+</vector>

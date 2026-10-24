@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_mobile_app/app/app.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
@@ -9,7 +10,10 @@ Future<void> main() async {
   final prefs = await SharedPreferences.getInstance();
   runApp(
     ProviderScope(
-      overrides: [localStoreProvider.overrideWith((ref) => SharedPrefsLocalStore(prefs))],
+      overrides: [
+        localStoreProvider.overrideWith((ref) => SharedPrefsLocalStore(prefs)),
+        notificationPluginProvider.overrideWithValue(LocalNotificationPlugin()),
+      ],
       child: const App(),
     ),
   );

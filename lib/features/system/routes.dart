@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/about/about_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/clear_data/clear_data_screen.dart';
+import 'package:recipe_mobile_app/features/system/presentation/notif_permission/notif_permission_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/onboarding/onboarding_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/policy/policy_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
@@ -19,6 +20,9 @@ const policyLocation = '/settings/policy';
 const aboutLocation = '/settings/about';
 const clearDataLocation = '/settings/clear-data';
 
+/// Giải thích rồi xin quyền thông báo. `context.push<bool>` trả về đã được cho phép hay chưa.
+const notifPermissionLocation = '/notif-permission';
+
 /// Onboarding (`Onboarding`), Cài đặt (`Settings`) và các màn mở từ Cài đặt.
 final systemRoutes = <RouteBase>[
   GoRoute(path: onboardingLocation, builder: (_, _) => const OnboardingScreen()),
@@ -29,6 +33,7 @@ final systemRoutes = <RouteBase>[
     path: feedbackLocation,
     builder: (_, _) => const ComingSoonScreen(title: SystemStrings.feedback),
   ),
+  GoRoute(path: notifPermissionLocation, builder: (_, _) => const NotifPermissionScreen()),
   GoRoute(path: policyLocation, builder: (_, _) => const PolicyScreen()),
   GoRoute(path: aboutLocation, builder: (_, _) => const AboutScreen()),
   GoRoute(

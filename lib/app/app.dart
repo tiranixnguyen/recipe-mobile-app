@@ -26,6 +26,8 @@ class _AppState extends ConsumerState<App> {
 
   @override
   Widget build(BuildContext context) {
+    // Hẹn lại nhắc bữa khi mở app và mỗi khi thực đơn hay cài đặt thông báo đổi.
+    ref.listen(mealReminderSyncProvider, (_, _) {});
     return MaterialApp.router(
       title: AppStrings.appName,
       theme: AppTheme.light,
