@@ -7,6 +7,7 @@
 ///   do [mealReminderSyncProvider] tự hẹn; `App` listen provider đó.
 /// - [shouldAskNotificationPermissionProvider] + [notifPermissionLocation]: F2/F4 mở màn xin quyền
 ///   trước lần hẹn giờ / nhắc bữa đầu.
+/// - [feedbackForErrorLocation]: màn lỗi mở Góp ý kèm mã lỗi.
 /// - [notificationPluginProvider]: `main.dart` override bằng [LocalNotificationPlugin].
 library;
 
@@ -20,4 +21,9 @@ export 'data/notification_service.dart'
 export 'data/preferences.dart'
     show OnboardingController, ThemeModeController, onboardingDoneProvider, themeModeProvider;
 export 'routes.dart'
-    show notifPermissionLocation, onboardingLocation, settingsLocation, systemRoutes;
+    show
+        feedbackForErrorLocation,
+        notifPermissionLocation,
+        onboardingLocation,
+        settingsLocation,
+        systemRoutes;
