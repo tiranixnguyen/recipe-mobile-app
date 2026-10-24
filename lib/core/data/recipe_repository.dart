@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/models.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 
 /// Đọc công thức và danh mục nguyên liệu đóng gói trong `assets/data/`.
 ///

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/models/models.dart';
-import '../../../core/storage/local_store.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/core/storage/local_store.dart';
 
 const _toolsKey = 'system.tools';
 const _dietsKey = 'system.diets';

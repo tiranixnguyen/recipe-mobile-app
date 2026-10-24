@@ -1,14 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
-
-import '../features/cook/cook.dart';
-import '../features/discover/discover.dart';
-import '../features/plan/plan.dart';
-import '../features/system/system.dart';
-import 'shell.dart';
-import 'splash_screen.dart';
-import 'tabs.dart';
-import 'theme_preview_screen.dart';
+import 'package:recipe_mobile_app/app/shell.dart';
+import 'package:recipe_mobile_app/app/splash_screen.dart';
+import 'package:recipe_mobile_app/app/tabs.dart';
+import 'package:recipe_mobile_app/app/theme_preview_screen.dart';
+import 'package:recipe_mobile_app/features/cook/cook.dart';
+import 'package:recipe_mobile_app/features/discover/discover.dart';
+import 'package:recipe_mobile_app/features/plan/plan.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 const splashLocation = '/splash';
 

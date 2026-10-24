@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import '../core/theme/theme.dart';
-import '../features/system/system.dart';
-import 'router.dart';
-import 'strings.dart';
+import 'package:recipe_mobile_app/app/router.dart';
+import 'package:recipe_mobile_app/app/strings.dart';
+import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 class App extends ConsumerStatefulWidget {
   const App({super.key});

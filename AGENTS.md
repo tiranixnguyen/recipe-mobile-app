@@ -94,6 +94,7 @@ Lead làm `app/`, `core/` (Splash, Error, theme, dữ liệu), `pubspec.yaml`, `
 
 1. Chỉ sửa file trong `lib/features/<feature của issue>/` và `test/features/<feature của issue>/`.
 2. Dùng feature khác **chỉ** qua `lib/features/<f>/<f>.dart`. Không import file bên trong feature khác.
+   Import luôn bằng `package:recipe_mobile_app/...` (lint `always_use_package_imports`), không `../../`.
 3. Cần sửa `lib/core/`, `lib/app/`, `pubspec.yaml`, `assets/` → **dừng lại**, ghi vào PR/issue để Lead làm.
    Ngoại lệ: issue giao component cho bạn thì được tạo file đó trong `lib/core/widgets/`.
 4. Key `LocalStore` có tiền tố tên feature: `discover.saved`, `pantry.items`…

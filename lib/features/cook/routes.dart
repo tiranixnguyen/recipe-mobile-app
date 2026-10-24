@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 
-import '../../core/widgets/coming_soon_screen.dart';
-import 'strings.dart';
+import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
+import 'package:recipe_mobile_app/features/cook/strings.dart';
 
 /// Đường dẫn tới màn Chi tiết món — feature khác dùng hàm này thay vì tự ghép chuỗi.
 String recipeLocation(String id) => '/recipe/$id';

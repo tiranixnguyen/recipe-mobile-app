@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'app_colors.dart';
-import 'app_radius.dart';
-import 'app_typography.dart';
+import 'package:recipe_mobile_app/core/theme/app_colors.dart';
+import 'package:recipe_mobile_app/core/theme/app_radius.dart';
+import 'package:recipe_mobile_app/core/theme/app_typography.dart';
 
 /// Theme sáng/tối dựng từ [AppColors]; `App` gắn vào `MaterialApp.theme`/`darkTheme`.
 ///
