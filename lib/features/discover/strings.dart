@@ -20,4 +20,8 @@ abstract final class DiscoverStrings {
   static const cookableEmpty = 'Bật vài thứ bạn đang có trong Tủ đồ, app tìm món nấu được.';
   static const quick = 'Nhanh sau giờ học';
   static const loadError = 'Không đọc được danh sách món. Thử mở lại app.';
+  static const savedEmptyTitle = 'Chưa lưu món nào';
+  static const savedEmptyBody =
+      'Bấm biểu tượng lưu trên món bạn thích. Món đã lưu được ưu tiên khi gợi ý và lên thực đơn.';
+  static const savedEmptyAction = 'Tìm món để lưu';
 }

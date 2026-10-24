@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 
 const discoverLocation = '/';
@@ -29,10 +30,7 @@ final discoverTabRoutes = <RouteBase>[
 
 /// Tab Đã lưu (prototype `Saved`).
 final savedTabRoutes = <RouteBase>[
-  GoRoute(
-    path: '/saved',
-    builder: (_, _) => const ComingSoonScreen(title: DiscoverStrings.saved),
-  ),
+  GoRoute(path: '/saved', builder: (_, _) => const SavedScreen()),
 ];
 
 /// Màn toàn màn hình: Tìm kiếm (`Search`), Hôm nay ăn gì (`Today`).

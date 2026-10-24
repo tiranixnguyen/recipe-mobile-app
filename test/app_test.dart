@@ -11,6 +11,7 @@ import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
 import 'package:recipe_mobile_app/features/pantry/presentation/pantry/pantry_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
@@ -44,11 +45,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(PantryScreen), findsOneWidget);
 
-    for (final label in ['Thực đơn', 'Đã lưu']) {
-      await tester.tap(_tab(label));
-      await tester.pumpAndSettle();
-      expect(find.widgetWithText(AppBar, label), findsOneWidget);
-    }
+    await tester.tap(_tab('Thực đơn'));
+    await tester.pumpAndSettle();
+    expect(find.widgetWithText(AppBar, 'Thực đơn'), findsOneWidget);
+
+    await tester.tap(_tab('Đã lưu'));
+    await tester.pumpAndSettle();
+    expect(find.byType(SavedScreen), findsOneWidget);
   });
 
   testWidgets('Onboarding: chọn dụng cụ, chế độ ăn rồi Xong thì lưu và vào Khám phá', (
