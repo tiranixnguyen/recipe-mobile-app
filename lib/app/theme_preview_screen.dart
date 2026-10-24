@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_mobile_app/app/strings.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 
 /// Chỉ có ở bản debug: `fvm flutter run --route /debug/theme` hoặc nút "Xem theme" trên màn tạm.
 const themePreviewLocation = '/debug/theme';
@@ -80,6 +81,9 @@ class _ThemeSection extends StatelessWidget {
                     const SizedBox(height: AppSpacing.s6),
                     const _Heading('Widget Material'),
                     const _MaterialSamples(),
+                    const SizedBox(height: AppSpacing.s6),
+                    const _Heading('Component'),
+                    const _ComponentSamples(),
                   ],
                 ),
               ),
@@ -280,6 +284,30 @@ class _MaterialSamples extends StatelessWidget {
           ),
         ),
         const Divider(height: AppSpacing.s6),
+      ],
+    );
+  }
+}
+
+/// Component dùng chung trong `lib/core/widgets/`, để soi nhanh cả hai theme.
+class _ComponentSamples extends StatelessWidget {
+  const _ComponentSamples();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: AppSpacing.s3,
+      children: [
+        Wrap(
+          spacing: AppSpacing.s2,
+          runSpacing: AppSpacing.s2,
+          children: [
+            AvailabilityBadge(),
+            AvailabilityBadge(missing: ['hành lá']),
+            AvailabilityBadge(missing: ['rau cải', 'tỏi']),
+          ],
+        ),
       ],
     );
   }
