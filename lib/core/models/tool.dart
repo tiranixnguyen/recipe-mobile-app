@@ -13,6 +13,12 @@ enum Tool {
   /// Nhãn hiển thị tiếng Việt.
   final String label;
 
+  /// Nhãn ngắn cho dòng meta của món: "15 phút · Bếp từ".
+  String get shortLabel => switch (this) {
+    stove => 'Bếp từ',
+    _ => label,
+  };
+
   /// Đọc id từ dữ liệu đóng gói; id lạ là lỗi nhập liệu nên ném [FormatException].
   static Tool fromId(String id) =>
       tryParse(id) ?? (throw FormatException('dụng cụ "$id" không có'));

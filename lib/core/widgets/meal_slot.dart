@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
-import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
+import 'package:recipe_mobile_app/core/widgets/recipe_row.dart';
 
 /// Ô một bữa trong Thực đơn, theo prototype `MealPlan` (design system chưa có component này).
 ///
-/// - Có món: ảnh 56, tên 15/22 600 và meta `inkMuted`, nền `surfaceRaised` viền `line`.
+/// - Có món: [RecipeRow] ảnh 56, tên 15/22 600 và meta `inkMuted`.
 /// - Trống ([MealSlot.empty]): cao 72, viền đứt 1.5px `outline`, "+ Thêm món".
 ///
 /// Nhãn bữa ("Sáng", "Trưa"…) phía trên do màn tự đặt.
@@ -73,52 +73,8 @@ class MealSlot extends StatelessWidget {
     );
   }
 
-  Widget _buildFilled(BuildContext context, String title) {
-    final colors = context.colors;
-    final meta = this.meta;
-    return Material(
-      color: colors.surfaceRaised,
-      shape: RoundedRectangleBorder(
-        side: BorderSide(color: colors.line),
-        borderRadius: AppRadius.mdAll,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.s2),
-          child: Row(
-            spacing: AppSpacing.s3,
-            children: [
-              ClipRRect(
-                borderRadius: AppRadius.smAll,
-                child: SizedBox.square(
-                  dimension: 56,
-                  child: RecipeCover(imageAsset: imageAsset, aspectRatio: 1),
-                ),
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.button.copyWith(color: colors.ink),
-                    ),
-                    if (meta != null)
-                      Text(meta, style: AppTextStyles.caption.copyWith(color: colors.inkMuted)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _buildFilled(BuildContext context, String title) =>
+      RecipeRow(title: title, meta: meta, imageAsset: imageAsset, onTap: onTap);
 }
 
 /// Viền đứt bo `radius-md` (Flutter không có `border-style: dashed`).
