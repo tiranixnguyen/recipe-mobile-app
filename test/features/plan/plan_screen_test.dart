@@ -26,7 +26,10 @@ Recipe _recipe(String id, String name) => Recipe(
   steps: const [],
 );
 
-Future<ProviderContainer> _pump(WidgetTester tester) async {
+Future<ProviderContainer> _pump(
+  WidgetTester tester, {
+  Future<List<Recipe>> Function()? recipes,
+}) async {
   tester.view.physicalSize = const Size(390 * 3, 844 * 3);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
@@ -45,7 +48,9 @@ Future<ProviderContainer> _pump(WidgetTester tester) async {
       // Thứ Ba.
       nowProvider.overrideWithValue(DateTime(2026, 10, 20, 8)),
       recipesProvider.overrideWith(
-        (ref) async => [_recipe('trung', 'Trứng chiên hành'), _recipe('canh', 'Canh cà chua')],
+        (ref) =>
+            (recipes ??
+            () async => [_recipe('trung', 'Trứng chiên hành'), _recipe('canh', 'Canh cà chua')])(),
       ),
     ],
   );
@@ -127,5 +132,13 @@ void main() {
     await tester.tap(find.text(PlanStrings.viewRecipe));
     await tester.pumpAndSettle();
     expect(find.text('at /recipe/trung'), findsOneWidget);
+  });
+
+  testWidgets('dữ liệu lỗi thì hiện câu lỗi, vẫn đi chợ được', (tester) async {
+    await _pump(tester, recipes: () => Future.error(const FormatException('hỏng')));
+
+    expect(find.text(PlanStrings.loadError), findsOneWidget);
+    expect(find.byType(MealSlot), findsNothing);
+    expect(find.text(PlanStrings.shopping), findsOneWidget);
   });
 }

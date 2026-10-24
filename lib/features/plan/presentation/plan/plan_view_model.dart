@@ -6,6 +6,9 @@ import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/plan/data/planned_meals.dart';
 
 /// Giờ hiện tại; test override để cố định "hôm nay".
+///
+/// Đọc một lần khi màn Thực đơn dựng: để app mở qua nửa đêm thì "hôm nay" vẫn là ngày cũ tới khi
+/// màn dựng lại (giới hạn đã biết, chưa cần theo dõi đổi ngày).
 final nowProvider = Provider<DateTime>((ref) => DateTime.now());
 
 @immutable
@@ -41,8 +44,8 @@ class PlanViewModel extends Notifier<AsyncValue<PlanState>> {
   @override
   AsyncValue<PlanState> build() {
     final now = ref.watch(nowProvider);
-    final today = now.weekday - DateTime.monday;
-    final weekStart = DateTime(now.year, now.month, now.day - today);
+    final today = _weekday(now);
+    final weekStart = _weekStart(now);
     final selectedDay = ref.watch(_selectedDayProvider) ?? today;
     final selectedDate = _dayOf(weekStart, selectedDay);
     final planned = ref.watch(plannedMealsProvider);
@@ -86,12 +89,15 @@ class PlanViewModel extends Notifier<AsyncValue<PlanState>> {
 
   DateTime _selectedDate() {
     final now = ref.read(nowProvider);
-    final today = now.weekday - DateTime.monday;
-    return _dayOf(
-      DateTime(now.year, now.month, now.day - today),
-      ref.read(_selectedDayProvider) ?? today,
-    );
+    return _dayOf(_weekStart(now), ref.read(_selectedDayProvider) ?? _weekday(now));
   }
+
+  /// 0 = Thứ Hai … 6 = Chủ Nhật.
+  static int _weekday(DateTime day) => day.weekday - DateTime.monday;
+
+  /// 0h Thứ Hai của tuần chứa [day].
+  static DateTime _weekStart(DateTime day) =>
+      DateTime(day.year, day.month, day.day - _weekday(day));
 
   static DateTime _dayOf(DateTime weekStart, int index) =>
       DateTime(weekStart.year, weekStart.month, weekStart.day + index);
