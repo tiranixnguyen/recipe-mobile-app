@@ -17,13 +17,12 @@ class ShoppingRequest {
 
   Map<String, dynamic> toJson() => {'recipeId': recipeId, 'servings': servings};
 
-  /// Trả null khi bản ghi hỏng.
+  /// Trả null khi bản ghi hỏng (thiếu trường, sai kiểu, khẩu phần không dương).
   static ShoppingRequest? tryParse(Object? json) {
-    if (json is! Map<String, dynamic>) return null;
-    final recipeId = json['recipeId'];
-    final servings = json['servings'];
-    if (recipeId is! String || servings is! int || servings <= 0) return null;
-    return ShoppingRequest(recipeId: recipeId, servings: servings);
+    if (json case {'recipeId': String recipeId, 'servings': int servings} when servings > 0) {
+      return ShoppingRequest(recipeId: recipeId, servings: servings);
+    }
+    return null;
   }
 
   @override

@@ -55,10 +55,14 @@ class DislikesController extends Notifier<Map<String, Dislike>> {
     final result = <String, Dislike>{};
     try {
       for (final MapEntry(:key, :value) in (jsonDecode(raw) as Map<String, dynamic>).entries) {
-        final json = value as Map<String, dynamic>;
-        final reason = DislikeReason.tryParse(json['reason'] as String?);
-        final at = DateTime.tryParse(json['at'] as String? ?? '');
-        if (reason != null && at != null) result[key] = Dislike(reason: reason, at: at);
+        // Bản ghi sai kiểu thì bỏ riêng bản ghi đó.
+        if (value case {'reason': String reason, 'at': String at}) {
+          final parsedReason = DislikeReason.tryParse(reason);
+          final parsedAt = DateTime.tryParse(at);
+          if (parsedReason != null && parsedAt != null) {
+            result[key] = Dislike(reason: parsedReason, at: parsedAt);
+          }
+        }
       }
     } on Object {
       // Dữ liệu hỏng thì bỏ, không làm app lỗi.

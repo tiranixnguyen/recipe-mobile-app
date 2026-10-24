@@ -96,6 +96,16 @@ void main() {
       expect(container.read(dislikedProvider)['a']!.reason, DislikeReason.tooLong);
     });
 
+    test('bản ghi sai kiểu bị bỏ, giữ phần còn lại', () async {
+      await store().writeString(
+        'pantry.disliked',
+        '{"a": {"reason": 1, "at": "2026-10-24T19:00:00.000"}, "b": "tooLong",'
+            ' "c": {"reason": "tooLong", "at": "2026-10-24T19:00:00.000"}}',
+      );
+      container.invalidate(dislikedProvider);
+      expect(container.read(dislikedProvider).keys, ['c']);
+    });
+
     test('dữ liệu hỏng hoặc lý do lạ bị bỏ qua', () async {
       await store().writeString(
         'pantry.disliked',

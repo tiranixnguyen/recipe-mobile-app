@@ -28,14 +28,15 @@ class PlannedMeal {
     'recipeId': recipeId,
   };
 
-  /// Trả null khi bản ghi hỏng.
+  /// Trả null khi bản ghi hỏng (thiếu trường, sai kiểu, bữa lạ), để chỉ mất bản ghi đó.
   static PlannedMeal? tryParse(Object? json) {
-    if (json is! Map<String, dynamic>) return null;
-    final day = DateTime.tryParse(json['day'] as String? ?? '');
-    final meal = Meal.tryParse(json['meal'] as String? ?? '');
-    final recipeId = json['recipeId'];
-    if (day == null || meal == null || recipeId is! String) return null;
-    return PlannedMeal(day: day, meal: meal, recipeId: recipeId);
+    if (json case {'day': String day, 'meal': String meal, 'recipeId': String recipeId}) {
+      final date = DateTime.tryParse(day);
+      final parsedMeal = Meal.tryParse(meal);
+      if (date == null || parsedMeal == null) return null;
+      return PlannedMeal(day: date, meal: parsedMeal, recipeId: recipeId);
+    }
+    return null;
   }
 
   @override

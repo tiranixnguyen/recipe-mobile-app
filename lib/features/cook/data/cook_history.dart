@@ -44,17 +44,19 @@ class CookRecord {
     if (rating != null) 'rating': rating!.id,
   };
 
-  /// Trả null khi bản ghi hỏng.
+  /// Trả null khi bản ghi hỏng (thiếu trường, sai kiểu); đánh giá lạ thì bỏ riêng đánh giá.
   static CookRecord? tryParse(Object? json) {
-    if (json is! Map<String, dynamic>) return null;
-    final recipeId = json['recipeId'];
-    final cookedAt = DateTime.tryParse(json['cookedAt'] as String? ?? '');
-    if (recipeId is! String || cookedAt == null) return null;
-    return CookRecord(
-      recipeId: recipeId,
-      cookedAt: cookedAt,
-      rating: CookRating.tryParse(json['rating'] as String?),
-    );
+    if (json case {'recipeId': String recipeId, 'cookedAt': String cookedAt}) {
+      final at = DateTime.tryParse(cookedAt);
+      if (at == null) return null;
+      final rating = json['rating'];
+      return CookRecord(
+        recipeId: recipeId,
+        cookedAt: at,
+        rating: rating is String ? CookRating.tryParse(rating) : null,
+      );
+    }
+    return null;
   }
 
   @override

@@ -52,6 +52,7 @@ void main() {
       await store().writeString(
         'plan.meals',
         '[{"day": "2026-10-26", "meal": "brunch", "recipeId": "a"},'
+            ' {"day": 20261028, "meal": "lunch", "recipeId": "c"},'
             ' {"day": "2026-10-27", "meal": "lunch", "recipeId": "b"}]',
       );
       container.invalidate(plannedMealsProvider);
@@ -79,6 +80,18 @@ void main() {
 
       container.invalidate(shoppingProvider);
       expect(container.read(shoppingProvider), expected);
+    });
+
+    test('bản ghi sai kiểu bị bỏ, giữ phần còn lại', () async {
+      await store().writeString(
+        'plan.shopping',
+        '[{"recipeId": "a", "servings": "2"}, {"recipeId": "b", "servings": 0},'
+            ' {"recipeId": "c", "servings": 2}]',
+      );
+      container.invalidate(shoppingProvider);
+      expect(container.read(shoppingProvider), const [
+        ShoppingRequest(recipeId: 'c', servings: 2),
+      ]);
     });
 
     test('JSON hỏng thì rỗng; xoá dữ liệu đưa về rỗng', () async {
