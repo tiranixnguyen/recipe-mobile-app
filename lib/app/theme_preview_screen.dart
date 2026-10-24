@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_mobile_app/app/strings.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/app_button.dart';
+import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
+import 'package:recipe_mobile_app/core/widgets/serving_stepper.dart';
+import 'package:recipe_mobile_app/core/widgets/step_timer.dart';
 
 /// Chỉ có ở bản debug: `fvm flutter run --route /debug/theme` hoặc nút "Xem theme" trên màn tạm.
 const themePreviewLocation = '/debug/theme';
@@ -295,11 +299,11 @@ class _ComponentSamples extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: AppSpacing.s3,
       children: [
-        Wrap(
+        const Wrap(
           spacing: AppSpacing.s2,
           runSpacing: AppSpacing.s2,
           children: [
@@ -308,6 +312,20 @@ class _ComponentSamples extends StatelessWidget {
             AvailabilityBadge(missing: ['rau cải', 'tỏi']),
           ],
         ),
+        Wrap(
+          spacing: AppSpacing.s2,
+          runSpacing: AppSpacing.s2,
+          children: [
+            AppButton(label: 'Bắt đầu nấu', onPressed: () {}),
+            AppButton.secondary(label: 'Thêm vào Tủ đồ', icon: AppIcons.plus, onPressed: () {}),
+            AppButton.ghost(label: 'Bỏ qua', onPressed: () {}),
+            const AppButton.danger(label: 'Xoá hết', onPressed: null),
+          ],
+        ),
+        AppButton(label: 'Bước tiếp', size: AppButtonSize.lg, block: true, onPressed: () {}),
+        ServingStepper(value: 2, onChanged: (_) {}),
+        const StepTimer(seconds: 180, label: 'Chiên mặt dưới'),
+        const StepTimer(seconds: 165, label: 'Luộc trứng', autoStart: true),
       ],
     );
   }
