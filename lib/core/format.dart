@@ -1,7 +1,6 @@
 import 'package:intl/intl.dart';
 
 import 'package:recipe_mobile_app/core/models/recipe.dart';
-import 'package:recipe_mobile_app/core/widgets/recipe_card.dart';
 
 final _amountFormat = NumberFormat('0.##', 'vi');
 
@@ -10,10 +9,17 @@ final _amountFormat = NumberFormat('0.##', 'vi');
 /// `4.0` → `4`, `1.5` → `1,5`, `1 / 3` → `0,33`.
 String formatAmount(double amount) => _amountFormat.format(amount);
 
+/// Dòng meta "15 phút · 1 người · Bếp từ"; bỏ phần null.
+String formatMeta({required int minutes, int? servings, String? tool}) => [
+  '$minutes phút',
+  if (servings != null) '$servings người',
+  ?tool,
+].join(' · ');
+
 /// Dòng meta của món: "15 phút · Bếp từ", hoặc "15 phút · 2 người · Bếp từ" khi [servings].
 ///
 /// Dụng cụ lấy cái đầu tiên của món, nhãn ngắn (`Tool.shortLabel`).
-String recipeMeta(Recipe recipe, {bool servings = false}) => RecipeCard.metaText(
+String recipeMeta(Recipe recipe, {bool servings = false}) => formatMeta(
   minutes: recipe.minutes,
   servings: servings ? recipe.servings : null,
   tool: recipe.tools.firstOrNull?.shortLabel,

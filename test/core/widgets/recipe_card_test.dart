@@ -7,14 +7,6 @@ import 'package:recipe_mobile_app/core/widgets/recipe_card.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
 
 void main() {
-  test('dòng meta', () {
-    expect(
-      RecipeCard.metaText(minutes: 15, servings: 1, tool: 'Bếp từ'),
-      '15 phút · 1 người · Bếp từ',
-    );
-    expect(RecipeCard.metaText(minutes: 5), '5 phút');
-  });
-
   for (final (name, theme, colors) in [
     ('sáng', AppTheme.light, AppColors.light),
     ('tối', AppTheme.dark, AppColors.dark),

@@ -10,6 +10,11 @@ void main() {
     expect(formatAmount(100), '100');
   });
 
+  test('formatMeta bỏ phần null', () {
+    expect(formatMeta(minutes: 15, servings: 1, tool: 'Bếp từ'), '15 phút · 1 người · Bếp từ');
+    expect(formatMeta(minutes: 5), '5 phút');
+  });
+
   test('recipeMeta: phút · (người) · dụng cụ đầu tiên, nhãn ngắn', () {
     Recipe recipe(List<Tool> tools) => Recipe(
       id: 'a',

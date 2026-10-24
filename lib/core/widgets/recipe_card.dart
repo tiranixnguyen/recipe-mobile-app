@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:recipe_mobile_app/core/format.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
@@ -46,12 +47,6 @@ class RecipeCard extends StatelessWidget {
   final Widget? action;
   final VoidCallback? onTap;
 
-  static String metaText({required int minutes, int? servings, String? tool}) => [
-    '$minutes phút',
-    if (servings != null) '$servings người',
-    ?tool,
-  ].join(' · ');
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -96,7 +91,7 @@ class RecipeCard extends StatelessWidget {
                       Icon(AppIcons.clock, size: 16, color: colors.inkMuted),
                       Flexible(
                         child: Text(
-                          metaText(minutes: minutes, servings: servings, tool: tool),
+                          formatMeta(minutes: minutes, servings: servings, tool: tool),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.meta.copyWith(color: colors.inkMuted),
