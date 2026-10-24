@@ -9,6 +9,7 @@ import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/app_logo.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
@@ -32,6 +33,8 @@ void main() {
   testWidgets('lần đầu: Splash → Onboarding → Khám phá, chuyển được 4 tab', (tester) async {
     await tester.pumpWidget(ProviderScope(overrides: _dataOverrides, child: const App()));
     expect(find.byType(SplashScreen), findsOneWidget);
+    expect(find.byType(AppLogo), findsOneWidget);
+    expect(find.text('Bếp Hoà Lạc'), findsOneWidget);
 
     await tester.pump(SplashScreen.duration);
     await tester.pumpAndSettle();
