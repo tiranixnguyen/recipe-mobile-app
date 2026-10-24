@@ -9,6 +9,7 @@ import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
+import 'package:recipe_mobile_app/features/pantry/presentation/pantry/pantry_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
@@ -30,7 +31,11 @@ void main() {
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.widgetWithText(AppBar, 'Khám phá'), findsOneWidget);
 
-    for (final label in ['Tủ đồ', 'Thực đơn', 'Đã lưu']) {
+    await tester.tap(_tab('Tủ đồ'));
+    await tester.pumpAndSettle();
+    expect(find.byType(PantryScreen), findsOneWidget);
+
+    for (final label in ['Thực đơn', 'Đã lưu']) {
       await tester.tap(_tab(label));
       await tester.pumpAndSettle();
       expect(find.widgetWithText(AppBar, label), findsOneWidget);
