@@ -5,7 +5,9 @@ import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
+import 'package:recipe_mobile_app/core/widgets/day_strip.dart';
 import 'package:recipe_mobile_app/core/widgets/empty_state.dart';
+import 'package:recipe_mobile_app/core/widgets/meal_slot.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_card.dart';
 import 'package:recipe_mobile_app/core/widgets/search_field.dart';
 import 'package:recipe_mobile_app/core/widgets/serving_stepper.dart';
@@ -351,6 +353,9 @@ class _ComponentSamples extends StatelessWidget {
             onTap: () {},
           ),
         ),
+        DayStrip(selected: 0, today: 1, daysWithMeals: const {0, 1, 2}, onSelected: (_) {}),
+        MealSlot(title: 'Trứng chiên hành', meta: '15 phút · Bếp từ', onTap: () {}),
+        MealSlot.empty(onTap: () {}),
         EmptyState(
           icon: AppIcons.bookmark,
           title: 'Chưa lưu món nào',

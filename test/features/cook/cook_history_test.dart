@@ -42,7 +42,8 @@ void main() {
   test('bản ghi hỏng bị bỏ qua, JSON hỏng thì rỗng', () async {
     await store().writeString(
       'cook.history',
-      '[{"recipeId": "a", "cookedAt": "2026-10-24T12:00:00.000", "rating": "wow"}, {"x": 1}]',
+      '[{"recipeId": "a", "cookedAt": "2026-10-24T12:00:00.000", "rating": "wow"}, {"x": 1},'
+          ' {"recipeId": "b", "cookedAt": 1}]',
     );
     container.invalidate(cookHistoryProvider);
     expect(container.read(cookHistoryProvider), [
