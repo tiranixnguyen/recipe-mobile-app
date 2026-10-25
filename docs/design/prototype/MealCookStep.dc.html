@@ -187,9 +187,10 @@ timers: timers,
 isFirst: st.d === 0 && i === 0,
 showNext: !(lastDish && lastStep),
 showFinish: lastDish && lastStep,
-nextLabel: lastStep ? 'Sang món ' + (st.d + 2) + ': ' + DISHES[st.d + 1].short : 'Bước tiếp',
+nextLabel: lastStep && !lastDish ? 'Sang món ' + (st.d + 2) + ': ' + DISHES[st.d + 1].short : 'Bước tiếp',
 next: function () {
 if (!lastStep) { go(st.d, i + 1); return; }
+if (lastDish) { return; }
 var done = Object.assign({}, self.state.done);
 done[st.d] = true;
 var pos = self.state.pos.slice();
