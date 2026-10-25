@@ -12,6 +12,16 @@ abstract final class PlanStrings {
   static const pickEmpty = 'Không thấy món nào. Thử từ khác.';
 
   static const viewRecipe = 'Xem món';
-  static const changeRecipe = 'Đổi món';
   static const removeRecipe = 'Xoá khỏi bữa';
+
+  static const addTitle = 'Thêm vào thực đơn';
+  static const addDay = 'Ngày';
+  static const addMeal = 'Bữa';
+  static const addServings = 'Khẩu phần';
+  static const addEmptyMeal = 'Trống';
+  static const addTodayShort = 'Nay';
+  static const addQuickGroup = 'Chọn nhanh';
+  static const cancel = 'Huỷ';
+  static String addConfirm(String when) => 'Thêm vào $when';
+  static const addNotFound = 'Không tìm thấy món này.';
 }
