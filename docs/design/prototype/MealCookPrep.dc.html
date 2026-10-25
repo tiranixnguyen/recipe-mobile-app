@@ -20,9 +20,9 @@ body{margin:0}
 a{color:var(--chili-deep)}
 a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
 input[type=checkbox]{accent-color:var(--herb)}
-.mv{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border:1px solid var(--outline);border-radius:999px;background:var(--surface-raised);color:var(--ink);cursor:pointer;padding:0}
-.mv:disabled{opacity:.35;cursor:not-allowed}
-.mv:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.grip{width:48px;height:48px;flex-shrink:0;margin:-6px 0;display:flex;align-items:center;justify-content:center;border:0;border-radius:12px;background:transparent;color:var(--ink-muted);cursor:grab;touch-action:none;padding:0}
+.grip:active{cursor:grabbing}
+.grip:focus-visible{outline:2px solid var(--chili);outline-offset:-2px}
 </style>
 </helmet>
 <div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
@@ -40,28 +40,29 @@ input[type=checkbox]{accent-color:var(--herb)}
   <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 16px; padding: 8px 16px 12px 16px">
     <section style="display: flex; flex-direction: column; gap: 8px">
       <div style="display: flex; align-items: baseline; justify-content: space-between">
-        <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Thứ tự nấu</h2>
+        <span style="display: flex; flex-direction: column">
+          <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Thứ tự nấu</h2>
+          <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">Giữ và kéo để đổi thứ tự</span>
+        </span>
         <sc-if value="{{reordered}}" hint-placeholder-val="{{false}}">
           <button onClick="{{resetOrder}}" style="border: 0; padding: 0; background: transparent; color: var(--chili-deep); cursor: pointer; font: 600 13px/18px 'Be Vietnam Pro', sans-serif">Dùng thứ tự gợi ý</button>
         </sc-if>
       </div>
       <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
         <sc-for list="{{order}}" as="o" hint-placeholder-count="2">
-          <li style="display: flex; align-items: center; gap: 12px; padding: 10px 8px 10px 12px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line)">
+          <li style="position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 4px 10px 12px; border-radius: 12px; background: var(--surface-raised); {{o.rowStyle}}">
             <span style="width: 28px; height: 28px; flex-shrink: 0; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); font-size: 13px; line-height: 28px; font-weight: 700; text-align: center">{{o.no}}</span>
             <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
               <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{o.name}}</span>
               <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{o.why}}</span>
             </span>
-            <button class="mv" onClick="{{o.up}}" disabled="{{o.isFirst}}" aria-label="{{o.upLabel}}">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"></path></svg>
-            </button>
-            <button class="mv" onClick="{{o.down}}" disabled="{{o.isLast}}" aria-label="{{o.downLabel}}">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"></path></svg>
+            <button class="grip" aria-label="{{o.gripLabel}}" aria-roledescription="tay cầm kéo" onPointerDown="{{o.down}}" onPointerMove="{{dragMove}}" onPointerUp="{{dragEnd}}" onPointerCancel="{{dragEnd}}" onKeyDown="{{o.key}}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"></circle><circle cx="15" cy="6" r="1.6"></circle><circle cx="9" cy="12" r="1.6"></circle><circle cx="15" cy="12" r="1.6"></circle><circle cx="9" cy="18" r="1.6"></circle><circle cx="15" cy="18" r="1.6"></circle></svg>
             </button>
           </li>
         </sc-for>
       </ol>
+      <span aria-live="polite" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{announce}}</span>
     </section>
 
     <section style="display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 8px 16px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
@@ -103,6 +104,7 @@ input[type=checkbox]{accent-color:var(--herb)}
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
 // Suggested order: dishes with passive or long steps first, fried dishes last, ties keep the order they were added.
+// Flutter: ReorderableListView with buildDefaultDragHandles: false and a ReorderableDragStartListener on drag_indicator_rounded.
 var DISHES = [
 { id: 'tofu', name: 'Đậu phụ sốt cà chua', short: 'Đậu phụ', why: '25 phút · có bước om, giữ ấm được' },
 { id: 'egg', name: 'Trứng chiên hành', short: 'Trứng', why: '15 phút · ăn nóng ngon nhất, làm sau cùng' }
@@ -119,15 +121,20 @@ var ITEMS = [
 class Component extends DCLogic {
 constructor(props) {
 super(props);
-this.state = { order: SUGGESTED.slice(), servings: 1, done: { tofu: true } };
+this.state = { order: SUGGESTED.slice(), servings: 1, done: { tofu: true }, drag: null, announce: '' };
 }
 renderVals() {
 var self = this;
 var st = this.state;
-function move(from, to) {
-var next = self.state.order.slice();
+function swap(order, from, to) {
+var next = order.slice();
 var t = next[from]; next[from] = next[to]; next[to] = t;
-self.setState({ order: next });
+return next;
+}
+function said(order, pos) { return DISHES[order[pos]].name + ' lên vị trí ' + (pos + 1); }
+function move(from, to) {
+var next = swap(self.state.order, from, to);
+self.setState({ order: next, announce: said(next, to) });
 }
 var count = 0;
 var items = ITEMS.map(function (it, i) {
@@ -154,21 +161,46 @@ six: 6,
 servings: st.servings,
 setServings: function (v) { self.setState({ servings: v }); },
 reordered: st.order.join() !== SUGGESTED.join(),
-resetOrder: function () { self.setState({ order: SUGGESTED.slice() }); },
+resetOrder: function () { self.setState({ order: SUGGESTED.slice(), announce: 'Đã dùng lại thứ tự gợi ý' }); },
 order: st.order.map(function (di, pos) {
 var d = DISHES[di];
+var dragging = st.drag && st.drag.pos === pos;
 return {
 no: pos + 1,
 name: d.name,
 why: d.why,
-isFirst: pos === 0,
-isLast: pos === st.order.length - 1,
-upLabel: 'Nấu ' + d.name + ' sớm hơn',
-downLabel: 'Nấu ' + d.name + ' muộn hơn',
-up: function () { if (pos > 0) { move(pos, pos - 1); } },
-down: function () { if (pos < self.state.order.length - 1) { move(pos, pos + 1); } }
+gripLabel: 'Đổi thứ tự ' + d.name + ', đang ở vị trí ' + (pos + 1) + '. Dùng phím mũi tên lên xuống',
+rowStyle: dragging
+? 'z-index: 2; border: 2px solid var(--chili); box-shadow: 0 8px 20px rgba(20, 14, 10, 0.18); transform: translateY(' + st.drag.dy + 'px) scale(1.02);'
+: 'border: 1px solid var(--line); transition: transform .15s;',
+down: function (e) {
+if (e.currentTarget.setPointerCapture) { e.currentTarget.setPointerCapture(e.pointerId); }
+var li = e.currentTarget.closest('li');
+self.setState({ drag: { pos: pos, y: e.clientY, dy: 0, row: (li ? li.offsetHeight : 60) + 8 } });
+},
+key: function (e) {
+if (e.key === 'ArrowUp' && pos > 0) { e.preventDefault(); move(pos, pos - 1); }
+if (e.key === 'ArrowDown' && pos < self.state.order.length - 1) { e.preventDefault(); move(pos, pos + 1); }
+}
 };
 }),
+dragMove: function (e) {
+var dr = self.state.drag;
+if (!dr) { return; }
+var order = self.state.order;
+var p = dr.pos;
+var y = dr.y;
+var dy = e.clientY - y;
+// Swap with the neighbour once the row passes half of its height.
+while (dy > dr.row / 2 && p < order.length - 1) { order = swap(order, p, p + 1); p += 1; y += dr.row; dy -= dr.row; }
+while (dy < -dr.row / 2 && p > 0) { order = swap(order, p, p - 1); p -= 1; y -= dr.row; dy += dr.row; }
+var max = (order.length - 1 - p) * dr.row + dr.row / 2;
+var min = -p * dr.row - dr.row / 2;
+dy = Math.max(min, Math.min(max, dy));
+self.setState({ order: order, drag: { pos: p, y: y, dy: dy, row: dr.row }, announce: p !== dr.pos ? said(order, p) : self.state.announce });
+},
+dragEnd: function () { if (self.state.drag) { self.setState({ drag: null }); } },
+announce: st.announce,
 items: items,
 doneCount: count,
 total: ITEMS.length,
