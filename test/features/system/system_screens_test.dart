@@ -304,6 +304,7 @@ void main() {
         await tester.pump();
 
         expect(find.byType(ClearDataScreen), findsOneWidget);
+        expect(_deleteButton(tester).onPressed, isNotNull);
         expect(tester.takeException(), isNull);
       });
     }

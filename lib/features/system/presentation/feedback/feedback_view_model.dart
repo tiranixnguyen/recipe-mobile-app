@@ -96,30 +96,38 @@ class FeedbackViewModel extends Notifier<FeedbackState> {
   /// Gửi góp ý; trả về `true` khi gửi được. Lỗi thì giữ nguyên nội dung để người dùng gửi lại.
   Future<bool> send() async {
     if (!state.canSend) return false;
+    // Chụp state và provider trước khi await: màn có thể đã đóng khi gửi xong.
+    final sent = state;
+    final analytics = ref.read(analyticsProvider);
     state = state.copyWith(sending: true);
-    final email = state.email.trim();
+    final email = sent.email.trim();
     try {
       await ref
           .read(feedbackRepositoryProvider)
           .send(
-            kind: state.kind,
-            message: state.message.trim(),
-            screenshot: state.screenshot,
+            kind: sent.kind,
+            message: sent.message.trim(),
+            screenshot: sent.screenshot,
             email: email.isEmpty ? null : email,
-            deviceInfo: state.includeDeviceInfo ? await _deviceInfo() : null,
+            deviceInfo: sent.includeDeviceInfo ? await _deviceInfo() : null,
           );
-      ref.read(analyticsProvider).track('feedback_send', {
-        'kind': state.kind.name,
-        'screenshot': state.screenshot != null,
-        'from_error': errorCode != null,
-      });
-      return true;
     } on Object catch (error) {
       debugPrint('Không gửi được góp ý: $error');
       return false;
     } finally {
       if (ref.mounted) state = state.copyWith(sending: false);
     }
+    // Ngoài try: analytics lỗi không được biến góp ý đã gửi thành "chưa gửi" (người dùng gửi trùng).
+    try {
+      analytics.track('feedback_send', {
+        'kind': sent.kind.name,
+        'screenshot': sent.screenshot != null,
+        'from_error': errorCode != null,
+      });
+    } on Object catch (error) {
+      debugPrint('Không ghi được analytics: $error');
+    }
+    return true;
   }
 
   /// Không đọc được thông tin máy thì vẫn gửi góp ý, chỉ thiếu phần này.

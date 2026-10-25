@@ -15,6 +15,9 @@ import 'package:recipe_mobile_app/features/system/strings.dart';
 class ClearDataScreen extends ConsumerWidget {
   const ClearDataScreen({super.key});
 
+  /// Từ cỡ chữ này (cài đặt máy) hai nút nằm chồng, để nhãn không bị bẻ đôi.
+  static const _stackButtonsTextScale = 1.15;
+
   static const _mono = TextStyle(fontFamily: 'monospace', fontWeight: FontWeight.w600);
 
   @override
@@ -162,8 +165,7 @@ class ClearDataScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.s4),
-              // Chữ to thì hai nút nằm chồng, nhãn không bị bẻ đôi.
-              if (MediaQuery.textScalerOf(context).scale(1) > 1.15)
+              if (MediaQuery.textScalerOf(context).scale(1) > _stackButtonsTextScale)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

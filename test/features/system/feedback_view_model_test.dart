@@ -41,6 +41,11 @@ class _FakeRepository implements FeedbackRepository {
   }
 }
 
+class _ThrowingAnalytics implements Analytics {
+  @override
+  void track(String event, [Map<String, Object>? params]) => throw StateError('analytics hỏng');
+}
+
 void main() {
   late _FakeRepository repository;
   late Uint8List? picked;
@@ -168,6 +173,23 @@ void main() {
 
     expect(sub.read().screenshot, hasLength(10));
     expect(sub.read().screenshotTooBig, isTrue);
+  });
+
+  test('analytics lỗi thì góp ý đã gửi vẫn tính là gửi được', () async {
+    final container = ProviderContainer(
+      overrides: [
+        feedbackRepositoryProvider.overrideWithValue(repository),
+        deviceInfoProvider.overrideWith((ref) async => const {}),
+        analyticsProvider.overrideWithValue(_ThrowingAnalytics()),
+      ],
+    );
+    addTearDown(container.dispose);
+    final sub = container.listen(feedbackViewModelProvider(null), (_, _) {});
+    final viewModel = container.read(feedbackViewModelProvider(null).notifier)..setMessage('Góp ý');
+
+    expect(await viewModel.send(), isTrue);
+    expect(repository.sent, hasLength(1));
+    expect(sub.read().sending, isFalse);
   });
 
   test('huỷ chọn ảnh thì giữ ảnh cũ', () async {
