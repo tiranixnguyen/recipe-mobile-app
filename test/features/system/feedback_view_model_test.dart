@@ -149,6 +149,17 @@ void main() {
     expect(sub.read().screenshot, isNull);
   });
 
+  test('đã có ảnh mà chọn nhầm ảnh quá 2 MB thì giữ ảnh cũ, vẫn báo lỗi', () async {
+    final sub = listen();
+    picked = Uint8List(10);
+    await viewModel().pickScreenshot();
+    picked = Uint8List(maxScreenshotBytes + 1);
+    await viewModel().pickScreenshot();
+
+    expect(sub.read().screenshot, hasLength(10));
+    expect(sub.read().screenshotTooBig, isTrue);
+  });
+
   test('huỷ chọn ảnh thì giữ ảnh cũ', () async {
     final sub = listen();
     picked = Uint8List(10);

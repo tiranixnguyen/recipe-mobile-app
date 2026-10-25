@@ -83,8 +83,9 @@ class FeedbackViewModel extends Notifier<FeedbackState> {
   Future<void> pickScreenshot() async {
     final bytes = await ref.read(pickScreenshotProvider)();
     if (bytes == null || !ref.mounted) return;
+    // Ảnh quá lớn thì chỉ báo, giữ ảnh đã đính kèm trước đó (nếu có).
     state = bytes.length > maxScreenshotBytes
-        ? state.copyWith(screenshot: () => null, screenshotTooBig: true)
+        ? state.copyWith(screenshotTooBig: true)
         : state.copyWith(screenshot: () => bytes, screenshotTooBig: false);
   }
 
