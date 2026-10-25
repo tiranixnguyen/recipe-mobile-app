@@ -51,10 +51,10 @@ void main() {
   AddToPlanViewModel viewModel(String id) =>
       container.read(addToPlanViewModelProvider(id).notifier);
 
-  group('Thứ Ba 20/10/2026', () {
-    setUp(() => container = create(DateTime(2026, 10, 20, 9)));
+  group('17h Thứ Ba 20/10/2026', () {
+    setUp(() => container = create(DateTime(2026, 10, 20, 17)));
 
-    test('mặc định Tối nay, khẩu phần chuẩn của món, bữa trống', () async {
+    test('mặc định bữa kế tiếp (Tối nay), khẩu phần chuẩn của món, bữa trống', () async {
       final sub = await listen('trung');
       final state = sub.read().requireValue;
 
@@ -65,8 +65,8 @@ void main() {
       expect(state.servings, 1);
       expect(state.quickPicks.map((q) => (q.label, q.selected)), [
         ('Tối nay', true),
+        ('Sáng mai', false),
         ('Trưa mai', false),
-        ('Tối mai', false),
       ]);
       expect(state.mealSummaries.values, everyElement('Trống'));
       expect(state.joinText, isNull);
@@ -87,11 +87,11 @@ void main() {
     test('chip nhanh, chọn ngày và bữa đổi nhãn nút và chip đang bật', () async {
       final sub = await listen('trung');
 
-      viewModel('trung').pickQuick(sub.read().requireValue.quickPicks[1]);
+      viewModel('trung').pickQuick(sub.read().requireValue.quickPicks[2]);
       var state = sub.read().requireValue;
       expect((state.day, state.meal), (2, Meal.lunch));
       expect(state.confirmLabel, 'Thêm vào Trưa mai');
-      expect(state.quickPicks.map((q) => q.selected), [false, true, false]);
+      expect(state.quickPicks.map((q) => q.selected), [false, false, true]);
 
       viewModel('trung').pickDay(3);
       viewModel('trung').pickMeal(Meal.breakfast);
@@ -162,11 +162,31 @@ void main() {
     });
   });
 
-  test('Chủ nhật: ẩn chip "mai" vì ngày mai sang tuần sau', () async {
-    container = create(DateTime(2026, 10, 25, 9));
-    final sub = await listen('trung');
-    final state = sub.read().requireValue;
+  test('8h: chip là ba bữa hôm nay, mặc định Sáng nay', () async {
+    container = create(DateTime(2026, 10, 20, 8));
+    final state = (await listen('trung')).read().requireValue;
+    expect(state.quickPicks.map((q) => q.label), ['Sáng nay', 'Trưa nay', 'Tối nay']);
+    expect(state.confirmLabel, 'Thêm vào Sáng nay');
+  });
+
+  test('22h: bữa tối đã qua, chip là ba bữa ngày mai', () async {
+    container = create(DateTime(2026, 10, 20, 22));
+    final state = (await listen('trung')).read().requireValue;
+    expect(state.quickPicks.map((q) => q.label), ['Sáng mai', 'Trưa mai', 'Tối mai']);
+    expect((state.day, state.meal), (2, Meal.breakfast));
+  });
+
+  test('Chủ nhật: ẩn bữa sang tuần sau', () async {
+    container = create(DateTime(2026, 10, 25, 17));
+    final state = (await listen('trung')).read().requireValue;
     expect(state.today, 6);
     expect(state.quickPicks.map((q) => q.label), ['Tối nay']);
+  });
+
+  test('tối Chủ nhật đã qua bữa tối: không có chip, mặc định Tối nay', () async {
+    container = create(DateTime(2026, 10, 25, 22));
+    final state = (await listen('trung')).read().requireValue;
+    expect(state.quickPicks, isEmpty);
+    expect(state.confirmLabel, 'Thêm vào Tối nay');
   });
 }

@@ -18,6 +18,26 @@ Recipe _recipe(String id, String name) => Recipe(
 );
 
 void main() {
+  group('nextMeals', () {
+    // Thứ Ba = 1.
+    DateTime at(int hour) => DateTime(2026, 10, 20, hour);
+
+    test('theo giờ hiện tại, bữa đã qua thì bỏ', () {
+      expect(nextMeals(at(7)), [(1, Meal.breakfast), (1, Meal.lunch), (1, Meal.dinner)]);
+      expect(nextMeals(at(10)), [(1, Meal.lunch), (1, Meal.dinner), (2, Meal.breakfast)]);
+      expect(nextMeals(at(17)), [(1, Meal.dinner), (2, Meal.breakfast), (2, Meal.lunch)]);
+      expect(nextMeals(at(21)), [(2, Meal.breakfast), (2, Meal.lunch), (2, Meal.dinner)]);
+    });
+
+    test('Chủ nhật sang tuần sau thì chỉ số quá 6', () {
+      expect(nextMeals(DateTime(2026, 10, 25, 17)), [
+        (6, Meal.dinner),
+        (7, Meal.breakfast),
+        (7, Meal.lunch),
+      ]);
+    });
+  });
+
   group('whenLabel', () {
     test('nay, mai, rồi tên ngày', () {
       expect(whenLabel(Meal.dinner, 1, 1), 'Tối nay');

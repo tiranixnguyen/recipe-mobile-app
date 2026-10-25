@@ -50,7 +50,8 @@ class AddToPlanState {
   final Meal meal;
   final int servings;
 
-  /// Chip "mai" bị ẩn khi hôm nay là Chủ nhật (ngày mai sang tuần sau).
+  /// Ba bữa kế tiếp từ giờ hiện tại ("Tối nay", "Sáng mai", "Trưa mai"); bữa sang tuần sau bị
+  /// ẩn vì thực đơn chỉ có tuần này.
   final List<QuickPick> quickPicks;
 
   /// Ngày trong tuần đã có món (chấm `herb`).
@@ -78,8 +79,14 @@ class AddToPlanViewModel extends Notifier<AsyncValue<AddToPlanState>> {
     final today = weekdayIndex(now);
     final weekStart = weekStartOf(now);
     final selection = ref.watch(_selectionProvider(recipeId));
-    final day = selection.day ?? today;
-    final meal = selection.meal;
+    // Bữa kế tiếp trong tuần này; tối Chủ nhật đã qua hết thì không có chip nào.
+    final upcoming = [
+      for (final slot in nextMeals(now))
+        if (slot.$1 < 7) slot,
+    ];
+    final (defaultDay, defaultMeal) = upcoming.firstOrNull ?? (today, Meal.dinner);
+    final day = selection.day ?? defaultDay;
+    final meal = selection.meal ?? defaultMeal;
     final date = dayOfWeek(weekStart, day);
     final planned = ref.watch(plannedMealsProvider);
 
@@ -106,18 +113,13 @@ class AddToPlanViewModel extends Notifier<AsyncValue<AddToPlanState>> {
         meal: meal,
         servings: servings,
         quickPicks: [
-          for (final (d, m) in [
-            (today, Meal.dinner),
-            (today + 1, Meal.lunch),
-            (today + 1, Meal.dinner),
-          ])
-            if (d < 7)
-              QuickPick(
-                label: whenLabel(m, d, today),
-                day: d,
-                meal: m,
-                selected: d == day && m == meal,
-              ),
+          for (final (d, m) in upcoming)
+            QuickPick(
+              label: whenLabel(m, d, today),
+              day: d,
+              meal: m,
+              selected: d == day && m == meal,
+            ),
         ],
         daysWithMeals: daysWithMeals,
         mealSummaries: {
@@ -161,13 +163,14 @@ class AddToPlanViewModel extends Notifier<AsyncValue<AddToPlanState>> {
   }
 }
 
-/// Lựa chọn trong sheet; `day` null là hôm nay, `servings` null là khẩu phần chuẩn của món.
+/// Lựa chọn trong sheet; `day`/`meal` null là bữa kế tiếp, `servings` null là khẩu phần chuẩn của
+/// món.
 @immutable
 class _Selection {
-  const _Selection({this.day, this.meal = Meal.dinner, this.servings});
+  const _Selection({this.day, this.meal, this.servings});
 
   final int? day;
-  final Meal meal;
+  final Meal? meal;
   final int? servings;
 
   _Selection copyWith({int? day, Meal? meal, int? servings}) => _Selection(

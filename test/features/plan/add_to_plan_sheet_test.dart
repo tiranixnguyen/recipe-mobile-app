@@ -51,8 +51,8 @@ Future<(ProviderContainer, bool? Function())> _open(
   final container = ProviderContainer(
     overrides: [
       localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
-      // Thứ Ba.
-      nowProvider.overrideWithValue(DateTime(2026, 10, 20, 9)),
+      // 17h Thứ Ba: chip Tối nay, Sáng mai, Trưa mai.
+      nowProvider.overrideWithValue(DateTime(2026, 10, 20, 17)),
       recipesProvider.overrideWith((ref) async => const [_recipe, _other]),
     ],
   );
