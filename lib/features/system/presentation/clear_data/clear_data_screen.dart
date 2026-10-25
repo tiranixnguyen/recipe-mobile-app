@@ -35,6 +35,17 @@ class ClearDataScreen extends ConsumerWidget {
       ClearDataHint.mismatch => (SystemStrings.clearDataMismatch, colors.inkMuted),
       ClearDataHint.matched => (SystemStrings.clearDataMatched, colors.herbInk),
     };
+    final cancelButton = AppButton.secondary(
+      label: SystemStrings.cancel,
+      block: true,
+      onPressed: state.clearing ? null : () => context.pop(),
+    );
+    final deleteButton = AppButton.danger(
+      label: SystemStrings.clearDataConfirm,
+      icon: AppIcons.trash,
+      block: true,
+      onPressed: state.matched && !state.clearing ? clear : null,
+    );
 
     return PopScope(
       // Đang xoá thì không cho đóng (back, chạm ra ngoài), để xoá xong còn về Onboarding.
@@ -77,7 +88,14 @@ class ClearDataScreen extends ConsumerWidget {
               for (final item in SystemStrings.clearDataItems)
                 Padding(
                   padding: const EdgeInsets.only(left: AppSpacing.s2, bottom: 2),
-                  child: Text('•  $item', style: AppTextStyles.body),
+                  // Dòng xuống thẳng hàng với chữ, không lùi về dưới dấu chấm.
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('•  ', style: AppTextStyles.body),
+                      Expanded(child: Text(item, style: AppTextStyles.body)),
+                    ],
+                  ),
                 ),
               const SizedBox(height: AppSpacing.s2),
               Text(
@@ -144,26 +162,24 @@ class ClearDataScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.s4),
-              Row(
-                children: [
-                  Expanded(
-                    child: AppButton.secondary(
-                      label: SystemStrings.cancel,
-                      block: true,
-                      onPressed: state.clearing ? null : () => context.pop(),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s3),
-                  Expanded(
-                    child: AppButton.danger(
-                      label: SystemStrings.clearDataConfirm,
-                      icon: AppIcons.trash,
-                      block: true,
-                      onPressed: state.matched && !state.clearing ? clear : null,
-                    ),
-                  ),
-                ],
-              ),
+              // Chữ to thì hai nút nằm chồng, nhãn không bị bẻ đôi.
+              if (MediaQuery.textScalerOf(context).scale(1) > 1.15)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    deleteButton,
+                    const SizedBox(height: AppSpacing.s2),
+                    cancelButton,
+                  ],
+                )
+              else
+                Row(
+                  children: [
+                    Expanded(child: cancelButton),
+                    const SizedBox(width: AppSpacing.s3),
+                    Expanded(child: deleteButton),
+                  ],
+                ),
             ],
           ),
         ),

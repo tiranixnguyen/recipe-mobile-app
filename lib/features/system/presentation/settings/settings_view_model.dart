@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
 
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/features/system/data/app_info.dart';
 import 'package:recipe_mobile_app/features/system/data/notification_permission.dart';
 import 'package:recipe_mobile_app/features/system/data/notification_prefs.dart';
@@ -46,7 +47,11 @@ class SettingsViewModel extends Notifier<SettingsState> {
     );
   }
 
-  Future<void> setThemeMode(ThemeMode mode) => ref.read(themeModeProvider.notifier).set(mode);
+  Future<void> setThemeMode(ThemeMode mode) async {
+    if (mode == state.themeMode) return;
+    ref.read(analyticsProvider).track('theme_change', {'mode': mode.name});
+    await ref.read(themeModeProvider.notifier).set(mode);
+  }
 
   /// Bật thì xin quyền thông báo nếu chưa có; bị từ chối thì để tắt và trả về `false` để View báo.
   Future<bool> setTimerDone(bool on) async {

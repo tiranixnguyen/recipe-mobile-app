@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/data/feedback_repository.dart';
 import 'package:recipe_mobile_app/features/system/data/device_info.dart';
 import 'package:recipe_mobile_app/features/system/data/screenshot_picker.dart';
@@ -107,6 +108,11 @@ class FeedbackViewModel extends Notifier<FeedbackState> {
             email: email.isEmpty ? null : email,
             deviceInfo: state.includeDeviceInfo ? await _deviceInfo() : null,
           );
+      ref.read(analyticsProvider).track('feedback_send', {
+        'kind': state.kind.name,
+        'screenshot': state.screenshot != null,
+        'from_error': errorCode != null,
+      });
       return true;
     } on Object catch (error) {
       debugPrint('Không gửi được góp ý: $error');
