@@ -14,6 +14,7 @@
     "Search.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Tìm kiếm", "w": 390, "x": 940, "y": 1224 },
     "Shopping.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Danh sách đi chợ", "w": 390, "x": 1880, "y": 1224 },
     "Today.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Hôm nay ăn gì", "w": 390, "x": 470, "y": 1224 },
+    "AddToPlan.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Thêm vào thực đơn · chọn ngày, bữa", "w": 390, "x": 2350, "y": 1224 },
     "Splash.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Khởi động", "w": 390, "x": 0, "y": 3712 },
     "NotifPermission.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Xin quyền thông báo", "w": 390, "x": 470, "y": 3712 },
     "Settings.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Cài đặt · Sáng / Tối / Hệ thống", "w": 390, "x": 940, "y": 3712 },
@@ -40,7 +41,7 @@
   "notes": {
     "cook": { "kind": "title1", "maxW": 1330, "text": "Luồng nấu — chuẩn bị, từng bước, hoàn thành", "w": 240, "x": 0, "y": 2148 },
     "flow": { "kind": "title1", "maxW": 1800, "text": "Tab chính — Khám phá · Tủ đồ · Thực đơn · Đã lưu", "w": 240, "x": 0, "y": -300 },
-    "flows2": { "kind": "title1", "maxW": 2270, "text": "Luồng — làm quen, gợi ý, tìm, nấu, đi chợ", "w": 240, "x": 0, "y": 924 },
+    "flows2": { "kind": "title1", "maxW": 2740, "text": "Luồng — làm quen, gợi ý, tìm, nấu, đi chợ", "w": 240, "x": 0, "y": 924 },
     "sys": { "kind": "title1", "maxW": 2270, "text": "Hệ thống — cài đặt, giao diện, góp ý, chính sách, lỗi", "x": 0, "y": 3412 },
     "logo": { "kind": "title1", "maxW": 2960, "text": "Logo — trẻ trung, tối giản · chọn hướng C", "x": 0, "y": 5640 }
   },
@@ -54,6 +55,7 @@
     "Search.dc.html",
     "Detail.dc.html",
     "Shopping.dc.html",
+    "AddToPlan.dc.html",
     "CookPrep.dc.html",
     "CookStep.dc.html",
     "CookDone.dc.html",
