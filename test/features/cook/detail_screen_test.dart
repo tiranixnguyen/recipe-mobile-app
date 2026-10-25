@@ -109,7 +109,8 @@ void main() {
     await tester.tap(find.text(CookStrings.addToPlan));
     await tester.pumpAndSettle();
     expect(find.text('Trứng chiên hành · 15 phút · Bếp từ'), findsOneWidget);
-    // Không cố định ngày (giờ thật): chọn Trưa của hôm nay.
+    // Không cố định ngày (giờ thật): chọn Trưa của hôm nay, ô ngày có chữ "Nay".
+    await tester.tap(find.text('Nay'));
     await tester.tap(find.text(Meal.lunch.label));
     await tester.pump();
     await tester.tap(find.textContaining('Thêm vào Trưa'));

@@ -207,7 +207,7 @@ void main() {
     expect(find.text('Xoá dữ liệu trên máy'), findsOneWidget);
   });
 
-  testWidgets('Thực đơn → Xem món → Chi tiết → Thêm vào Tối mai → Thực đơn mở ngày mai có món', (
+  testWidgets('Thực đơn → Xem món → Chi tiết → Thêm vào Trưa mai → Thực đơn mở ngày mai có món', (
     tester,
   ) async {
     const recipe = Recipe(
@@ -231,8 +231,8 @@ void main() {
           recipesProvider.overrideWith((ref) async => const [recipe]),
           ingredientsProvider.overrideWith((ref) async => const <Ingredient>[]),
           localStoreProvider.overrideWithValue(store),
-          // Thứ Ba.
-          nowProvider.overrideWithValue(DateTime(2026, 10, 20, 9)),
+          // 17h Thứ Ba.
+          nowProvider.overrideWithValue(DateTime(2026, 10, 20, 17)),
         ],
         child: const App(),
       ),
@@ -255,19 +255,19 @@ void main() {
 
     await tester.tap(find.text('Thêm vào thực đơn'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Tối mai'));
+    await tester.tap(find.text('Trưa mai'));
     await tester.pump();
-    await tester.tap(find.text('Thêm vào Tối mai'));
+    await tester.tap(find.text('Thêm vào Trưa mai'));
     await tester.pumpAndSettle();
 
     expect(find.byType(DetailScreen), findsNothing);
     expect(find.byType(PlanScreen), findsOneWidget);
     expect(find.text('Thứ Tư'), findsOneWidget);
-    expect(find.widgetWithText(MealSlot, 'Tối'), findsOneWidget);
+    expect(find.widgetWithText(MealSlot, 'Trưa'), findsOneWidget);
     expect(find.widgetWithText(MealSlot, 'Trứng chiên hành'), findsOneWidget);
     expect(
       container.read(plannedMealsProvider).map((p) => (p.day, p.meal)),
-      [(DateTime(2026, 10, 20), Meal.lunch), (DateTime(2026, 10, 21), Meal.dinner)],
+      [(DateTime(2026, 10, 20), Meal.lunch), (DateTime(2026, 10, 21), Meal.lunch)],
     );
 
     // Về hôm nay vẫn thấy bữa trưa cũ.
