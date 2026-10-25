@@ -9,6 +9,7 @@ import 'package:recipe_mobile_app/features/system/data/app_info.dart';
 import 'package:recipe_mobile_app/features/system/data/notification_prefs.dart';
 import 'package:recipe_mobile_app/features/system/presentation/about/about_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/clear_data/clear_data_screen.dart';
+import 'package:recipe_mobile_app/features/system/presentation/feedback/feedback_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/notif_permission/notif_permission_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/onboarding/onboarding_screen.dart';
 import 'package:recipe_mobile_app/features/system/presentation/policy/policy_screen.dart';
@@ -176,5 +177,22 @@ void main() {
       const Duration(minutes: 60),
     );
     expect(find.text('Trước bữa 1 tiếng'), findsOneWidget, reason: 'ghi chú dưới công tắc');
+  });
+
+  testWidgets('Góp ý: mở từ màn lỗi thì ghi sẵn mã lỗi; nút Gửi mở khi có nội dung', (
+    tester,
+  ) async {
+    await _pumpSettings(tester);
+    GoRouter.of(
+      tester.element(find.byType(SettingsScreen)),
+    ).push(feedbackForErrorLocation('ERR-0042'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(FeedbackScreen), findsOneWidget);
+    expect(find.textContaining('Mã lỗi: ERR-0042'), findsOneWidget);
+    expect(
+      tester.widget<AppButton>(find.widgetWithText(AppButton, 'Gửi góp ý')).onPressed,
+      isNotNull,
+    );
   });
 }

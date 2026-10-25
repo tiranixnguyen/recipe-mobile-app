@@ -1,3 +1,4 @@
+import 'package:recipe_mobile_app/core/data/feedback_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 
 abstract final class SystemStrings {
@@ -141,4 +142,31 @@ abstract final class SystemStrings {
   static const clearDataMatched = 'Đã khớp. Giờ bạn có thể bấm Xoá hết.';
   static const cancel = 'Huỷ';
   static const clearDataConfirm = 'Xoá hết';
+
+  // Góp ý (`Feedback`).
+  static const feedbackIntro =
+      'Món nào khó làm, chỗ nào khó dùng, hay app bị lỗi, cứ nói thẳng. Nhóm đọc hết.';
+  static const feedbackKindLabel = 'Bạn muốn gửi gì?';
+  static const feedbackKinds = {
+    FeedbackKind.bug: ('Báo lỗi', 'Ví dụ: bấm Hẹn giờ ở bước 3 thì app đứng hình.'),
+    FeedbackKind.recipe: (
+      'Góp ý món',
+      'Ví dụ: thêm món dùng lò vi sóng, hoặc sửa bước của một món.',
+    ),
+    FeedbackKind.other: ('Khác', 'Bất cứ điều gì bạn muốn nhóm biết.'),
+  };
+  static const feedbackMessageLabel = 'Bạn muốn nói gì?';
+  static const feedbackAttach = 'Đính kèm ảnh chụp màn hình';
+  static const feedbackAttached = 'Đã đính kèm ảnh';
+  static const feedbackRemoveImage = 'Bỏ ảnh';
+  static const feedbackImageTooBig = 'Ảnh lớn quá, chọn ảnh dưới 2 MB nhé.';
+  static const feedbackEmailLabel = 'Email để nhóm trả lời';
+  static const feedbackOptional = ' (không bắt buộc)';
+  static const feedbackEmailHint = 'ban@vidu.com';
+  static const feedbackEmailInvalid = 'Email chưa đúng dạng, ví dụ ban@vidu.com.';
+  static const feedbackDevice = 'Gửi kèm thông tin máy (phiên bản app, Android) để dễ sửa lỗi';
+  static const feedbackSend = 'Gửi góp ý';
+  static const feedbackSent = 'Đã gửi. Cảm ơn bạn đã góp ý.';
+  static const feedbackFailed = 'Chưa gửi được. Kiểm tra mạng rồi thử lại, nội dung vẫn còn đây.';
+  static String feedbackErrorCode(String code) => 'Mã lỗi: $code';
 }
