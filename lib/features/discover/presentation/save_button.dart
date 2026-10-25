@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/features/discover/data/saved_recipes.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/save_button_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 
 /// Nút lưu món: tròn 40, nền `surfaceRaised`; đã lưu thì bookmark tô đặc màu `chili`.
@@ -21,7 +22,7 @@ class SaveButton extends ConsumerWidget {
     return Semantics(
       toggled: saved,
       child: IconButton(
-        onPressed: () => ref.read(savedIdsProvider.notifier).toggle(recipeId),
+        onPressed: () => ref.read(saveButtonViewModelProvider.notifier).toggle(recipeId),
         tooltip: saved ? DiscoverStrings.unsave : DiscoverStrings.save,
         icon: Icon(AppIcons.bookmark, fill: saved ? 1 : 0),
         style: IconButton.styleFrom(

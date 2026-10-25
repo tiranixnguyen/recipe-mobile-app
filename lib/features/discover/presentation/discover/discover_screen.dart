@@ -22,7 +22,7 @@ import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Khám phá (prototype `Main`): lối vào Hôm nay ăn gì, tìm kiếm, món nấu được với đồ đang có và món
 /// nhanh.
-class DiscoverScreen extends ConsumerWidget {
+class DiscoverScreen extends ConsumerStatefulWidget {
   const DiscoverScreen({super.key});
 
   /// Chip nhanh mở Tìm kiếm có sẵn bộ lọc.
@@ -34,7 +34,38 @@ class DiscoverScreen extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DiscoverScreen> createState() => _DiscoverScreenState();
+}
+
+class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
+  bool _visible = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateVisibility();
+  }
+
+  void _updateVisibility() {
+    // indexedStack giữ tab còn sống; TickerMode tắt cho nhánh đang ẩn.
+    final routeVisible =
+        (ModalRoute.of(context)?.isCurrent ?? false) && TickerMode.valuesOf(context).enabled;
+    if (routeVisible && !_visible) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted &&
+            (ModalRoute.of(context)?.isCurrent ?? false) &&
+            TickerMode.valuesOf(context).enabled) {
+          ref.read(discoverViewModelProvider.notifier).recordView();
+        }
+      });
+    } else if (!routeVisible && _visible) {
+      ref.read(discoverViewModelProvider.notifier).endView();
+    }
+    _visible = routeVisible;
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     final state = ref.watch(discoverViewModelProvider);
     const gap = SizedBox(height: AppSpacing.s6);
@@ -69,7 +100,7 @@ class DiscoverScreen extends ConsumerWidget {
                     child: Row(
                       spacing: AppSpacing.s2,
                       children: [
-                        for (final (label, location) in _quickFilters)
+                        for (final (label, location) in DiscoverScreen._quickFilters)
                           AppChip(
                             label: label,
                             selected: false,

@@ -30,8 +30,14 @@ const _recipe = Recipe(
 /// Màn đích chỉ in ra đường dẫn để kiểm điều hướng.
 Widget _location(BuildContext context, GoRouterState state) => Text('at ${state.uri}');
 
-Future<void> _pump(WidgetTester tester, {List<Recipe> recipes = const [_recipe]}) async {
-  tester.view.physicalSize = const Size(390 * 3, 1400 * 3);
+Future<void> _pump(
+  WidgetTester tester, {
+  List<Recipe> recipes = const [_recipe],
+  Future<List<Recipe>> Function()? loadRecipes,
+  ThemeData? theme,
+  bool compact = false,
+}) async {
+  tester.view.physicalSize = Size((compact ? 360 : 390) * 3, (compact ? 800 : 1400) * 3);
   tester.view.devicePixelRatio = 3;
   addTearDown(tester.view.reset);
   final router = GoRouter(
@@ -47,9 +53,18 @@ Future<void> _pump(WidgetTester tester, {List<Recipe> recipes = const [_recipe]}
       overrides: [
         localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
         ingredientsProvider.overrideWith((ref) async => _ingredients),
-        recipesProvider.overrideWith((ref) async => recipes),
+        recipesProvider.overrideWith((ref) => (loadRecipes ?? () async => recipes)()),
       ],
-      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      child: MaterialApp.router(
+        theme: theme ?? AppTheme.light,
+        builder: compact
+            ? (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.3)),
+                child: child!,
+              )
+            : null,
+        routerConfig: router,
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -103,4 +118,49 @@ void main() {
     await _pump(tester);
     await _tapAndExpect(tester, find.byType(RecipeCard), '/recipe/trung-chien');
   });
+
+  for (final (label, target) in [
+    (DiscoverStrings.quickRiceCooker, '/search?tool=rice'),
+    (DiscoverStrings.quickVeg, '/search?diet=veg'),
+    (DiscoverStrings.quickDinner, '/search?meal=dinner'),
+  ]) {
+    testWidgets('chip $label chuyển đúng bộ lọc', (tester) async {
+      await _pump(tester);
+      await tester.ensureVisible(find.text(label));
+      await _tapAndExpect(tester, find.text(label), target);
+    });
+  }
+
+  testWidgets('lỗi tải công thức hiện thông báo thay vì danh sách', (tester) async {
+    await _pump(tester, loadRecipes: () => Future.error(const FormatException('invalid')));
+    expect(find.text(DiscoverStrings.loadError), findsOneWidget);
+    expect(find.byType(RecipeCard), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  for (final (name, theme) in [('sáng', AppTheme.light), ('tối', AppTheme.dark)]) {
+    for (final recipes in [
+      const [_recipe],
+      const <Recipe>[],
+    ]) {
+      testWidgets('Main $name, ${recipes.isEmpty ? 'trống' : 'có món'}: 360dp, chữ 1.3', (
+        tester,
+      ) async {
+        await _pump(tester, theme: theme, compact: true, recipes: recipes);
+        expect(find.text(DiscoverStrings.heroTitle), findsOneWidget);
+        expect(find.text(DiscoverStrings.cookable), findsOneWidget);
+        await tester.ensureVisible(find.text(DiscoverStrings.cookable));
+        if (recipes.isEmpty) {
+          expect(find.text(DiscoverStrings.cookableEmpty), findsOneWidget);
+        } else {
+          expect(find.byType(RecipeCard), findsOneWidget);
+          await tester.ensureVisible(find.byType(RecipeCard));
+        }
+        expect(tester.takeException(), isNull);
+        await tester.ensureVisible(find.text(DiscoverStrings.heroAction));
+        await _tapAndExpect(tester, find.text(DiscoverStrings.heroAction), '/today');
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
 }

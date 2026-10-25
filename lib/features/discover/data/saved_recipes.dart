@@ -6,15 +6,21 @@ const _savedKey = 'discover.saved';
 
 /// Id món đã lưu, theo thứ tự lưu (cũ trước, mới sau).
 class SavedRecipesController extends Notifier<Set<String>> {
+  Future<void> _pending = Future.value();
+
   @override
   Set<String> build() => Set.unmodifiable(ref.watch(localStoreProvider).readList(_savedKey));
 
-  /// Lưu nếu chưa lưu, bỏ lưu nếu đã lưu.
-  Future<void> toggle(String recipeId) async {
-    final next = {...state};
-    if (!next.remove(recipeId)) next.add(recipeId);
-    state = Set.unmodifiable(next);
-    await ref.read(localStoreProvider).writeList(_savedKey, next.toList());
+  /// Lưu nếu chưa lưu, bỏ lưu nếu đã lưu. Các lần bấm liên tiếp phải chờ ghi trước đó.
+  Future<void> toggle(String recipeId) {
+    final operation = _pending.then((_) async {
+      final next = {...state};
+      if (!next.remove(recipeId)) next.add(recipeId);
+      await ref.read(localStoreProvider).writeList(_savedKey, next.toList());
+      state = Set.unmodifiable(next);
+    });
+    _pending = operation.catchError((Object _) {});
+    return operation;
   }
 }
 

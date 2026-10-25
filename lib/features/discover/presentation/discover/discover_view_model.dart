@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
@@ -21,6 +22,17 @@ class DiscoverViewModel extends Notifier<AsyncValue<DiscoverState>> {
   static const cookableLimit = 6;
   static const quickMinutes = 20;
   static const quickLimit = 3;
+
+  bool _viewTracked = false;
+
+  /// Gọi khi màn thực sự xuất hiện; build/rebuild và cập nhật dữ liệu không phải lượt xem mới.
+  void recordView() {
+    if (_viewTracked) return;
+    _viewTracked = true;
+    ref.read(analyticsProvider).track('view_discover');
+  }
+
+  void endView() => _viewTracked = false;
 
   @override
   AsyncValue<DiscoverState> build() {

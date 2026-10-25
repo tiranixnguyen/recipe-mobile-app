@@ -31,7 +31,14 @@ Future<void> _pump(
   WidgetTester tester, {
   List<String> saved = const [],
   Future<List<Recipe>> Function()? recipes,
+  ThemeData? theme,
+  bool compact = false,
 }) async {
+  if (compact) {
+    tester.view.physicalSize = const Size(360 * 3, 800 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+  }
   final store = InMemoryLocalStore();
   await store.writeList('discover.saved', saved);
   final router = GoRouter(
@@ -54,7 +61,16 @@ Future<void> _pump(
         ),
         recipesProvider.overrideWith((ref) => (recipes ?? () async => const [_recipe])()),
       ],
-      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+      child: MaterialApp.router(
+        theme: theme ?? AppTheme.light,
+        builder: compact
+            ? (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.3)),
+                child: child!,
+              )
+            : null,
+        routerConfig: router,
+      ),
     ),
   );
   await tester.pumpAndSettle();
@@ -101,4 +117,34 @@ void main() {
     expect(find.text(DiscoverStrings.loadError), findsOneWidget);
     expect(find.byType(RecipeCard), findsNothing);
   });
+
+  for (final (name, theme) in [('sáng', AppTheme.light), ('tối', AppTheme.dark)]) {
+    for (final saved in [
+      const <String>[],
+      const ['trung-chien'],
+    ]) {
+      testWidgets('Saved $name, ${saved.isEmpty ? 'trống' : 'có món'}: 360dp, chữ 1.3', (
+        tester,
+      ) async {
+        await _pump(tester, theme: theme, compact: true, saved: saved);
+        expect(find.text(DiscoverStrings.saved), findsOneWidget);
+        if (saved.isEmpty) {
+          expect(find.byType(EmptyState), findsOneWidget);
+          await tester.ensureVisible(find.text(DiscoverStrings.savedEmptyAction));
+          expect(tester.takeException(), isNull);
+          await tester.tap(find.text(DiscoverStrings.savedEmptyAction));
+          await tester.pumpAndSettle();
+          expect(find.text('at /'), findsOneWidget);
+        } else {
+          expect(find.byType(RecipeCard), findsOneWidget);
+          await tester.ensureVisible(find.byType(SaveButton));
+          expect(tester.takeException(), isNull);
+          await tester.tap(find.byType(SaveButton));
+          await tester.pumpAndSettle();
+          expect(find.byType(EmptyState), findsOneWidget);
+        }
+        expect(tester.takeException(), isNull);
+      });
+    }
+  }
 }
