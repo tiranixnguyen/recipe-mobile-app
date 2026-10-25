@@ -67,6 +67,18 @@ a{color:var(--chili-deep)}
       </div>
     </section>
 
+    <sc-if value="{{showUpcoming}}" hint-placeholder-val="{{true}}">
+      <section aria-label="Bữa sắp tới" style="margin: -8px 16px 0 16px; padding: 12px 12px 12px 16px; display: flex; align-items: center; gap: 12px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line)">
+        <span style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 999px; background: var(--chili-soft); color: var(--chili); display: flex; align-items: center; justify-content: center">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h18a9 9 0 0 1-18 0zM12 4v3M8 5v2M16 5v2"></path></svg>
+        </span>
+        <a href="MealPlan.dc.html" style="flex: 1; min-width: 0; display: flex; flex-direction: column; color: var(--ink); text-decoration: none">
+          <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600">Tối nay · 2 món · khoảng 35 phút</span>
+          <span style="font-size: 15px; line-height: 22px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Đậu phụ sốt cà chua + Trứng chiên hành</span>
+        </a>
+        <a href="MealCookPrep.dc.html" style="height: 40px; padding: 0 12px; flex-shrink: 0; display: flex; align-items: center; border-radius: 12px; background: var(--chili); color: #FFFFFF; text-decoration: none; font-size: 13px; line-height: 18px; font-weight: 600">Nấu bữa tối</a>
+      </section>
+    </sc-if>
     <section style="display: flex; flex-direction: column; gap: 12px">
       <div style="display: flex; align-items: baseline; justify-content: space-between; padding: 0 16px">
         <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Nấu được với đồ bạn có</h2>
@@ -96,16 +108,7 @@ a{color:var(--chili-deep)}
       </div>
     </section>
 
-    <section style="display: flex; flex-direction: column; gap: 12px; padding: 0 16px">
-      <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Nhanh sau giờ học</h2>
-      <a href="Detail.dc.html" style="display: flex; gap: 12px; align-items: center; padding: 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
-        <div style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></div>
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
-          <span style="font-size: 15px; line-height: 22px; font-weight: 600">Trứng hấp nồi cơm</span>
-          <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">20 phút · 1 người · Nồi cơm điện</span>
-        </div>
-      </a>
-    </section>
+
   </main>
 
   <nav aria-label="Điều hướng chính" style="height: 80px; flex-shrink: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface-raised); border-top: 1px solid var(--line)">
@@ -136,10 +139,10 @@ a{color:var(--chili-deep)}
   </nav>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"showResume":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"showResume":{"editor":"boolean","default":false},"showUpcoming":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
 class Component extends DCLogic {
 renderVals() {
-return { theme: this.props.theme ?? 'system', showResume: this.props.showResume ?? false };
+return { theme: this.props.theme ?? 'system', showResume: this.props.showResume ?? false, showUpcoming: this.props.showUpcoming ?? true };
 }
 }
 </script>

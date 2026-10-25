@@ -49,9 +49,17 @@ a{color:var(--chili-deep)}
           <div style="display: flex; flex-direction: column; gap: 6px">
             <div style="display: flex; align-items: center; justify-content: space-between; min-height: 24px">
               <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600">{{s.meal}}{{s.countLabel}}</span>
-              <sc-if value="{{s.filled}}" hint-placeholder-val="{{true}}">
-                <a href="Today.dc.html" style="padding: 2px 4px; font-size: 13px; line-height: 18px; font-weight: 600; text-decoration: none">+ Thêm món</a>
-              </sc-if>
+              <span style="display: flex; align-items: center; gap: 8px">
+                <sc-if value="{{s.multi}}" hint-placeholder-val="{{false}}">
+                  <a href="MealCookPrep.dc.html" aria-label="{{s.cookLabel}}" style="height: 32px; padding: 0 10px; display: flex; align-items: center; gap: 4px; border-radius: 999px; background: var(--chili); color: #FFFFFF; font-size: 13px; line-height: 18px; font-weight: 600; text-decoration: none">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h18a9 9 0 0 1-18 0zM12 4v3M8 5v2M16 5v2"></path></svg>
+                    Nấu bữa này
+                  </a>
+                </sc-if>
+                <sc-if value="{{s.filled}}" hint-placeholder-val="{{true}}">
+                  <a href="Today.dc.html" style="padding: 2px 4px; font-size: 13px; line-height: 18px; font-weight: 600; text-decoration: none">+ Thêm món</a>
+                </sc-if>
+              </span>
             </div>
             <sc-for list="{{s.dishes}}" as="dsh" hint-placeholder-count="1">
               <a href="Detail.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 6px 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
@@ -135,7 +143,7 @@ var META = {
 'Mì xào rau cải': '15 phút · Bếp từ',
 'Canh cà chua trứng': '15 phút · Bếp từ',
 'Trứng chiên hành': '15 phút · Bếp từ',
-'Đậu phụ sốt cà chua': '20 phút · Bếp từ',
+'Đậu phụ sốt cà chua': '25 phút · Bếp từ',
 'Trứng hấp thịt băm': '20 phút · Nồi cơm điện',
 'Cháo trứng hành': '25 phút · Nồi cơm điện',
 'Cơm rang dưa cải': '10 phút · Bếp từ',
@@ -192,6 +200,8 @@ return {
 meal: m,
 countLabel: list.length > 1 ? ' · ' + list.length + ' món' : '',
 dishes: list.map(function (n) { return { name: n, meta: META[n] }; }),
+multi: list.length > 1,
+cookLabel: 'Nấu cả bữa ' + m.toLowerCase() + ': ' + list.join(', '),
 filled: list.length > 0,
 empty: list.length === 0
 };

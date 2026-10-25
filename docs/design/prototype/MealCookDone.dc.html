@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Xong cả bữa</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+input[type=checkbox]{accent-color:var(--herb)}
+.done-art .bh-icon{width:40px;height:40px;stroke-width:1.5}
+.rate{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;padding:0}
+.rate:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.rate .bh-icon{width:24px;height:24px}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 18px; padding: 24px 16px 12px 16px">
+    <section style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+      <div class="done-art" style="width: 80px; height: 80px; border-radius: 999px; background: var(--chili-soft); color: var(--chili); display: flex; align-items: center; justify-content: center">
+        <x-import component-from-global-scope="BepHoaLac.Icon" name="bowl"></x-import>
+      </div>
+      <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700">Xong bữa tối! Ăn ngon nhé</h1>
+      <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">2 món · 1 người · khoảng 35 phút</span>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Từng món thế nào?</h2>
+      <ul style="margin: 0; padding: 0 12px; list-style: none; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
+        <sc-for list="{{dishes}}" as="dh" hint-placeholder-count="2">
+          <li style="min-height: 68px; display: flex; align-items: center; gap: 8px; {{dh.rowStyle}}">
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+              <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{dh.name}}</span>
+              <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{dh.picked}}</span>
+            </span>
+            <span role="group" aria-label="{{dh.groupLabel}}" style="display: flex; gap: 6px">
+              <sc-for list="{{dh.ratings}}" as="r" hint-placeholder-count="3">
+                <button class="rate" onClick="{{r.pick}}" aria-pressed="{{r.on}}" aria-label="{{r.label}}" title="{{r.label}}" style="{{r.style}}">
+                  <x-import component-from-global-scope="BepHoaLac.Icon" name="{{r.icon}}"></x-import>
+                </button>
+              </sc-for>
+            </span>
+          </li>
+        </sc-for>
+      </ul>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Cập nhật Tủ đồ · cả bữa</h2>
+      <p style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px">Tick thứ đã dùng hết, app bỏ khỏi tủ một lần cho cả hai món.</p>
+      <ul style="margin: 0; padding: 0 12px; list-style: none; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
+        <sc-for list="{{items}}" as="it" hint-placeholder-count="4">
+          <li style="{{it.rowStyle}}">
+            <label style="min-height: 52px; display: flex; align-items: center; gap: 12px; cursor: pointer">
+              <span style="flex: 1; display: flex; flex-direction: column">
+                <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{it.name}}</span>
+                <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{it.note}}</span>
+              </span>
+              <span style="font-size: 13px; line-height: 18px; font-weight: 600">Hết</span>
+              <input type="checkbox" checked="{{it.out}}" onChange="{{it.toggle}}" aria-label="{{it.aria}}" style="width: 22px; height: 22px; margin: 0">
+            </label>
+          </li>
+        </sc-for>
+      </ul>
+    </section>
+  </main>
+
+  <footer style="flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding: 12px 16px 24px 16px; border-top: 1px solid var(--line); background: var(--surface-raised)">
+    <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px; text-align: center">Bữa tối thứ Ba được đánh dấu đã nấu trong Thực đơn.</span>
+    <a href="Main.dc.html" class="bh-btn bh-btn-primary bh-btn-block bh-btn-lg" style="text-decoration: none">Cập nhật tủ và xong</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+var DISHES = ['Đậu phụ sốt cà chua', 'Trứng chiên hành'];
+var RATINGS = [['good', 'Ngon', 'smile'], ['ok', 'Tạm', 'meh'], ['bad', 'Chê', 'frown']];
+var USED = [
+{ id: 'tofu', name: 'Đậu phụ', note: 'Đã dùng 2 bìa · Đậu phụ' },
+{ id: 'tomato', name: 'Cà chua', note: 'Đã dùng 2 quả · Đậu phụ' },
+{ id: 'egg', name: 'Trứng gà', note: 'Đã dùng 2 quả · tủ còn trứng' },
+{ id: 'onion', name: 'Hành lá', note: 'Đã dùng 2 nắm · 2 món' }
+];
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { rating: { 0: 'good' }, out: { tofu: true, tomato: true, onion: true } };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+return {
+theme: this.props.theme ?? 'system',
+dishes: DISHES.map(function (name, di) {
+var cur = st.rating[di];
+var curLabel = RATINGS.filter(function (r) { return r[0] === cur; })[0];
+return {
+name: name,
+picked: curLabel ? 'Bạn chấm: ' + curLabel[1] : 'Chưa chấm',
+groupLabel: 'Đánh giá ' + name,
+rowStyle: di < DISHES.length - 1 ? 'border-bottom: 1px solid var(--line);' : '',
+ratings: RATINGS.map(function (r) {
+var on = cur === r[0];
+return {
+label: r[1] + ' · ' + name,
+icon: r[2],
+on: on,
+style: on ? 'border: 1px solid var(--chili-soft); background: var(--chili-soft); color: var(--chili-deep);' : 'border: 1px solid var(--outline); background: var(--surface-raised); color: var(--ink);',
+pick: function () {
+var next = Object.assign({}, self.state.rating);
+next[di] = r[0];
+self.setState({ rating: next });
+}
+};
+})
+};
+}),
+items: USED.map(function (u, i) {
+var o = !!st.out[u.id];
+return {
+name: u.name, note: u.note, out: o,
+aria: u.name + ': đã dùng hết',
+rowStyle: i < USED.length - 1 ? 'border-bottom: 1px solid var(--line);' : '',
+toggle: function () {
+var next = Object.assign({}, self.state.out);
+next[u.id] = !o;
+self.setState({ out: next });
+}
+};
+})
+};
+}
+}
+</script>
+</body>
+</html>

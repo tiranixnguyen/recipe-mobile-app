@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Nấu cả bữa · từng bước</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a{color:var(--chili-deep)}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+.dish{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;padding:8px 10px;border-radius:12px;cursor:pointer;text-align:left;font-family:'Be Vietnam Pro',sans-serif;color:var(--ink)}
+.dish:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.dish .bh-icon{width:16px;height:16px}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; position: relative; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; flex-direction: column; gap: 8px; padding: 8px 16px 0 4px; flex-shrink: 0">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <a href="MealCookPrep.dc.html" aria-label="Thoát chế độ nấu" style="width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <x-import component-from-global-scope="BepHoaLac.Icon" name="close"></x-import>
+      </a>
+      <span style="font-size: 15px; line-height: 22px; font-weight: 600">Bữa tối · món {{dishNo}}/{{dishCount}}</span>
+      <x-import component-from-global-scope="BepHoaLac.Button" variant="ghost" icon="list" on-click="{{openSheet}}">Nguyên liệu</x-import>
+    </div>
+    <div role="tablist" aria-label="Món trong bữa" style="display: flex; gap: 8px; padding-left: 12px">
+      <sc-for list="{{dishes}}" as="dh" hint-placeholder-count="2">
+        <button class="dish" role="tab" aria-selected="{{dh.on}}" onClick="{{dh.pick}}" style="{{dh.style}}">
+          <span style="display: flex; align-items: center; gap: 4px; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
+            <sc-if value="{{dh.done}}" hint-placeholder-val="{{false}}"><span style="display: flex; color: var(--herb-ink)"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span></sc-if>
+            {{dh.label}}
+          </span>
+          <span aria-hidden="true" style="display: grid; gap: 3px; {{dh.grid}}">
+            <sc-for list="{{dh.segments}}" as="sg" hint-placeholder-count="4">
+              <span style="height: 4px; border-radius: 999px; {{sg.style}}"></span>
+            </sc-for>
+          </span>
+          <span style="color: var(--ink-muted); font-size: 11px; line-height: 14px; font-weight: 600">{{dh.progress}}</span>
+        </button>
+      </sc-for>
+    </div>
+  </header>
+
+  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 16px; padding: 24px 24px 16px 24px">
+    <span style="font-size: 13px; line-height: 18px; font-weight: 700; color: var(--chili-deep); letter-spacing: .04em">{{stepTag}}</span>
+    <p aria-live="polite" style="margin: 0; font-size: 24px; line-height: 34px; font-weight: 400">{{step.text}}</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px">
+      <sc-for list="{{step.uses}}" as="u" hint-placeholder-count="2">
+        <span style="padding: 4px 10px; border-radius: 999px; background: var(--surface-raised); border: 1px solid var(--line); font-size: 13px; line-height: 18px; font-weight: 600">{{u}}</span>
+      </sc-for>
+    </div>
+    <sc-if value="{{hasTip}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--herb-soft); font-size: 13px; line-height: 18px">
+        <span style="display: flex; color: var(--herb-ink)"><x-import component-from-global-scope="BepHoaLac.Icon" name="info"></x-import></span>
+        <span>{{step.tip}}</span>
+      </div>
+    </sc-if>
+  </main>
+
+  <section aria-label="Hẹn giờ" style="flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding: 0 16px 12px 16px">
+    <sc-for list="{{timers}}" as="tm" hint-placeholder-count="1">
+      <div style="{{tm.style}}">
+        <x-import component-from-global-scope="BepHoaLac.StepTimer" seconds="{{tm.sec}}" label="{{tm.name}}" on-status-change="{{tm.onStatus}}"></x-import>
+      </div>
+    </sc-for>
+  </section>
+
+  <footer style="flex-shrink: 0; display: flex; gap: 12px; padding: 12px 16px 24px 16px; border-top: 1px solid var(--line); background: var(--surface-raised)">
+    <x-import component-from-global-scope="BepHoaLac.Button" variant="secondary" icon="back" size="lg" block="{{yes}}" disabled="{{isFirst}}" on-click="{{prev}}" style="flex: 1">Bước trước</x-import>
+    <sc-if value="{{showNext}}" hint-placeholder-val="{{true}}">
+      <x-import component-from-global-scope="BepHoaLac.Button" size="lg" block="{{yes}}" on-click="{{next}}" style="flex: 1.6">{{nextLabel}}</x-import>
+    </sc-if>
+    <sc-if value="{{showFinish}}" hint-placeholder-val="{{false}}">
+      <a href="MealCookDone.dc.html" class="bh-btn bh-btn-primary bh-btn-lg" style="flex: 1.6; padding: 0 12px; text-decoration: none">
+        <x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import>
+        Xong cả bữa
+      </a>
+    </sc-if>
+  </footer>
+
+  <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(20, 14, 10, 0.55)">
+      <div role="dialog" aria-label="Nguyên liệu" style="padding: 8px 16px 24px 16px; border-radius: 16px 16px 0 0; background: var(--surface-raised); display: flex; flex-direction: column; gap: 12px">
+        <span aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: var(--line)"></span>
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">{{sheetTitle}}</h2>
+          <x-import component-from-global-scope="BepHoaLac.Button" variant="ghost" on-click="{{closeSheet}}">Đóng</x-import>
+        </div>
+        <ul style="margin: 0; padding: 0; list-style: none">
+          <sc-for list="{{sheetItems}}" as="si" hint-placeholder-count="4">
+            <li style="display: flex; justify-content: space-between; padding: 12px 0; font-size: 15px; line-height: 22px; {{si.rowStyle}}"><span>{{si.name}}</span><span style="font-weight: 600">{{si.qty}}</span></li>
+          </sc-for>
+        </ul>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+var DISHES = [
+{ name: 'Đậu phụ sốt cà chua', short: 'Đậu phụ', ingredients: [['Đậu phụ', '2 bìa'], ['Cà chua', '2 quả'], ['Hành lá', '1 nắm'], ['Dầu ăn, nước mắm', 'Vừa đủ']], steps: [
+{ text: 'Cắt đậu phụ thành miếng vuông. Cà chua bổ múi cau, hành lá thái nhỏ.', uses: ['2 bìa đậu', '2 quả cà chua', 'Hành lá'], sec: 0 },
+{ text: 'Cho 2 thìa dầu vào chảo, chiên đậu đến khi vàng các mặt rồi gắp ra đĩa.', uses: ['Dầu ăn', 'Chảo'], sec: 300, timerName: 'Chiên đậu' },
+{ text: 'Xào cà chua đến khi nhuyễn, thêm 1 thìa nước mắm và nửa bát nước.', uses: ['Cà chua', 'Nước mắm'], sec: 180, timerName: 'Xào cà chua' },
+{ text: 'Cho đậu vào, om nhỏ lửa cho ngấm sốt. Rắc hành, tắt bếp và đậy nắp.', uses: ['Đậu đã chiên', 'Hành lá'], sec: 480, timerName: 'Om nhỏ lửa', tip: 'Đậy nắp là giữ ấm được tới lúc ăn. Om xong thì sang món trứng.' }
+] },
+{ name: 'Trứng chiên hành', short: 'Trứng', ingredients: [['Trứng gà', '2 quả'], ['Hành lá', '1 nắm'], ['Cơm trắng', '1 suất'], ['Dầu ăn, nước mắm, tiêu', 'Vừa đủ']], steps: [
+{ text: 'Đập 2 quả trứng ra bát, thêm chút nước mắm, tiêu và phần hành còn lại, đánh tan.', uses: ['2 quả trứng', 'Hành lá'], sec: 0, tip: 'Dùng luôn chảo vừa làm đậu, lau qua là được.' },
+{ text: 'Bật bếp từ mức vừa, cho 1 thìa dầu vào chảo và đợi dầu nóng.', uses: ['Dầu ăn', 'Chảo'], sec: 60, timerName: 'Làm nóng dầu' },
+{ text: 'Đổ trứng vào chảo, nghiêng chảo cho trứng dàn đều. Chiên đến khi mặt dưới vàng.', uses: ['Trứng đã đánh'], sec: 180, timerName: 'Chiên mặt dưới' },
+{ text: 'Lật trứng, chiên thêm một chút rồi xúc ra đĩa. Dọn cả hai món ra ăn nóng.', uses: ['Cơm trắng'], sec: 60, timerName: 'Chiên mặt trên' }
+] }
+];
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { d: 0, pos: [0, 0], done: {}, sheet: false, status: {} };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var dish = DISHES[st.d];
+var i = st.pos[st.d];
+var s = dish.steps[i];
+var lastDish = st.d === DISHES.length - 1;
+var lastStep = i === dish.steps.length - 1;
+function go(d, k) {
+var pos = self.state.pos.slice();
+pos[d] = k;
+self.setState({ d: d, pos: pos });
+}
+var timers = [];
+DISHES.forEach(function (x, di) {
+x.steps.forEach(function (y, k) {
+// One StepTimer per timed step of every dish, kept mounted; a running or finished one stays visible across dishes.
+if (y.sec > 0) {
+var key = di + '-' + k;
+var shown = (di === st.d && k === i) || (st.status[key] || 'idle') !== 'idle';
+timers.push({
+sec: y.sec,
+name: x.short + ' · ' + y.timerName,
+style: shown ? 'display: block;' : 'display: none;',
+onStatus: function (v) {
+var next = Object.assign({}, self.state.status);
+next[key] = v;
+self.setState({ status: next });
+}
+});
+}
+});
+});
+return {
+theme: this.props.theme ?? 'system',
+yes: true,
+dishNo: st.d + 1,
+dishCount: DISHES.length,
+dishes: DISHES.map(function (x, di) {
+var on = di === st.d;
+var p = st.pos[di];
+var finished = !!st.done[di];
+return {
+label: (di + 1) + '. ' + x.short,
+on: on,
+done: finished,
+pick: function () { self.setState({ d: di }); },
+style: on ? 'border: 2px solid var(--chili); background: var(--chili-soft);' : 'border: 1px solid var(--outline); background: var(--surface-raised);',
+grid: 'grid-template-columns: repeat(' + x.steps.length + ', minmax(0, 1fr));',
+segments: x.steps.map(function (y, k) { return { style: (finished || k <= p && (on || p > 0)) ? 'background: var(--chili);' : 'background: var(--line);' }; }),
+progress: finished ? 'Xong' : (on || p > 0 ? 'Bước ' + (p + 1) + '/' + x.steps.length : x.steps.length + ' bước')
+};
+}),
+stepTag: dish.short.toUpperCase() + ' · BƯỚC ' + (i + 1) + '/' + dish.steps.length,
+step: { text: s.text, uses: s.uses, tip: s.tip || '' },
+hasTip: !!s.tip,
+timers: timers,
+isFirst: st.d === 0 && i === 0,
+showNext: !(lastDish && lastStep),
+showFinish: lastDish && lastStep,
+nextLabel: lastStep ? 'Sang món ' + (st.d + 2) + ': ' + DISHES[st.d + 1].short : 'Bước tiếp',
+next: function () {
+if (!lastStep) { go(st.d, i + 1); return; }
+var done = Object.assign({}, self.state.done);
+done[st.d] = true;
+var pos = self.state.pos.slice();
+self.setState({ done: done, d: st.d + 1, pos: pos });
+},
+prev: function () {
+if (i > 0) { go(st.d, i - 1); return; }
+if (st.d > 0) { go(st.d - 1, DISHES[st.d - 1].steps.length - 1); }
+},
+sheetOpen: st.sheet,
+sheetTitle: 'Nguyên liệu · ' + dish.name,
+sheetItems: dish.ingredients.map(function (g, k) { return { name: g[0], qty: g[1], rowStyle: k < dish.ingredients.length - 1 ? 'border-bottom: 1px solid var(--line);' : '' }; }),
+openSheet: function () { self.setState({ sheet: true }); },
+closeSheet: function () { self.setState({ sheet: false }); }
+};
+}
+}
+</script>
+</body>
+</html>
