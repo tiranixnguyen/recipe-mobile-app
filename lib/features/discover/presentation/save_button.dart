@@ -6,13 +6,14 @@ import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/features/discover/data/saved_recipes.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 
-/// Nút lưu món: tròn 40, nền `surfaceRaised`; đã lưu thì bookmark tô đặc màu `chili`.
+/// Nút lưu món: tròn [size] (40), nền `surfaceRaised`; đã lưu thì bookmark tô đặc màu `chili`.
 ///
-/// Đặt vào slot `action` của `RecipeCard`, hoặc thanh trên màn Chi tiết món.
+/// Đặt vào slot `action` của `RecipeCard`, hoặc trên ảnh màn Chi tiết món (`size: 48`).
 class SaveButton extends ConsumerWidget {
-  const SaveButton({super.key, required this.recipeId});
+  const SaveButton({super.key, required this.recipeId, this.size = 40});
 
   final String recipeId;
+  final double size;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,8 +26,8 @@ class SaveButton extends ConsumerWidget {
         tooltip: saved ? DiscoverStrings.unsave : DiscoverStrings.save,
         icon: Icon(AppIcons.bookmark, fill: saved ? 1 : 0),
         style: IconButton.styleFrom(
-          fixedSize: const Size.square(40),
-          minimumSize: const Size.square(40),
+          fixedSize: Size.square(size),
+          minimumSize: Size.square(size),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           backgroundColor: colors.surfaceRaised,
           foregroundColor: saved ? colors.chili : colors.ink,
