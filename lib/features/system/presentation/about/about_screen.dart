@@ -143,10 +143,12 @@ class _InfoRow extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 56),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: AppTextStyles.body),
+              // Chữ to hay màn hẹp: nhãn và giá trị chia nhau bề ngang, cùng xuống dòng.
+              Flexible(child: Text(label, style: AppTextStyles.body)),
               const SizedBox(width: AppSpacing.s3),
-              Expanded(
+              Flexible(
                 child: Text(
                   value,
                   textAlign: TextAlign.end,

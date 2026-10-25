@@ -2,10 +2,13 @@ import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/data/feedback_repository.dart';
 import 'package:recipe_mobile_app/features/system/data/device_info.dart';
 import 'package:recipe_mobile_app/features/system/data/screenshot_picker.dart';
 import 'package:recipe_mobile_app/features/system/presentation/feedback/feedback_view_model.dart';
+
+import 'fake_analytics.dart';
 
 typedef _Sent = ({
   FeedbackKind kind,
@@ -38,19 +41,27 @@ class _FakeRepository implements FeedbackRepository {
   }
 }
 
+class _ThrowingAnalytics implements Analytics {
+  @override
+  void track(String event, [Map<String, Object>? params]) => throw StateError('analytics hỏng');
+}
+
 void main() {
   late _FakeRepository repository;
   late Uint8List? picked;
   late ProviderContainer container;
+  late FakeAnalytics analytics;
 
   setUp(() {
     repository = _FakeRepository();
+    analytics = FakeAnalytics();
     picked = null;
     container = ProviderContainer(
       overrides: [
         feedbackRepositoryProvider.overrideWithValue(repository),
         deviceInfoProvider.overrideWith((ref) async => {'app': '0.1.0', 'android': '15'}),
         pickScreenshotProvider.overrideWithValue(() async => picked),
+        analyticsProvider.overrideWithValue(analytics),
       ],
     );
   });
@@ -102,6 +113,8 @@ void main() {
     expect(sent.screenshot, [1, 2, 3]);
     expect(sent.email, 'ban@vidu.com');
     expect(sent.deviceInfo, {'app': '0.1.0', 'android': '15'});
+    expect(analytics.events, ['feedback_send']);
+    expect(analytics.params.single, {'kind': 'recipe', 'screenshot': true, 'from_error': false});
   });
 
   test('bỏ tick thông tin máy, không điền email thì không gửi hai thứ đó', () async {
@@ -128,9 +141,11 @@ void main() {
     expect(sub.read().email, 'ban@vidu.com');
     expect(sub.read().sending, isFalse);
     expect(sub.read().canSend, isTrue);
+    expect(analytics.events, isEmpty, reason: 'chỉ ghi khi gửi được');
 
     repository.fail = false;
     expect(await viewModel().send(), isTrue);
+    expect(analytics.events, hasLength(1));
   });
 
   test('ảnh quá 2 MB thì không đính kèm, báo lỗi; bỏ ảnh được', () async {
@@ -158,6 +173,23 @@ void main() {
 
     expect(sub.read().screenshot, hasLength(10));
     expect(sub.read().screenshotTooBig, isTrue);
+  });
+
+  test('analytics lỗi thì góp ý đã gửi vẫn tính là gửi được', () async {
+    final container = ProviderContainer(
+      overrides: [
+        feedbackRepositoryProvider.overrideWithValue(repository),
+        deviceInfoProvider.overrideWith((ref) async => const {}),
+        analyticsProvider.overrideWithValue(_ThrowingAnalytics()),
+      ],
+    );
+    addTearDown(container.dispose);
+    final sub = container.listen(feedbackViewModelProvider(null), (_, _) {});
+    final viewModel = container.read(feedbackViewModelProvider(null).notifier)..setMessage('Góp ý');
+
+    expect(await viewModel.send(), isTrue);
+    expect(repository.sent, hasLength(1));
+    expect(sub.read().sending, isFalse);
   });
 
   test('huỷ chọn ảnh thì giữ ảnh cũ', () async {

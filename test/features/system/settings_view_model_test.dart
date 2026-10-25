@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/features/system/data/app_info.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
+import 'fake_analytics.dart';
 import 'fake_notification_plugin.dart';
 
 void main() {
@@ -13,16 +15,19 @@ void main() {
   late ProviderSubscription<SettingsState> sub;
   late int storeOpened;
   late FakeNotificationPlugin plugin;
+  late FakeAnalytics analytics;
 
   setUp(() {
     storeOpened = 0;
     plugin = FakeNotificationPlugin();
+    analytics = FakeAnalytics();
     container = ProviderContainer(
       overrides: [
         localStoreProvider.overrideWithValue(InMemoryLocalStore()),
         appVersionProvider.overrideWith((ref) async => '1.2.3'),
         openStoreListingProvider.overrideWithValue(() async => storeOpened++),
         notificationPluginProvider.overrideWithValue(plugin),
+        analyticsProvider.overrideWithValue(analytics),
       ],
     );
     sub = container.listen(settingsViewModelProvider, (_, _) {});
@@ -47,6 +52,14 @@ void main() {
 
     expect(sub.read().themeMode, ThemeMode.dark);
     expect(container.read(themeModeProvider), ThemeMode.dark);
+  });
+
+  test('đổi giao diện ghi theme_change; chọn lại ô đang chọn thì không', () async {
+    await viewModel().setThemeMode(ThemeMode.system);
+    await viewModel().setThemeMode(ThemeMode.light);
+
+    expect(analytics.events, ['theme_change']);
+    expect(analytics.params.single, {'mode': 'light'});
   });
 
   test('bật/tắt thông báo cập nhật state', () async {

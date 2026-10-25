@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/system/data/kitchen_profile.dart';
 import 'package:recipe_mobile_app/features/system/data/preferences.dart';
@@ -40,12 +41,24 @@ class OnboardingViewModel extends Notifier<OnboardingState> {
     await ref
         .read(kitchenProfileProvider.notifier)
         .save(KitchenProfile(tools: state.tools, diets: state.diets));
-    await ref.read(onboardingDoneProvider.notifier).complete();
+    await _complete(skipped: false);
   }
 
   /// Bỏ qua: không lưu lựa chọn (hồ sơ bếp để rỗng = chưa chọn), chỉ ghi nhận đã qua Onboarding.
   Future<void> skip() async {
     state = state.copyWith(finishing: true);
+    await _complete(skipped: true);
+  }
+
+  /// Lần đầu qua Onboarding thì ghi `onboarding_done`; sửa lại từ Cài đặt thì không.
+  Future<void> _complete({required bool skipped}) async {
+    if (!ref.read(onboardingDoneProvider)) {
+      ref.read(analyticsProvider).track('onboarding_done', {
+        'skipped': skipped,
+        'tools': skipped ? 0 : state.tools.length,
+        'diets': skipped ? 0 : state.diets.length,
+      });
+    }
     await ref.read(onboardingDoneProvider.notifier).complete();
   }
 

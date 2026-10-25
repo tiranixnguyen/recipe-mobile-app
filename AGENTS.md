@@ -77,6 +77,19 @@ assets/data/             # recipes.json, ingredients.json — xem docs/data-mode
 - Kiểu dùng chung (`Recipe`, `Ingredient`, `Meal`, `Tool`, `Diet`, `IngredientGroup`) nằm trong
   `lib/core/models/`. Không tự định nghĩa lại bằng `String`.
 
+## Analytics
+
+Ghi sự kiện bằng `ref.read(analyticsProvider).track(event, params)` (`lib/core/analytics.dart`) trong
+ViewModel, không gọi từ View. Tên snake_case; tham số chỉ là số, bool hoặc chuỗi cố định — không gửi nội dung
+người dùng gõ, email hay id thiết bị. Hiện là stub in ra log, bản Firebase thay sau (SET-16). Thêm sự kiện mới
+thì ghi vào bảng này.
+
+| Sự kiện | Khi nào | Tham số |
+|---|---|---|
+| `onboarding_done` | Lần đầu qua Onboarding (Xong hoặc Bỏ qua) | `skipped`, `tools`, `diets` (số lượng) |
+| `theme_change` | Đổi Sáng/Tối/Theo hệ thống trong Cài đặt | `mode` (`light`/`dark`/`system`) |
+| `feedback_send` | Gửi góp ý thành công | `kind` (`bug`/`recipe`/`other`), `screenshot`, `from_error` |
+
 ## 5 feature
 
 | Feature | Chủ | Thư mục | Màn (prototype) | Public API (`<f>.dart`) |

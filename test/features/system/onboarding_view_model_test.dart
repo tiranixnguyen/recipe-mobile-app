@@ -1,17 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/features/system/presentation/onboarding/onboarding_view_model.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
+import 'fake_analytics.dart';
+
 void main() {
   late ProviderContainer container;
   late ProviderSubscription<OnboardingState> sub;
+  late FakeAnalytics analytics;
 
   setUp(() {
+    analytics = FakeAnalytics();
     container = ProviderContainer(
-      overrides: [localStoreProvider.overrideWithValue(InMemoryLocalStore())],
+      overrides: [
+        localStoreProvider.overrideWithValue(InMemoryLocalStore()),
+        analyticsProvider.overrideWithValue(analytics),
+      ],
     );
     sub = container.listen(onboardingViewModelProvider, (_, _) {});
   });
@@ -72,5 +80,32 @@ void main() {
     final state = container.read(onboardingViewModelProvider);
     expect(state.tools, {Tool.rice});
     expect(state.diets, {Diet.light});
+  });
+
+  test('lần đầu Xong hay Bỏ qua đều ghi onboarding_done', () async {
+    viewModel()
+      ..toggleTool(Tool.kettle)
+      ..toggleTool(Tool.rice)
+      ..toggleDiet(Diet.veg);
+    await viewModel().save();
+
+    expect(analytics.events, ['onboarding_done']);
+    expect(analytics.params.single, {'skipped': false, 'tools': 2, 'diets': 1});
+  });
+
+  test('Bỏ qua ghi onboarding_done với skipped', () async {
+    viewModel().toggleTool(Tool.micro);
+    await viewModel().skip();
+
+    expect(analytics.events, ['onboarding_done']);
+    expect(analytics.params.single, {'skipped': true, 'tools': 0, 'diets': 0});
+  });
+
+  test('sửa lại từ Cài đặt thì không ghi onboarding_done nữa', () async {
+    await container.read(onboardingDoneProvider.notifier).complete();
+
+    await viewModel().save();
+
+    expect(analytics.events, isEmpty);
   });
 }
