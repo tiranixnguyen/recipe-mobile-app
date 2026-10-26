@@ -20,6 +20,7 @@ class DoneState {
     required this.usedUp,
     required this.rating,
     required this.saved,
+    this.finishing = false,
   });
 
   final Recipe recipe;
@@ -32,6 +33,9 @@ class DoneState {
   final Set<String> usedUp;
   final CookRating? rating;
   final bool saved;
+
+  /// Đang lưu sau khi bấm "Cập nhật tủ và xong": khoá nút để không ghi lịch sử hai lần.
+  final bool finishing;
 }
 
 /// Nấu xong một món (prototype `CookDone`): bỏ đồ đã hết khỏi tủ, đánh giá, lưu món.
@@ -44,6 +48,7 @@ class DoneViewModel extends Notifier<AsyncValue<DoneState>> {
   Set<String> _usedUp = const {};
   CookRating? _rating;
   int? _servings;
+  bool _finishing = false;
 
   @override
   AsyncValue<DoneState> build() {
@@ -81,6 +86,7 @@ class DoneViewModel extends Notifier<AsyncValue<DoneState>> {
         usedUp: _usedUp,
         rating: _rating,
         saved: ref.watch(savedIdsProvider).contains(recipeId),
+        finishing: _finishing,
       ),
     );
   }
@@ -105,16 +111,23 @@ class DoneViewModel extends Notifier<AsyncValue<DoneState>> {
   /// nấu; đủ lần "Ngon" thì hỏi đánh giá app.
   Future<void> finish() async {
     final value = state.value;
-    if (value == null) return;
-    final pantry = ref.read(pantryItemsProvider.notifier);
-    for (final item in value.used.where((i) => value.usedUp.contains(i.ingredientId))) {
-      await pantry.removeFromPantry(item.ingredientId);
+    if (value == null || _finishing) return;
+    _finishing = true;
+    ref.invalidateSelf();
+    try {
+      final pantry = ref.read(pantryItemsProvider.notifier);
+      for (final item in value.used.where((i) => value.usedUp.contains(i.ingredientId))) {
+        await pantry.removeFromPantry(item.ingredientId);
+      }
+      await ref
+          .read(cookHistoryProvider.notifier)
+          .record(recipeId, rating: value.rating, at: ref.read(cookClockProvider)());
+      await ref.read(cookSessionProvider.notifier).clear();
+      if (value.rating == CookRating.good) await ref.read(reviewPromptProvider).maybeAsk();
+    } finally {
+      _finishing = false;
+      if (ref.mounted) ref.invalidateSelf();
     }
-    await ref
-        .read(cookHistoryProvider.notifier)
-        .record(recipeId, rating: value.rating, at: ref.read(cookClockProvider)());
-    await ref.read(cookSessionProvider.notifier).clear();
-    if (value.rating == CookRating.good) await ref.read(reviewPromptProvider).maybeAsk();
   }
 }
 

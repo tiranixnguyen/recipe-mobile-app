@@ -80,6 +80,14 @@ void main() {
     expect(env.review.requests, 0);
   });
 
+  test('bấm xong hai lần liền chỉ ghi một lần nấu', () async {
+    final env = _Env();
+    await env.open();
+    env.viewModel.rate(CookRating.good);
+    await Future.wait([env.viewModel.finish(), env.viewModel.finish()]);
+    expect(env.container.read(cookHistoryProvider), hasLength(1));
+  });
+
   test('chọn lại đánh giá đang chọn thì bỏ; không đánh giá vẫn ghi lịch sử', () async {
     final env = _Env();
     await env.open();

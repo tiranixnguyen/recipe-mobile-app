@@ -136,7 +136,7 @@ class _Done extends ConsumerWidget {
                     label: state.used.isEmpty ? CookStrings.finish : CookStrings.finishAndUpdate,
                     size: AppButtonSize.lg,
                     block: true,
-                    onPressed: finish,
+                    onPressed: state.finishing ? null : finish,
                   ),
                 ],
               ),
