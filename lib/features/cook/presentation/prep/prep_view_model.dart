@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
@@ -135,9 +136,14 @@ class PrepViewModel extends Notifier<AsyncValue<PrepState>> {
 
   /// "Bắt đầu nấu": mở phiên nấu mới từ bước đầu.
   Future<void> start() async {
-    final servings = state.value?.servings;
-    if (servings == null) return;
-    await ref.read(cookSessionProvider.notifier).startRecipe(recipeId, servings);
+    final value = state.value;
+    if (value == null) return;
+    await ref.read(cookSessionProvider.notifier).startRecipe(recipeId, value.servings);
+    ref.read(analyticsProvider).track('start_cooking', {
+      'servings': value.servings,
+      'steps': value.recipe.steps.length,
+      'meal_dishes': 1,
+    });
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/cook/domain/recipe_detail.dart';
@@ -47,6 +48,9 @@ class DetailViewModel extends Notifier<AsyncValue<DetailState>> {
 
   final String recipeId;
 
+  /// `view_recipe` chỉ ghi một lần mỗi lần mở màn, không ghi lại khi tủ đồ đổi.
+  bool _viewed = false;
+
   @override
   AsyncValue<DetailState> build() {
     final recipes = ref.watch(recipesProvider);
@@ -68,6 +72,10 @@ class DetailViewModel extends Notifier<AsyncValue<DetailState>> {
     final pantry = ref.watch(pantryItemsProvider);
     final byId = {for (final i in ingredients) i.id: i};
     final (:items, :basicSpices) = detailIngredients(recipe, pantry, byId);
+    if (!_viewed) {
+      _viewed = true;
+      ref.read(analyticsProvider).track('view_recipe', {'recipe': recipe.id});
+    }
     return AsyncData(
       DetailState(
         recipe: recipe,

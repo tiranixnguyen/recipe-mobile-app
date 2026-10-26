@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/cook/data/app_review.dart';
@@ -131,6 +132,15 @@ class MealDoneViewModel extends Notifier<AsyncValue<MealDoneState>> {
         for (final d in value.dishes) d.recipe.id,
       ]);
       await ref.read(cookSessionProvider.notifier).clear();
+      final analytics = ref.read(analyticsProvider);
+      analytics.track('finish_cooking', {
+        'used_up': value.usedUp.length,
+        'rated': value.ratings.isNotEmpty,
+        'meal_dishes': value.dishes.length,
+      });
+      for (final rating in value.ratings.values) {
+        analytics.track('rate_recipe', {'rating': rating.id});
+      }
       if (value.ratings.containsValue(CookRating.good)) {
         await ref.read(reviewPromptProvider).maybeAsk();
       }
