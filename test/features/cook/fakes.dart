@@ -1,4 +1,5 @@
 import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/features/cook/data/app_review.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_device.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
@@ -38,4 +39,11 @@ class FakeNotificationService implements NotificationService {
 
   @override
   Future<void> cancelMealReminders() async {}
+}
+
+class FakeAppReview implements AppReview {
+  int requests = 0;
+
+  @override
+  Future<void> request() async => requests++;
 }

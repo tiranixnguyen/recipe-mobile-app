@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
+import 'package:recipe_mobile_app/features/cook/cook.dart';
+import 'package:recipe_mobile_app/features/pantry/data/suggestions.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 
 const _egg = Ingredient(id: 'egg', name: 'Trứng', group: IngredientGroup.protein);
@@ -140,6 +142,53 @@ void main() {
 
       await container.read(dislikedProvider.notifier).dislike('a', DislikeReason.justAte);
       expect((await container.read(suggestionsProvider(args).future)).map((r) => r.id), ['c']);
+    });
+  });
+
+  group('món bị chê sau khi nấu', () {
+    final now = DateTime(2026, 10, 26, 18);
+
+    ProviderContainer withClock() {
+      final c = ProviderContainer(
+        overrides: [
+          localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
+          ingredientsProvider.overrideWith((ref) async => const [_egg]),
+          recipesProvider.overrideWith((ref) async => recipes),
+          pantryClockProvider.overrideWithValue(() => now),
+        ],
+      );
+      addTearDown(c.dispose);
+      return c;
+    }
+
+    test('lùi xuống cuối gợi ý và món nấu được trong 3 ngày', () async {
+      final c = withClock();
+      final history = c.read(cookHistoryProvider.notifier);
+      await history.record('a', rating: CookRating.bad, at: now.subtract(const Duration(days: 2)));
+      await c.read(pantryItemsProvider.notifier).addToPantry('egg');
+      const args = (meal: Meal.dinner, count: 3);
+      c.listen(suggestionsProvider(args), (_, _) {});
+      c.listen(pantryMatchesProvider, (_, _) {});
+      await c.read(ingredientsProvider.future);
+
+      expect((await c.read(suggestionsProvider(args).future)).map((r) => r.id), ['c', 'a']);
+      expect(c.read(pantryMatchesProvider).requireValue.ready.map((r) => r.id), ['b', 'c', 'a']);
+    });
+
+    test('quá 3 ngày hoặc nấu lại chấm Ngon thì về chỗ cũ', () async {
+      final c = withClock();
+      final history = c.read(cookHistoryProvider.notifier);
+      await history.record('a', rating: CookRating.bad, at: now.subtract(const Duration(days: 4)));
+      await history.record('c', rating: CookRating.bad, at: now.subtract(const Duration(days: 1)));
+      await history.record(
+        'c',
+        rating: CookRating.good,
+        at: now.subtract(const Duration(hours: 1)),
+      );
+      const args = (meal: Meal.dinner, count: 3);
+      c.listen(suggestionsProvider(args), (_, _) {});
+
+      expect((await c.read(suggestionsProvider(args).future)).map((r) => r.id), ['a', 'c']);
     });
   });
 }

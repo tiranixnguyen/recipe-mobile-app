@@ -1,5 +1,6 @@
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/pantry/domain/availability.dart';
+import 'package:recipe_mobile_app/features/pantry/domain/suggest.dart';
 
 /// Món còn thiếu vài thứ, kèm danh sách thiếu.
 typedef NearMatch = ({Recipe recipe, Availability availability});
@@ -10,12 +11,14 @@ typedef PantryMatches = ({List<Recipe> ready, List<NearMatch> near});
 /// Chia [recipes] theo đồ trong [pantry] (so bằng [availabilityFor]).
 ///
 /// [ready] giữ thứ tự dữ liệu; [near] gồm món thiếu 1..[maxMissing] thứ, thiếu ít lên trước, cùng
-/// số thiếu thì giữ thứ tự dữ liệu. Món thiếu nhiều hơn bị bỏ.
+/// số thiếu thì giữ thứ tự dữ liệu. Món thiếu nhiều hơn bị bỏ. Món trong [demoted] (vừa bị chê)
+/// xuống cuối mỗi danh sách.
 PantryMatches matchPantry(
   List<Recipe> recipes,
   Set<String> pantry,
   Map<String, Ingredient> ingredientsById, {
   int maxMissing = 2,
+  Set<String> demoted = const {},
 }) {
   final ready = <Recipe>[];
   final near = <NearMatch>[];
@@ -34,5 +37,8 @@ PantryMatches matchPantry(
     final byMissing = a.availability.missing.length.compareTo(b.availability.missing.length);
     return byMissing != 0 ? byMissing : order[a.recipe.id]!.compareTo(order[b.recipe.id]!);
   });
-  return (ready: List.unmodifiable(ready), near: List.unmodifiable(near));
+  return (
+    ready: List.unmodifiable(demoteLast(ready, demoted, (r) => r.id)),
+    near: List.unmodifiable(demoteLast(near, demoted, (m) => m.recipe.id)),
+  );
 }

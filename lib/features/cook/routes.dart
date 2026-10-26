@@ -1,10 +1,9 @@
 import 'package:go_router/go_router.dart';
 
-import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_screen.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/done/done_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/prep/prep_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/step/step_screen.dart';
-import 'package:recipe_mobile_app/features/cook/strings.dart';
 
 /// Đường dẫn tới màn Chi tiết món — feature khác dùng hàm này thay vì tự ghép chuỗi.
 String recipeLocation(String id) => '/recipe/$id';
@@ -34,7 +33,7 @@ final cookRoutes = <RouteBase>[
       ),
       GoRoute(
         path: 'done',
-        builder: (_, _) => const ComingSoonScreen(title: CookStrings.cookDone),
+        builder: (_, state) => DoneScreen(recipeId: state.pathParameters['id']!),
       ),
     ],
   ),

@@ -110,7 +110,7 @@ void main() {
     await tester.tap(find.text(CookStrings.finish));
     await tester.pumpAndSettle();
     expect(env.container.read(cookSessionProvider)!.isDone, isTrue);
-    expect(find.text(CookStrings.cookDone), findsOneWidget);
+    expect(find.text(CookStrings.doneTitle), findsOneWidget);
     expect(env.wakelock.enabled, isFalse);
   });
 
