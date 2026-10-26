@@ -18,6 +18,9 @@
 body{margin:0}
 *{box-sizing:border-box}
 a{color:var(--chili-deep)}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
 </style>
 </helmet>
 <div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
@@ -47,13 +50,13 @@ a{color:var(--chili-deep)}
     </div>
   </header>
 
-  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 12px; padding: 4px 16px 16px 16px">
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 4px 16px 16px 16px">
     <p style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">[N] món có trứng, dưới 15 phút</p>
 
     <a href="Detail.dc.html" style="display: flex; gap: 12px; padding: 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
       <div style="width: 88px; height: 88px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></div>
-      <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 4px 0">
-        <span style="font-size: 15px; line-height: 22px; font-weight: 600">Trứng chiên hành</span>
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 4px 0">
+        <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">Trứng chiên hành</span>
         <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">15 phút · 1 người · Bếp từ</span>
         <span style="align-self: flex-start; padding: 0 8px; border-radius: 8px; background: var(--herb); color: #FFFFFF; font-size: 12px; line-height: 20px; font-weight: 600">Đủ đồ</span>
       </div>
@@ -64,8 +67,8 @@ a{color:var(--chili-deep)}
 
     <a href="Detail.dc.html" style="display: flex; gap: 12px; padding: 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
       <div style="width: 88px; height: 88px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></div>
-      <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 4px 0">
-        <span style="font-size: 15px; line-height: 22px; font-weight: 600">Canh cà chua trứng</span>
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 4px 0">
+        <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">Canh cà chua trứng</span>
         <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">15 phút · 2 người · Bếp từ</span>
         <span style="align-self: flex-start; padding: 0 8px; border-radius: 8px; background: var(--herb); color: #FFFFFF; font-size: 12px; line-height: 20px; font-weight: 600">Đủ đồ</span>
       </div>
@@ -76,8 +79,8 @@ a{color:var(--chili-deep)}
 
     <a href="Detail.dc.html" style="display: flex; gap: 12px; padding: 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
       <div style="width: 88px; height: 88px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></div>
-      <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 4px 0">
-        <span style="font-size: 15px; line-height: 22px; font-weight: 600">Bánh mì trứng ốp</span>
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 4px 0">
+        <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">Bánh mì trứng ốp</span>
         <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">10 phút · 1 người · Bếp từ</span>
         <span style="color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 600">Thiếu: bánh mì</span>
       </div>
@@ -88,7 +91,7 @@ a{color:var(--chili-deep)}
 
     <a href="Detail.dc.html" style="display: flex; gap: 12px; padding: 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
       <div style="width: 88px; height: 88px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></div>
-      <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; padding: 4px 0">
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 4px 0">
         <span style="font-size: 15px; line-height: 22px; font-weight: 600">Mì trứng hành</span>
         <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">10 phút · 1 người · Ấm siêu tốc</span>
         <span style="align-self: flex-start; padding: 0 8px; border-radius: 8px; background: var(--herb); color: #FFFFFF; font-size: 12px; line-height: 20px; font-weight: 600">Đủ đồ</span>

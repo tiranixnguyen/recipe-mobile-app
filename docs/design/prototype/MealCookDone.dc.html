@@ -23,17 +23,20 @@ input[type=checkbox]{accent-color:var(--herb)}
 .rate{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:12px;cursor:pointer;padding:0}
 .rate:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
 .rate .bh-icon{width:24px;height:24px}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
 </style>
 </helmet>
 <div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
 
-  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 18px; padding: 24px 16px 12px 16px">
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; padding: 24px 16px 12px 16px">
     <section style="display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
       <div class="done-art" style="width: 80px; height: 80px; border-radius: 999px; background: var(--chili-soft); color: var(--chili); display: flex; align-items: center; justify-content: center">
         <x-import component-from-global-scope="BepHoaLac.Icon" name="bowl"></x-import>
       </div>
       <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700">Xong bữa tối! Ăn ngon nhé</h1>
-      <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">2 món · 1 người · khoảng 35 phút</span>
+      <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{meta}}</span>
     </section>
 
     <section style="display: flex; flex-direction: column; gap: 8px">
@@ -42,7 +45,7 @@ input[type=checkbox]{accent-color:var(--herb)}
         <sc-for list="{{dishes}}" as="dh" hint-placeholder-count="2">
           <li style="min-height: 68px; display: flex; align-items: center; gap: 8px; {{dh.rowStyle}}">
             <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
-              <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{dh.name}}</span>
+              <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">{{dh.name}}</span>
               <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{dh.picked}}</span>
             </span>
             <span role="group" aria-label="{{dh.groupLabel}}" style="display: flex; gap: 6px">
@@ -64,7 +67,7 @@ input[type=checkbox]{accent-color:var(--herb)}
         <sc-for list="{{items}}" as="it" hint-placeholder-count="4">
           <li style="{{it.rowStyle}}">
             <label style="min-height: 52px; display: flex; align-items: center; gap: 12px; cursor: pointer">
-              <span style="flex: 1; display: flex; flex-direction: column">
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
                 <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{it.name}}</span>
                 <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{it.note}}</span>
               </span>
@@ -83,7 +86,7 @@ input[type=checkbox]{accent-color:var(--herb)}
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"$preview":{"width":390,"height":844}}'>
 var DISHES = ['Đậu phụ sốt cà chua', 'Trứng chiên hành'];
 var RATINGS = [['good', 'Ngon', 'smile'], ['ok', 'Tạm', 'meh'], ['bad', 'Chê', 'frown']];
 var USED = [
@@ -92,24 +95,45 @@ var USED = [
 { id: 'egg', name: 'Trứng gà', note: 'Đã dùng 2 quả · tủ còn trứng' },
 { id: 'onion', name: 'Hành lá', note: 'Đã dùng 2 nắm · 2 món' }
 ];
+// Tweak 'sample' = 'tên dài, nhiều món' swaps in long dish names and extra dishes to stress the layout.
+var LONG = {
+'Đậu phụ sốt cà chua': 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm',
+'Trứng chiên hành': 'Trứng chiên hành lá với thịt băm và mộc nhĩ',
+'Canh cà chua trứng': 'Canh cà chua trứng nấu đậu phụ non và rau mùi',
+'Cơm rang dưa cải': 'Cơm rang dưa cải thịt bò kiểu sinh viên ký túc xá',
+'Mì xào rau cải': 'Mì tôm xào rau cải ngọt với trứng và xúc xích',
+'Trứng hấp thịt băm': 'Trứng hấp thịt băm nấm mèo trong nồi cơm điện'
+};
+var EXTRA = ['Rau muống xào tỏi', 'Canh bí đỏ nấu tôm khô với rau ngót'];
+var STRESS = false;
+function L(n) { return STRESS && LONG[n] ? LONG[n] : n; }
+// Lists of dishes: up to 2 names in full, then "+N món".
+function summary(list) {
+var names = list.map(L);
+return names.length <= 2 ? names.join(', ') : names.slice(0, 2).join(', ') + ' +' + (names.length - 2) + ' món';
+}
 class Component extends DCLogic {
 constructor(props) {
 super(props);
 this.state = { rating: { 0: 'good' }, out: { tofu: true, tomato: true, onion: true } };
 }
 renderVals() {
+STRESS = this.props.sample === 'tên dài, nhiều món';
+var dishes = DISHES.concat(STRESS ? EXTRA : []);
 var self = this;
 var st = this.state;
 return {
 theme: this.props.theme ?? 'system',
-dishes: DISHES.map(function (name, di) {
+meta: dishes.length + ' món · 1 người · khoảng ' + (STRESS ? 55 : 35) + ' phút',
+dishes: dishes.map(function (name, di) {
+name = L(name);
 var cur = st.rating[di];
 var curLabel = RATINGS.filter(function (r) { return r[0] === cur; })[0];
 return {
 name: name,
 picked: curLabel ? 'Bạn chấm: ' + curLabel[1] : 'Chưa chấm',
 groupLabel: 'Đánh giá ' + name,
-rowStyle: di < DISHES.length - 1 ? 'border-bottom: 1px solid var(--line);' : '',
+rowStyle: di < dishes.length - 1 ? 'border-bottom: 1px solid var(--line);' : '',
 ratings: RATINGS.map(function (r) {
 var on = cur === r[0];
 return {
