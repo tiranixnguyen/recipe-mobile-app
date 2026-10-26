@@ -19,6 +19,9 @@ body{margin:0}
 *{box-sizing:border-box}
 a{color:var(--chili-deep)}
 input[type=checkbox]{accent-color:var(--herb)}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
 </style>
 </helmet>
 <div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
@@ -27,13 +30,13 @@ input[type=checkbox]{accent-color:var(--herb)}
     <a href="MealPlan.dc.html" aria-label="Quay lại thực đơn" style="width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
     </a>
-    <div style="flex: 1; display: flex; flex-direction: column">
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
       <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Danh sách đi chợ</h1>
       <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">Cho thực đơn tuần này · {{doneCount}}/{{total}} đã mua</span>
     </div>
   </header>
 
-  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 16px; padding: 12px 16px 16px 16px">
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 12px 16px 16px 16px">
     <div style="display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 12px; background: var(--herb-soft); color: var(--ink); font-size: 13px; line-height: 18px">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color: var(--herb-ink); flex-shrink: 0"><path d="M5 12l5 5 9-10"></path></svg>
       <span>Đã bỏ <strong>4 thứ</strong> có sẵn trong Tủ đồ: trứng, hành lá, cơm, mì gói.</span>
@@ -47,7 +50,7 @@ input[type=checkbox]{accent-color:var(--herb)}
             <li style="{{item.rowStyle}}">
               <label style="min-height: 52px; display: flex; align-items: center; gap: 12px; cursor: pointer">
                 <input type="checkbox" checked="{{item.done}}" onChange="{{item.toggle}}" style="width: 20px; height: 20px; margin: 0">
-                <span style="flex: 1; display: flex; flex-direction: column">
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
                   <span style="font-size: 15px; line-height: 22px; {{item.nameStyle}}">{{item.name}}</span>
                   <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{item.recipe}}</span>
                 </span>

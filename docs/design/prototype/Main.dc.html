@@ -18,6 +18,9 @@
 body{margin:0}
 *{box-sizing:border-box}
 a{color:var(--chili-deep)}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
 </style>
 </helmet>
 <div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
@@ -32,13 +35,13 @@ a{color:var(--chili-deep)}
     </a>
   </header>
 
-  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 24px; padding-bottom: 16px">
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 24px; padding-bottom: 16px">
     <sc-if value="{{showResume}}" hint-placeholder-val="{{false}}">
       <a href="CookStep.dc.html" style="margin: 0 16px -8px 16px; padding: 12px 12px 12px 16px; display: flex; align-items: center; gap: 12px; border-radius: 12px; background: var(--ink); color: var(--surface); text-decoration: none">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2M9 2h6"></path></svg>
-        <span style="flex: 1; display: flex; flex-direction: column">
+        <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
           <span style="font-size: 12px; line-height: 16px; opacity: .85">Đang nấu dở</span>
-          <span style="font-size: 15px; line-height: 22px; font-weight: 600">Trứng chiên hành · bước 2/4</span>
+          <span class="c1" style="font-size: 15px; line-height: 22px; font-weight: 600">{{resume}}</span>
         </span>
         <span style="height: 40px; padding: 0 14px; display: flex; align-items: center; border-radius: 12px; background: var(--chili); color: #FFFFFF; font-size: 13px; line-height: 18px; font-weight: 600">Nấu tiếp</span>
       </a>
@@ -73,8 +76,8 @@ a{color:var(--chili-deep)}
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h18a9 9 0 0 1-18 0zM12 4v3M8 5v2M16 5v2"></path></svg>
         </span>
         <a href="MealPlan.dc.html" style="flex: 1; min-width: 0; display: flex; flex-direction: column; color: var(--ink); text-decoration: none">
-          <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600">Tối nay · 2 món · khoảng 35 phút</span>
-          <span style="font-size: 15px; line-height: 22px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">Đậu phụ sốt cà chua + Trứng chiên hành</span>
+          <span class="c1" style="color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600">{{upMeta}}</span>
+          <span class="c1" style="font-size: 15px; line-height: 22px; font-weight: 600">{{upNames}}</span>
         </a>
         <a href="MealCookPrep.dc.html" style="height: 40px; padding: 0 12px; flex-shrink: 0; display: flex; align-items: center; border-radius: 12px; background: var(--chili); color: #FFFFFF; text-decoration: none; font-size: 13px; line-height: 18px; font-weight: 600">Nấu bữa tối</a>
       </section>
@@ -91,7 +94,7 @@ a{color:var(--chili-deep)}
             <span style="position: absolute; left: 8px; top: 8px; padding: 2px 8px; border-radius: 8px; background: var(--herb); color: #FFFFFF; font-size: 12px; line-height: 16px; font-weight: 600">Đủ đồ</span>
           </div>
           <div style="padding: 10px 12px 12px 12px; display: flex; flex-direction: column; gap: 2px">
-            <span style="font-size: 15px; line-height: 22px; font-weight: 600">Trứng chiên hành</span>
+            <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">{{card1}}</span>
             <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">15 phút · Bếp từ</span>
           </div>
         </a>
@@ -101,7 +104,7 @@ a{color:var(--chili-deep)}
             <span style="position: absolute; left: 8px; top: 8px; padding: 2px 8px; border-radius: 8px; background: var(--chili-soft); color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 600">Thiếu hành</span>
           </div>
           <div style="padding: 10px 12px 12px 12px; display: flex; flex-direction: column; gap: 2px">
-            <span style="font-size: 15px; line-height: 22px; font-weight: 600">Canh cà chua trứng</span>
+            <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">{{card2}}</span>
             <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">15 phút · Bếp từ</span>
           </div>
         </a>
@@ -139,10 +142,29 @@ a{color:var(--chili-deep)}
   </nav>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"showResume":{"editor":"boolean","default":false},"showUpcoming":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"showResume":{"editor":"boolean","default":false},"showUpcoming":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
+// Tweak 'sample' = 'tên dài, nhiều món' swaps in long dish names and extra dishes to stress the layout.
+var LONG = {
+'Đậu phụ sốt cà chua': 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm',
+'Trứng chiên hành': 'Trứng chiên hành lá với thịt băm và mộc nhĩ',
+'Canh cà chua trứng': 'Canh cà chua trứng nấu đậu phụ non và rau mùi',
+'Cơm rang dưa cải': 'Cơm rang dưa cải thịt bò kiểu sinh viên ký túc xá',
+'Mì xào rau cải': 'Mì tôm xào rau cải ngọt với trứng và xúc xích',
+'Trứng hấp thịt băm': 'Trứng hấp thịt băm nấm mèo trong nồi cơm điện'
+};
+var EXTRA = ['Rau muống xào tỏi', 'Canh bí đỏ nấu tôm khô với rau ngót'];
+var STRESS = false;
+function L(n) { return STRESS && LONG[n] ? LONG[n] : n; }
+// Lists of dishes: up to 2 names in full, then "+N món".
+function summary(list) {
+var names = list.map(L);
+return names.length <= 2 ? names.join(', ') : names.slice(0, 2).join(', ') + ' +' + (names.length - 2) + ' món';
+}
 class Component extends DCLogic {
 renderVals() {
-return { theme: this.props.theme ?? 'system', showResume: this.props.showResume ?? false, showUpcoming: this.props.showUpcoming ?? true };
+STRESS = this.props.sample === 'tên dài, nhiều món';
+var up = ['Đậu phụ sốt cà chua', 'Trứng chiên hành'].concat(STRESS ? EXTRA : []);
+return { resume: L('Trứng chiên hành') + ' · bước 2/4', upMeta: 'Tối nay · ' + up.length + ' món · khoảng ' + (STRESS ? 55 : 35) + ' phút', upNames: summary(up), card1: L('Trứng chiên hành'), card2: L('Canh cà chua trứng'), theme: this.props.theme ?? 'system', showResume: this.props.showResume ?? false, showUpcoming: this.props.showUpcoming ?? true };
 }
 }
 </script>

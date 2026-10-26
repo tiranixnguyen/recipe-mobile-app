@@ -18,6 +18,9 @@
 body{margin:0}
 *{box-sizing:border-box}
 a{color:var(--chili-deep)}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
 </style>
 </helmet>
 <div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
@@ -33,7 +36,7 @@ a{color:var(--chili-deep)}
     </div>
   </header>
 
-  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 16px; padding: 8px 16px 16px 16px">
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 8px 16px 16px 16px">
     <sc-if value="{{isDay}}" hint-placeholder-val="{{true}}">
       <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
         <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
@@ -63,12 +66,15 @@ a{color:var(--chili-deep)}
             <sc-for list="{{s.dishes}}" as="dsh" hint-placeholder-count="1">
               <a href="Detail.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 6px 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
                 <div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></div>
-                <div style="flex: 1; display: flex; flex-direction: column">
-                  <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{dsh.name}}</span>
+                <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                  <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">{{dsh.name}}</span>
                   <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{dsh.meta}}</span>
                 </div>
               </a>
             </sc-for>
+            <sc-if value="{{s.more}}" hint-placeholder-val="{{false}}">
+              <a href="Detail.dc.html" style="align-self: flex-start; padding: 2px 4px; font-size: 13px; line-height: 18px; font-weight: 600; text-decoration: none">{{s.moreLabel}}</a>
+            </sc-if>
             <sc-if value="{{s.empty}}" hint-placeholder-val="{{false}}">
               <a href="Today.dc.html" style="height: 58px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px dashed var(--outline); border-radius: 12px; color: var(--ink); text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
@@ -89,7 +95,7 @@ a{color:var(--chili-deep)}
           <div style="display: grid; grid-template-columns: 40px repeat(3, minmax(0, 1fr)); gap: 6px; align-items: stretch">
             <span style="display: flex; align-items: center; font-size: 13px; line-height: 18px; font-weight: 600; {{row.labelStyle}}">{{row.short}}</span>
             <sc-for list="{{row.cells}}" as="c" hint-placeholder-count="3">
-              <a href="{{c.href}}" style="height: 56px; padding: 6px 8px; display: flex; align-items: center; border-radius: 8px; text-decoration: none; font-size: 12px; line-height: 16px; overflow: hidden; {{c.style}}">{{c.label}}</a>
+              <a href="{{c.href}}" style="height: 56px; padding: 6px 8px; display: flex; align-items: center; border-radius: 8px; text-decoration: none; font-size: 12px; line-height: 16px; overflow: hidden; {{c.style}}"><span class="c2">{{c.label}}</span></a>
             </sc-for>
           </div>
         </sc-for>
@@ -133,7 +139,7 @@ a{color:var(--chili-deep)}
   </nav>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"$preview":{"width":390,"height":844}}'>
 var DAYS = [['T2', 'Thứ Hai'], ['T3', 'Thứ Ba'], ['T4', 'Thứ Tư'], ['T5', 'Thứ Năm'], ['T6', 'Thứ Sáu'], ['T7', 'Thứ Bảy'], ['CN', 'Chủ Nhật']];
 var MEALS = ['Sáng', 'Trưa', 'Tối'];
 var TODAY = 1;
@@ -170,15 +176,33 @@ return row.map(function (v) { if (v.length) { return v; } var n = POOL[k % POOL.
 }
 var ON = 'background: var(--chili-soft); color: var(--chili-deep);';
 var OFF = 'background: transparent; color: var(--ink);';
+// Tweak 'sample' = 'tên dài, nhiều món' swaps in long dish names and extra dishes to stress the layout.
+var LONG = {
+'Đậu phụ sốt cà chua': 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm',
+'Trứng chiên hành': 'Trứng chiên hành lá với thịt băm và mộc nhĩ',
+'Canh cà chua trứng': 'Canh cà chua trứng nấu đậu phụ non và rau mùi',
+'Cơm rang dưa cải': 'Cơm rang dưa cải thịt bò kiểu sinh viên ký túc xá',
+'Mì xào rau cải': 'Mì tôm xào rau cải ngọt với trứng và xúc xích',
+'Trứng hấp thịt băm': 'Trứng hấp thịt băm nấm mèo trong nồi cơm điện'
+};
+var EXTRA = ['Rau muống xào tỏi', 'Canh bí đỏ nấu tôm khô với rau ngót'];
+var STRESS = false;
+function L(n) { return STRESS && LONG[n] ? LONG[n] : n; }
+// Lists of dishes: up to 2 names in full, then "+N món".
+function summary(list) {
+var names = list.map(L);
+return names.length <= 2 ? names.join(', ') : names.slice(0, 2).join(', ') + ' +' + (names.length - 2) + ' món';
+}
 class Component extends DCLogic {
 constructor(props) {
 super(props);
 this.state = { mode: 'day', day: TODAY, auto: false };
 }
 renderVals() {
+STRESS = this.props.sample === 'tên dài, nhiều món';
 var self = this;
 var st = this.state;
-var plan = st.auto ? filledPlan() : BASE;
+var plan = (st.auto ? filledPlan() : BASE).map(function (row, i) { return row.map(function (v, j) { return STRESS && i === 1 && j === 2 ? v.concat(EXTRA) : v; }); });
 var planned = 0;
 plan.forEach(function (r) { r.forEach(function (v) { if (v.length) { planned += 1; } }); });
 var days = DAYS.map(function (d, i) {
@@ -196,9 +220,11 @@ var list = plan[st.day][j];
 return {
 meal: m,
 countLabel: list.length > 1 ? ' · ' + list.length + ' món' : '',
-dishes: list.map(function (n) { return { name: n, meta: META[n] }; }),
+dishes: list.slice(0, 3).map(function (n) { return { name: L(n), meta: META[n] || '15 phút · Bếp từ' }; }),
+more: list.length > 3,
+moreLabel: '+ ' + (list.length - 3) + ' món nữa trong bữa',
 multi: list.length > 1,
-cookLabel: 'Nấu cả bữa ' + m.toLowerCase() + ': ' + list.join(', '),
+cookLabel: 'Nấu cả bữa ' + m.toLowerCase() + ': ' + list.map(L).join(', '),
 filled: list.length > 0,
 empty: list.length === 0
 };
@@ -209,7 +235,7 @@ short: d[0],
 labelStyle: i === TODAY ? 'color: var(--chili-deep);' : 'color: var(--ink);',
 cells: plan[i].map(function (v) {
 return v.length
-? { label: v[0] + (v.length > 1 ? ' +' + (v.length - 1) : ''), href: 'Detail.dc.html', style: 'background: var(--surface-raised); border: 1px solid var(--line); color: var(--ink);' }
+? { label: L(v[0]) + (v.length > 1 ? ' +' + (v.length - 1) : ''), href: 'Detail.dc.html', style: 'background: var(--surface-raised); border: 1px solid var(--line); color: var(--ink);' }
 : { label: '+', href: 'Today.dc.html', style: 'justify-content: center; border: 1.5px dashed var(--outline); color: var(--ink-muted); font-size: 16px;' };
 })
 };

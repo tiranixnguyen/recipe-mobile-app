@@ -19,6 +19,11 @@ body{margin:0}
 *{box-sizing:border-box}
 a{color:var(--chili-deep)}
 a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
+.bh-timer-text{min-width:0}
+.bh-timer-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </helmet>
 <div data-theme="{{theme}}" style="width: 390px; height: 844px; position: relative; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
@@ -39,7 +44,7 @@ a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
     <span style="padding-left: 12px; color: var(--ink-muted); font-size: 12px; line-height: 16px">Màn hình luôn sáng khi đang nấu</span>
   </header>
 
-  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 20px; padding: 32px 24px 16px 24px">
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 32px 24px 16px 24px">
     <span style="font-size: 13px; line-height: 18px; font-weight: 700; color: var(--chili-deep); letter-spacing: .04em">BƯỚC {{stepNo}}</span>
     <p aria-live="polite" style="margin: 0; font-size: 24px; line-height: 34px; font-weight: 400">{{step.text}}</p>
     <div style="display: flex; flex-wrap: wrap; gap: 8px">
