@@ -3,7 +3,7 @@
 /// - [recipeLocation]: đường dẫn tới Chi tiết món, `context.push(recipeLocation(id))`.
 /// - [cookPrepLocation]: màn Chuẩn bị nấu của món, mở từ Chi tiết.
 /// - [cookStepLocation]: nấu từng bước, mở ở bước đang dở.
-/// - [ResumeCookingBanner]: thanh "Đang nấu dở" cho màn Khám phá (stub, chưa hiện gì).
+/// - [ResumeCookingBanner]: thanh "Đang nấu dở · Nấu tiếp" cho màn Khám phá; không nấu dở thì ẩn.
 /// - [cookHistoryProvider]: món đã nấu kèm đánh giá [CookRating].
 library;
 

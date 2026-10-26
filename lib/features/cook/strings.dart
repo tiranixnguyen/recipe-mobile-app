@@ -26,4 +26,23 @@ abstract final class CookStrings {
   static const gather = 'Lấy đồ ra';
   static String gathered(int done, int total) => 'Đã lấy $done/$total';
   static const addToShopping = 'Thêm vào đi chợ';
+
+  // Nấu từng bước (`CookStep`).
+  static const exitCooking = 'Thoát chế độ nấu';
+  static String stepOf(int step, int total) => 'Bước $step/$total';
+  static String stepLabel(int step) => 'BƯỚC $step';
+  static String timerLabel(int step) => 'Bước $step';
+  static const keepScreenOn = 'Màn hình luôn sáng khi đang nấu';
+  static const previousStep = 'Bước trước';
+  static const nextStep = 'Bước tiếp';
+  static const finish = 'Xong';
+  static String sheetTitle(int servings) => 'Nguyên liệu · $servings người';
+  static const close = 'Đóng';
+  static const enough = 'Vừa đủ';
+  static const timers = 'Hẹn giờ';
+
+  // Thanh "Đang nấu dở" ở Khám phá.
+  static const resumeTitle = 'Đang nấu dở';
+  static String resumeStep(String name, int step, int total) => '$name · bước $step/$total';
+  static const resumeAction = 'Nấu tiếp';
 }

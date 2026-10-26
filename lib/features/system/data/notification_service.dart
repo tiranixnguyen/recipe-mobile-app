@@ -5,7 +5,8 @@ import 'package:recipe_mobile_app/features/system/data/notification_plugin.dart'
 import 'package:recipe_mobile_app/features/system/data/notification_prefs.dart';
 import 'package:recipe_mobile_app/features/system/strings.dart';
 
-/// Gửi thông báo trên máy. F2 gọi [timerDone] khi hẹn giờ nấu hết. Nhắc bữa theo thực đơn do
+/// Gửi thông báo trên máy. F2 hẹn [scheduleTimer] khi đồng hồ nấu bắt đầu chạy (báo cả khi đang ở
+/// app khác), huỷ bằng [cancelTimer]; [timerDone] báo ngay. Nhắc bữa theo thực đơn do
 /// feature Hệ thống tự hẹn (`mealReminderSyncProvider`), dùng [mealReminder].
 ///
 /// Bản thật ([LocalNotificationService]) tự bỏ qua khi người dùng tắt công tắc tương ứng trong
@@ -13,6 +14,13 @@ import 'package:recipe_mobile_app/features/system/strings.dart';
 abstract interface class NotificationService {
   /// Báo đồng hồ nấu của món [recipeTitle] đã hết giờ.
   Future<void> timerDone({required String recipeTitle});
+
+  /// Hẹn báo hết giờ của món [recipeTitle] lúc [at]. [key] (0…[maxTimerKey]) phân biệt các đồng hồ
+  /// chạy cùng lúc (nấu cả bữa); hẹn lại cùng [key] thì thay lịch cũ.
+  Future<void> scheduleTimer({required int key, required String recipeTitle, required DateTime at});
+
+  /// Huỷ báo hết giờ đã hẹn với [key].
+  Future<void> cancelTimer(int key);
 
   /// Hẹn nhắc bữa [meal] lúc [at] cho món [recipeTitle]. Hẹn lại cùng ngày và bữa thì thay lịch cũ.
   Future<void> mealReminder({
@@ -25,12 +33,25 @@ abstract interface class NotificationService {
   Future<void> cancelMealReminders();
 }
 
+/// [NotificationService.scheduleTimer] nhận key từ 0 tới số này.
+const maxTimerKey = 899;
+
 /// Không làm gì; dùng trong test của feature khác.
 class NoopNotificationService implements NotificationService {
   const NoopNotificationService();
 
   @override
   Future<void> timerDone({required String recipeTitle}) async {}
+
+  @override
+  Future<void> scheduleTimer({
+    required int key,
+    required String recipeTitle,
+    required DateTime at,
+  }) async {}
+
+  @override
+  Future<void> cancelTimer(int key) async {}
 
   @override
   Future<void> mealReminder({
@@ -49,8 +70,16 @@ class LocalNotificationService implements NotificationService {
   final NotificationPlugin _plugin;
   final NotificationPrefs Function() _prefs;
 
-  /// Hẹn giờ nấu chỉ có một đồng hồ chạy, dùng chung một id: thông báo mới thay thông báo cũ.
+  /// Báo hết giờ ngay ([timerDone]) dùng chung một id: thông báo mới thay thông báo cũ.
   static const timerId = 1;
+
+  /// Id báo hết giờ đã hẹn: [_timerIdBase] + key, nằm dưới id nhắc bữa.
+  static const _timerIdBase = 100;
+
+  static int scheduledTimerId(int key) {
+    RangeError.checkValueInInterval(key, 0, maxTimerKey, 'key');
+    return _timerIdBase + key;
+  }
 
   /// Id nhắc bữa: một id cho mỗi (ngày, bữa), từ [_mealIdBase] trở lên.
   static const _mealIdBase = 1000;
@@ -73,6 +102,26 @@ class LocalNotificationService implements NotificationService {
       body: SystemStrings.notifTimerBody(recipeTitle),
     );
   }
+
+  @override
+  Future<void> scheduleTimer({
+    required int key,
+    required String recipeTitle,
+    required DateTime at,
+  }) async {
+    final id = scheduledTimerId(key);
+    if (!_prefs().timerDone || !at.isAfter(DateTime.now())) return;
+    await _plugin.schedule(
+      id: id,
+      channel: NotificationChannel.timer,
+      at: at,
+      title: SystemStrings.notifTimerTitle,
+      body: SystemStrings.notifTimerBody(recipeTitle),
+    );
+  }
+
+  @override
+  Future<void> cancelTimer(int key) => _plugin.cancel(scheduledTimerId(key));
 
   @override
   Future<void> mealReminder({
