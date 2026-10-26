@@ -8,7 +8,7 @@ import 'package:recipe_mobile_app/features/system/data/device_info.dart';
 import 'package:recipe_mobile_app/features/system/data/screenshot_picker.dart';
 import 'package:recipe_mobile_app/features/system/presentation/feedback/feedback_view_model.dart';
 
-import 'fake_analytics.dart';
+import '../../core/fake_analytics.dart';
 
 typedef _Sent = ({
   FeedbackKind kind,

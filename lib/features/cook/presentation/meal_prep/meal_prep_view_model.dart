@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
@@ -194,6 +195,11 @@ class MealPrepViewModel extends Notifier<AsyncValue<MealPrepState>> {
     await ref.read(cookSessionProvider.notifier).startMeal([
       for (final d in value.dishes) (recipeId: d.recipe.id, servings: d.servings),
     ], slot);
+    ref.read(analyticsProvider).track('start_cooking', {
+      'servings': value.servings,
+      'steps': value.dishes.fold<int>(0, (sum, d) => sum + d.recipe.steps.length),
+      'meal_dishes': value.dishes.length,
+    });
   }
 }
 

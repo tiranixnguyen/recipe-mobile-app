@@ -11,16 +11,25 @@ import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_logo.dart';
 import 'package:recipe_mobile_app/core/widgets/meal_slot.dart';
+import 'package:recipe_mobile_app/features/cook/cook.dart';
+import 'package:recipe_mobile_app/features/cook/data/app_review.dart';
+import 'package:recipe_mobile_app/features/cook/data/cook_device.dart';
+import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_screen.dart';
+import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
+import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/pantry/presentation/pantry/pantry_screen.dart';
 import 'package:recipe_mobile_app/features/plan/data/planned_meals.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/plan/plan_screen.dart';
 import 'package:recipe_mobile_app/features/system/data/app_info.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
+
+import 'features/cook/fakes.dart';
+import 'features/cook/fixtures.dart';
 
 /// Dữ liệu đóng gói đọc bằng `rootBundle` không xong trong fake async của widget test, màn có
 /// spinner sẽ làm `pumpAndSettle` treo; dữ liệu thật đã có `bundled_data_test.dart`.
@@ -275,5 +284,64 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Thứ Ba · Hôm nay'), findsOneWidget);
     expect(find.widgetWithText(MealSlot, 'Trứng chiên hành'), findsOneWidget);
+  });
+
+  testWidgets('Chi tiết → Chuẩn bị đổi khẩu phần → qua từng bước → Hoàn thành cập nhật tủ', (
+    tester,
+  ) async {
+    final store = InMemoryLocalStore();
+    await store.writeString('system.onboarded', 'true');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          recipesProvider.overrideWith((ref) async => const [cookRecipeFixture]),
+          ingredientsProvider.overrideWith((ref) async => cookIngredientsFixture),
+          localStoreProvider.overrideWithValue(store),
+          wakelockProvider.overrideWithValue(FakeWakelock()),
+          notificationServiceProvider.overrideWithValue(FakeNotificationService()),
+          shouldAskNotificationPermissionProvider.overrideWithValue(() async => false),
+          appInForegroundProvider.overrideWithValue(() => true),
+          appReviewProvider.overrideWithValue(FakeAppReview()),
+        ],
+        child: const App(),
+      ),
+    );
+    await tester.pump(SplashScreen.duration);
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(tester.element(find.byType(NavigationBar)));
+    for (final id in ['egg', 'scallion']) {
+      await container.read(pantryItemsProvider.notifier).addToPantry(id);
+    }
+
+    GoRouter.of(tester.element(find.byType(NavigationBar))).push(recipeLocation('trung'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(CookStrings.startCooking));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Thêm một người'));
+    await tester.pump();
+    expect(find.text('Trứng gà · 4 quả'), findsOneWidget);
+    await tester.tap(find.text(CookStrings.startCooking).last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Bước 1/4'), findsOneWidget);
+    for (var i = 0; i < 3; i++) {
+      await tester.tap(find.text(CookStrings.nextStep));
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('Bước 4/4'), findsOneWidget);
+    await tester.tap(find.text(CookStrings.finish));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Đã dùng 4 quả'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel(CookStrings.usedUpLabel('Trứng gà')));
+    await tester.pump();
+    await tester.tap(find.text(CookStrings.finishAndUpdate));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DiscoverScreen), findsOneWidget);
+    expect(container.read(pantryItemsProvider), {'scallion'});
+    expect(container.read(cookHistoryProvider).single.recipeId, 'trung');
+    expect(container.read(cookSessionProvider), isNull);
   });
 }
