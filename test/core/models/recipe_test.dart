@@ -84,6 +84,88 @@ void main() {
     });
   });
 
+  group('RecipeStep', () {
+    test('prep mặc định false, chỉ ghi ra JSON khi true', () {
+      final step = RecipeStep.fromJson(<String, dynamic>{'text': 'Chiên', 'timerSeconds': 60});
+      expect(step.prep, isFalse);
+      expect(step.toJson(), {'text': 'Chiên', 'timerSeconds': 60});
+
+      final prep = RecipeStep.fromJson(<String, dynamic>{'text': 'Thái hành', 'prep': true});
+      expect(prep.prep, isTrue);
+      expect(prep.toJson(), {'text': 'Thái hành', 'prep': true});
+      expect(RecipeStep.fromJson(prep.toJson()), prep);
+      expect(prep, isNot(const RecipeStep(text: 'Thái hành')));
+      expect(prep.hashCode, const RecipeStep(text: 'Thái hành', prep: true).hashCode);
+    });
+  });
+
+  group('gatherIngredients', () {
+    Recipe recipe(String id, int servings, List<RecipeIngredient> ingredients) => Recipe(
+      id: id,
+      name: id,
+      description: '',
+      imageAsset: '',
+      minutes: 10,
+      servings: servings,
+      tools: const [],
+      diets: const [],
+      meals: const [],
+      ingredients: ingredients,
+      steps: const [],
+    );
+    final trung = recipe('trung', 1, const [
+      RecipeIngredient(id: 'egg', amount: 2, unit: 'quả'),
+      RecipeIngredient(id: 'scallion', amount: 1, unit: 'nhánh'),
+    ]);
+    final canh = recipe('canh', 2, const [
+      RecipeIngredient(id: 'tomato', amount: 2, unit: 'quả'),
+      RecipeIngredient(id: 'egg', amount: 1, unit: 'quả'),
+      RecipeIngredient(id: 'scallion', amount: 10, unit: 'g'),
+    ]);
+    final byId = {trung.id: trung, canh.id: canh};
+
+    test('cộng lượng theo khẩu phần, khác đơn vị tách dòng, giữ thứ tự gặp đầu', () {
+      final lines = gatherIngredients([
+        (recipeId: 'trung', servings: 2),
+        (recipeId: 'canh', servings: 4),
+      ], byId);
+      expect(lines, const [
+        GatheredIngredient(
+          ingredientId: 'egg',
+          unit: 'quả',
+          amount: 6,
+          recipeIds: ['trung', 'canh'],
+        ),
+        GatheredIngredient(
+          ingredientId: 'scallion',
+          unit: 'nhánh',
+          amount: 2,
+          recipeIds: ['trung'],
+        ),
+        GatheredIngredient(ingredientId: 'tomato', unit: 'quả', amount: 4, recipeIds: ['canh']),
+        GatheredIngredient(ingredientId: 'scallion', unit: 'g', amount: 20, recipeIds: ['canh']),
+      ]);
+    });
+
+    test('món lạ bị bỏ qua, cùng món hai lần không lặp id', () {
+      final lines = gatherIngredients([
+        (recipeId: 'trung', servings: 1),
+        (recipeId: 'khong-co', servings: 1),
+        (recipeId: 'trung', servings: 1),
+      ], byId);
+      expect(
+        lines.first,
+        const GatheredIngredient(
+          ingredientId: 'egg',
+          unit: 'quả',
+          amount: 4,
+          recipeIds: ['trung'],
+        ),
+      );
+      expect(lines, hasLength(2));
+    });
+  });
+
   group('enum', () {
     test('tryParse trả null cho id lạ (dữ liệu cũ trong LocalStore)', () {
       expect(Tool.tryParse('stoev'), isNull);
