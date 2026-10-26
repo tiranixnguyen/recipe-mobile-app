@@ -64,31 +64,40 @@ class RecipeIngredient {
 /// Một bước nấu, có thể kèm thời gian hẹn giờ.
 @immutable
 class RecipeStep {
-  const RecipeStep({required this.text, this.timerSeconds});
+  const RecipeStep({required this.text, this.timerSeconds, this.prep = false});
 
   final String text;
 
   /// Thời gian hẹn giờ (giây) cho bước này, null nếu không có.
   final int? timerSeconds;
 
+  /// Bước sơ chế (rửa, thái, ngâm, ướp, đánh trứng, vo gạo): làm trước được, không cần bếp, nước sôi
+  /// hay hẹn giờ. Nấu cả bữa gom các bước này thành một bước đầu cho mọi món.
+  final bool prep;
+
   factory RecipeStep.fromJson(Map<String, dynamic> json) {
     return RecipeStep(
       text: json['text'] as String,
       timerSeconds: json['timerSeconds'] as int?,
+      prep: json['prep'] as bool? ?? false,
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'text': text,
     if (timerSeconds != null) 'timerSeconds': timerSeconds,
+    if (prep) 'prep': true,
   };
 
   @override
   bool operator ==(Object other) =>
-      other is RecipeStep && other.text == text && other.timerSeconds == timerSeconds;
+      other is RecipeStep &&
+      other.text == text &&
+      other.timerSeconds == timerSeconds &&
+      other.prep == prep;
 
   @override
-  int get hashCode => Object.hash(text, timerSeconds);
+  int get hashCode => Object.hash(text, timerSeconds, prep);
 }
 
 /// Công thức nấu ăn đóng gói sẵn trong app — **không có trường giá**.
@@ -237,4 +246,68 @@ List<RecipeIngredient> scaleIngredients(Recipe recipe, int targetServings) {
         ),
       )
       .toList();
+}
+
+/// Tổng lượng một nguyên liệu (cùng đơn vị) cho nhiều món, kèm món dùng tới nó.
+@immutable
+class GatheredIngredient {
+  const GatheredIngredient({
+    required this.ingredientId,
+    required this.unit,
+    required this.amount,
+    required this.recipeIds,
+  });
+
+  final String ingredientId;
+  final String unit;
+  final double amount;
+
+  /// Món dùng tới nguyên liệu này, theo thứ tự gặp đầu tiên, không trùng.
+  final List<String> recipeIds;
+
+  @override
+  bool operator ==(Object other) =>
+      other is GatheredIngredient &&
+      other.ingredientId == ingredientId &&
+      other.unit == unit &&
+      other.amount == amount &&
+      listEquals(other.recipeIds, recipeIds);
+
+  @override
+  int get hashCode => Object.hash(ingredientId, unit, amount, Object.hashAll(recipeIds));
+
+  @override
+  String toString() => 'GatheredIngredient($ingredientId, $amount $unit, $recipeIds)';
+}
+
+/// Gom nguyên liệu của [dishes] (mỗi món kèm số người nấu) — dùng cho danh sách đi chợ và Nấu cả bữa.
+///
+/// Lượng nhân theo khẩu phần bằng [scaleAmount], cộng dồn theo (nguyên liệu, đơn vị); khác đơn vị
+/// thì tách dòng. Giữ thứ tự xuất hiện đầu tiên. Món không có trong [recipesById] bị bỏ qua.
+List<GatheredIngredient> gatherIngredients(
+  Iterable<({String recipeId, int servings})> dishes,
+  Map<String, Recipe> recipesById,
+) {
+  final amounts = <(String, String), double>{};
+  final usedBy = <(String, String), List<String>>{};
+  for (final dish in dishes) {
+    final recipe = recipesById[dish.recipeId];
+    if (recipe == null) continue;
+    for (final ing in recipe.ingredients) {
+      final key = (ing.id, ing.unit);
+      final amount = scaleAmount(ing.amount, recipe.servings, dish.servings);
+      amounts[key] = (amounts[key] ?? 0) + amount;
+      final ids = usedBy.putIfAbsent(key, () => []);
+      if (!ids.contains(recipe.id)) ids.add(recipe.id);
+    }
+  }
+  return List.unmodifiable([
+    for (final MapEntry(key: (id, unit), value: amount) in amounts.entries)
+      GatheredIngredient(
+        ingredientId: id,
+        unit: unit,
+        amount: amount,
+        recipeIds: List.unmodifiable(usedBy[(id, unit)]!),
+      ),
+  ]);
 }

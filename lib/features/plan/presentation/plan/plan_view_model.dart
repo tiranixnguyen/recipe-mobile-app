@@ -4,12 +4,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/plan/data/planned_meals.dart';
+import 'package:recipe_mobile_app/features/plan/domain/week.dart';
 
-/// Giờ hiện tại; test override để cố định "hôm nay".
-///
-/// Đọc một lần khi màn Thực đơn dựng: để app mở qua nửa đêm thì "hôm nay" vẫn là ngày cũ tới khi
-/// màn dựng lại (giới hạn đã biết, chưa cần theo dõi đổi ngày).
-final nowProvider = Provider<DateTime>((ref) => DateTime.now());
+/// Một món trong bữa, kèm số người nấu.
+@immutable
+class PlannedDish {
+  const PlannedDish({required this.recipe, required this.servings});
+
+  final Recipe recipe;
+  final int servings;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PlannedDish && other.recipe == recipe && other.servings == servings;
+
+  @override
+  int get hashCode => Object.hash(recipe, servings);
+}
 
 @immutable
 class PlanState {
@@ -30,13 +41,14 @@ class PlanState {
   final int today;
   final DateTime selectedDate;
 
-  /// Món của từng bữa ngày đang xem, theo thứ tự [Meal]; null là ô trống.
-  final Map<Meal, Recipe?> meals;
+  /// Món của từng bữa ngày đang xem, theo thứ tự [Meal]; mỗi bữa theo thứ tự thêm, rỗng là bữa
+  /// trống. Món không còn trong dữ liệu bị bỏ.
+  final Map<Meal, List<PlannedDish>> meals;
 
   /// Ngày trong tuần đã có ít nhất một món.
   final Set<int> daysWithMeals;
 
-  /// Số bữa đã xếp món trong tuần, trên [slotsPerWeek].
+  /// Số bữa có ít nhất một món trong tuần, trên [slotsPerWeek].
   final int plannedCount;
 }
 
@@ -44,21 +56,21 @@ class PlanViewModel extends Notifier<AsyncValue<PlanState>> {
   @override
   AsyncValue<PlanState> build() {
     final now = ref.watch(nowProvider);
-    final today = _weekday(now);
-    final weekStart = _weekStart(now);
+    final today = weekdayIndex(now);
+    final weekStart = weekStartOf(now);
     final selectedDay = ref.watch(_selectedDayProvider) ?? today;
-    final selectedDate = _dayOf(weekStart, selectedDay);
+    final selectedDate = dayOfWeek(weekStart, selectedDay);
     final planned = ref.watch(plannedMealsProvider);
 
     return ref.watch(recipesProvider).whenData((recipes) {
       final byId = {for (final r in recipes) r.id: r};
       final daysWithMeals = <int>{};
-      var plannedCount = 0;
+      final plannedSlots = <(int, Meal)>{};
       for (final p in planned) {
-        final index = _indexIn(weekStart, p.day);
+        final index = indexInWeek(weekStart, p.day);
         if (index == null) continue;
         daysWithMeals.add(index);
-        plannedCount++;
+        plannedSlots.add((index, p.meal));
       }
       return PlanState(
         selectedDay: selectedDay,
@@ -66,48 +78,39 @@ class PlanViewModel extends Notifier<AsyncValue<PlanState>> {
         selectedDate: selectedDate,
         meals: {
           for (final meal in Meal.values)
-            meal:
-                byId[planned
-                    .where((p) => p.day == selectedDate && p.meal == meal)
-                    .firstOrNull
-                    ?.recipeId],
+            meal: List.unmodifiable([
+              for (final p in planned)
+                if (p.day == selectedDate && p.meal == meal)
+                  if (byId[p.recipeId] case final recipe?)
+                    PlannedDish(recipe: recipe, servings: p.servings),
+            ]),
         },
         daysWithMeals: daysWithMeals,
-        plannedCount: plannedCount,
+        plannedCount: plannedSlots.length,
       );
     });
   }
 
   void selectDay(int day) => ref.read(_selectedDayProvider.notifier).select(day);
 
-  /// Xếp [recipeId] vào bữa [meal] của ngày đang xem; ô đã có món thì thay.
-  Future<void> setMeal(Meal meal, String recipeId) =>
-      ref.read(plannedMealsProvider.notifier).addToPlan(recipeId, _selectedDate(), meal);
+  /// Thêm [recipeId] vào cuối bữa [meal] của ngày đang xem; món đã có thì giữ nguyên.
+  Future<void> addDish(Meal meal, String recipeId) async {
+    final date = _selectedDate();
+    final exists = ref
+        .read(plannedMealsProvider)
+        .any((p) => p.day == date && p.meal == meal && p.recipeId == recipeId);
+    if (exists) return;
+    await ref.read(plannedMealsProvider.notifier).addToPlan(recipeId, date, meal);
+  }
 
-  Future<void> clearMeal(Meal meal) =>
-      ref.read(plannedMealsProvider.notifier).removeFromPlan(_selectedDate(), meal);
+  /// Bỏ [recipeId] khỏi bữa [meal] của ngày đang xem, giữ các món khác.
+  Future<void> removeDish(Meal meal, String recipeId) => ref
+      .read(plannedMealsProvider.notifier)
+      .removeFromPlan(_selectedDate(), meal, recipeId: recipeId);
 
   DateTime _selectedDate() {
     final now = ref.read(nowProvider);
-    return _dayOf(_weekStart(now), ref.read(_selectedDayProvider) ?? _weekday(now));
-  }
-
-  /// 0 = Thứ Hai … 6 = Chủ Nhật.
-  static int _weekday(DateTime day) => day.weekday - DateTime.monday;
-
-  /// 0h Thứ Hai của tuần chứa [day].
-  static DateTime _weekStart(DateTime day) =>
-      DateTime(day.year, day.month, day.day - _weekday(day));
-
-  static DateTime _dayOf(DateTime weekStart, int index) =>
-      DateTime(weekStart.year, weekStart.month, weekStart.day + index);
-
-  /// Vị trí của [day] trong tuần bắt đầu từ [weekStart], null nếu ngoài tuần.
-  static int? _indexIn(DateTime weekStart, DateTime day) {
-    for (var i = 0; i < 7; i++) {
-      if (_dayOf(weekStart, i) == day) return i;
-    }
-    return null;
+    return dayOfWeek(weekStartOf(now), ref.read(_selectedDayProvider) ?? weekdayIndex(now));
   }
 }
 
