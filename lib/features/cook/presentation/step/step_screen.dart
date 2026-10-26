@@ -96,6 +96,7 @@ class _Step extends ConsumerWidget {
                     key: ValueKey(i),
                     visible: state.showsTimer(i),
                     seconds: state.steps[i].timerSeconds!,
+                    endAt: state.timerEnds[i],
                     label: CookStrings.timerLabel(i + 1),
                     clock: viewModel.clock,
                     onStatusChange: (status) => viewModel.timerChanged(i, status),

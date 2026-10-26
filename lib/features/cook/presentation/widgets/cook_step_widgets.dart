@@ -171,6 +171,7 @@ class StepTimerSlot extends StatelessWidget {
     super.key,
     required this.visible,
     required this.seconds,
+    this.endAt,
     required this.label,
     required this.clock,
     required this.onStatusChange,
@@ -178,6 +179,9 @@ class StepTimerSlot extends StatelessWidget {
 
   final bool visible;
   final int seconds;
+
+  /// Mốc hết giờ đã lưu khi mở lại màn lúc đồng hồ còn chạy.
+  final DateTime? endAt;
   final String label;
   final DateTime Function() clock;
   final ValueChanged<StepTimerStatus> onStatusChange;
@@ -190,6 +194,7 @@ class StepTimerSlot extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: AppSpacing.s2),
         child: StepTimer(
           seconds: seconds,
+          endAt: endAt,
           label: label,
           clock: clock,
           onStatusChange: onStatusChange,

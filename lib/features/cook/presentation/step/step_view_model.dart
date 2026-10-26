@@ -19,6 +19,7 @@ class CookStepState {
     required this.ingredients,
     required this.basicSpices,
     required this.timers,
+    this.timerEnds = const {},
   });
 
   final Recipe recipe;
@@ -34,6 +35,19 @@ class CookStepState {
   /// Trạng thái đồng hồ theo chỉ số bước; bước chưa bấm hẹn giờ thì không có.
   final Map<int, StepTimerStatus> timers;
 
+  /// Mốc hết giờ đã lưu của đồng hồ đang chạy, theo chỉ số bước: mở lại màn thì chạy tiếp.
+  final Map<int, DateTime> timerEnds;
+
+  CookStepState copyWith({Map<int, StepTimerStatus>? timers}) => CookStepState(
+    recipe: recipe,
+    servings: servings,
+    index: index,
+    ingredients: ingredients,
+    basicSpices: basicSpices,
+    timers: timers ?? this.timers,
+    timerEnds: timerEnds,
+  );
+
   List<RecipeStep> get steps => recipe.steps;
   RecipeStep get step => steps[index];
   bool get isFirst => index == 0;
@@ -47,7 +61,11 @@ class CookStepState {
 
   /// Đồng hồ của bước [i] hiện ra: ở đúng bước đó, hoặc đang chạy / hết giờ (ở mọi bước).
   bool showsTimer(int i) =>
-      i == index || (timers[i] ?? StepTimerStatus.idle) != StepTimerStatus.idle;
+      i == index ||
+      switch (timers[i]) {
+        null => timerEnds.containsKey(i),
+        final status => status != StepTimerStatus.idle,
+      };
 }
 
 /// Nấu từng bước một món (prototype `CookStep`). Bước đang ở lưu trong phiên nấu
@@ -90,6 +108,8 @@ class StepViewModel extends Notifier<AsyncValue<CookStepState>> {
     final (:items, :basicSpices) = stepIngredients(recipe, servings, {
       for (final i in ingredients) i.id: i,
     });
+    final now = clock();
+    final ends = session?.timerEnds ?? const <int, DateTime>{};
     return AsyncData(
       CookStepState(
         recipe: recipe,
@@ -98,6 +118,10 @@ class StepViewModel extends Notifier<AsyncValue<CookStepState>> {
         ingredients: items,
         basicSpices: basicSpices,
         timers: _timers,
+        timerEnds: {
+          for (var i = 0; i < recipe.steps.length; i++)
+            if (ends[cookTimerKey(0, i)] case final at? when at.isAfter(now)) i: at,
+        },
       ),
     );
   }
@@ -133,12 +157,13 @@ class StepViewModel extends Notifier<AsyncValue<CookStepState>> {
     final value = state.value;
     if (value == null) return;
     final notifications = ref.read(notificationServiceProvider);
-    for (final i in value.timedSteps) {
-      await notifications.cancelTimer(cookTimerKey(0, i));
-    }
     final sessions = ref.read(cookSessionProvider.notifier);
     if (ref.read(cookSessionProvider) == null) {
       await sessions.startRecipe(recipeId, value.servings);
+    }
+    for (final i in value.timedSteps) {
+      await notifications.cancelTimer(cookTimerKey(0, i));
+      await sessions.setTimerEnd(cookTimerKey(0, i), null);
     }
     await sessions.finishDish(0);
   }
@@ -147,34 +172,25 @@ class StepViewModel extends Notifier<AsyncValue<CookStepState>> {
   /// khác); dừng thì huỷ; hết giờ lúc app đang mở thì huỷ lịch (người dùng đã thấy trên màn).
   Future<void> timerChanged(int step, StepTimerStatus status) async {
     _timers = Map.unmodifiable({..._timers, step: status});
-    if (state case AsyncData(:final value)) {
-      state = AsyncData(
-        CookStepState(
-          recipe: value.recipe,
-          servings: value.servings,
-          index: value.index,
-          ingredients: value.ingredients,
-          basicSpices: value.basicSpices,
-          timers: _timers,
-        ),
-      );
-    }
-    final recipe = state.value?.recipe;
-    final seconds = recipe?.steps[step].timerSeconds;
-    if (recipe == null || seconds == null) return;
+    if (state case AsyncData(:final value)) state = AsyncData(value.copyWith(timers: _timers));
+    final value = state.value;
+    final seconds = value?.steps[step].timerSeconds;
+    if (value == null || seconds == null) return;
     final notifications = ref.read(notificationServiceProvider);
+    final sessions = ref.read(cookSessionProvider.notifier);
     final key = cookTimerKey(0, step);
     switch (status) {
       case StepTimerStatus.running:
-        await notifications.scheduleTimer(
-          key: key,
-          recipeTitle: recipe.name,
-          at: clock().add(Duration(seconds: seconds)),
-        );
+        // Đồng hồ chạy tiếp từ mốc đã lưu (mở lại màn) thì giữ mốc đó.
+        final at = value.timerEnds[step] ?? clock().add(Duration(seconds: seconds));
+        await notifications.scheduleTimer(key: key, recipeTitle: value.recipe.name, at: at);
+        if (_session != null) await sessions.setTimerEnd(key, at);
       case StepTimerStatus.idle:
         await notifications.cancelTimer(key);
+        await sessions.setTimerEnd(key, null);
       case StepTimerStatus.done:
         if (ref.read(appInForegroundProvider)()) await notifications.cancelTimer(key);
+        await sessions.setTimerEnd(key, null);
     }
   }
 }

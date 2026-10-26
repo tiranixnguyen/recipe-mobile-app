@@ -139,6 +139,20 @@ void main() {
     expect(find.byType(StepTimer, skipOffstage: false), findsNWidgets(2));
   });
 
+  testWidgets('thoát khi đồng hồ đang chạy, Nấu tiếp thì đồng hồ chạy tiếp', (tester) async {
+    final env = await _pump(tester, step: 1);
+    await tester.tap(find.text('Hẹn 1 phút'));
+    await tester.pump();
+    await tester.tap(find.byTooltip(CookStrings.exitCooking));
+    await tester.pumpAndSettle();
+
+    env.now = env.now.add(const Duration(seconds: 20));
+    await tester.tap(find.text(CookStrings.resumeAction));
+    await tester.pumpAndSettle();
+    expect(find.text('00:40'), findsOneWidget);
+    expect(find.text('Dừng'), findsOneWidget);
+  });
+
   testWidgets('sheet Nguyên liệu theo khẩu phần, gia vị Vừa đủ', (tester) async {
     await _pump(tester);
 

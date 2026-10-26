@@ -137,6 +137,28 @@ void main() {
     expect(env.notifications.timers.keys, [cookTimerKey(0, 1)]);
   });
 
+  test('đồng hồ đang chạy lưu mốc hết giờ vào phiên; mở lại màn thì giữ mốc đó', () async {
+    final env = _Env();
+    await env.container.read(cookSessionProvider.notifier).startRecipe('trung', 1);
+    final sub = await env.open();
+    await env.viewModel.timerChanged(1, StepTimerStatus.running);
+    final endAt = _now.add(const Duration(seconds: 60));
+    expect(env.container.read(cookSessionProvider)!.timerEnds, {cookTimerKey(0, 1): endAt});
+
+    sub.close();
+    await env.container.pump();
+    await env.open();
+    expect(env.state.timerEnds, {1: endAt});
+    expect(env.state.showsTimer(1), isTrue);
+    // StepTimer chạy tiếp báo running: không dời lịch.
+    await env.viewModel.timerChanged(1, StepTimerStatus.running);
+    expect(env.notifications.timers[cookTimerKey(0, 1)]!.at, endAt);
+
+    await env.viewModel.timerChanged(1, StepTimerStatus.idle);
+    expect(env.container.read(cookSessionProvider)!.timerEnds, isEmpty);
+    expect(env.state.showsTimer(1), isFalse);
+  });
+
   test('Xong: món xong trong phiên, huỷ mọi lịch báo của món', () async {
     final env = _Env();
     await env.container.read(cookSessionProvider.notifier).startRecipe('trung', 1);

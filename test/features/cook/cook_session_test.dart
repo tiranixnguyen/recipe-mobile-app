@@ -54,6 +54,10 @@ void main() {
     await controller().goTo(0, 1);
     await controller().goTo(1, 3);
     await controller().finishDish(0);
+    final end = DateTime(2026, 10, 26, 18, 3);
+    await controller().setTimerEnd(51, end);
+    await controller().setTimerEnd(2, end);
+    await controller().setTimerEnd(2, null);
 
     container.invalidate(cookSessionProvider);
     final session = container.read(cookSessionProvider)!;
@@ -62,6 +66,7 @@ void main() {
     expect(session.current, 1);
     expect(session.positions, [1, 3]);
     expect(session.finished, {0});
+    expect(session.timerEnds, {51: end});
     expect(session.isDone, isFalse);
   });
 
