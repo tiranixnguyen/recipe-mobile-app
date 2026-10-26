@@ -17,10 +17,13 @@ import 'package:recipe_mobile_app/features/plan/strings.dart';
 
 /// Thực đơn theo ngày (prototype `MealPlan`, chế độ Ngày).
 class PlanScreen extends ConsumerStatefulWidget {
-  const PlanScreen({super.key, this.initialDay});
+  const PlanScreen({super.key, this.initialDay, this.openRequest});
 
   /// Ngày mở sẵn (`/plan?day=3`, sau khi thêm món từ Chi tiết); null là giữ ngày đang xem.
   final int? initialDay;
+
+  /// `extra` của lần điều hướng ([goToPlanDay]); đổi thì mở lại [initialDay] dù ngày không đổi.
+  final Object? openRequest;
 
   @override
   ConsumerState<PlanScreen> createState() => _PlanScreenState();
@@ -36,8 +39,12 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
   @override
   void didUpdateWidget(PlanScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Tab giữ màn khi chuyển tab, nên `go(planLocation(day: …))` lần sau tới đây.
-    if (widget.initialDay != oldWidget.initialDay) _showInitialDay();
+    // Tab giữ màn khi chuyển tab, nên `go(planLocation(day: …))` lần sau tới đây. So cả
+    // [openRequest] vì thêm món vào cùng ngày lần nữa thì URL không đổi.
+    if (widget.initialDay != oldWidget.initialDay ||
+        !identical(widget.openRequest, oldWidget.openRequest)) {
+      _showInitialDay();
+    }
   }
 
   /// Đổi state của ViewModel sau frame, Riverpod không cho sửa provider lúc đang dựng cây widget.

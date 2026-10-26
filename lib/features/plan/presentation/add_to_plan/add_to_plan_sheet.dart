@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import 'package:recipe_mobile_app/core/format.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
@@ -28,7 +27,7 @@ Future<bool> showAddToPlanSheet(BuildContext context, Recipe recipe) async {
     builder: (_) => AddToPlanSheet(recipeId: recipe.id),
   );
   if (day == null) return false;
-  if (context.mounted) context.go(planLocation(day: day));
+  if (context.mounted) goToPlanDay(context, day);
   return true;
 }
 

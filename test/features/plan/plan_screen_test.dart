@@ -106,6 +106,24 @@ void main() {
     expect(container.read(plannedMealsProvider), isEmpty);
   });
 
+  testWidgets('goToPlanDay mở lại ngày đó dù URL không đổi và người dùng đã chọn ngày khác', (
+    tester,
+  ) async {
+    await _pump(tester);
+    final context = tester.element(find.byType(MealSlot).first);
+    goToPlanDay(context, 3);
+    await tester.pumpAndSettle();
+    expect(find.text('Thứ Năm'), findsOneWidget);
+
+    await tester.tap(find.text('T7'));
+    await tester.pumpAndSettle();
+    expect(find.text('Thứ Bảy'), findsOneWidget);
+
+    goToPlanDay(context, 3);
+    await tester.pumpAndSettle();
+    expect(find.text('Thứ Năm'), findsOneWidget);
+  });
+
   testWidgets('thêm hai món vào một bữa từ sheet tìm, rồi xoá một món', (tester) async {
     final container = await _pump(tester);
 
