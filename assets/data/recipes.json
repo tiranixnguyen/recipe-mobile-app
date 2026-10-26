@@ -145,7 +145,7 @@
       { "id": "fishsauce", "amount": 1, "unit": "muỗng canh" }
     ],
     "steps": [
-      { "text": "Đánh tan trứng với thịt băm, hành lá thái nhỏ và nước mắm.", "prep": [{ "id": "scallion", "action": "Thái nhỏ" }, { "id": "egg", "action": "Đập ra bát, thêm thịt băm, hành lá, nước mắm rồi đánh tan" }] },
+      { "text": "Đánh tan trứng với thịt băm, hành lá thái nhỏ và nước mắm.", "prep": [{ "id": "scallion", "action": "Thái nhỏ" }, { "id": "egg", "action": "Đập ra bát rồi đánh tan" }, { "id": "pork", "action": "Trộn vào trứng cùng hành lá và nước mắm" }] },
       { "text": "Đổ vào bát chịu nhiệt." },
       { "text": "Đặt bát lên xửng hấp khi nấu cơm. Nồi không có xửng thì đổ 2 bát nước vào lòng nồi rồi đặt bát vào." },
       { "text": "Bấm nấu, hấp đến khi xiên đũa vào không còn chảy nước.", "timerSeconds": 1200 }
