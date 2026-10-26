@@ -60,17 +60,20 @@ abstract final class CookStrings {
   static String mealTitle(Meal meal) => 'Nấu bữa ${meal.label.toLowerCase()}';
   static String mealMeta(String dayName, int dishes, int minutes, String? tool) =>
       [dayName, '$dishes món', 'khoảng $minutes phút', ?tool].join(' · ');
+  static String mealPrepMeta(String dayName, int dishes, int prepMinutes, int cookMinutes) =>
+      '$dayName · $dishes món · sơ chế ~$prepMinutes phút, nấu ~$cookMinutes phút';
   static const backToPlan = 'Quay lại thực đơn';
   static const cookOrder = 'Thứ tự nấu';
   static const cookOrderHint = 'Giữ và kéo để đổi thứ tự';
   static const useSuggestedOrder = 'Dùng thứ tự gợi ý';
   static String reorderLabel(String name, int position) =>
-      'Đổi thứ tự $name, đang ở vị trí $position';
+      'Đổi thứ tự $name, đang ở vị trí $position. Dùng phím mũi tên lên xuống';
   static String movedTo(String name, int position) => '$name lên vị trí $position';
   static const mealServingsHint = 'Áp dụng cho cả bữa';
   static const mealGather = 'Lấy đồ ra · cả bữa';
   static String dishesTag(int count) => '$count món';
   static String startFirst(String name) => 'Bắt đầu: $name';
+  static const startPrep = 'Bắt đầu sơ chế';
   static String mealStepTitle(Meal meal, int dish, int total) =>
       'Bữa ${meal.label.toLowerCase()} · món $dish/$total';
   static const mealDishes = 'Món trong bữa';
@@ -80,6 +83,22 @@ abstract final class CookStrings {
       '${name.toUpperCase()} · BƯỚC $step/$total';
   static String mealTimerLabel(String name, int step) => '$name · Bước $step';
   static String nextDish(int number, String name) => 'Sang món $number: $name';
+  static String nextDishShort(int number) => 'Sang món $number';
+
+  // Chặng "Sơ chế cả bữa" đầu `MealCookStep`.
+  static String mealPrepStageTitle(Meal meal) => 'Bữa ${meal.label.toLowerCase()} · sơ chế';
+  static const prepTab = 'Sơ chế';
+  static String prepProgress(int done, int total) => '$done/$total việc';
+  static String prepStageLabel(int minutes) => 'SƠ CHẾ CẢ BỮA · ~$minutes PHÚT';
+  static const prepStageLabelNoTime = 'SƠ CHẾ CẢ BỮA';
+  static const prepTipLead = 'Mẹo:';
+  static const prepTip = ' Sơ chế sẵn mọi thứ tại đây để lúc đứng bếp chỉ việc nấu liền một mạch.';
+  static const prepSkipHint = 'Đã sơ chế từ trước? Bấm nút bên dưới để vào nấu luôn.';
+  static String prepShare(String amountText) => '~$amountText';
+  static String prepTaskLabel(String ingredient, String action) =>
+      action.isEmpty ? ingredient : '$ingredient: $action';
+  static String startCookingDish(String name) => 'Bắt đầu nấu: $name';
+  static String startCookingNumber(int number) => 'Bắt đầu nấu món $number';
   static const finishMeal = 'Xong cả bữa';
   static String mealSheetTitle(String name, int servings) =>
       'Nguyên liệu · $name · $servings người';

@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
+import 'package:recipe_mobile_app/core/format.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/widgets/step_timer.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_device.dart';
@@ -10,6 +11,56 @@ import 'package:recipe_mobile_app/features/cook/data/cook_timers.dart';
 import 'package:recipe_mobile_app/features/cook/domain/cook_step.dart';
 import 'package:recipe_mobile_app/features/cook/domain/meal_cook.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_prep/meal_prep_view_model.dart';
+
+/// Một việc ở chặng Sơ chế, đã sẵn chữ để hiện: "Tỏi · Băm nhỏ · 3 tép", tag món kèm phần lượng.
+@immutable
+class PrepItem {
+  const PrepItem({
+    required this.id,
+    required this.ingredient,
+    required this.action,
+    required this.amountText,
+    this.dishes = const [],
+    this.children = const [],
+  });
+
+  /// `MealPrepTask.id`: khoá lưu tick.
+  final String id;
+  final String ingredient;
+
+  /// Cách làm; rỗng ở việc cha.
+  final String action;
+  final String amountText;
+
+  /// Món dùng tới (tên đầy đủ), kèm phần lượng "~2 tép" khi nhiều món cùng làm một việc.
+  final List<({String name, String? share})> dishes;
+
+  /// Việc con khi các món sơ chế nguyên liệu này khác cách.
+  final List<PrepItem> children;
+
+  /// Việc lá được tick: chính nó, hoặc các việc con.
+  List<String> get leafIds => children.isEmpty ? [id] : [for (final c in children) c.id];
+
+  @override
+  bool operator ==(Object other) =>
+      other is PrepItem &&
+      other.id == id &&
+      other.ingredient == ingredient &&
+      other.action == action &&
+      other.amountText == amountText &&
+      listEquals(other.dishes, dishes) &&
+      listEquals(other.children, children);
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ingredient,
+    action,
+    amountText,
+    Object.hashAll(dishes),
+    Object.hashAll(children),
+  );
+}
 
 @immutable
 class MealStepState {
@@ -23,6 +74,9 @@ class MealStepState {
     required this.basicSpices,
     required this.timers,
     required this.timerEnds,
+    this.inPrep = false,
+    this.prep = const [],
+    this.prepDone = const {},
   });
 
   final Meal meal;
@@ -30,10 +84,10 @@ class MealStepState {
   /// Món theo thứ tự nấu.
   final List<MealDish> dishes;
 
-  /// Món đang xem.
+  /// Món đang xem (ở chặng Sơ chế: món sẽ nấu khi bấm "Bắt đầu nấu").
   final int current;
 
-  /// Bước đang ở của từng món.
+  /// Bước đang ở của từng món, chỉ số trong [stepsOf] (bước đứng bếp).
   final List<int> positions;
   final Set<int> finished;
 
@@ -41,11 +95,20 @@ class MealStepState {
   final List<StepIngredient> ingredients;
   final List<String> basicSpices;
 
-  /// Trạng thái đồng hồ theo `cookTimerKey(món, bước)`.
+  /// Trạng thái đồng hồ theo `cookTimerKey(món, bước gốc)`.
   final Map<int, StepTimerStatus> timers;
 
-  /// Mốc hết giờ đã lưu theo `cookTimerKey(món, bước)`.
+  /// Mốc hết giờ đã lưu theo `cookTimerKey(món, bước gốc)`.
   final Map<int, DateTime> timerEnds;
+
+  /// Đang ở chặng "Sơ chế cả bữa".
+  final bool inPrep;
+
+  /// Việc sơ chế cả bữa; rỗng khi bữa không có gì để sơ chế (không có tab Sơ chế).
+  final List<PrepItem> prep;
+
+  /// Việc lá đã tick.
+  final Set<String> prepDone;
 
   MealStepState copyWith({Map<int, StepTimerStatus>? timers}) => MealStepState(
     meal: meal,
@@ -57,26 +120,56 @@ class MealStepState {
     basicSpices: basicSpices,
     timers: timers ?? this.timers,
     timerEnds: timerEnds,
+    inPrep: inPrep,
+    prep: prep,
+    prepDone: prepDone,
   );
+
+  bool get hasPrep => prep.isNotEmpty;
+
+  /// Tiến độ chặng Sơ chế tính theo việc lá.
+  int get prepTotal => prep.fold(0, (sum, p) => sum + p.leafIds.length);
+  int get prepDoneCount =>
+      prep.fold(0, (sum, p) => sum + p.leafIds.where(prepDone.contains).length);
+  bool get prepFinished => hasPrep && prepDoneCount == prepTotal;
+
+  /// Phút sơ chế cả bữa (`Recipe.prepMinutes` cộng lại), 0 khi dữ liệu không có.
+  int get prepMinutes => dishes.fold(0, (sum, d) => sum + (d.recipe.prepMinutes ?? 0));
+
+  /// Ô tick của [item]: true khi xong mọi việc lá, null khi mới xong một phần (việc cha).
+  bool? checkedOf(PrepItem item) {
+    final done = item.leafIds.where(prepDone.contains).length;
+    if (done == 0) return false;
+    return done == item.leafIds.length ? true : null;
+  }
+
+  /// Bước đứng bếp của món thứ [dish] (bỏ bước sơ chế), kèm chỉ số gốc.
+  List<({int index, RecipeStep step})> stepsOf(int dish) => cookSteps(dishes[dish].recipe);
 
   MealDish get dish => dishes[current];
   Recipe get recipe => dish.recipe;
+  List<({int index, RecipeStep step})> get steps => stepsOf(current);
   int get index => positions[current];
-  RecipeStep get step => recipe.steps[index];
-  bool get isFirst => current == 0 && index == 0;
-  bool get isLastStep => index == recipe.steps.length - 1;
+  RecipeStep get step => steps[index].step;
+
+  /// Không lùi được nữa: ở chặng Sơ chế, hoặc bước đầu món đầu khi bữa không có chặng Sơ chế.
+  bool get isFirst => inPrep || (current == 0 && index == 0 && !hasPrep);
+  bool get isLastStep => index == steps.length - 1;
   bool get isLastDish => current == dishes.length - 1;
 
-  /// Bước có hẹn giờ của mọi món: (món, bước).
+  /// Bước có hẹn giờ của mọi món: (món, bước gốc).
   List<(int, int)> get timedSteps => [
     for (final (d, dish) in dishes.indexed)
       for (final (i, s) in dish.recipe.steps.indexed)
-        if ((s.timerSeconds ?? 0) > 0) (d, i),
+        if (!s.isPrep && (s.timerSeconds ?? 0) > 0) (d, i),
   ];
 
-  /// Đồng hồ hiện ra: ở đúng bước đang xem, hoặc đang chạy / hết giờ (ở mọi món).
+  /// Số thứ tự hiển thị ("Bước 2") của bước gốc [step] món [dish], đếm trên bước đứng bếp.
+  int stepNumber(int dish, int step) => stepsOf(dish).indexWhere((s) => s.index == step) + 1;
+
+  /// Đồng hồ hiện ra: ở đúng bước đang xem, hoặc đang chạy / hết giờ (ở mọi món, cả chặng Sơ chế).
   bool showsTimer(int dish, int step) {
-    if (dish == current && step == index) return true;
+    if (!inPrep && dish == current && step == steps[index].index) return true;
     final key = cookTimerKey(dish, step);
     return switch (timers[key]) {
       null => timerEnds.containsKey(key),
@@ -85,8 +178,9 @@ class MealStepState {
   }
 }
 
-/// Nấu cả bữa từng bước (prototype `MealCookStep`): tab món, mỗi món giữ bước riêng, đồng hồ của
-/// mọi món chạy tiếp khi chuyển món. Đọc và ghi phiên nấu ([cookSessionProvider]).
+/// Nấu cả bữa từng bước (prototype `MealCookStep`): chặng Sơ chế chung, rồi tab món, mỗi món giữ
+/// bước đứng bếp riêng, đồng hồ của mọi món chạy tiếp khi chuyển món. Đọc và ghi phiên nấu
+/// ([cookSessionProvider]).
 class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
   Map<int, StepTimerStatus> _timers = const {};
 
@@ -117,7 +211,7 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
     }
     final dishes = [
       for (final d in session.dishes)
-        if (byId[d.recipeId] case final recipe? when recipe.steps.isNotEmpty)
+        if (byId[d.recipeId] case final recipe? when cookSteps(recipe).isNotEmpty)
           (recipe: recipe, servings: d.servings),
     ];
     // Món bị bỏ khỏi dữ liệu thì chỉ số trong phiên không còn đúng: coi như không có bữa.
@@ -125,12 +219,13 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
       return AsyncError(const MealNotFound(), StackTrace.current);
     }
     final positions = [
-      for (final (i, d) in dishes.indexed) session.positions[i].clamp(0, d.recipe.steps.length - 1),
+      for (final (i, d) in dishes.indexed)
+        session.positions[i].clamp(0, cookSteps(d.recipe).length - 1),
     ];
     final dish = dishes[session.current];
-    final (:items, :basicSpices) = stepIngredients(dish.recipe, dish.servings, {
-      for (final i in ingredients) i.id: i,
-    });
+    final ingredientsById = {for (final i in ingredients) i.id: i};
+    final (:items, :basicSpices) = stepIngredients(dish.recipe, dish.servings, ingredientsById);
+    final prep = _prepItems(dishes, ingredientsById);
     final now = clock();
     return AsyncData(
       MealStepState(
@@ -146,8 +241,36 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
           for (final MapEntry(:key, :value) in session.timerEnds.entries)
             if (value.isAfter(now)) key: value,
         },
+        inPrep: session.inPrep && prep.isNotEmpty,
+        prep: prep,
+        prepDone: session.prepDone,
       ),
     );
+  }
+
+  /// Việc sơ chế cả bữa ([mealPrepTasks]) kèm tên nguyên liệu, tên món và lượng đã định dạng.
+  static List<PrepItem> _prepItems(List<MealDish> dishes, Map<String, Ingredient> ingredientsById) {
+    final names = {for (final d in dishes) d.recipe.id: d.recipe.name};
+    String amount(double value, String unit) => '${formatAmount(value)} $unit';
+    PrepItem item(MealPrepTask task, String ingredient) => PrepItem(
+      id: task.id,
+      ingredient: ingredient,
+      action: task.action,
+      amountText: amount(task.amount, task.unit),
+      dishes: [
+        for (final s in task.shares)
+          (
+            name: names[s.recipeId] ?? s.recipeId,
+            // Một món thì tag món là đủ; nhiều món mới ghi phần của từng món.
+            share: task.shares.length > 1 ? amount(s.amount, task.unit) : null,
+          ),
+      ],
+      children: [for (final c in task.children) item(c, ingredient)],
+    );
+    return List.unmodifiable([
+      for (final task in mealPrepTasks(dishes))
+        item(task, ingredientsById[task.ingredientId]?.name ?? task.ingredientId),
+    ]);
   }
 
   CookSessionController get _sessions => ref.read(cookSessionProvider.notifier);
@@ -155,27 +278,42 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
   /// Bấm tab món [dish]: xem món đó ở bước đang dở.
   Future<void> selectDish(int dish) async {
     final value = state.value;
-    if (value == null || dish == value.current) return;
+    if (value == null || (dish == value.current && !value.inPrep)) return;
     await _sessions.goTo(dish, value.positions[dish]);
   }
 
-  /// "Bước tiếp"; ở bước cuối món chưa phải món cuối thì "Sang món n": món này xong, sang món sau.
+  /// Bấm tab Sơ chế.
+  Future<void> showPrep() async {
+    if (state.value?.hasPrep ?? false) await _sessions.showPrep();
+  }
+
+  /// Bấm ô tick của [item]: việc lá thì đảo; việc cha thì tick hết việc con, đã đủ thì bỏ hết.
+  Future<void> togglePrep(PrepItem item) async {
+    final value = state.value;
+    if (value == null) return;
+    await _sessions.setPrepDone(item.leafIds, done: value.checkedOf(item) != true);
+  }
+
+  /// "Bước tiếp"; ở chặng Sơ chế thì "Bắt đầu nấu" món đầu (chưa tick đủ vẫn được); ở bước cuối
+  /// món chưa phải món cuối thì "Sang món n": món này xong, sang món sau.
   Future<void> next() async {
     final value = state.value;
     if (value == null) return;
+    if (value.inPrep) return _sessions.goTo(0, value.positions[0]);
     if (!value.isLastStep) return _sessions.goTo(value.current, value.index + 1);
     if (value.isLastDish) return;
     await _finishDish(value, value.current);
     await _sessions.goTo(value.current + 1, value.positions[value.current + 1]);
   }
 
-  /// "Bước trước"; ở bước đầu món thì về bước cuối món trước.
+  /// "Bước trước"; ở bước đầu món thì về bước cuối món trước, bước đầu món đầu thì về chặng Sơ chế.
   Future<void> previous() async {
     final value = state.value;
     if (value == null || value.isFirst) return;
     if (value.index > 0) return _sessions.goTo(value.current, value.index - 1);
+    if (value.current == 0) return _sessions.showPrep();
     final dish = value.current - 1;
-    await _sessions.goTo(dish, value.dishes[dish].recipe.steps.length - 1);
+    await _sessions.goTo(dish, value.stepsOf(dish).length - 1);
   }
 
   /// "Xong cả bữa": mọi món xong, phiên chờ màn Hoàn thành.

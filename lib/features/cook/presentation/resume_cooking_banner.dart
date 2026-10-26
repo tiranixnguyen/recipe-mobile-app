@@ -6,6 +6,7 @@ import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
+import 'package:recipe_mobile_app/features/cook/domain/meal_cook.dart';
 import 'package:recipe_mobile_app/features/cook/routes.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 
@@ -20,10 +21,23 @@ final resumeCookingProvider = Provider.autoDispose<ResumeCooking?>((ref) {
   final dish = session.currentDish;
   final recipe = recipes?.where((r) => r.id == dish.recipeId).firstOrNull;
   if (recipe == null || recipe.steps.isEmpty) return null;
-  final step = session.positions[session.current].clamp(0, recipe.steps.length - 1);
+  if (!session.isMeal) {
+    final step = session.positions[session.current].clamp(0, recipe.steps.length - 1);
+    return (
+      text: CookStrings.resumeStep(recipe.name, step + 1, recipe.steps.length),
+      location: cookStepLocation(recipe.id),
+    );
+  }
+  // Nấu cả bữa: bước tính trên bước đứng bếp, chặng Sơ chế hiện "Bữa tối · sơ chế".
+  final planned = session.planned;
+  final steps = cookSteps(recipe).length;
+  if (steps == 0) return null;
+  final step = session.positions[session.current].clamp(0, steps - 1);
   return (
-    text: CookStrings.resumeStep(recipe.name, step + 1, recipe.steps.length),
-    location: session.isMeal ? mealCookStepLocation : cookStepLocation(recipe.id),
+    text: session.inPrep && planned != null
+        ? CookStrings.mealPrepStageTitle(planned.meal)
+        : CookStrings.resumeStep(recipe.name, step + 1, steps),
+    location: mealCookStepLocation,
   );
 });
 
@@ -71,6 +85,8 @@ class ResumeCookingBanner extends ConsumerWidget {
                       ),
                       Text(
                         resume.text,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: AppTextStyles.body.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colors.surface,

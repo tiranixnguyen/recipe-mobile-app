@@ -115,4 +115,37 @@ void main() {
       });
     });
   }
+
+  testWidgets('nhãn dài cắt "…" một dòng, không đẩy nút Dừng ra ngoài', (tester) async {
+    const label = 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm · Bước 3';
+    tester.view.physicalSize = const Size(360, 640) * 3;
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(1.3)),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: StepTimer(
+              seconds: 60,
+              label: label,
+              autoStart: true,
+              clock: () => DateTime(2026, 10, 27, 18),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    final text = tester.widget<Text>(find.text(label));
+    expect((text.maxLines, text.overflow), (1, TextOverflow.ellipsis));
+    final stop = tester.getRect(find.text('Dừng'));
+    expect(stop.right, lessThanOrEqualTo(360 - 16));
+    expect(tester.getSize(find.text(label)).height, lessThan(30));
+  });
 }

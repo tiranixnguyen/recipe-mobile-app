@@ -70,6 +70,50 @@ void main() {
     expect(session.isDone, isFalse);
   });
 
+  test('chặng Sơ chế: bắt đầu ở Sơ chế, tick lưu lại, sang bước thì rời Sơ chế', () async {
+    await controller().startMeal(
+      [(recipeId: 'dau', servings: 2), (recipeId: 'canh', servings: 2)],
+      (day: DateTime(2026, 10, 27), meal: Meal.dinner),
+      prep: true,
+    );
+    expect(container.read(cookSessionProvider)!.inPrep, isTrue);
+    await controller().setPrepDone(['garlic', 'scallion/Thái nhỏ'], done: true);
+    await controller().setPrepDone(['garlic'], done: false);
+
+    container.invalidate(cookSessionProvider);
+    var session = container.read(cookSessionProvider)!;
+    expect(session.inPrep, isTrue);
+    expect(session.prepDone, {'scallion/Thái nhỏ'});
+
+    await controller().goTo(0, 0);
+    expect(container.read(cookSessionProvider)!.inPrep, isFalse);
+    await controller().showPrep();
+    container.invalidate(cookSessionProvider);
+    session = container.read(cookSessionProvider)!;
+    expect(session.inPrep, isTrue);
+    expect(session.prepDone, {'scallion/Thái nhỏ'});
+  });
+
+  test('phiên không có inPrep, prepDone (lưu trước COOK-06) vẫn đọc được', () async {
+    await store().writeString(
+      'cook.session',
+      jsonEncode({
+        'dishes': [
+          {'recipeId': 'trung', 'servings': 1},
+        ],
+        'current': 0,
+        'positions': [1],
+        'finished': <int>[],
+        'startedAt': now.toIso8601String(),
+      }),
+    );
+    container.invalidate(cookSessionProvider);
+    final session = container.read(cookSessionProvider)!;
+    expect((session.inPrep, session.prepDone.isEmpty), (false, true));
+    expect(session.positions, [1]);
+    expect(session.toJson().containsKey('inPrep'), isFalse);
+  });
+
   test('bắt đầu phiên mới thì thay phiên cũ; clear thì xoá', () async {
     await controller().startRecipe('trung', 1);
     await controller().startRecipe('mi', 3);

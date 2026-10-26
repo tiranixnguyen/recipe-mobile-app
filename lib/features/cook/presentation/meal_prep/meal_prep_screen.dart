@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -20,7 +21,7 @@ import 'package:recipe_mobile_app/features/plan/plan.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Chuẩn bị nấu cả bữa (prototype `MealCookPrep`): thứ tự nấu, khẩu phần cả bữa, "Lấy đồ ra · cả
-/// bữa"; dưới cùng "Bắt đầu: tên món đầu".
+/// bữa"; dưới cùng "Bắt đầu sơ chế" ("Bắt đầu: tên món đầu" khi bữa không có gì để sơ chế).
 class MealPrepScreen extends ConsumerWidget {
   const MealPrepScreen({super.key, required this.slot});
 
@@ -66,6 +67,7 @@ class _MealPrep extends ConsumerWidget {
     }
 
     void move(int from, int to) {
+      if (to < 0 || to >= state.dishes.length || to == from) return;
       viewModel.move(from, to);
       final name = state.dishes[from].recipe.name;
       SemanticsService.sendAnnouncement(
@@ -78,20 +80,17 @@ class _MealPrep extends ConsumerWidget {
     final spices = state.basicSpices;
     final gatherRows = [
       for (final item in state.gather)
-        GatherRow(
-          label: '${item.name} · ${item.amountText}',
-          status: CookStrings.inPantry,
-          tag: item.recipeIds.length > 1
-              ? CookStrings.dishesTag(item.recipeIds.length)
-              : state.nameOf(item.recipeIds.single),
+        MealGatherRow(
+          name: item.name,
+          amount: item.amountText,
+          dishes: [for (final id in item.recipeIds) state.nameOf(id)],
           checked: state.checked.contains(item.ingredientId),
           onChanged: () => viewModel.toggle(item.ingredientId),
         ),
       if (spices.isNotEmpty)
-        GatherRow(
-          label: spices.join(', '),
-          status: CookStrings.basicSpices,
-          muted: true,
+        MealGatherRow(
+          name: spices.join(', '),
+          amount: CookStrings.enough,
           checked: state.checked.contains(MealPrepViewModel.spicesKey),
           onChanged: () => viewModel.toggle(MealPrepViewModel.spicesKey),
         ),
@@ -106,12 +105,19 @@ class _MealPrep extends ConsumerWidget {
           children: [
             CookHeader(
               title: CookStrings.mealTitle(state.slot.meal),
-              subtitle: CookStrings.mealMeta(
-                dayName,
-                state.dishes.length,
-                state.minutes,
-                state.tools,
-              ),
+              subtitle: state.hasPrep
+                  ? CookStrings.mealPrepMeta(
+                      dayName,
+                      state.dishes.length,
+                      state.prepMinutes,
+                      state.cookMinutes,
+                    )
+                  : CookStrings.mealMeta(
+                      dayName,
+                      state.dishes.length,
+                      state.minutes,
+                      state.tools,
+                    ),
               icon: AppIcons.back,
               tooltip: CookStrings.backToPlan,
               onPressed: () => context.canPop() ? context.pop() : context.go(planLocation()),
@@ -147,7 +153,7 @@ class _MealPrep extends ConsumerWidget {
                       itemBuilder: (context, i) => Padding(
                         key: ValueKey(state.dishes[i].recipe.id),
                         padding: const EdgeInsets.only(bottom: AppSpacing.s2),
-                        child: _OrderRow(index: i, dish: state.dishes[i]),
+                        child: _OrderRow(index: i, dish: state.dishes[i], onMove: move),
                       ),
                     ),
                   ),
@@ -190,7 +196,9 @@ class _MealPrep extends ConsumerWidget {
             ),
             CookFooter(
               child: AppButton(
-                label: CookStrings.startFirst(state.dishes.first.recipe.name),
+                label: state.hasPrep
+                    ? CookStrings.startPrep
+                    : CookStrings.startFirst(state.dishes.first.recipe.name),
                 size: AppButtonSize.lg,
                 block: true,
                 onPressed: start,
@@ -251,12 +259,16 @@ class _OrderHeader extends StatelessWidget {
   }
 }
 
-/// Một món trong "Thứ tự nấu": số thứ tự tròn 28, tên, thời gian · dụng cụ, tay cầm kéo.
+/// Một món trong "Thứ tự nấu": số thứ tự tròn 28, tên (tối đa 2 dòng), thời gian · dụng cụ, tay
+/// cầm kéo. Tay cầm nhận phím mũi tên lên/xuống để đổi thứ tự không cần kéo.
 class _OrderRow extends StatelessWidget {
-  const _OrderRow({required this.index, required this.dish});
+  const _OrderRow({required this.index, required this.dish, required this.onMove});
 
   final int index;
   final MealDish dish;
+
+  /// Đổi món ở vị trí `from` sang vị trí `to`.
+  final void Function(int from, int to) onMove;
 
   @override
   Widget build(BuildContext context) {
@@ -293,6 +305,8 @@ class _OrderRow extends StatelessWidget {
                 children: [
                   Text(
                     recipe.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.body.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.ink,
@@ -307,15 +321,60 @@ class _OrderRow extends StatelessWidget {
             ),
             ReorderableDragStartListener(
               index: index,
-              child: Tooltip(
-                message: CookStrings.reorderLabel(recipe.name, index + 1),
-                child: SizedBox.square(
-                  dimension: 48,
-                  child: Icon(Symbols.drag_indicator_rounded, color: colors.inkMuted),
-                ),
+              child: _Grip(
+                label: CookStrings.reorderLabel(recipe.name, index + 1),
+                onUp: () => onMove(index, index - 1),
+                onDown: () => onMove(index, index + 1),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Tay cầm kéo 48×48 lấy focus được: mũi tên lên/xuống đổi thứ tự; viền `chili` khi có focus.
+class _Grip extends StatefulWidget {
+  const _Grip({required this.label, required this.onUp, required this.onDown});
+
+  final String label;
+  final VoidCallback onUp;
+  final VoidCallback onDown;
+
+  @override
+  State<_Grip> createState() => _GripState();
+}
+
+class _GripState extends State<_Grip> {
+  bool _focused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Focus(
+      onFocusChange: (focused) => setState(() => _focused = focused),
+      onKeyEvent: (_, event) {
+        if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
+        if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+          widget.onUp();
+        } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+          widget.onDown();
+        } else {
+          return KeyEventResult.ignored;
+        }
+        return KeyEventResult.handled;
+      },
+      child: Tooltip(
+        message: widget.label,
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            borderRadius: AppRadius.mdAll,
+            border: _focused ? Border.all(color: colors.chili, width: 2) : null,
+          ),
+          child: Icon(Symbols.drag_indicator_rounded, color: colors.inkMuted),
         ),
       ),
     );

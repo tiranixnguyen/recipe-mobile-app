@@ -63,14 +63,22 @@ const cookRecipeFixture = Recipe(
     ),
   ],
   steps: [
-    RecipeStep(text: 'Đánh trứng với hành'),
+    RecipeStep(
+      text: 'Đánh trứng với hành',
+      prep: [
+        PrepTask(id: 'scallion', action: 'Thái nhỏ'),
+        PrepTask(id: 'egg', action: 'Đập ra bát rồi đánh tan'),
+      ],
+    ),
     RecipeStep(text: 'Làm nóng dầu', timerSeconds: 60),
     RecipeStep(text: 'Chiên mặt dưới', timerSeconds: 180),
     RecipeStep(text: 'Lật trứng, xúc ra đĩa'),
   ],
+  prepMinutes: 3,
 );
 
-/// Món thứ hai cho Nấu cả bữa: lâu hơn [cookRecipeFixture] nên được gợi ý nấu trước.
+/// Món thứ hai cho Nấu cả bữa: lâu hơn [cookRecipeFixture] nên được gợi ý nấu trước. Sơ chế chung
+/// với món trứng: trứng cùng cách làm (một việc), hành lá khác cách (việc cha, hai việc con).
 const soupRecipeFixture = Recipe(
   id: 'canh',
   name: 'Canh cà chua trứng',
@@ -84,9 +92,19 @@ const soupRecipeFixture = Recipe(
   ingredients: [
     RecipeIngredient(id: 'tomato', amount: 2, unit: 'quả'),
     RecipeIngredient(id: 'egg', amount: 1, unit: 'quả'),
+    RecipeIngredient(id: 'scallion', amount: 1, unit: 'nắm'),
     RecipeIngredient(id: 'oil', amount: 1, unit: 'muỗng cà phê'),
   ],
+  prepMinutes: 5,
   steps: [
+    RecipeStep(
+      text: 'Cà chua bổ múi cau, hành cắt khúc, đánh trứng',
+      prep: [
+        PrepTask(id: 'tomato', action: 'Bổ múi cau'),
+        PrepTask(id: 'scallion', action: 'Cắt khúc'),
+        PrepTask(id: 'egg', action: 'Đập ra bát rồi đánh tan'),
+      ],
+    ),
     RecipeStep(text: 'Xào cà chua'),
     RecipeStep(text: 'Đổ nước, đun sôi', timerSeconds: 300),
     RecipeStep(text: 'Đổ trứng, tắt bếp'),

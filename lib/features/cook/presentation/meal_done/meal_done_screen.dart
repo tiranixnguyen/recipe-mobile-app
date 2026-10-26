@@ -160,6 +160,8 @@ class _DishRating extends StatelessWidget {
                 children: [
                   Text(
                     name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.body.copyWith(
                       fontWeight: FontWeight.w600,
                       color: colors.ink,

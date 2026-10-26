@@ -27,6 +27,7 @@ class MealPrepState {
     required this.basicSpices,
     required this.missing,
     required this.checked,
+    required this.hasPrep,
   });
 
   final PlannedSlot slot;
@@ -46,11 +47,18 @@ class MealPrepState {
   /// Dòng đã tick: id nguyên liệu và [MealPrepViewModel.spicesKey].
   final Set<String> checked;
 
+  /// Bữa có việc sơ chế ([mealPrepTasks]): bắt đầu ở chặng Sơ chế.
+  final bool hasPrep;
+
   /// Người dùng đã kéo đổi thứ tự khác gợi ý.
   bool get reordered => !listEquals([for (final d in dishes) d.recipe.id], suggested);
 
   /// Nấu lần lượt từng món nên cộng thời gian; prototype ghi "khoảng".
   int get minutes => dishes.fold(0, (sum, d) => sum + d.recipe.minutes);
+
+  /// Phút sơ chế cả bữa (`Recipe.prepMinutes` cộng lại); phần còn lại của [minutes] là nấu.
+  int get prepMinutes => dishes.fold(0, (sum, d) => sum + (d.recipe.prepMinutes ?? 0));
+  int get cookMinutes => minutes - prepMinutes;
 
   /// Dụng cụ của cả bữa, không trùng: "Bếp từ, Nồi cơm điện".
   String? get tools {
@@ -139,6 +147,7 @@ class MealPrepViewModel extends Notifier<AsyncValue<MealPrepState>> {
         basicSpices: basicSpices,
         missing: missing,
         checked: _checked,
+        hasPrep: mealPrepTasks(dishes).isNotEmpty,
       ),
     );
   }
@@ -188,13 +197,18 @@ class MealPrepViewModel extends Notifier<AsyncValue<MealPrepState>> {
     return ref.read(shouldAskNotificationPermissionProvider)();
   }
 
-  /// "Bắt đầu: tên món đầu": mở phiên nấu cả bữa theo thứ tự đang chọn.
+  /// "Bắt đầu sơ chế" ("Bắt đầu: tên món đầu" khi bữa không có gì để sơ chế): mở phiên nấu cả
+  /// bữa theo thứ tự đang chọn.
   Future<void> start() async {
     final value = state.value;
     if (value == null) return;
-    await ref.read(cookSessionProvider.notifier).startMeal([
-      for (final d in value.dishes) (recipeId: d.recipe.id, servings: d.servings),
-    ], slot);
+    await ref
+        .read(cookSessionProvider.notifier)
+        .startMeal(
+          [for (final d in value.dishes) (recipeId: d.recipe.id, servings: d.servings)],
+          slot,
+          prep: value.hasPrep,
+        );
     ref.read(analyticsProvider).track('start_cooking', {
       'servings': value.servings,
       'steps': value.dishes.fold<int>(0, (sum, d) => sum + d.recipe.steps.length),

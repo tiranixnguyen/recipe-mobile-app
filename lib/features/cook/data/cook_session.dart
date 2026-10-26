@@ -33,10 +33,13 @@ class CookSession {
     this.planned,
     required this.startedAt,
     Map<int, DateTime> timerEnds = const {},
+    this.inPrep = false,
+    Set<String> prepDone = const {},
   }) : dishes = List.unmodifiable(dishes),
        positions = List.unmodifiable(positions ?? List.filled(dishes.length, 0)),
        finished = Set.unmodifiable(finished),
-       timerEnds = Map.unmodifiable(timerEnds);
+       timerEnds = Map.unmodifiable(timerEnds),
+       prepDone = Set.unmodifiable(prepDone);
 
   /// Món theo thứ tự nấu.
   final List<CookDish> dishes;
@@ -44,7 +47,8 @@ class CookSession {
   /// Chỉ số món đang nấu trong [dishes].
   final int current;
 
-  /// Bước đang ở của từng món, cùng thứ tự [dishes].
+  /// Bước đang ở của từng món, cùng thứ tự [dishes]. Nấu cả bữa: chỉ số trong bước đứng bếp
+  /// (`cookSteps`), vì bước sơ chế đã gom lên chặng Sơ chế.
   final List<int> positions;
 
   /// Chỉ số món đã nấu xong.
@@ -57,6 +61,12 @@ class CookSession {
   /// Mốc hết giờ của đồng hồ đang chạy, theo key `cookTimerKey(món, bước)`: mở lại màn nấu thì đồng
   /// hồ chạy tiếp.
   final Map<int, DateTime> timerEnds;
+
+  /// Nấu cả bữa đang ở chặng "Sơ chế cả bữa" (trước món đầu).
+  final bool inPrep;
+
+  /// Việc sơ chế đã tick, theo `MealPrepTask.id` của việc lá.
+  final Set<String> prepDone;
 
   /// Nấu cả bữa (mở từ Thực đơn) thay vì một món.
   bool get isMeal => planned != null || dishes.length > 1;
@@ -71,6 +81,8 @@ class CookSession {
     List<int>? positions,
     Set<int>? finished,
     Map<int, DateTime>? timerEnds,
+    bool? inPrep,
+    Set<String>? prepDone,
   }) => CookSession(
     dishes: dishes,
     current: current ?? this.current,
@@ -79,6 +91,8 @@ class CookSession {
     planned: planned,
     startedAt: startedAt,
     timerEnds: timerEnds ?? this.timerEnds,
+    inPrep: inPrep ?? this.inPrep,
+    prepDone: prepDone ?? this.prepDone,
   );
 
   Map<String, dynamic> toJson() => {
@@ -93,9 +107,12 @@ class CookSession {
     'startedAt': startedAt.toIso8601String(),
     if (timerEnds.isNotEmpty)
       'timerEnds': {for (final e in timerEnds.entries) '${e.key}': e.value.toIso8601String()},
+    if (inPrep) 'inPrep': true,
+    if (prepDone.isNotEmpty) 'prepDone': prepDone.toList(),
   };
 
-  /// Trả null khi dữ liệu hỏng (thiếu trường, sai kiểu, chỉ số ngoài khoảng).
+  /// Trả null khi dữ liệu hỏng (thiếu trường, sai kiểu, chỉ số ngoài khoảng). `inPrep`, `prepDone`
+  /// tuỳ chọn: phiên lưu trước khi có chặng Sơ chế vẫn đọc được.
   static CookSession? tryParse(Object? json) {
     if (json case {
       'dishes': List<dynamic> rawDishes,
@@ -147,6 +164,10 @@ class CookSession {
         planned: planned,
         startedAt: startedAt,
         timerEnds: timerEnds,
+        inPrep: json['inPrep'] == true,
+        prepDone: {
+          if (json['prepDone'] case final List<dynamic> raw) ...raw.whereType<String>(),
+        },
       );
     }
     return null;
@@ -161,7 +182,9 @@ class CookSession {
       setEquals(other.finished, finished) &&
       other.planned == planned &&
       other.startedAt == startedAt &&
-      mapEquals(other.timerEnds, timerEnds);
+      mapEquals(other.timerEnds, timerEnds) &&
+      other.inPrep == inPrep &&
+      setEquals(other.prepDone, prepDone);
 
   @override
   int get hashCode => Object.hash(
@@ -172,10 +195,14 @@ class CookSession {
     planned,
     startedAt,
     Object.hashAllUnordered(timerEnds.entries.map((e) => Object.hash(e.key, e.value))),
+    inPrep,
+    Object.hashAllUnordered(prepDone),
   );
 
   @override
-  String toString() => 'CookSession($dishes, current: $current, $positions, done: $finished)';
+  String toString() =>
+      'CookSession($dishes, current: $current, $positions, done: $finished'
+      '${inPrep ? ', inPrep' : ''})';
 }
 
 /// Phiên nấu đang dở; null khi không nấu gì. Bắt đầu phiên mới thì thay phiên cũ.
@@ -206,8 +233,9 @@ class CookSessionController extends Notifier<CookSession?> {
     ),
   );
 
-  /// Bắt đầu nấu cả bữa [planned]: [dishes] theo thứ tự nấu.
-  Future<void> startMeal(List<CookDish> dishes, PlannedSlot planned) => _save(
+  /// Bắt đầu nấu cả bữa [planned]: [dishes] theo thứ tự nấu. [prep]: bữa có việc sơ chế thì bắt
+  /// đầu ở chặng Sơ chế.
+  Future<void> startMeal(List<CookDish> dishes, PlannedSlot planned, {bool prep = false}) => _save(
     CookSession(
       dishes: dishes,
       planned: (
@@ -215,16 +243,38 @@ class CookSessionController extends Notifier<CookSession?> {
         meal: planned.meal,
       ),
       startedAt: ref.read(cookClockProvider)(),
+      inPrep: prep,
     ),
   );
 
-  /// Sang bước [step] của món thứ [dish] (cũng là món đang nấu).
+  /// Sang bước [step] của món thứ [dish] (cũng là món đang nấu); rời chặng Sơ chế nếu đang ở đó.
   Future<void> goTo(int dish, int step) async {
     final session = state;
     if (session == null || dish < 0 || dish >= session.dishes.length || step < 0) return;
     await _save(
-      session.copyWith(current: dish, positions: [...session.positions]..[dish] = step),
+      session.copyWith(
+        current: dish,
+        positions: [...session.positions]..[dish] = step,
+        inPrep: false,
+      ),
     );
+  }
+
+  /// Về chặng "Sơ chế cả bữa" (tab Sơ chế, "Bước trước" ở bước đầu món 1).
+  Future<void> showPrep() async {
+    final session = state;
+    if (session == null || session.inPrep) return;
+    await _save(session.copyWith(inPrep: true));
+  }
+
+  /// Tick ([done] true) hoặc bỏ tick các việc sơ chế [ids].
+  Future<void> setPrepDone(Iterable<String> ids, {required bool done}) async {
+    final session = state;
+    if (session == null) return;
+    final next = {...session.prepDone};
+    done ? next.addAll(ids) : next.removeAll(ids);
+    if (setEquals(next, session.prepDone)) return;
+    await _save(session.copyWith(prepDone: next));
   }
 
   /// Đánh dấu món thứ [dish] đã nấu xong.

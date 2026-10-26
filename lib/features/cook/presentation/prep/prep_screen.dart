@@ -88,6 +88,7 @@ class _Prep extends ConsumerWidget {
             CookHeader(
               title: CookStrings.prepTitle,
               subtitle: recipe.name,
+              subtitleMaxLines: 1,
               icon: AppIcons.back,
               tooltip: CookStrings.backToDetail,
               onPressed: () => context.canPop() ? context.pop() : context.go(discoverLocation),
