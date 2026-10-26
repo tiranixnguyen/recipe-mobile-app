@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_screen.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/prep/prep_screen.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 
 /// Đường dẫn tới màn Chi tiết món — feature khác dùng hàm này thay vì tự ghép chuỗi.
@@ -10,7 +11,13 @@ String recipeLocation(String id) => '/recipe/$id';
 /// Màn Chuẩn bị nấu của món [id] (prototype `CookPrep`).
 String cookPrepLocation(String id) => '${recipeLocation(id)}/prep';
 
-/// Chi tiết món (`Detail`); chế độ nấu (`CookPrep` → `CookStep` → `CookDone`) thêm dưới route này.
+/// Nấu từng bước món [id] (prototype `CookStep`), mở ở bước đang dở của phiên nấu.
+String cookStepLocation(String id) => '${recipeLocation(id)}/cook';
+
+/// Nấu xong món [id] (prototype `CookDone`).
+String cookDoneLocation(String id) => '${recipeLocation(id)}/done';
+
+/// Chi tiết món (`Detail`) và chế độ nấu một món: `CookPrep` → `CookStep` → `CookDone`.
 final cookRoutes = <RouteBase>[
   GoRoute(
     path: '/recipe/:id',
@@ -18,7 +25,15 @@ final cookRoutes = <RouteBase>[
     routes: [
       GoRoute(
         path: 'prep',
-        builder: (_, _) => const ComingSoonScreen(title: CookStrings.prep),
+        builder: (_, state) => PrepScreen(recipeId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: 'cook',
+        builder: (_, _) => const ComingSoonScreen(title: CookStrings.cookStep),
+      ),
+      GoRoute(
+        path: 'done',
+        builder: (_, _) => const ComingSoonScreen(title: CookStrings.cookDone),
       ),
     ],
   ),
