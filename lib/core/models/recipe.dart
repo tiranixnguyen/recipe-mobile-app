@@ -61,32 +61,80 @@ class RecipeIngredient {
   int get hashCode => Object.hash(id, amount, unit, optional, substituteNote);
 }
 
+/// Một việc sơ chế trên một nguyên liệu của bước sơ chế: "Cà chua — Bổ múi cau".
+@immutable
+class PrepTask {
+  const PrepTask({required this.id, required this.action, this.amount});
+
+  /// Nguyên liệu được sơ chế, tham chiếu tới `RecipeIngredient.id` cùng món.
+  final String id;
+
+  /// Cách sơ chế, ngắn, viết hoa chữ đầu, không dấu chấm cuối: "Thái nhỏ", "Đập ra bát rồi đánh tan".
+  final String action;
+
+  /// Lượng sơ chế theo cách này, cùng đơn vị với nguyên liệu [id] của món; null = cả lượng của món.
+  /// Dùng khi một nguyên liệu chia hai cách làm (một nửa thái nhỏ, một nửa cắt khúc).
+  final double? amount;
+
+  factory PrepTask.fromJson(Map<String, dynamic> json) {
+    return PrepTask(
+      id: json['id'] as String,
+      action: json['action'] as String,
+      amount: (json['amount'] as num?)?.toDouble(),
+    );
+  }
+
+  Map<String, dynamic> toJson() => <String, dynamic>{
+    'id': id,
+    'action': action,
+    if (amount != null) 'amount': amount,
+  };
+
+  @override
+  bool operator ==(Object other) =>
+      other is PrepTask && other.id == id && other.action == action && other.amount == amount;
+
+  @override
+  int get hashCode => Object.hash(id, action, amount);
+
+  @override
+  String toString() => 'PrepTask($id: $action${amount == null ? '' : ' · $amount'})';
+}
+
 /// Một bước nấu, có thể kèm thời gian hẹn giờ.
 @immutable
 class RecipeStep {
-  const RecipeStep({required this.text, this.timerSeconds, this.prep = false});
+  const RecipeStep({required this.text, this.timerSeconds, this.prep = const []});
 
   final String text;
 
   /// Thời gian hẹn giờ (giây) cho bước này, null nếu không có.
   final int? timerSeconds;
 
-  /// Bước sơ chế (rửa, thái, ngâm, ướp, đánh trứng, vo gạo): làm trước được, không cần bếp, nước sôi
-  /// hay hẹn giờ. Nấu cả bữa gom các bước này thành một bước đầu cho mọi món.
-  final bool prep;
+  /// Việc sơ chế trong bước, theo nguyên liệu; rỗng = bước đứng bếp. Bước sơ chế (rửa, thái, ngâm,
+  /// ướp, đánh trứng, vo gạo) làm trước được, không cần bếp, nước sôi hay hẹn giờ. Nấu cả bữa gom
+  /// việc của mọi món thành chặng "Sơ chế cả bữa" đầu tiên.
+  final List<PrepTask> prep;
+
+  /// Bước sơ chế ([prep] không rỗng).
+  bool get isPrep => prep.isNotEmpty;
 
   factory RecipeStep.fromJson(Map<String, dynamic> json) {
     return RecipeStep(
       text: json['text'] as String,
       timerSeconds: json['timerSeconds'] as int?,
-      prep: json['prep'] as bool? ?? false,
+      prep: List.unmodifiable(
+        ((json['prep'] as List<dynamic>?) ?? const []).map(
+          (e) => PrepTask.fromJson(e as Map<String, dynamic>),
+        ),
+      ),
     );
   }
 
   Map<String, dynamic> toJson() => <String, dynamic>{
     'text': text,
     if (timerSeconds != null) 'timerSeconds': timerSeconds,
-    if (prep) 'prep': true,
+    if (prep.isNotEmpty) 'prep': prep.map((e) => e.toJson()).toList(),
   };
 
   @override
@@ -94,10 +142,10 @@ class RecipeStep {
       other is RecipeStep &&
       other.text == text &&
       other.timerSeconds == timerSeconds &&
-      other.prep == prep;
+      listEquals(other.prep, prep);
 
   @override
-  int get hashCode => Object.hash(text, timerSeconds, prep);
+  int get hashCode => Object.hash(text, timerSeconds, Object.hashAll(prep));
 }
 
 /// Công thức nấu ăn đóng gói sẵn trong app — **không có trường giá**.
@@ -109,6 +157,7 @@ class Recipe {
     required this.description,
     required this.imageAsset,
     required this.minutes,
+    this.prepMinutes,
     required this.servings,
     required this.tools,
     required this.diets,
@@ -126,6 +175,10 @@ class Recipe {
 
   /// Tổng thời gian nấu (phút).
   final int minutes;
+
+  /// Phút sơ chế, đã tính trong [minutes]; null khi món không có bước sơ chế. Nấu cả bữa cộng lại
+  /// thành "sơ chế ~8 phút, nấu ~27 phút".
+  final int? prepMinutes;
 
   /// Khẩu phần chuẩn của công thức.
   final int servings;
@@ -155,6 +208,7 @@ class Recipe {
         description: json['description'] as String? ?? '',
         imageAsset: json['imageAsset'] as String,
         minutes: json['minutes'] as int,
+        prepMinutes: json['prepMinutes'] as int?,
         servings: json['servings'] as int,
         tools: _parseEnumList(json['tools'], Tool.fromId),
         diets: _parseEnumList(json['diets'], Diet.fromId),
@@ -181,6 +235,7 @@ class Recipe {
     'description': description,
     'imageAsset': imageAsset,
     'minutes': minutes,
+    if (prepMinutes != null) 'prepMinutes': prepMinutes,
     'servings': servings,
     'tools': tools.map((e) => e.id).toList(),
     'diets': diets.map((e) => e.id).toList(),
@@ -197,6 +252,7 @@ class Recipe {
       other.description == description &&
       other.imageAsset == imageAsset &&
       other.minutes == minutes &&
+      other.prepMinutes == prepMinutes &&
       other.servings == servings &&
       listEquals(other.tools, tools) &&
       listEquals(other.diets, diets) &&
@@ -211,6 +267,7 @@ class Recipe {
     description,
     imageAsset,
     minutes,
+    prepMinutes,
     servings,
     Object.hashAll(tools),
     Object.hashAll(diets),

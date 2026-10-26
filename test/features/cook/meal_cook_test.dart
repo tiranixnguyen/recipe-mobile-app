@@ -175,4 +175,188 @@ void main() {
       ]);
     });
   });
+
+  group('mealPrepTasks', () {
+    /// Hành lá chỉ cắt khúc 1 trong 2 nhánh (`amount`), món trứng thái nhỏ cả nhánh.
+    final dau = _recipe(
+      'dau',
+      minutes: 20,
+      servings: 2,
+      ingredients: const [
+        RecipeIngredient(id: 'garlic', amount: 2, unit: 'tép'),
+        RecipeIngredient(id: 'scallion', amount: 2, unit: 'nhánh'),
+        RecipeIngredient(id: 'tomato', amount: 2, unit: 'quả'),
+      ],
+      steps: const [
+        RecipeStep(
+          text: 'Cà chua bổ múi cau. Tỏi băm. Hành lá cắt khúc.',
+          prep: [
+            PrepTask(id: 'tomato', action: 'Bổ múi cau'),
+            PrepTask(id: 'garlic', action: 'Băm nhỏ'),
+            PrepTask(id: 'scallion', action: 'Cắt khúc', amount: 1),
+          ],
+        ),
+        RecipeStep(text: 'Xào.', timerSeconds: 120),
+      ],
+    );
+    final trung = _recipe(
+      'trung',
+      ingredients: const [
+        RecipeIngredient(id: 'egg', amount: 2, unit: 'quả'),
+        RecipeIngredient(id: 'garlic', amount: 1, unit: 'tép'),
+        RecipeIngredient(id: 'scallion', amount: 1, unit: 'nhánh'),
+      ],
+      steps: const [
+        RecipeStep(
+          text: 'Tỏi băm, hành thái nhỏ.',
+          prep: [
+            PrepTask(id: 'garlic', action: 'Băm nhỏ'),
+            PrepTask(id: 'scallion', action: 'Thái nhỏ'),
+          ],
+        ),
+        RecipeStep(
+          text: 'Đánh trứng.',
+          prep: [PrepTask(id: 'egg', action: 'Đánh tan')],
+        ),
+        RecipeStep(text: 'Chiên.', timerSeconds: 120),
+      ],
+    );
+
+    test('một món: mỗi việc một dòng, lượng cả món hoặc một phần, giữ thứ tự', () {
+      final tasks = mealPrepTasks([(recipe: dau, servings: 2)]);
+      expect(tasks, const [
+        MealPrepTask(
+          id: 'tomato',
+          ingredientId: 'tomato',
+          action: 'Bổ múi cau',
+          amount: 2,
+          unit: 'quả',
+          shares: [(recipeId: 'dau', amount: 2)],
+        ),
+        MealPrepTask(
+          id: 'garlic',
+          ingredientId: 'garlic',
+          action: 'Băm nhỏ',
+          amount: 2,
+          unit: 'tép',
+          shares: [(recipeId: 'dau', amount: 2)],
+        ),
+        MealPrepTask(
+          id: 'scallion',
+          ingredientId: 'scallion',
+          action: 'Cắt khúc',
+          amount: 1,
+          unit: 'nhánh',
+          shares: [(recipeId: 'dau', amount: 1)],
+        ),
+      ]);
+      expect(prepLeafIds(tasks), ['tomato', 'garlic', 'scallion']);
+    });
+
+    test('nhiều món cùng cách làm: một việc, cộng lượng, giữ phần từng món theo thứ tự nấu', () {
+      final tasks = mealPrepTasks([(recipe: dau, servings: 2), (recipe: trung, servings: 1)]);
+      final garlic = tasks.firstWhere((t) => t.ingredientId == 'garlic');
+      expect(garlic.action, 'Băm nhỏ');
+      expect(garlic.amount, 3);
+      expect(garlic.shares, [(recipeId: 'dau', amount: 2.0), (recipeId: 'trung', amount: 1.0)]);
+      expect(garlic.isParent, isFalse);
+    });
+
+    test('nhiều món khác cách làm: việc cha tổng lượng, việc con theo cách làm', () {
+      final tasks = mealPrepTasks([(recipe: dau, servings: 2), (recipe: trung, servings: 1)]);
+      expect(tasks.map((t) => t.id), ['tomato', 'garlic', 'scallion', 'egg']);
+
+      final scallion = tasks[2];
+      expect(scallion.isParent, isTrue);
+      expect(scallion.action, isEmpty);
+      expect(scallion.shares, isEmpty);
+      expect(scallion.amount, 2);
+      expect(scallion.children, const [
+        MealPrepTask(
+          id: 'scallion/Cắt khúc',
+          ingredientId: 'scallion',
+          action: 'Cắt khúc',
+          amount: 1,
+          unit: 'nhánh',
+          shares: [(recipeId: 'dau', amount: 1)],
+        ),
+        MealPrepTask(
+          id: 'scallion/Thái nhỏ',
+          ingredientId: 'scallion',
+          action: 'Thái nhỏ',
+          amount: 1,
+          unit: 'nhánh',
+          shares: [(recipeId: 'trung', amount: 1)],
+        ),
+      ]);
+      expect(prepLeafIds(tasks), [
+        'tomato',
+        'garlic',
+        'scallion/Cắt khúc',
+        'scallion/Thái nhỏ',
+        'egg',
+      ]);
+    });
+
+    test('nhân lượng theo khẩu phần', () {
+      final tasks = mealPrepTasks([(recipe: dau, servings: 4), (recipe: trung, servings: 3)]);
+      final garlic = tasks.firstWhere((t) => t.ingredientId == 'garlic');
+      expect(garlic.shares, [(recipeId: 'dau', amount: 4.0), (recipeId: 'trung', amount: 3.0)]);
+      expect(garlic.amount, 7);
+      final scallion = tasks.firstWhere((t) => t.ingredientId == 'scallion');
+      expect(scallion.children.map((c) => c.amount), [2, 3]);
+      expect(scallion.amount, 5);
+    });
+
+    test('món không có bước sơ chế: rỗng; id lạ bỏ qua', () {
+      expect(mealPrepTasks([(recipe: _banhMi, servings: 1)]), isEmpty);
+      expect(prepLeafIds(const []), isEmpty);
+
+      final odd = _recipe(
+        'odd',
+        steps: const [
+          RecipeStep(
+            text: 'Thái.',
+            prep: [PrepTask(id: 'ghost', action: 'Thái')],
+          ),
+        ],
+      );
+      expect(mealPrepTasks([(recipe: odd, servings: 1)]), isEmpty);
+    });
+
+    test('một nguyên liệu hai đơn vị trong bữa: khoá thêm đơn vị', () {
+      final canh = _recipe(
+        'canh',
+        ingredients: const [RecipeIngredient(id: 'scallion', amount: 10, unit: 'g')],
+        steps: const [
+          RecipeStep(
+            text: 'Thái hành.',
+            prep: [PrepTask(id: 'scallion', action: 'Thái nhỏ')],
+          ),
+        ],
+      );
+      final tasks = mealPrepTasks([(recipe: trung, servings: 1), (recipe: canh, servings: 1)]);
+      final ids = prepLeafIds(tasks);
+      expect(ids, ['garlic', 'scallion@nhánh', 'egg', 'scallion@g']);
+      expect(ids.toSet(), hasLength(ids.length));
+    });
+  });
+
+  group('cookSteps', () {
+    test('bỏ bước sơ chế, giữ chỉ số gốc', () {
+      final recipe = _recipe(
+        'r',
+        steps: const [
+          RecipeStep(
+            text: 'Thái.',
+            prep: [PrepTask(id: 'egg', action: 'Thái')],
+          ),
+          RecipeStep(text: 'Chiên.', timerSeconds: 60),
+          RecipeStep(text: 'Bày ra đĩa.'),
+        ],
+      );
+      expect(cookSteps(recipe).map((s) => s.index), [1, 2]);
+      expect(cookSteps(_trung).map((s) => s.index), [0, 1, 2, 3]);
+    });
+  });
 }

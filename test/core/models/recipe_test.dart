@@ -84,18 +84,76 @@ void main() {
     });
   });
 
+  group('PrepTask', () {
+    test('round-trip, amount tuỳ chọn chỉ ghi khi có', () {
+      final whole = PrepTask.fromJson(<String, dynamic>{'id': 'tomato', 'action': 'Bổ múi cau'});
+      expect(whole, const PrepTask(id: 'tomato', action: 'Bổ múi cau'));
+      expect(whole.amount, isNull);
+      expect(whole.toJson(), {'id': 'tomato', 'action': 'Bổ múi cau'});
+
+      final part = PrepTask.fromJson(<String, dynamic>{
+        'id': 'scallion',
+        'action': 'Thái nhỏ',
+        'amount': 1,
+      });
+      expect(part.amount, 1.0);
+      expect(PrepTask.fromJson(part.toJson()), part);
+      expect(part.hashCode, const PrepTask(id: 'scallion', action: 'Thái nhỏ', amount: 1).hashCode);
+      expect(part, isNot(const PrepTask(id: 'scallion', action: 'Thái nhỏ')));
+    });
+  });
+
   group('RecipeStep', () {
-    test('prep mặc định false, chỉ ghi ra JSON khi true', () {
+    test('prep mặc định rỗng, chỉ ghi ra JSON khi có việc', () {
       final step = RecipeStep.fromJson(<String, dynamic>{'text': 'Chiên', 'timerSeconds': 60});
-      expect(step.prep, isFalse);
+      expect(step.prep, isEmpty);
+      expect(step.isPrep, isFalse);
       expect(step.toJson(), {'text': 'Chiên', 'timerSeconds': 60});
 
-      final prep = RecipeStep.fromJson(<String, dynamic>{'text': 'Thái hành', 'prep': true});
-      expect(prep.prep, isTrue);
-      expect(prep.toJson(), {'text': 'Thái hành', 'prep': true});
+      final json = <String, dynamic>{
+        'text': 'Cà chua bổ múi cau. Hành lá thái nhỏ.',
+        'prep': [
+          {'id': 'tomato', 'action': 'Bổ múi cau'},
+          {'id': 'scallion', 'action': 'Thái nhỏ', 'amount': 0.5},
+        ],
+      };
+      final prep = RecipeStep.fromJson(json);
+      expect(prep.isPrep, isTrue);
+      expect(prep.prep, const [
+        PrepTask(id: 'tomato', action: 'Bổ múi cau'),
+        PrepTask(id: 'scallion', action: 'Thái nhỏ', amount: 0.5),
+      ]);
+      expect(prep.toJson(), json);
       expect(RecipeStep.fromJson(prep.toJson()), prep);
-      expect(prep, isNot(const RecipeStep(text: 'Thái hành')));
-      expect(prep.hashCode, const RecipeStep(text: 'Thái hành', prep: true).hashCode);
+      expect(prep.hashCode, RecipeStep.fromJson(json).hashCode);
+      expect(prep, isNot(RecipeStep(text: prep.text)));
+      expect(() => prep.prep.clear(), throwsUnsupportedError);
+    });
+  });
+
+  group('Recipe.prepMinutes', () {
+    test('tuỳ chọn, chỉ ghi khi có', () {
+      const base = Recipe(
+        id: 'r1',
+        name: 'Món test',
+        description: '',
+        imageAsset: '',
+        minutes: 15,
+        servings: 1,
+        tools: [],
+        diets: [],
+        meals: [],
+        ingredients: [],
+        steps: [],
+      );
+      expect(base.toJson().containsKey('prepMinutes'), isFalse);
+      expect(Recipe.fromJson(base.toJson()).prepMinutes, isNull);
+
+      final withPrep = Recipe.fromJson({...base.toJson(), 'prepMinutes': 5});
+      expect(withPrep.prepMinutes, 5);
+      expect(withPrep.toJson()['prepMinutes'], 5);
+      expect(withPrep, isNot(base));
+      expect(Recipe.fromJson(withPrep.toJson()), withPrep);
     });
   });
 
