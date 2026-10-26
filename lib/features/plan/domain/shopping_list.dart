@@ -36,32 +36,19 @@ class ShoppingLine {
 
 /// Gom nguyên liệu của [dishes] (mỗi món kèm số người nấu) thành danh sách đi chợ.
 ///
-/// Lượng nhân theo khẩu phần bằng [scaleAmount], cộng dồn theo (nguyên liệu, đơn vị); khác đơn vị
-/// thì tách dòng. Giữ thứ tự xuất hiện đầu tiên. Món không có trong [recipesById] bị bỏ qua.
+/// Cách gom xem [gatherIngredients]: nhân theo khẩu phần, cộng dồn theo (nguyên liệu, đơn vị), giữ thứ
+/// tự xuất hiện đầu tiên, bỏ món không có trong [recipesById].
 List<ShoppingLine> gatherShopping(
   Iterable<({String recipeId, int servings})> dishes,
   Map<String, Recipe> recipesById,
 ) {
-  final amounts = <(String, String), double>{};
-  final usedBy = <(String, String), List<String>>{};
-  for (final dish in dishes) {
-    final recipe = recipesById[dish.recipeId];
-    if (recipe == null) continue;
-    for (final ing in recipe.ingredients) {
-      final key = (ing.id, ing.unit);
-      final amount = scaleAmount(ing.amount, recipe.servings, dish.servings);
-      amounts[key] = (amounts[key] ?? 0) + amount;
-      final ids = usedBy.putIfAbsent(key, () => []);
-      if (!ids.contains(recipe.id)) ids.add(recipe.id);
-    }
-  }
   return List.unmodifiable([
-    for (final MapEntry(key: (id, unit), value: amount) in amounts.entries)
+    for (final g in gatherIngredients(dishes, recipesById))
       ShoppingLine(
-        ingredientId: id,
-        unit: unit,
-        amount: amount,
-        recipeIds: List.unmodifiable(usedBy[(id, unit)]!),
+        ingredientId: g.ingredientId,
+        unit: g.unit,
+        amount: g.amount,
+        recipeIds: g.recipeIds,
       ),
   ]);
 }
