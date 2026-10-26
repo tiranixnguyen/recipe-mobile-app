@@ -23,7 +23,7 @@ final resumeCookingProvider = Provider.autoDispose<ResumeCooking?>((ref) {
   final step = session.positions[session.current].clamp(0, recipe.steps.length - 1);
   return (
     text: CookStrings.resumeStep(recipe.name, step + 1, recipe.steps.length),
-    location: cookStepLocation(recipe.id),
+    location: session.isMeal ? mealCookStepLocation : cookStepLocation(recipe.id),
   );
 });
 

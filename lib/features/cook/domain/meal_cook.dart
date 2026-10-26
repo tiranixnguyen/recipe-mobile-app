@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:recipe_mobile_app/core/format.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/features/cook/domain/cook_prep.dart';
 
 /// Một món trong bữa đang nấu, kèm số người nấu.
 typedef MealDish = ({Recipe recipe, int servings});
@@ -17,44 +18,6 @@ List<MealDish> suggestCookOrder(List<MealDish> dishes) {
     });
   return List.unmodifiable(indexed.map((e) => e.$2));
 }
-
-/// Một việc trong bước "Sơ chế cả bữa": bước `prep` [stepIndex] (chỉ số gốc) của món [recipeId].
-@immutable
-class MealPrepTask {
-  const MealPrepTask({required this.recipeId, required this.stepIndex, required this.text});
-
-  final String recipeId;
-  final int stepIndex;
-  final String text;
-
-  @override
-  bool operator ==(Object other) =>
-      other is MealPrepTask &&
-      other.recipeId == recipeId &&
-      other.stepIndex == stepIndex &&
-      other.text == text;
-
-  @override
-  int get hashCode => Object.hash(recipeId, stepIndex, text);
-
-  @override
-  String toString() => 'MealPrepTask($recipeId#$stepIndex, $text)';
-}
-
-/// Việc sơ chế cả bữa: các bước `prep` theo thứ tự nấu [ordered], trong món giữ thứ tự bước.
-///
-/// Rỗng khi không món nào có bước sơ chế — khi đó bỏ bước "Sơ chế cả bữa".
-List<MealPrepTask> mealPrepTasks(List<MealDish> ordered) => List.unmodifiable([
-  for (final dish in ordered)
-    for (final (i, step) in dish.recipe.steps.indexed)
-      if (step.prep) MealPrepTask(recipeId: dish.recipe.id, stepIndex: i, text: step.text),
-]);
-
-/// Bước đứng bếp của [recipe] khi nấu cả bữa (bỏ bước `prep`), kèm chỉ số gốc để làm khoá hẹn giờ.
-List<({int index, RecipeStep step})> cookSteps(Recipe recipe) => List.unmodifiable([
-  for (final (i, step) in recipe.steps.indexed)
-    if (!step.prep) (index: i, step: step),
-]);
 
 /// Một dòng "Lấy đồ ra · cả bữa": "Trứng gà · 4 quả", kèm món dùng tới.
 @immutable
@@ -123,4 +86,36 @@ class MealGatherItem {
     );
   }
   return (items: List.unmodifiable(items), basicSpices: List.unmodifiable(spices));
+}
+
+/// Đồ cần lấy ra khi chuẩn bị nấu cả bữa [ordered] ([mealGatherList]), chia theo [pantry]:
+///
+/// - [gather]: đồ đang có trong tủ, lượng cộng cho cả bữa.
+/// - [basicSpices]: gia vị cơ bản gom một dòng.
+/// - [missing]: đồ chưa có (mỗi nguyên liệu một lần), kèm ghi chú thay thế đầu tiên của nó trong
+///   các món.
+({List<MealGatherItem> gather, List<String> basicSpices, List<PrepMissing> missing}) mealPrepItems(
+  List<MealDish> ordered,
+  Set<String> pantry,
+  Map<String, Ingredient> ingredientsById,
+) {
+  final (:items, :basicSpices) = mealGatherList(ordered, ingredientsById);
+  final missingIds = <String>{};
+  final missing = <PrepMissing>[];
+  for (final item in items) {
+    if (pantry.contains(item.ingredientId) || !missingIds.add(item.ingredientId)) continue;
+    final note = [
+      for (final d in ordered)
+        for (final i in d.recipe.ingredients)
+          if (i.id == item.ingredientId) ?i.substituteNote,
+    ].firstOrNull;
+    missing.add(
+      PrepMissing(ingredientId: item.ingredientId, name: item.name.toLowerCase(), note: note),
+    );
+  }
+  return (
+    gather: List.unmodifiable(items.where((i) => pantry.contains(i.ingredientId))),
+    basicSpices: basicSpices,
+    missing: List.unmodifiable(missing),
+  );
 }

@@ -106,6 +106,17 @@ void main() {
     expect(dishes.single.servings, 3);
   });
 
+  test('bữa đã nấu khi mọi món trong bữa đã nấu', () async {
+    final plan = container.read(plannedMealsProvider.notifier);
+    await plan.addToPlan('a', _now, Meal.dinner);
+    await plan.addToPlan('c', _now, Meal.dinner);
+    await plan.addToPlan('a', _now, Meal.lunch);
+    expect((await loaded()).cookedMeals, isEmpty);
+
+    await plan.markCooked(_now, Meal.dinner);
+    expect(sub.read().requireValue.cookedMeals, {Meal.dinner});
+  });
+
   test('món không còn trong dữ liệu bị bỏ khỏi bữa', () async {
     await loaded();
     final plan = container.read(plannedMealsProvider.notifier);

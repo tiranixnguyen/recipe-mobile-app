@@ -49,7 +49,7 @@ class CookHeader extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
                   ),

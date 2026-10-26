@@ -37,7 +37,7 @@ Future<ProviderContainer> _pump(
     initialLocation: location,
     routes: [
       ...planTabRoutes,
-      for (final path in ['/shopping', '/recipe/:id'])
+      for (final path in ['/shopping', '/recipe/:id', '/meal-cook'])
         GoRoute(path: path, builder: (_, state) => Text('at ${state.uri}')),
     ],
   );
@@ -64,6 +64,8 @@ Future<ProviderContainer> _pump(
   await tester.pumpAndSettle();
   return container;
 }
+
+GoRouter router(WidgetTester tester) => GoRouter.of(tester.element(find.byType(Navigator).first));
 
 Finder _emptySlots() => find.byWidgetPredicate((w) => w is MealSlot && w.dishes.isEmpty);
 
@@ -158,6 +160,33 @@ void main() {
     expect(find.text('Canh cà chua'), findsOneWidget);
     expect(find.text('Sáng'), findsOneWidget);
     expect(container.read(plannedMealsProvider).single.recipeId, 'canh');
+  });
+
+  testWidgets('bữa nhiều món có Nấu bữa này mở Nấu cả bữa; nấu xong thì Đã nấu', (tester) async {
+    final container = await _pump(tester);
+    final plan = container.read(plannedMealsProvider.notifier);
+    final day = DateTime(2026, 10, 20);
+    await plan.addToPlan('trung', day, Meal.lunch);
+    await tester.pump();
+    expect(find.text(PlanStrings.cookMeal), findsNothing);
+
+    await plan.addToPlan('canh', day, Meal.lunch);
+    await tester.pump();
+    expect(
+      find.bySemanticsLabel(
+        PlanStrings.cookMealLabel(Meal.lunch, ['Trứng chiên hành', 'Canh cà chua']),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.text(PlanStrings.cookMeal));
+    await tester.pumpAndSettle();
+    expect(find.text('at /meal-cook?day=2026-10-20&meal=lunch'), findsOneWidget);
+
+    await plan.markCooked(day, Meal.lunch);
+    router(tester).pop();
+    await tester.pumpAndSettle();
+    expect(find.text(PlanStrings.cookMeal), findsNothing);
+    expect(find.text(PlanStrings.cooked), findsOneWidget);
   });
 
   testWidgets('Xem món mở Chi tiết', (tester) async {

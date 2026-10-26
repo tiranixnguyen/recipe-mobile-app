@@ -23,7 +23,8 @@ class MealSlotDish {
 ///
 /// - [MealSlot]: dòng nhãn "Sáng" hoặc "Sáng · 2 món" (12/16 600 `inkMuted`), có món thì thêm
 ///   link "+ Thêm món" `chiliDeep` bên phải; mỗi món một [RecipeRow] ảnh 44. Bữa trống: ô viền
-///   đứt 1.5px `outline` cao 58, "+ Thêm món".
+///   đứt 1.5px `outline` cao 58, "+ Thêm món". [action] đặt trước "+ Thêm món", ví dụ nút "Nấu bữa
+///   này" khi bữa có nhiều món.
 /// - [MealSlot.compact]: ô cao 56 trong lưới Tuần, "Tên món đầu +N"; trống thì ô viền đứt "+".
 class MealSlot extends StatelessWidget {
   const MealSlot({
@@ -32,6 +33,7 @@ class MealSlot extends StatelessWidget {
     required this.dishes,
     required VoidCallback this.onAdd,
     this.onDishTap,
+    this.action,
   }) : titles = const [],
        onTap = null;
 
@@ -39,7 +41,8 @@ class MealSlot extends StatelessWidget {
     : label = null,
       dishes = const [],
       onAdd = null,
-      onDishTap = null;
+      onDishTap = null,
+      action = null;
 
   /// Tên bữa ("Sáng", "Trưa", "Tối"); null ở [MealSlot.compact].
   final String? label;
@@ -48,6 +51,9 @@ class MealSlot extends StatelessWidget {
 
   /// Bấm món thứ i trong [dishes].
   final ValueChanged<int>? onDishTap;
+
+  /// Widget ở dòng nhãn, trước "+ Thêm món"; chỉ hiện khi bữa có món.
+  final Widget? action;
 
   /// Tên các món ở [MealSlot.compact].
   final List<String> titles;
@@ -82,6 +88,10 @@ class MealSlot extends StatelessWidget {
                   ),
                 ),
               ),
+              if (dishes.isNotEmpty && action != null) ...[
+                action!,
+                const SizedBox(width: AppSpacing.s2),
+              ],
               if (dishes.isNotEmpty)
                 Semantics(
                   button: true,

@@ -196,8 +196,80 @@ class _Day extends ConsumerWidget {
             ],
             onAdd: () => pick(meal),
             onDishTap: (i) => act(meal, dishes[i].recipe),
+            action: state.cookedMeals.contains(meal)
+                ? const _CookedLabel()
+                : dishes.length > 1
+                ? _CookMealButton(
+                    label: PlanStrings.cookMealLabel(meal, [for (final d in dishes) d.recipe.name]),
+                    onPressed: () => context.push(mealCookLocation(state.selectedDate, meal)),
+                  )
+                : null,
           ),
         ],
+      ],
+    );
+  }
+}
+
+/// "Nấu bữa này": viên `chili` cao 32 (prototype `MealPlan`), vùng chạm 48.
+class _CookMealButton extends StatelessWidget {
+  const _CookMealButton({required this.label, required this.onPressed});
+
+  /// Nhãn cho trình đọc màn hình, kèm tên các món.
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: AppRadius.pillAll,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Center(
+            widthFactor: 1,
+            child: Container(
+              height: 32,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(color: colors.chili, borderRadius: AppRadius.pillAll),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: AppSpacing.s1,
+                children: [
+                  // Chữ trắng trên `chili` như nút chính.
+                  const Icon(AppIcons.bowl, size: 16, color: Colors.white),
+                  Text(
+                    PlanStrings.cookMeal,
+                    style: AppTextStyles.label.copyWith(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bữa đã nấu xong cả bữa: dấu check "Đã nấu" `herbInk`.
+class _CookedLabel extends StatelessWidget {
+  const _CookedLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: 2,
+      children: [
+        Icon(AppIcons.check, size: 16, color: colors.herbInk),
+        Text(PlanStrings.cooked, style: AppTextStyles.label.copyWith(color: colors.herbInk)),
       ],
     );
   }

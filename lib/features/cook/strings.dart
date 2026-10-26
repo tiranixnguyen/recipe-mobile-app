@@ -1,3 +1,5 @@
+import 'package:recipe_mobile_app/core/models/models.dart';
+
 abstract final class CookStrings {
   static const detail = 'Chi tiết món';
   static const prep = 'Chuẩn bị nấu';
@@ -53,6 +55,49 @@ abstract final class CookStrings {
   static const saved = 'Đã lưu món';
   static const demotedNote = 'Món này sẽ tạm lùi trong gợi ý 3 ngày tới.';
   static const finishAndUpdate = 'Cập nhật tủ và xong';
+
+  // Nấu cả bữa (`MealCookPrep`, `MealCookStep`, `MealCookDone`).
+  static String mealTitle(Meal meal) => 'Nấu bữa ${meal.label.toLowerCase()}';
+  static String mealMeta(String dayName, int dishes, int minutes, String? tool) =>
+      [dayName, '$dishes món', 'khoảng $minutes phút', ?tool].join(' · ');
+  static const backToPlan = 'Quay lại thực đơn';
+  static const cookOrder = 'Thứ tự nấu';
+  static const cookOrderHint = 'Giữ và kéo để đổi thứ tự';
+  static const useSuggestedOrder = 'Dùng thứ tự gợi ý';
+  static String reorderLabel(String name, int position) =>
+      'Đổi thứ tự $name, đang ở vị trí $position';
+  static String movedTo(String name, int position) => '$name lên vị trí $position';
+  static const mealServingsHint = 'Áp dụng cho cả bữa';
+  static const mealGather = 'Lấy đồ ra · cả bữa';
+  static String dishesTag(int count) => '$count món';
+  static String startFirst(String name) => 'Bắt đầu: $name';
+  static String mealStepTitle(Meal meal, int dish, int total) =>
+      'Bữa ${meal.label.toLowerCase()} · món $dish/$total';
+  static const mealDishes = 'Món trong bữa';
+  static String dishTab(int number, String name) => '$number. $name';
+  static String dishSteps(int total) => '$total bước';
+  static String mealStepLabel(String name, int step, int total) =>
+      '${name.toUpperCase()} · BƯỚC $step/$total';
+  static String mealTimerLabel(String name, int step) => '$name · Bước $step';
+  static String nextDish(int number, String name) => 'Sang món $number: $name';
+  static const finishMeal = 'Xong cả bữa';
+  static String mealSheetTitle(String name, int servings) =>
+      'Nguyên liệu · $name · $servings người';
+  static String mealDoneTitle(Meal meal) => 'Xong bữa ${meal.label.toLowerCase()}! Ăn ngon nhé';
+  static String mealDoneMeta(int dishes, int servings, int minutes) =>
+      '$dishes món · $servings người · khoảng $minutes phút';
+  static const rateEach = 'Từng món thế nào?';
+  static String ratedAs(String label) => 'Bạn chấm: $label';
+  static const notRated = 'Chưa chấm';
+  static String rateDish(String label, String name) => '$label · $name';
+  static const mealUpdatePantry = 'Cập nhật Tủ đồ · cả bữa';
+  static const mealUpdatePantryHint = 'Tick thứ đã dùng hết, app bỏ khỏi tủ một lần cho cả bữa.';
+  static String mealMarked(Meal meal, String dayName) =>
+      'Bữa ${meal.label.toLowerCase()} ${dayName.toLowerCase()} được đánh dấu đã nấu trong Thực đơn.';
+  static const noMealTitle = 'Không có bữa đang nấu';
+  static const noMealBody = 'Mở Thực đơn, chọn bữa có nhiều món rồi bấm Nấu bữa này.';
+  static const mealNotFoundBody = 'Bữa này chưa có món nào trong Thực đơn.';
+  static const toPlan = 'Mở Thực đơn';
 
   // Thanh "Đang nấu dở" ở Khám phá.
   static const resumeTitle = 'Đang nấu dở';
