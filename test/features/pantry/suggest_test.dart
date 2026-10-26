@@ -41,4 +41,12 @@ void main() {
       ['moi-bua', 'trua-toi'],
     );
   });
+
+  test('món vừa bị chê xuống cuối, vẫn giữ thứ tự', () {
+    expect(
+      ids(suggest(recipes, meal: Meal.dinner, count: 10, demoted: {'moi-bua', 'toi'})),
+      ['trua-toi', 'moi-bua', 'toi'],
+    );
+    expect(ids(suggest(recipes, meal: Meal.dinner, count: 1, demoted: {'moi-bua'})), ['toi']);
+  });
 }

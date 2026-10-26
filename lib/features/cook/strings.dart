@@ -1,8 +1,6 @@
 abstract final class CookStrings {
   static const detail = 'Chi tiết món';
   static const prep = 'Chuẩn bị nấu';
-  static const cookStep = 'Nấu từng bước';
-  static const cookDone = 'Nấu xong';
   static const back = 'Quay lại';
   static const ingredients = 'Nguyên liệu';
   static String steps(int count) => 'Cách làm · $count bước';
@@ -40,6 +38,21 @@ abstract final class CookStrings {
   static const close = 'Đóng';
   static const enough = 'Vừa đủ';
   static const timers = 'Hẹn giờ';
+
+  // Hoàn thành (`CookDone`).
+  static const doneTitle = 'Xong rồi! Ăn ngon nhé';
+  static String doneMeta(String name, int servings, int steps) =>
+      '$name · $servings người · $steps bước';
+  static const updatePantry = 'Cập nhật Tủ đồ';
+  static const updatePantryHint = 'Tick thứ đã dùng hết, app sẽ bỏ khỏi tủ. Còn dư thì bỏ tick.';
+  static const usedUp = 'Hết';
+  static String usedUpLabel(String name) => '$name: đã dùng hết';
+  static const howWasIt = 'Món này thế nào?';
+  static const rateGroup = 'Đánh giá món';
+  static const saveForLater = 'Lưu món để nấu lại';
+  static const saved = 'Đã lưu món';
+  static const demotedNote = 'Món này sẽ tạm lùi trong gợi ý 3 ngày tới.';
+  static const finishAndUpdate = 'Cập nhật tủ và xong';
 
   // Thanh "Đang nấu dở" ở Khám phá.
   static const resumeTitle = 'Đang nấu dở';
