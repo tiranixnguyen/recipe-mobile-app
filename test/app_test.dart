@@ -28,11 +28,11 @@ import 'package:recipe_mobile_app/features/system/data/app_info.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
-/// Dữ liệu đóng gói đọc bằng `rootBundle` không xong trong fake async của widget test, màn có
-/// spinner sẽ làm `pumpAndSettle` treo; dữ liệu thật đã có `bundled_data_test.dart`.
 import 'features/cook/fakes.dart';
 import 'features/cook/fixtures.dart';
 
+/// Dữ liệu đóng gói đọc bằng `rootBundle` không xong trong fake async của widget test, màn có
+/// spinner sẽ làm `pumpAndSettle` treo; dữ liệu thật đã có `bundled_data_test.dart`.
 final _dataOverrides = [
   recipesProvider.overrideWith((ref) async => const <Recipe>[]),
   ingredientsProvider.overrideWith((ref) async => const <Ingredient>[]),
