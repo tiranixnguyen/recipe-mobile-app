@@ -20,7 +20,12 @@ void main() {
       late List<StepTimerStatus> statuses;
       late int dones;
 
-      Future<void> pump(WidgetTester tester, {int seconds = 180, bool autoStart = false}) {
+      Future<void> pump(
+        WidgetTester tester, {
+        int seconds = 180,
+        bool autoStart = false,
+        Duration? endsIn,
+      }) {
         now = DateTime(2026, 10, 24, 18);
         statuses = [];
         dones = 0;
@@ -33,6 +38,7 @@ void main() {
                   seconds: seconds,
                   label: 'Chiên mặt dưới',
                   autoStart: autoStart,
+                  endAt: endsIn == null ? null : now.add(endsIn),
                   clock: () => now,
                   onStatusChange: statuses.add,
                   onDone: () => dones++,
@@ -46,6 +52,18 @@ void main() {
       Color barColor(WidgetTester tester) =>
           (tester.widget<Container>(find.byType(Container).first).decoration! as BoxDecoration)
               .color!;
+
+      testWidgets('endAt còn ở tương lai: chạy tiếp tới mốc đó; đã qua thì chờ', (tester) async {
+        await pump(tester, endsIn: const Duration(seconds: 42));
+        expect(find.text('00:42'), findsOneWidget);
+        await tester.pump();
+        expect(statuses, [StepTimerStatus.running]);
+
+        await tester.pumpWidget(const SizedBox());
+        await pump(tester, endsIn: const Duration(seconds: -5));
+        await tester.pump();
+        expect(find.text('Hẹn 3 phút'), findsOneWidget);
+      });
 
       testWidgets('chờ → đang chạy → hết giờ → tắt', (tester) async {
         await pump(tester);

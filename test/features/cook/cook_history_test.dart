@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
@@ -63,15 +62,5 @@ void main() {
 
   test('nhãn đánh giá theo màn Nấu xong', () {
     expect(CookRating.values.map((r) => r.label), ['Ngon', 'Tạm', 'Chê']);
-  });
-
-  testWidgets('ResumeCookingBanner stub không hiện gì', (tester) async {
-    await tester.pumpWidget(
-      const Directionality(
-        textDirection: TextDirection.ltr,
-        child: Center(child: ResumeCookingBanner()),
-      ),
-    );
-    expect(tester.getSize(find.byType(ResumeCookingBanner)), Size.zero);
   });
 }

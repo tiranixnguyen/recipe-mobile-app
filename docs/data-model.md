@@ -102,6 +102,15 @@ test chặn nếu nhập sai.
 - `ingredients[].optional`: nguyên liệu tuỳ chọn.
 - `ingredients[].substituteNote`: cách thay thế khi thiếu.
 - `steps[].timerSeconds`: thời gian hẹn giờ (giây) cho bước, tuỳ chọn; nếu có thì > 0.
+- `steps[].prep`: bước sơ chế, tuỳ chọn, mặc định `false` (chỉ ghi khi `true`). Nấu cả bữa gom mọi bước
+  `prep` của các món thành một bước "Sơ chế cả bữa" làm trước, rồi mới tới bước đứng bếp. Gắn khi bước:
+  - làm trước được: rửa, thái, gọt, ngâm, ướp, đánh trứng, vo gạo, trộn nước chấm, bày ra bát/đĩa;
+  - không cần bếp, nước sôi, lò vi sóng hay hẹn giờ (bước `prep` không có `timerSeconds`);
+  - không phụ thuộc bước nấu trước nó.
+
+  Một bước vừa sơ chế vừa nấu ("Vo gạo, cho vào nồi…") thì tách làm hai: "Vo gạo." (`prep`) và "Cho gạo
+  vào nồi…". Bước `prep` đứng trước mọi bước nấu của món, và món phải còn ít nhất một bước không phải
+  `prep` (test `bundled_data_test.dart` chặn). Món không có gì để sơ chế (bánh mì ốp trứng) thì không gắn.
 - `servings`, `minutes`, `ingredients[].amount` > 0; `ingredients`, `steps` không rỗng.
 
 Mọi id (`tools`, `diets`, `meals`, `group`) phải đúng danh sách trên. Id lạ không bị bỏ qua:
@@ -125,11 +134,14 @@ Hai provider đọc asset một lần cho cả phiên và không retry khi lỗi
 
 `scaleAmount(amount, baseServings, targetServings)` trả về `amount * targetServings / baseServings`.
 `scaleIngredients(recipe, targetServings)` nhân toàn bộ nguyên liệu.
+`gatherIngredients(dishes, recipesById)` gom nguyên liệu nhiều món (mỗi món kèm số người): cộng lượng
+theo (nguyên liệu, đơn vị), khác đơn vị tách dòng, giữ thứ tự gặp đầu. Danh sách đi chợ và "Lấy đồ ra ·
+cả bữa" dùng chung hàm này.
 
 ### Hiển thị lượng
 
 `formatAmount(amount)` trong `lib/core/format.dart`: `4` → `4`, `1.5` → `1,5`, `1/3` → `0,33`.
-`ServingStepper`, màn Detail và danh sách đi chợ hiển thị lượng qua hàm này, không tự `toString()`.
+`ServingStepper`, màn Detail, danh sách đi chợ và Nấu cả bữa hiển thị lượng qua hàm này, không tự `toString()`.
 
 ## Dữ liệu trên máy (`LocalStore`)
 
@@ -145,5 +157,7 @@ Hai provider đọc asset một lần cho cả phiên và không retry khi lỗi
 - Giọng văn: xưng "bạn", câu ngắn, không emoji.
 - Không ghi giá tiền.
 - Id không trùng; nguyên liệu tham chiếu phải tồn tại; dụng cụ/chế độ ăn/bữa thuộc danh sách cho phép.
+- Bước sơ chế gắn `"prep": true` theo luật `steps[].prep` ở trên; viết sơ chế thành bước riêng ở đầu món
+  (rửa, thái, đánh trứng…), không trộn vào bước nấu. Nguyên liệu nào cần thái/rửa thì ghi rõ ở bước đó.
 - `test/core/data/bundled_data_test.dart` chạy trên `assets/data/` thật và kiểm hết các quy tắc trên
   (kể cả không có key `price`/`gia`). CI đỏ thì sửa dữ liệu, không sửa test.

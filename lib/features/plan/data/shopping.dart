@@ -3,7 +3,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
+import 'package:recipe_mobile_app/features/plan/data/planned_meals.dart';
+import 'package:recipe_mobile_app/features/plan/domain/shopping_list.dart';
+import 'package:recipe_mobile_app/features/plan/domain/week.dart';
 
 const _shoppingKey = 'plan.shopping';
 
@@ -73,3 +77,19 @@ class ShoppingController extends Notifier<List<ShoppingRequest>> {
 final shoppingProvider = NotifierProvider<ShoppingController, List<ShoppingRequest>>(
   ShoppingController.new,
 );
+
+/// Nguyên liệu cần mua cho món trong thực đơn tuần này (T2…CN) cộng món thêm riêng vào đi chợ,
+/// đã nhân theo khẩu phần và cộng dồn (chưa trừ đồ trong Tủ đồ — SHP-01).
+final shoppingListProvider = Provider<AsyncValue<List<ShoppingLine>>>((ref) {
+  final weekStart = weekStartOf(ref.watch(nowProvider));
+  final planned = ref.watch(plannedMealsProvider);
+  final requests = ref.watch(shoppingProvider);
+  return ref.watch(recipesProvider).whenData((recipes) {
+    final dishes = [
+      for (final p in planned)
+        if (indexInWeek(weekStart, p.day) != null) (recipeId: p.recipeId, servings: p.servings),
+      for (final r in requests) (recipeId: r.recipeId, servings: r.servings),
+    ];
+    return gatherShopping(dishes, {for (final r in recipes) r.id: r});
+  });
+});

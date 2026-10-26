@@ -16,11 +16,48 @@ import 'package:recipe_mobile_app/features/plan/routes.dart';
 import 'package:recipe_mobile_app/features/plan/strings.dart';
 
 /// Thực đơn theo ngày (prototype `MealPlan`, chế độ Ngày).
-class PlanScreen extends ConsumerWidget {
-  const PlanScreen({super.key});
+class PlanScreen extends ConsumerStatefulWidget {
+  const PlanScreen({super.key, this.initialDay, this.openRequest});
+
+  /// Ngày mở sẵn (`/plan?day=3`, sau khi thêm món từ Chi tiết); null là giữ ngày đang xem.
+  final int? initialDay;
+
+  /// `extra` của lần điều hướng ([goToPlanDay]); đổi thì mở lại [initialDay] dù ngày không đổi.
+  final Object? openRequest;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PlanScreen> createState() => _PlanScreenState();
+}
+
+class _PlanScreenState extends ConsumerState<PlanScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _showInitialDay();
+  }
+
+  @override
+  void didUpdateWidget(PlanScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Tab giữ màn khi chuyển tab, nên `go(planLocation(day: …))` lần sau tới đây. So cả
+    // [openRequest] vì thêm món vào cùng ngày lần nữa thì URL không đổi.
+    if (widget.initialDay != oldWidget.initialDay ||
+        !identical(widget.openRequest, oldWidget.openRequest)) {
+      _showInitialDay();
+    }
+  }
+
+  /// Đổi state của ViewModel sau frame, Riverpod không cho sửa provider lúc đang dựng cây widget.
+  void _showInitialDay() {
+    final day = widget.initialDay;
+    if (day == null || day < 0 || day > 6) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(planViewModelProvider.notifier).selectDay(day);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
     final state = ref.watch(planViewModelProvider);
     final plannedCount = state.value?.plannedCount;
@@ -107,19 +144,17 @@ class _Day extends ConsumerWidget {
 
     Future<void> pick(Meal meal) async {
       final id = await showRecipePicker(context, meal);
-      if (id != null) await viewModel.setMeal(meal, id);
+      if (id != null) await viewModel.addDish(meal, id);
     }
 
     Future<void> act(Meal meal, Recipe recipe) async {
-      final action = await _showSlotActions(context, recipe);
+      final action = await _showDishActions(context, recipe);
       if (!context.mounted) return;
       switch (action) {
-        case _SlotAction.view:
+        case _DishAction.view:
           await context.push(recipeLocation(recipe.id));
-        case _SlotAction.change:
-          await pick(meal);
-        case _SlotAction.remove:
-          await viewModel.clearMeal(meal);
+        case _DishAction.remove:
+          await viewModel.removeDish(meal, recipe.id);
         case null:
           break;
       }
@@ -147,36 +182,32 @@ class _Day extends ConsumerWidget {
             style: AppTextStyles.subtitle.copyWith(color: colors.ink),
           ),
         ),
-        for (final MapEntry(key: meal, value: recipe) in state.meals.entries) ...[
+        for (final MapEntry(key: meal, value: dishes) in state.meals.entries) ...[
           const SizedBox(height: AppSpacing.s3),
-          Text(
-            meal.label,
-            style: AppTextStyles.caption.copyWith(
-              fontWeight: FontWeight.w600,
-              color: colors.inkMuted,
-            ),
+          MealSlot(
+            label: meal.label,
+            dishes: [
+              for (final d in dishes)
+                MealSlotDish(
+                  title: d.recipe.name,
+                  meta: recipeMeta(d.recipe),
+                  imageAsset: d.recipe.imageAsset,
+                ),
+            ],
+            onAdd: () => pick(meal),
+            onDishTap: (i) => act(meal, dishes[i].recipe),
           ),
-          const SizedBox(height: 6),
-          if (recipe == null)
-            MealSlot.empty(onTap: () => pick(meal))
-          else
-            MealSlot(
-              title: recipe.name,
-              meta: recipeMeta(recipe),
-              imageAsset: recipe.imageAsset,
-              onTap: () => act(meal, recipe),
-            ),
         ],
       ],
     );
   }
 }
 
-enum _SlotAction { view, change, remove }
+enum _DishAction { view, remove }
 
-Future<_SlotAction?> _showSlotActions(BuildContext context, Recipe recipe) {
+Future<_DishAction?> _showDishActions(BuildContext context, Recipe recipe) {
   final colors = context.colors;
-  return showModalBottomSheet<_SlotAction>(
+  return showModalBottomSheet<_DishAction>(
     context: context,
     useRootNavigator: true,
     showDragHandle: true,
@@ -190,15 +221,14 @@ Future<_SlotAction?> _showSlotActions(BuildContext context, Recipe recipe) {
           child: Text(recipe.name, style: AppTextStyles.title.copyWith(color: colors.ink)),
         ),
         for (final (action, label, icon) in [
-          (_SlotAction.view, PlanStrings.viewRecipe, AppIcons.bowl),
-          (_SlotAction.change, PlanStrings.changeRecipe, AppIcons.shuffle),
-          (_SlotAction.remove, PlanStrings.removeRecipe, AppIcons.trash),
+          (_DishAction.view, PlanStrings.viewRecipe, AppIcons.bowl),
+          (_DishAction.remove, PlanStrings.removeRecipe, AppIcons.trash),
         ])
           ListTile(
             leading: Icon(icon),
             title: Text(label),
-            iconColor: action == _SlotAction.remove ? colors.dangerInk : colors.ink,
-            textColor: action == _SlotAction.remove ? colors.dangerInk : colors.ink,
+            iconColor: action == _DishAction.remove ? colors.dangerInk : colors.ink,
+            textColor: action == _DishAction.remove ? colors.dangerInk : colors.ink,
             onTap: () => Navigator.of(context).pop(action),
           ),
         const SizedBox(height: AppSpacing.s2),
