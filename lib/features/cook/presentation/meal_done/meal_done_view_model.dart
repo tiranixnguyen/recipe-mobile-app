@@ -127,7 +127,9 @@ class MealDoneViewModel extends Notifier<AsyncValue<MealDoneState>> {
       for (final (i, d) in value.dishes.indexed) {
         await history.record(d.recipe.id, rating: value.ratings[i], at: now);
       }
-      await ref.read(plannedMealsProvider.notifier).markCooked(value.slot.day, value.slot.meal);
+      await ref.read(plannedMealsProvider.notifier).markCooked(value.slot.day, value.slot.meal, [
+        for (final d in value.dishes) d.recipe.id,
+      ]);
       await ref.read(cookSessionProvider.notifier).clear();
       if (value.ratings.containsValue(CookRating.good)) {
         await ref.read(reviewPromptProvider).maybeAsk();

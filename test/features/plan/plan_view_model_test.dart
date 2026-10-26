@@ -113,7 +113,7 @@ void main() {
     await plan.addToPlan('a', _now, Meal.lunch);
     expect((await loaded()).cookedMeals, isEmpty);
 
-    await plan.markCooked(_now, Meal.dinner);
+    await plan.markCooked(_now, Meal.dinner, ['a', 'c']);
     expect(sub.read().requireValue.cookedMeals, {Meal.dinner});
   });
 

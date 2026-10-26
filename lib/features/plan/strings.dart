@@ -31,4 +31,5 @@ abstract final class PlanStrings {
   static String cookMealLabel(Meal meal, List<String> names) =>
       'Nấu cả bữa ${meal.label.toLowerCase()}: ${names.join(', ')}';
   static const cooked = 'Đã nấu';
+  static String cookAgainLabel(Meal meal) => 'Đã nấu bữa ${meal.label.toLowerCase()}, nấu lại';
 }

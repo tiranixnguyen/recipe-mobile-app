@@ -197,7 +197,10 @@ class _Day extends ConsumerWidget {
             onAdd: () => pick(meal),
             onDishTap: (i) => act(meal, dishes[i].recipe),
             action: state.cookedMeals.contains(meal)
-                ? const _CookedLabel()
+                ? _CookedLabel(
+                    label: PlanStrings.cookAgainLabel(meal),
+                    onPressed: () => context.push(mealCookLocation(state.selectedDate, meal)),
+                  )
                 : dishes.length > 1
                 ? _CookMealButton(
                     label: PlanStrings.cookMealLabel(meal, [for (final d in dishes) d.recipe.name]),
@@ -257,20 +260,36 @@ class _CookMealButton extends StatelessWidget {
   }
 }
 
-/// Bữa đã nấu xong cả bữa: dấu check "Đã nấu" `herbInk`.
+/// Bữa đã nấu xong cả bữa: dấu check "Đã nấu" `herbInk`; bấm để nấu lại bữa đó.
 class _CookedLabel extends StatelessWidget {
-  const _CookedLabel();
+  const _CookedLabel({required this.label, required this.onPressed});
+
+  /// Nhãn cho trình đọc màn hình.
+  final String label;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      spacing: 2,
-      children: [
-        Icon(AppIcons.check, size: 16, color: colors.herbInk),
-        Text(PlanStrings.cooked, style: AppTextStyles.label.copyWith(color: colors.herbInk)),
-      ],
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: AppRadius.pillAll,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 48),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 2,
+            children: [
+              Icon(AppIcons.check, size: 16, color: colors.herbInk),
+              Text(PlanStrings.cooked, style: AppTextStyles.label.copyWith(color: colors.herbInk)),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

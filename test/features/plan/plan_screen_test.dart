@@ -182,11 +182,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('at /meal-cook?day=2026-10-20&meal=lunch'), findsOneWidget);
 
-    await plan.markCooked(day, Meal.lunch);
+    await plan.markCooked(day, Meal.lunch, ['trung', 'canh']);
     router(tester).pop();
     await tester.pumpAndSettle();
     expect(find.text(PlanStrings.cookMeal), findsNothing);
     expect(find.text(PlanStrings.cooked), findsOneWidget);
+
+    // Bữa đã nấu vẫn nấu lại được.
+    await tester.tap(find.bySemanticsLabel(PlanStrings.cookAgainLabel(Meal.lunch)));
+    await tester.pumpAndSettle();
+    expect(find.text('at /meal-cook?day=2026-10-20&meal=lunch'), findsOneWidget);
   });
 
   testWidgets('Xem món mở Chi tiết', (tester) async {

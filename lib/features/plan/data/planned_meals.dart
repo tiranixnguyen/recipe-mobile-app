@@ -122,12 +122,14 @@ class PlannedMealsController extends Notifier<List<PlannedMeal>> {
     );
   }
 
-  /// Đánh dấu mọi món trong bữa [meal] ngày [day] đã nấu (Nấu cả bữa xong).
-  Future<void> markCooked(DateTime day, Meal meal) {
+  /// Đánh dấu các món [recipeIds] trong bữa [meal] ngày [day] đã nấu (Nấu cả bữa xong). Món thêm
+  /// vào bữa sau khi bắt đầu nấu không nằm trong [recipeIds] nên vẫn là chưa nấu.
+  Future<void> markCooked(DateTime day, Meal meal, Iterable<String> recipeIds) {
     final date = dateOnly(day);
+    final ids = recipeIds.toSet();
     return _save([
       for (final p in state)
-        p.day == date && p.meal == meal
+        p.day == date && p.meal == meal && ids.contains(p.recipeId)
             ? PlannedMeal(
                 day: p.day,
                 meal: p.meal,
