@@ -10,10 +10,13 @@ import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_logo.dart';
+import 'package:recipe_mobile_app/core/widgets/meal_slot.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_screen.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
 import 'package:recipe_mobile_app/features/pantry/presentation/pantry/pantry_screen.dart';
+import 'package:recipe_mobile_app/features/plan/data/planned_meals.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/plan/plan_screen.dart';
 import 'package:recipe_mobile_app/features/system/data/app_info.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_screen.dart';
@@ -202,5 +205,75 @@ void main() {
 
     await tester.scrollUntilVisible(find.text('Bếp Hoà Lạc · phiên bản 1.0.0'), 200);
     expect(find.text('Xoá dữ liệu trên máy'), findsOneWidget);
+  });
+
+  testWidgets('Thực đơn → Xem món → Chi tiết → Thêm vào Trưa mai → Thực đơn mở ngày mai có món', (
+    tester,
+  ) async {
+    const recipe = Recipe(
+      id: 'trung',
+      name: 'Trứng chiên hành',
+      description: '',
+      imageAsset: '',
+      minutes: 15,
+      servings: 1,
+      tools: [Tool.stove],
+      diets: [],
+      meals: [],
+      ingredients: [],
+      steps: [RecipeStep(text: 'Chiên trứng')],
+    );
+    final store = InMemoryLocalStore();
+    await store.writeString('system.onboarded', 'true');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          recipesProvider.overrideWith((ref) async => const [recipe]),
+          ingredientsProvider.overrideWith((ref) async => const <Ingredient>[]),
+          localStoreProvider.overrideWithValue(store),
+          // 17h Thứ Ba.
+          nowProvider.overrideWithValue(DateTime(2026, 10, 20, 17)),
+        ],
+        child: const App(),
+      ),
+    );
+    await tester.pump(SplashScreen.duration);
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(tester.element(find.byType(NavigationBar)));
+    await container
+        .read(plannedMealsProvider.notifier)
+        .addToPlan('trung', DateTime(2026, 10, 20), Meal.lunch);
+
+    await tester.tap(_tab('Thực đơn'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Trứng chiên hành'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Xem món'));
+    await tester.pumpAndSettle();
+    expect(find.byType(DetailScreen), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+
+    await tester.tap(find.text('Thêm vào thực đơn'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Trưa mai'));
+    await tester.pump();
+    await tester.tap(find.text('Thêm vào Trưa mai'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(DetailScreen), findsNothing);
+    expect(find.byType(PlanScreen), findsOneWidget);
+    expect(find.text('Thứ Tư'), findsOneWidget);
+    expect(find.widgetWithText(MealSlot, 'Trưa'), findsOneWidget);
+    expect(find.widgetWithText(MealSlot, 'Trứng chiên hành'), findsOneWidget);
+    expect(
+      container.read(plannedMealsProvider).map((p) => (p.day, p.meal)),
+      [(DateTime(2026, 10, 20), Meal.lunch), (DateTime(2026, 10, 21), Meal.lunch)],
+    );
+
+    // Về hôm nay vẫn thấy bữa trưa cũ.
+    await tester.tap(find.text('T3'));
+    await tester.pumpAndSettle();
+    expect(find.text('Thứ Ba · Hôm nay'), findsOneWidget);
+    expect(find.widgetWithText(MealSlot, 'Trứng chiên hành'), findsOneWidget);
   });
 }

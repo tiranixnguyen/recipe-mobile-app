@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_mobile_app/app/strings.dart';
-import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
@@ -14,7 +12,6 @@ import 'package:recipe_mobile_app/core/widgets/recipe_card.dart';
 import 'package:recipe_mobile_app/core/widgets/search_field.dart';
 import 'package:recipe_mobile_app/core/widgets/serving_stepper.dart';
 import 'package:recipe_mobile_app/core/widgets/step_timer.dart';
-import 'package:recipe_mobile_app/features/plan/plan.dart';
 
 /// Chỉ có ở bản debug: `fvm flutter run --route /debug/theme` hoặc nút "Xem theme" trên màn tạm.
 const themePreviewLocation = '/debug/theme';
@@ -386,17 +383,6 @@ class _ComponentSamples extends StatelessWidget {
               ),
             ],
           ),
-        ),
-        // Sheet của Thực đơn, mở với món đầu tiên trong dữ liệu (Chi tiết món chưa dựng).
-        Consumer(
-          builder: (context, ref, _) {
-            final recipe = ref.watch(recipesProvider).value?.firstOrNull;
-            return AppButton.secondary(
-              label: 'Mở sheet Thêm vào thực đơn',
-              icon: AppIcons.calendar,
-              onPressed: recipe == null ? null : () => showAddToPlanSheet(context, recipe),
-            );
-          },
         ),
         EmptyState(
           icon: AppIcons.bookmark,

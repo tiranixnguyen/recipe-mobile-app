@@ -62,6 +62,21 @@ void main() {
           }
         }
       });
+
+      test('bước prep không hẹn giờ, đứng trước bước nấu; còn ít nhất một bước nấu', () {
+        for (final (i, step) in r.steps.indexed) {
+          if (step.prep) {
+            expect(step.timerSeconds, isNull, reason: 'bước ${i + 1} prep nhưng có timerSeconds');
+          }
+        }
+        final firstCook = r.steps.indexWhere((s) => !s.prep);
+        expect(firstCook, isNot(-1), reason: 'mọi bước đều là prep');
+        expect(
+          r.steps.skip(firstCook).where((s) => s.prep),
+          isEmpty,
+          reason: 'bước prep nằm sau bước nấu đầu tiên (bước ${firstCook + 1})',
+        );
+      });
     });
   }
 
