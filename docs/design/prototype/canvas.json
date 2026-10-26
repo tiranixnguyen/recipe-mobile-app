@@ -2,32 +2,253 @@
   "v": 3,
   "attachments": {},
   "boards": {
-    "CookDone.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Nấu · Hoàn thành", "w": 390, "x": 940, "y": 2448 },
-    "CookPrep.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Nấu · Chuẩn bị", "w": 390, "x": 0, "y": 2448 },
-    "CookStep.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Nấu · Từng bước", "w": 390, "x": 470, "y": 2448 },
-    "Detail.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Chi tiết món", "w": 390, "x": 1410, "y": 1224 },
-    "Main.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Khám phá", "w": 390, "x": 0, "y": 0 },
-    "MealPlan.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Thực đơn", "w": 390, "x": 940, "y": 0 },
-    "Onboarding.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Làm quen lần đầu", "w": 390, "x": 0, "y": 1224 },
-    "Pantry.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Tủ đồ", "w": 390, "x": 470, "y": 0 },
-    "Saved.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Đã lưu (trống)", "w": 390, "x": 1410, "y": 0 },
-    "Search.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Tìm kiếm", "w": 390, "x": 940, "y": 1224 },
-    "Shopping.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Danh sách đi chợ", "w": 390, "x": 1880, "y": 1224 },
-    "Today.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Hôm nay ăn gì", "w": 390, "x": 470, "y": 1224 },
-    "AddToPlan.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Thêm vào thực đơn · chọn ngày, bữa", "w": 390, "x": 2350, "y": 1224 },
-    "Splash.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Khởi động", "w": 390, "x": 0, "y": 3712 },
-    "NotifPermission.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Xin quyền thông báo", "w": 390, "x": 470, "y": 3712 },
-    "Settings.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Cài đặt · Sáng / Tối / Hệ thống", "w": 390, "x": 940, "y": 3712 },
-    "About.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Giới thiệu", "w": 390, "x": 1410, "y": 3712 },
-    "Policy.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Chính sách quyền riêng tư", "w": 390, "x": 1880, "y": 3712 },
-    "Feedback.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Góp ý & báo lỗi", "w": 390, "x": 0, "y": 4676 },
-    "RateApp.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Đánh giá trên Google Play", "w": 390, "x": 470, "y": 4676 },
-    "ClearData.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Xoá dữ liệu · gõ CONFIRM DELETE", "w": 390, "x": 940, "y": 4676 },
-    "Error.dc.html": { "h": 844, "is_interactive": true, "radius": 24, "title": "Lỗi", "w": 390, "x": 1410, "y": 4676 },
-    "Logo.dc.html": { "h": 800, "is_interactive": true, "radius": 24, "title": "Logo · 4 hướng (đã chọn C)", "w": 1440, "x": 0, "y": 5940 },
-    "LogoC.dc.html": { "h": 900, "radius": 24, "title": "Logo C · Bát & đũa — bộ nhận diện", "w": 1440, "x": 1520, "y": 5940 }
+    "CookDone.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Nấu · Hoàn thành",
+      "w": 390,
+      "x": 940,
+      "y": 2448
+    },
+    "CookPrep.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Nấu · Chuẩn bị",
+      "w": 390,
+      "x": 0,
+      "y": 2448
+    },
+    "CookStep.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Nấu · Từng bước",
+      "w": 390,
+      "x": 470,
+      "y": 2448
+    },
+    "Detail.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Chi tiết món",
+      "w": 390,
+      "x": 1410,
+      "y": 1224
+    },
+    "Main.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Khám phá",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "MealPlan.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Thực đơn",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Onboarding.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Làm quen lần đầu",
+      "w": 390,
+      "x": 0,
+      "y": 1224
+    },
+    "Pantry.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Tủ đồ",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Saved.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Đã lưu (trống)",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "Search.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Tìm kiếm",
+      "w": 390,
+      "x": 940,
+      "y": 1224
+    },
+    "Shopping.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Danh sách đi chợ",
+      "w": 390,
+      "x": 1880,
+      "y": 1224
+    },
+    "Today.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Hôm nay ăn gì",
+      "w": 390,
+      "x": 470,
+      "y": 1224
+    },
+    "AddToPlan.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Thêm vào thực đơn · chọn ngày, bữa",
+      "w": 390,
+      "x": 2350,
+      "y": 1224
+    },
+    "Splash.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Khởi động",
+      "w": 390,
+      "x": 0,
+      "y": 4976
+    },
+    "NotifPermission.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Xin quyền thông báo",
+      "w": 390,
+      "x": 470,
+      "y": 4976
+    },
+    "Settings.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Cài đặt · Sáng / Tối / Hệ thống",
+      "w": 390,
+      "x": 940,
+      "y": 4976
+    },
+    "About.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Giới thiệu",
+      "w": 390,
+      "x": 1410,
+      "y": 4976
+    },
+    "Policy.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Chính sách quyền riêng tư",
+      "w": 390,
+      "x": 1880,
+      "y": 4976
+    },
+    "Feedback.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Góp ý & báo lỗi",
+      "w": 390,
+      "x": 0,
+      "y": 5940
+    },
+    "RateApp.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Đánh giá trên Google Play",
+      "w": 390,
+      "x": 470,
+      "y": 5940
+    },
+    "ClearData.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Xoá dữ liệu · gõ CONFIRM DELETE",
+      "w": 390,
+      "x": 940,
+      "y": 5940
+    },
+    "Error.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Lỗi",
+      "w": 390,
+      "x": 1410,
+      "y": 5940
+    },
+    "Logo.dc.html": {
+      "h": 800,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Logo · 4 hướng (đã chọn C)",
+      "w": 1440,
+      "x": 0,
+      "y": 7204
+    },
+    "LogoC.dc.html": {
+      "h": 900,
+      "radius": 24,
+      "title": "Logo C · Bát & đũa — bộ nhận diện",
+      "w": 1440,
+      "x": 1520,
+      "y": 7204
+    },
+    "MealCookPrep.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Nấu cả bữa · Chuẩn bị, thứ tự món",
+      "w": 390,
+      "x": 0,
+      "y": 3712
+    },
+    "MealCookStep.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Nấu cả bữa · Từng bước, chuyển món",
+      "w": 390,
+      "x": 470,
+      "y": 3712
+    },
+    "MealCookDone.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Nấu cả bữa · Xong, chấm từng món",
+      "w": 390,
+      "x": 940,
+      "y": 3712
+    }
   },
-  "createdOnFiles": { "at": "2026-10-19T09:00:00Z", "v": 1 },
+  "createdOnFiles": {
+    "at": "2026-10-19T09:00:00Z",
+    "v": 1
+  },
   "designSystems": [
     {
       "artifact": "https://claude.ai/code/artifact/94b079ab-6f57-4010-983a-5350c6ef0865",
@@ -37,13 +258,56 @@
       "version": "1792522706-cd99"
     }
   ],
-  "launch": { "view": "canvas" },
+  "launch": {
+    "view": "canvas"
+  },
   "notes": {
-    "cook": { "kind": "title1", "maxW": 1330, "text": "Luồng nấu — chuẩn bị, từng bước, hoàn thành", "w": 240, "x": 0, "y": 2148 },
-    "flow": { "kind": "title1", "maxW": 1800, "text": "Tab chính — Khám phá · Tủ đồ · Thực đơn · Đã lưu", "w": 240, "x": 0, "y": -300 },
-    "flows2": { "kind": "title1", "maxW": 2740, "text": "Luồng — làm quen, gợi ý, tìm, nấu, đi chợ", "w": 240, "x": 0, "y": 924 },
-    "sys": { "kind": "title1", "maxW": 2270, "text": "Hệ thống — cài đặt, giao diện, góp ý, chính sách, lỗi", "x": 0, "y": 3412 },
-    "logo": { "kind": "title1", "maxW": 2960, "text": "Logo — trẻ trung, tối giản · chọn hướng C", "x": 0, "y": 5640 }
+    "cook": {
+      "kind": "title1",
+      "maxW": 1330,
+      "text": "Luồng nấu — chuẩn bị, từng bước, hoàn thành",
+      "w": 240,
+      "x": 0,
+      "y": 2148
+    },
+    "flow": {
+      "kind": "title1",
+      "maxW": 1800,
+      "text": "Tab chính — Khám phá · Tủ đồ · Thực đơn · Đã lưu",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "flows2": {
+      "kind": "title1",
+      "maxW": 2740,
+      "text": "Luồng — làm quen, gợi ý, tìm, nấu, đi chợ",
+      "w": 240,
+      "x": 0,
+      "y": 924
+    },
+    "sys": {
+      "kind": "title1",
+      "maxW": 2270,
+      "text": "Hệ thống — cài đặt, giao diện, góp ý, chính sách, lỗi",
+      "x": 0,
+      "y": 4676
+    },
+    "logo": {
+      "kind": "title1",
+      "maxW": 2960,
+      "text": "Logo — trẻ trung, tối giản · chọn hướng C",
+      "x": 0,
+      "y": 6904
+    },
+    "mealcook": {
+      "kind": "title1",
+      "maxW": 1330,
+      "text": "Nấu cả bữa — nhiều món, nấu lần lượt theo thứ tự gợi ý",
+      "w": 240,
+      "x": 0,
+      "y": 3412
+    }
   },
   "order": [
     "Main.dc.html",
@@ -59,6 +323,9 @@
     "CookPrep.dc.html",
     "CookStep.dc.html",
     "CookDone.dc.html",
+    "MealCookPrep.dc.html",
+    "MealCookStep.dc.html",
+    "MealCookDone.dc.html",
     "Splash.dc.html",
     "NotifPermission.dc.html",
     "Settings.dc.html",

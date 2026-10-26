@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Chuẩn bị cả bữa</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a{color:var(--chili-deep)}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+input[type=checkbox]{accent-color:var(--herb)}
+.grip{width:48px;height:48px;flex-shrink:0;margin:-6px 0;display:flex;align-items:center;justify-content:center;border:0;border-radius:12px;background:transparent;color:var(--ink-muted);cursor:grab;touch-action:none;padding:0}
+.grip:active{cursor:grabbing}
+.grip:focus-visible{outline:2px solid var(--chili);outline-offset:-2px}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; align-items: center; gap: 4px; padding: 8px 16px 0 4px; height: 64px; flex-shrink: 0">
+    <a href="MealPlan.dc.html" aria-label="Quay lại thực đơn" style="width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+      <x-import component-from-global-scope="BepHoaLac.Icon" name="back"></x-import>
+    </a>
+    <div style="display: flex; flex-direction: column">
+      <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Nấu bữa tối</h1>
+      <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">Thứ Ba · 2 món · khoảng 35 phút · Bếp từ</span>
+    </div>
+  </header>
+
+  <main style="flex: 1; overflow: hidden; display: flex; flex-direction: column; gap: 16px; padding: 8px 16px 12px 16px">
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <span style="display: flex; flex-direction: column">
+          <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Thứ tự nấu</h2>
+          <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">Giữ và kéo để đổi thứ tự</span>
+        </span>
+        <sc-if value="{{reordered}}" hint-placeholder-val="{{false}}">
+          <button onClick="{{resetOrder}}" style="border: 0; padding: 0; background: transparent; color: var(--chili-deep); cursor: pointer; font: 600 13px/18px 'Be Vietnam Pro', sans-serif">Dùng thứ tự gợi ý</button>
+        </sc-if>
+      </div>
+      <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{order}}" as="o" hint-placeholder-count="2">
+          <li style="position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 4px 10px 12px; border-radius: 12px; background: var(--surface-raised); {{o.rowStyle}}">
+            <span style="width: 28px; height: 28px; flex-shrink: 0; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); font-size: 13px; line-height: 28px; font-weight: 700; text-align: center">{{o.no}}</span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+              <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{o.name}}</span>
+              <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{o.why}}</span>
+            </span>
+            <button class="grip" aria-label="{{o.gripLabel}}" aria-roledescription="tay cầm kéo" onPointerDown="{{o.down}}" onPointerMove="{{dragMove}}" onPointerUp="{{dragEnd}}" onPointerCancel="{{dragEnd}}" onKeyDown="{{o.key}}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="9" cy="6" r="1.6"></circle><circle cx="15" cy="6" r="1.6"></circle><circle cx="9" cy="12" r="1.6"></circle><circle cx="15" cy="12" r="1.6"></circle><circle cx="9" cy="18" r="1.6"></circle><circle cx="15" cy="18" r="1.6"></circle></svg>
+            </button>
+          </li>
+        </sc-for>
+      </ol>
+      <span aria-live="polite" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{announce}}</span>
+    </section>
+
+    <section style="display: flex; align-items: center; justify-content: space-between; padding: 8px 8px 8px 16px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
+      <div style="display: flex; flex-direction: column">
+        <span style="font-size: 15px; line-height: 22px; font-weight: 600">Khẩu phần</span>
+        <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">Áp dụng cho cả bữa</span>
+      </div>
+      <x-import component-from-global-scope="BepHoaLac.ServingStepper" value="{{servings}}" min="{{one}}" max="{{six}}" on-change="{{setServings}}" label="Khẩu phần cả bữa"></x-import>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Lấy đồ ra · cả bữa</h2>
+        <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">Đã lấy {{doneCount}}/{{total}}</span>
+      </div>
+      <ul style="margin: 0; padding: 0 12px; list-style: none; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
+        <sc-for list="{{items}}" as="it" hint-placeholder-count="6">
+          <li style="{{it.rowStyle}}">
+            <label style="min-height: 44px; display: flex; align-items: center; gap: 12px; cursor: pointer">
+              <input type="checkbox" checked="{{it.done}}" onChange="{{it.toggle}}" style="width: 20px; height: 20px; margin: 0">
+              <span style="flex: 1; font-size: 15px; line-height: 22px; {{it.nameStyle}}">{{it.label}}</span>
+              <span style="padding: 1px 8px; border-radius: 8px; font-size: 12px; line-height: 16px; font-weight: 600; {{it.tagStyle}}">{{it.tag}}</span>
+            </label>
+          </li>
+        </sc-for>
+      </ul>
+      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+        <x-import component-from-global-scope="BepHoaLac.AvailabilityBadge" missing="{{missing}}"></x-import>
+        <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">Món trứng · không có cũng được</span>
+        <a href="Shopping.dc.html" style="margin-left: auto; font-size: 13px; line-height: 18px; font-weight: 600">Thêm vào đi chợ</a>
+      </div>
+    </section>
+  </main>
+
+  <footer style="flex-shrink: 0; padding: 12px 16px 24px 16px; border-top: 1px solid var(--line); background: var(--surface-raised)">
+    <a href="MealCookStep.dc.html" class="bh-btn bh-btn-primary bh-btn-block bh-btn-lg" style="text-decoration: none">Bắt đầu: {{firstName}}</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+// Suggested order: dishes with passive or long steps first, fried dishes last, ties keep the order they were added.
+// Flutter: ReorderableListView with buildDefaultDragHandles: false and a ReorderableDragStartListener on drag_indicator_rounded.
+var DISHES = [
+{ id: 'tofu', name: 'Đậu phụ sốt cà chua', short: 'Đậu phụ', why: '25 phút · có bước om, giữ ấm được' },
+{ id: 'egg', name: 'Trứng chiên hành', short: 'Trứng', why: '15 phút · ăn nóng ngon nhất, làm sau cùng' }
+];
+var SUGGESTED = [0, 1];
+var ITEMS = [
+{ id: 'tofu', name: 'Đậu phụ', qty: 2, unit: 'bìa', tag: 'Đậu phụ' },
+{ id: 'tomato', name: 'Cà chua', qty: 2, unit: 'quả', tag: 'Đậu phụ' },
+{ id: 'egg', name: 'Trứng gà', qty: 2, unit: 'quả', tag: 'Trứng' },
+{ id: 'onion', name: 'Hành lá', qty: 2, unit: 'nắm', tag: '2 món', shared: true },
+{ id: 'oil', name: 'Dầu ăn', qty: 3, unit: 'thìa', tag: '2 món', shared: true },
+{ id: 'rice', name: 'Cơm trắng', qty: 1, unit: 'suất', tag: 'Cả bữa', shared: true }
+];
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { order: SUGGESTED.slice(), servings: 1, done: { tofu: true }, drag: null, announce: '' };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+function swap(order, from, to) {
+var next = order.slice();
+var t = next[from]; next[from] = next[to]; next[to] = t;
+return next;
+}
+function said(order, pos) { return DISHES[order[pos]].name + ' lên vị trí ' + (pos + 1); }
+function move(from, to) {
+var next = swap(self.state.order, from, to);
+self.setState({ order: next, announce: said(next, to) });
+}
+var count = 0;
+var items = ITEMS.map(function (it, i) {
+var d = !!st.done[it.id];
+if (d) { count += 1; }
+return {
+label: it.name + ' · ' + (it.qty * st.servings) + ' ' + it.unit,
+tag: it.tag,
+tagStyle: it.shared ? 'background: var(--chili-soft); color: var(--chili-deep);' : 'background: var(--surface); color: var(--ink-muted); border: 1px solid var(--line);',
+done: d,
+rowStyle: i < ITEMS.length - 1 ? 'border-bottom: 1px solid var(--line);' : '',
+nameStyle: d ? 'color: var(--ink-muted); text-decoration: line-through;' : '',
+toggle: function () {
+var next = Object.assign({}, self.state.done);
+next[it.id] = !d;
+self.setState({ done: next });
+}
+};
+});
+return {
+theme: this.props.theme ?? 'system',
+one: 1,
+six: 6,
+servings: st.servings,
+setServings: function (v) { self.setState({ servings: v }); },
+reordered: st.order.join() !== SUGGESTED.join(),
+resetOrder: function () { self.setState({ order: SUGGESTED.slice(), announce: 'Đã dùng lại thứ tự gợi ý' }); },
+order: st.order.map(function (di, pos) {
+var d = DISHES[di];
+var dragging = st.drag && st.drag.pos === pos;
+return {
+no: pos + 1,
+name: d.name,
+why: d.why,
+gripLabel: 'Đổi thứ tự ' + d.name + ', đang ở vị trí ' + (pos + 1) + '. Dùng phím mũi tên lên xuống',
+rowStyle: dragging
+? 'z-index: 2; border: 2px solid var(--chili); box-shadow: 0 8px 20px rgba(20, 14, 10, 0.18); transform: translateY(' + st.drag.dy + 'px) scale(1.02);'
+: 'border: 1px solid var(--line); transition: transform .15s;',
+down: function (e) {
+if (e.currentTarget.setPointerCapture) { e.currentTarget.setPointerCapture(e.pointerId); }
+var li = e.currentTarget.closest('li');
+self.setState({ drag: { pos: pos, y: e.clientY, dy: 0, row: (li ? li.offsetHeight : 60) + 8 } });
+},
+key: function (e) {
+if (e.key === 'ArrowUp' && pos > 0) { e.preventDefault(); move(pos, pos - 1); }
+if (e.key === 'ArrowDown' && pos < self.state.order.length - 1) { e.preventDefault(); move(pos, pos + 1); }
+}
+};
+}),
+dragMove: function (e) {
+var dr = self.state.drag;
+if (!dr) { return; }
+var order = self.state.order;
+var p = dr.pos;
+var y = dr.y;
+var dy = e.clientY - y;
+// Swap with the neighbour once the row passes half of its height.
+while (dy > dr.row / 2 && p < order.length - 1) { order = swap(order, p, p + 1); p += 1; y += dr.row; dy -= dr.row; }
+while (dy < -dr.row / 2 && p > 0) { order = swap(order, p, p - 1); p -= 1; y -= dr.row; dy += dr.row; }
+var max = (order.length - 1 - p) * dr.row + dr.row / 2;
+var min = -p * dr.row - dr.row / 2;
+dy = Math.max(min, Math.min(max, dy));
+self.setState({ order: order, drag: { pos: p, y: y, dy: dy, row: dr.row }, announce: p !== dr.pos ? said(order, p) : self.state.announce });
+},
+dragEnd: function () { if (self.state.drag) { self.setState({ drag: null }); } },
+announce: st.announce,
+items: items,
+doneCount: count,
+total: ITEMS.length,
+missing: ['hạt tiêu'],
+firstName: DISHES[st.order[0]].name
+};
+}
+}
+</script>
+</body>
+</html>
