@@ -37,19 +37,12 @@ a.bh-btn-secondary,a.bh-btn-secondary:hover{color:var(--ink)}
         <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">Trứng chiên hành · 15 phút · Bếp từ</span>
       </div>
 
-      <div role="group" aria-label="Chọn nhanh" style="display: flex; gap: 8px">
-        <sc-for list="{{quick}}" as="q" hint-placeholder-count="3">
-          <x-import component-from-global-scope="BepHoaLac.Chip" selected="{{q.on}}" on-click="{{q.pick}}">{{q.label}}</x-import>
-        </sc-for>
-      </div>
-
       <section style="display: flex; flex-direction: column; gap: 8px">
-        <span id="lbl-day" style="font-size: 13px; line-height: 18px; font-weight: 600">Ngày</span>
+        <span id="lbl-day" style="font-size: 13px; line-height: 18px; font-weight: 600">Các ngày tới</span>
         <div role="radiogroup" aria-labelledby="lbl-day" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
           <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
-            <button role="radio" aria-checked="{{d.on}}" aria-label="{{d.full}}" onClick="{{d.pick}}" style="height: 56px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; font-family: 'Be Vietnam Pro', sans-serif; {{d.style}}">
+            <button role="radio" aria-checked="{{d.on}}" aria-label="{{d.full}}" onClick="{{d.pick}}" style="height: 56px; padding: 0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; font-family: 'Be Vietnam Pro', sans-serif; {{d.style}}">
               <span style="font-size: 13px; line-height: 18px; font-weight: 600">{{d.short}}</span>
-              <span style="font-size: 10px; line-height: 12px; font-weight: 600; min-height: 12px; display: flex; align-items: center">{{d.sub}}<span style="width: 6px; height: 6px; border-radius: 999px; {{d.dotStyle}}"></span></span>
             </button>
           </sc-for>
         </div>
@@ -87,11 +80,19 @@ a.bh-btn-secondary,a.bh-btn-secondary:hover{color:var(--ink)}
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
-var DAYS = [['T2', 'Thứ Hai', 'thứ Hai'], ['T3', 'Thứ Ba', 'thứ Ba'], ['T4', 'Thứ Tư', 'thứ Tư'], ['T5', 'Thứ Năm', 'thứ Năm'], ['T6', 'Thứ Sáu', 'thứ Sáu'], ['T7', 'Thứ Bảy', 'thứ Bảy'], ['CN', 'Chủ nhật', 'Chủ nhật']];
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"now":{"editor":"enum","options":["07:30","11:30","18:30"],"default":"18:30"},"$preview":{"width":390,"height":844}}'>
+// Rolling 7 days from today (Tuesday), so every cell can be picked and the most likely days come first.
+var DAYS = [
+{ short: 'T3', name: 'nay', full: 'Thứ Ba, hôm nay', week: 1 },
+{ short: 'T4', name: 'mai', full: 'Thứ Tư, ngày mai', week: 2 },
+{ short: 'T5', name: 'thứ Năm', full: 'Thứ Năm', week: 3 },
+{ short: 'T6', name: 'thứ Sáu', full: 'Thứ Sáu', week: 4 },
+{ short: 'T7', name: 'thứ Bảy', full: 'Thứ Bảy', week: 5 },
+{ short: 'CN', name: 'Chủ nhật', full: 'Chủ nhật', week: 6 },
+{ short: 'T2', name: 'thứ Hai tuần sau', full: 'Thứ Hai tuần sau', week: 7 }
+];
 var MEALS = ['Sáng', 'Trưa', 'Tối'];
-var TODAY = 1;
-// Same plan as the Thực đơn screen: each meal holds a list of dishes.
+// Same plan as the Thực đơn screen, indexed T2..CN of this week; index 7 is next Monday. Each meal holds a list of dishes.
 var PLAN = [
 [['Bánh mì trứng ốp'], ['Mì xào rau cải'], ['Canh cà chua trứng']],
 [[], ['Cơm rang dưa cải'], ['Đậu phụ sốt cà chua']],
@@ -99,44 +100,45 @@ var PLAN = [
 [[], [], []],
 [[], [], []],
 [[], [], []],
+[[], [], []],
 [[], [], []]
 ];
-var QUICK = [['Tối nay', TODAY, 2], ['Trưa mai', TODAY + 1, 1], ['Tối mai', TODAY + 1, 2]];
+// Default to the next meal by the clock: before 10:00 Sáng, before 14:00 Trưa, otherwise Tối.
+function nextMeal(now) {
+var h = parseInt(String(now || '18:30').split(':')[0], 10);
+return h < 10 ? 0 : h < 14 ? 1 : 2;
+}
 class Component extends DCLogic {
 constructor(props) {
 super(props);
-this.state = { day: TODAY, meal: 2, servings: 1 };
+this.state = { day: 0, meal: null, servings: 1 };
 }
 renderVals() {
 var self = this;
-var st = this.state;
-var existing = PLAN[st.day][st.meal];
-var when = MEALS[st.meal] + ' ' + (st.day === TODAY ? 'nay' : st.day === TODAY + 1 ? 'mai' : DAYS[st.day][2]);
+// meal stays null until the user picks one, so the default follows the 'now' tweak.
+var st = Object.assign({}, this.state, { meal: this.state.meal === null ? nextMeal(this.props.now) : this.state.meal });
+var plan = function (i) { return PLAN[DAYS[i].week]; };
+var existing = plan(st.day)[st.meal];
+var when = MEALS[st.meal] + ' ' + DAYS[st.day].name;
 return {
 theme: this.props.theme ?? 'system',
 one: 1,
 six: 6,
 servings: st.servings,
 setServings: function (v) { self.setState({ servings: v }); },
-quick: QUICK.map(function (q) {
-return { label: q[0], on: st.day === q[1] && st.meal === q[2], pick: function () { self.setState({ day: q[1], meal: q[2] }); } };
-}),
 days: DAYS.map(function (d, i) {
 var on = i === st.day;
-var any = PLAN[i].some(function (m) { return m.length > 0; });
 return {
-short: d[0],
-full: d[1] + (i === TODAY ? ', hôm nay' : ''),
-sub: i === TODAY ? 'Nay' : '',
+short: d.short,
+full: d.full,
 on: on,
 style: on ? 'border: 1px solid var(--chili); background: var(--chili); color: #FFFFFF;' : 'border: 1px solid var(--line); background: var(--surface); color: var(--ink);',
-dotStyle: i !== TODAY && any ? (on ? 'background: #FFFFFF;' : 'background: var(--herb);') : 'display: none;',
 pick: function () { self.setState({ day: i }); }
 };
 }),
 meals: MEALS.map(function (m, j) {
 var on = j === st.meal;
-var dishes = PLAN[st.day][j];
+var dishes = plan(st.day)[j];
 return {
 label: m,
 has: dishes.length ? dishes.join(', ') : 'Trống',

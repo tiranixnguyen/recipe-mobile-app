@@ -39,7 +39,6 @@ a{color:var(--chili-deep)}
         <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
           <button onClick="{{d.pick}}" aria-pressed="{{d.on}}" aria-label="{{d.full}}" style="height: 56px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; font-family: 'Be Vietnam Pro', sans-serif; {{d.style}}">
             <span style="font-size: 13px; line-height: 18px; font-weight: 600">{{d.short}}</span>
-            <span style="width: 6px; height: 6px; border-radius: 999px; {{d.dotStyle}}"></span>
           </button>
         </sc-for>
       </div>
@@ -184,13 +183,11 @@ var planned = 0;
 plan.forEach(function (r) { r.forEach(function (v) { if (v.length) { planned += 1; } }); });
 var days = DAYS.map(function (d, i) {
 var on = i === st.day;
-var any = plan[i].some(function (v) { return v.length > 0; });
 return {
 short: d[0],
 full: d[1],
 on: on,
 style: on ? 'border: 1px solid var(--chili); background: var(--chili); color: #FFFFFF;' : 'border: 1px solid var(--line); background: var(--surface-raised); color: var(--ink);',
-dotStyle: any ? (on ? 'background: #FFFFFF;' : 'background: var(--herb);') : 'background: transparent;',
 pick: function () { self.setState({ day: i }); }
 };
 });

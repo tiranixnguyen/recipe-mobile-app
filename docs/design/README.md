@@ -7,7 +7,7 @@ Bản sao trong repo của hai artifact thiết kế trên claude.ai, để cả
 | Design system | [`design-system/`](design-system/) | https://claude.ai/artifact/KMviZS2qvYfCv3YdyvCYsn |
 | Prototype Android (27 màn) | [`prototype/`](prototype/) | https://claude.ai/artifact/8Bxj3zhHYamZgfue2wXUii |
 
-> **Nguồn sự thật là artifact.** Thư mục này là ảnh chụp tại thời điểm sync (2026-10-25). Sửa thiết kế trên artifact rồi sync lại; đừng sửa tay ở đây.
+> **Nguồn sự thật là artifact.** Thư mục này là ảnh chụp tại thời điểm sync (2026-10-26). Sửa thiết kế trên artifact rồi sync lại; đừng sửa tay ở đây.
 
 ## Đọc theo thứ tự nào
 
