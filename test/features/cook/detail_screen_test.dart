@@ -129,7 +129,7 @@ void main() {
 
     await tester.tap(find.text(CookStrings.startCooking));
     await tester.pumpAndSettle();
-    expect(find.text(CookStrings.prep), findsOneWidget);
+    expect(find.text(CookStrings.prepTitle), findsOneWidget);
     expect(cookPrepLocation('trung'), '/recipe/trung/prep');
   });
 
