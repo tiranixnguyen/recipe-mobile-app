@@ -14,8 +14,18 @@ void main() {
       byId,
     );
     expect(used, [
-      const UsedItem(ingredientId: 'egg', name: 'Trứng gà', note: 'Đã dùng 4 quả'),
-      const UsedItem(ingredientId: 'chili', name: 'Ớt', note: 'Đã dùng 1 quả'),
+      const UsedItem(
+        ingredientId: 'egg',
+        name: 'Trứng gà',
+        note: 'Đã dùng 4 quả',
+        recipeIds: ['trung'],
+      ),
+      const UsedItem(
+        ingredientId: 'chili',
+        name: 'Ớt',
+        note: 'Đã dùng 1 quả',
+        recipeIds: ['trung'],
+      ),
     ]);
   });
 
@@ -42,6 +52,7 @@ void main() {
       byId,
     );
     expect(used.map((u) => u.note), ['Đã dùng 4 quả', 'Đã dùng 1 nắm, 20 g']);
+    expect(used.first.recipeIds, ['trung', 'canh']);
   });
 
   test('tủ trống thì không có gì', () {

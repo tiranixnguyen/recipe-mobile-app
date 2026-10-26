@@ -83,6 +83,19 @@ void main() {
         expect(taps, [1, 0]);
       });
 
+      testWidgets('action đặt trước link Thêm món; bữa trống thì không hiện', (tester) async {
+        const action = Text('Nấu bữa này');
+        await pump(tester, MealSlot(label: 'Tối', dishes: _dishes, onAdd: () {}, action: action));
+        expect(find.text('Nấu bữa này'), findsOneWidget);
+        expect(
+          tester.getTopRight(find.text('Nấu bữa này')).dx,
+          lessThan(tester.getTopLeft(find.text('+ Thêm món')).dx),
+        );
+
+        await pump(tester, MealSlot(label: 'Tối', dishes: const [], onAdd: () {}, action: action));
+        expect(find.text('Nấu bữa này'), findsNothing);
+      });
+
       testWidgets('một món: nhãn không đếm', (tester) async {
         await pump(tester, MealSlot(label: 'Trưa', dishes: [_dishes.first], onAdd: () {}));
         expect(find.text('Trưa'), findsOneWidget);

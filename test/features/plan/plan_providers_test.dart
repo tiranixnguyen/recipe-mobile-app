@@ -58,6 +58,32 @@ void main() {
       ]);
     });
 
+    test(
+      'đánh dấu đã nấu các món của phiên; thêm lại món giữ đã nấu, món mới chưa nấu; dựng lại vẫn còn',
+      () async {
+        final plan = container.read(plannedMealsProvider.notifier);
+        final day = DateTime(2026, 10, 26);
+        await plan.addToPlan('a', day, Meal.dinner);
+        await plan.addToPlan('b', day, Meal.dinner);
+        await plan.addToPlan('a', day, Meal.lunch);
+        await plan.addToPlan('d', day, Meal.dinner);
+        await plan.markCooked(DateTime(2026, 10, 26, 20), Meal.dinner, ['a', 'b']);
+        await plan.addToPlan('a', day, Meal.dinner, servings: 2);
+        await plan.addToPlan('c', day, Meal.dinner);
+
+        final expected = [
+          PlannedMeal(day: day, meal: Meal.dinner, recipeId: 'a', servings: 2, cooked: true),
+          PlannedMeal(day: day, meal: Meal.dinner, recipeId: 'b', cooked: true),
+          PlannedMeal(day: day, meal: Meal.lunch, recipeId: 'a'),
+          PlannedMeal(day: day, meal: Meal.dinner, recipeId: 'd'),
+          PlannedMeal(day: day, meal: Meal.dinner, recipeId: 'c'),
+        ];
+        expect(container.read(plannedMealsProvider), expected);
+        container.invalidate(plannedMealsProvider);
+        expect(container.read(plannedMealsProvider), expected);
+      },
+    );
+
     test('bỏ một món giữ món còn lại; không truyền món thì bỏ cả bữa', () async {
       final plan = container.read(plannedMealsProvider.notifier);
       final day = DateTime(2026, 10, 26);

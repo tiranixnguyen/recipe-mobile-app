@@ -9,8 +9,9 @@ import 'package:recipe_mobile_app/features/cook/strings.dart';
 
 /// Đầu màn Hoàn thành: vòng tròn 88 `chiliSoft` có icon bát, "Xong rồi! Ăn ngon nhé", dòng meta.
 class DoneHero extends StatelessWidget {
-  const DoneHero({super.key, required this.meta});
+  const DoneHero({super.key, required this.meta, this.title = CookStrings.doneTitle});
 
+  final String title;
   final String meta;
 
   @override
@@ -28,7 +29,7 @@ class DoneHero extends StatelessWidget {
         Semantics(
           header: true,
           child: Text(
-            CookStrings.doneTitle,
+            title,
             textAlign: TextAlign.center,
             style: AppTextStyles.display.copyWith(color: colors.ink),
           ),
@@ -50,8 +51,12 @@ class UpdatePantrySection extends StatelessWidget {
     required this.items,
     required this.usedUp,
     required this.onToggle,
+    this.title = CookStrings.updatePantry,
+    this.hint = CookStrings.updatePantryHint,
   });
 
+  final String title;
+  final String hint;
   final List<UsedItem> items;
   final Set<String> usedUp;
   final ValueChanged<String> onToggle;
@@ -63,9 +68,9 @@ class UpdatePantrySection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: AppSpacing.s2,
       children: [
-        const SectionHeader(title: CookStrings.updatePantry),
+        SectionHeader(title: title),
         Text(
-          CookStrings.updatePantryHint,
+          hint,
           style: AppTextStyles.meta.copyWith(fontWeight: FontWeight.w400, color: colors.inkMuted),
         ),
         RowsBox(

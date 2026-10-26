@@ -87,21 +87,24 @@ class _Step extends ConsumerWidget {
               ),
             ),
             Expanded(
-              child: StepBody(label: CookStrings.stepLabel(state.index + 1), text: state.step.text),
-            ),
-            StepTimers(
-              timers: [
-                for (final i in state.timedSteps)
-                  StepTimerSlot(
-                    key: ValueKey(i),
-                    visible: state.showsTimer(i),
-                    seconds: state.steps[i].timerSeconds!,
-                    endAt: state.timerEnds[i],
-                    label: CookStrings.timerLabel(i + 1),
-                    clock: viewModel.clock,
-                    onStatusChange: (status) => viewModel.timerChanged(i, status),
-                  ),
-              ],
+              child: StepBody(
+                label: CookStrings.stepLabel(state.index + 1),
+                text: state.step.text,
+                timers: StepTimers(
+                  timers: [
+                    for (final i in state.timedSteps)
+                      StepTimerSlot(
+                        key: ValueKey(i),
+                        visible: state.showsTimer(i),
+                        seconds: state.steps[i].timerSeconds!,
+                        endAt: state.timerEnds[i],
+                        label: CookStrings.timerLabel(i + 1),
+                        clock: viewModel.clock,
+                        onStatusChange: (status) => viewModel.timerChanged(i, status),
+                      ),
+                  ],
+                ),
+              ),
             ),
             CookFooter(
               child: Row(

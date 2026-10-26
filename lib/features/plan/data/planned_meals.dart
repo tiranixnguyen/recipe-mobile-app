@@ -25,6 +25,7 @@ class PlannedMeal {
     required this.meal,
     required this.recipeId,
     this.servings = 1,
+    this.cooked = false,
   }) : day = dateOnly(day);
 
   /// Luôn là 0h của ngày đó.
@@ -33,11 +34,15 @@ class PlannedMeal {
   final String recipeId;
   final int servings;
 
+  /// Đã nấu xong cả bữa này (Nấu cả bữa).
+  final bool cooked;
+
   Map<String, dynamic> toJson() => {
     'day': day.toIso8601String().substring(0, 10),
     'meal': meal.id,
     'recipeId': recipeId,
     'servings': servings,
+    if (cooked) 'cooked': true,
   };
 
   /// Trả null khi bản ghi hỏng (thiếu trường, sai kiểu, bữa lạ), để chỉ mất bản ghi đó.
@@ -52,7 +57,13 @@ class PlannedMeal {
         final int n when n > 0 => n,
         _ => 1,
       };
-      return PlannedMeal(day: date, meal: parsedMeal, recipeId: recipeId, servings: servings);
+      return PlannedMeal(
+        day: date,
+        meal: parsedMeal,
+        recipeId: recipeId,
+        servings: servings,
+        cooked: json['cooked'] == true,
+      );
     }
     return null;
   }
@@ -63,13 +74,14 @@ class PlannedMeal {
       other.day == day &&
       other.meal == meal &&
       other.recipeId == recipeId &&
-      other.servings == servings;
+      other.servings == servings &&
+      other.cooked == cooked;
 
   @override
-  int get hashCode => Object.hash(day, meal, recipeId, servings);
+  int get hashCode => Object.hash(day, meal, recipeId, servings, cooked);
 
   @override
-  String toString() => 'PlannedMeal($day, $meal, $recipeId, $servings)';
+  String toString() => 'PlannedMeal($day, $meal, $recipeId, $servings${cooked ? ', cooked' : ''})';
 }
 
 /// Thực đơn: mỗi bữa (ngày, bữa) có thể nhiều món (cơm + canh + mặn), theo thứ tự thêm.
@@ -90,13 +102,43 @@ class PlannedMealsController extends Notifier<List<PlannedMeal>> {
 
   /// Thêm [recipeId] vào cuối bữa [meal] ngày [day], cho [servings] người.
   ///
-  /// Món đã có trong bữa đó thì chỉ cập nhật khẩu phần, giữ vị trí.
+  /// Món đã có trong bữa đó thì chỉ cập nhật khẩu phần, giữ vị trí và trạng thái đã nấu.
   Future<void> addToPlan(String recipeId, DateTime day, Meal meal, {int servings = 1}) {
     final entry = PlannedMeal(day: day, meal: meal, recipeId: recipeId, servings: servings);
     final index = state.indexWhere(
       (p) => p.day == entry.day && p.meal == meal && p.recipeId == recipeId,
     );
-    return _save(index < 0 ? [...state, entry] : ([...state]..[index] = entry));
+    if (index < 0) return _save([...state, entry]);
+    final old = state[index];
+    return _save(
+      [...state]
+        ..[index] = PlannedMeal(
+          day: day,
+          meal: meal,
+          recipeId: recipeId,
+          servings: servings,
+          cooked: old.cooked,
+        ),
+    );
+  }
+
+  /// Đánh dấu các món [recipeIds] trong bữa [meal] ngày [day] đã nấu (Nấu cả bữa xong). Món thêm
+  /// vào bữa sau khi bắt đầu nấu không nằm trong [recipeIds] nên vẫn là chưa nấu.
+  Future<void> markCooked(DateTime day, Meal meal, Iterable<String> recipeIds) {
+    final date = dateOnly(day);
+    final ids = recipeIds.toSet();
+    return _save([
+      for (final p in state)
+        p.day == date && p.meal == meal && ids.contains(p.recipeId)
+            ? PlannedMeal(
+                day: p.day,
+                meal: p.meal,
+                recipeId: p.recipeId,
+                servings: p.servings,
+                cooked: true,
+              )
+            : p,
+    ]);
   }
 
   /// Bỏ món [recipeId] khỏi bữa [meal] ngày [day]; [recipeId] null thì bỏ cả bữa.

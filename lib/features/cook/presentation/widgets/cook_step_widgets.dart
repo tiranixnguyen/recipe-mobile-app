@@ -9,7 +9,8 @@ import 'package:recipe_mobile_app/features/cook/domain/cook_step.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 
 /// Đầu màn Từng bước: nút thoát, "Bước x/y", nút "Nguyên liệu"; thanh đoạn tiến độ và dòng "Màn
-/// hình luôn sáng". [below] đặt giữa hàng nút và thanh tiến độ (tab món khi nấu cả bữa).
+/// hình luôn sáng". [below] đặt dưới hàng nút (tab món khi nấu cả bữa, khi đó [showProgress] false
+/// vì mỗi tab có tiến độ riêng).
 class StepHeader extends StatelessWidget {
   const StepHeader({
     super.key,
@@ -20,6 +21,7 @@ class StepHeader extends StatelessWidget {
     required this.onIngredients,
     this.title,
     this.below,
+    this.showProgress = true,
   });
 
   final int step;
@@ -33,6 +35,7 @@ class StepHeader extends StatelessWidget {
   /// Chữ giữa hàng nút; mặc định "Bước x/y".
   final String? title;
   final Widget? below;
+  final bool showProgress;
 
   @override
   Widget build(BuildContext context) {
@@ -65,82 +68,99 @@ class StepHeader extends StatelessWidget {
                   ),
                 ),
               ),
-              AppButton.ghost(
-                label: CookStrings.ingredients,
-                icon: AppIcons.list,
-                onPressed: onIngredients,
+              // Chữ to thì nút chia chỗ với tiêu đề, không ép tiêu đề xuống từng chữ một dòng.
+              Flexible(
+                child: AppButton.ghost(
+                  label: CookStrings.ingredients,
+                  icon: AppIcons.list,
+                  onPressed: onIngredients,
+                ),
               ),
             ],
           ),
           ?below,
-          Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.s3),
-            child: ExcludeSemantics(
-              child: Row(
-                spacing: AppSpacing.s1,
-                children: [
-                  for (var i = 0; i < total; i++)
-                    Expanded(
-                      child: Container(
-                        height: 6,
-                        decoration: BoxDecoration(
-                          color: i < done ? colors.chili : colors.line,
-                          borderRadius: AppRadius.pillAll,
+          if (showProgress) ...[
+            Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.s3),
+              child: ExcludeSemantics(
+                child: Row(
+                  spacing: AppSpacing.s1,
+                  children: [
+                    for (var i = 0; i < total; i++)
+                      Expanded(
+                        child: Container(
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: i < done ? colors.chili : colors.line,
+                            borderRadius: AppRadius.pillAll,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: AppSpacing.s3),
-            child: Text(
-              CookStrings.keepScreenOn,
-              style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+            Padding(
+              padding: const EdgeInsets.only(left: AppSpacing.s3),
+              child: Text(
+                CookStrings.keepScreenOn,
+                style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
   }
 }
 
-/// Nhãn "BƯỚC n" và chữ bước 24/34, cuộn được khi chữ to.
+/// Phần giữa màn Từng bước: nhãn "BƯỚC n", chữ bước 24/34, đồng hồ sát footer. Màn thấp hoặc chữ
+/// to thì cả phần này cuộn, để header và footer luôn hiện.
 class StepBody extends StatelessWidget {
-  const StepBody({super.key, required this.label, required this.text});
+  const StepBody({super.key, required this.label, required this.text, required this.timers});
 
   final String label;
   final String text;
+  final StepTimers timers;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.s6,
-        AppSpacing.s8,
-        AppSpacing.s6,
-        AppSpacing.s4,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: AppSpacing.s5,
-        children: [
-          Text(
-            label,
-            style: AppTextStyles.label.copyWith(
-              fontWeight: FontWeight.w700,
-              letterSpacing: 13 * 0.04,
-              color: colors.chiliDeep,
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.s6,
+            AppSpacing.s8,
+            AppSpacing.s6,
+            AppSpacing.s4,
+          ),
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: AppSpacing.s5,
+              children: [
+                Text(
+                  label,
+                  style: AppTextStyles.label.copyWith(
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 13 * 0.04,
+                    color: colors.chiliDeep,
+                  ),
+                ),
+                Semantics(
+                  liveRegion: true,
+                  child: Text(text, style: AppTextStyles.step.copyWith(color: colors.ink)),
+                ),
+              ],
             ),
           ),
-          Semantics(
-            liveRegion: true,
-            child: Text(text, style: AppTextStyles.step.copyWith(color: colors.ink)),
-          ),
-        ],
-      ),
+        ),
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Align(alignment: Alignment.bottomCenter, child: timers),
+        ),
+      ],
     );
   }
 }
@@ -159,7 +179,11 @@ class StepTimers extends StatelessWidget {
       label: CookStrings.timers,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(AppSpacing.s4, 0, AppSpacing.s4, AppSpacing.s1),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: timers),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: timers,
+        ),
       ),
     );
   }
@@ -206,9 +230,11 @@ class StepTimerSlot extends StatelessWidget {
   }
 }
 
-/// Sheet "Nguyên liệu · n người": tên — lượng theo khẩu phần, gia vị cơ bản "Vừa đủ".
+/// Sheet "Nguyên liệu · n người" ([title] thay tiêu đề khi nấu cả bữa): tên — lượng theo khẩu
+/// phần, gia vị cơ bản "Vừa đủ".
 Future<void> showStepIngredients(
   BuildContext context, {
+  String? title,
   required int servings,
   required List<StepIngredient> items,
   required List<String> basicSpices,
@@ -235,7 +261,7 @@ Future<void> showStepIngredients(
                 child: Semantics(
                   header: true,
                   child: Text(
-                    CookStrings.sheetTitle(servings),
+                    title ?? CookStrings.sheetTitle(servings),
                     style: AppTextStyles.subtitle.copyWith(color: colors.ink),
                   ),
                 ),

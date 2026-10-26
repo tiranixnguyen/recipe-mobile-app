@@ -44,8 +44,8 @@ final _trung = _recipe(
     RecipeIngredient(id: 'oil', amount: 1, unit: 'muỗng canh'),
   ],
   steps: const [
-    RecipeStep(text: 'Thái hành.', prep: true),
-    RecipeStep(text: 'Đánh trứng.', prep: true),
+    RecipeStep(text: 'Thái hành.'),
+    RecipeStep(text: 'Đánh trứng.'),
     RecipeStep(text: 'Làm nóng dầu.', timerSeconds: 60),
     RecipeStep(text: 'Chiên trứng.', timerSeconds: 120),
   ],
@@ -64,7 +64,7 @@ final _canh = _recipe(
     RecipeIngredient(id: 'oil', amount: 1, unit: 'muỗng cà phê'),
   ],
   steps: const [
-    RecipeStep(text: 'Cà chua bổ múi cau.', prep: true),
+    RecipeStep(text: 'Cà chua bổ múi cau.'),
     RecipeStep(text: 'Đun sôi nước.', timerSeconds: 300),
   ],
 );
@@ -96,37 +96,6 @@ void main() {
     test('giữ khẩu phần của từng món', () {
       final order = suggestCookOrder([(recipe: _trung, servings: 3), (recipe: _canh, servings: 4)]);
       expect(order.map((d) => d.servings), [4, 3]);
-    });
-  });
-
-  group('mealPrepTasks', () {
-    test('bước prep theo thứ tự nấu rồi thứ tự trong món, giữ chỉ số gốc', () {
-      final tasks = mealPrepTasks([
-        (recipe: _canh, servings: 2),
-        (recipe: _banhMi, servings: 1),
-        (recipe: _trung, servings: 1),
-      ]);
-      expect(tasks, const [
-        MealPrepTask(recipeId: 'canh', stepIndex: 0, text: 'Cà chua bổ múi cau.'),
-        MealPrepTask(recipeId: 'trung', stepIndex: 0, text: 'Thái hành.'),
-        MealPrepTask(recipeId: 'trung', stepIndex: 1, text: 'Đánh trứng.'),
-      ]);
-    });
-
-    test('không món nào có prep thì rỗng', () {
-      expect(mealPrepTasks([(recipe: _banhMi, servings: 1)]), isEmpty);
-    });
-  });
-
-  group('cookSteps', () {
-    test('bỏ bước prep, giữ chỉ số gốc làm khoá hẹn giờ', () {
-      final steps = cookSteps(_trung);
-      expect(steps.map((s) => s.index), [2, 3]);
-      expect(steps.map((s) => s.step.text), ['Làm nóng dầu.', 'Chiên trứng.']);
-    });
-
-    test('món không có prep giữ nguyên', () {
-      expect(cookSteps(_banhMi), [(index: 0, step: _banhMi.steps.first)]);
     });
   });
 
@@ -173,6 +142,37 @@ void main() {
 
       final half = mealGatherList([(recipe: _canh, servings: 1)], _ingredients);
       expect(half.items.map((i) => i.amountText), ['1 quả', '0,5 quả', '5 g']);
+    });
+  });
+
+  group('mealPrepItems', () {
+    test('đồ có trong tủ cộng cho cả bữa, đồ thiếu mỗi thứ một lần kèm ghi chú', () {
+      final ot = _recipe(
+        'ot',
+        ingredients: const [
+          RecipeIngredient(
+            id: 'chili',
+            amount: 1,
+            unit: 'quả',
+            optional: true,
+            substituteNote: 'Không có cũng được.',
+          ),
+        ],
+      );
+      final result = mealPrepItems(
+        [(recipe: _canh, servings: 2), (recipe: _trung, servings: 1), (recipe: ot, servings: 1)],
+        {'egg'},
+        _ingredients,
+      );
+
+      expect(result.gather.map((i) => (i.name, i.amountText)), [('Trứng gà', '3 quả')]);
+      expect(result.gather.single.recipeIds, ['canh', 'trung']);
+      expect(result.basicSpices, ['Nước mắm', 'dầu ăn']);
+      expect(result.missing.map((m) => (m.ingredientId, m.note)), [
+        ('tomato', null),
+        ('scallion', null),
+        ('chili', 'Không có cũng được.'),
+      ]);
     });
   });
 }

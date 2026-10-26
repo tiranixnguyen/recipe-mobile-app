@@ -31,6 +31,7 @@ class PlanState {
     required this.meals,
     required this.daysWithMeals,
     required this.plannedCount,
+    this.cookedMeals = const {},
   });
 
   /// Số bữa của một tuần (7 ngày × 3 bữa).
@@ -50,6 +51,9 @@ class PlanState {
 
   /// Số bữa có ít nhất một món trong tuần, trên [slotsPerWeek].
   final int plannedCount;
+
+  /// Bữa của ngày đang xem đã nấu xong cả bữa (mọi món đã nấu).
+  final Set<Meal> cookedMeals;
 }
 
 class PlanViewModel extends Notifier<AsyncValue<PlanState>> {
@@ -87,6 +91,12 @@ class PlanViewModel extends Notifier<AsyncValue<PlanState>> {
         },
         daysWithMeals: daysWithMeals,
         plannedCount: plannedSlots.length,
+        cookedMeals: {
+          for (final meal in Meal.values)
+            if (planned.where((p) => p.day == selectedDate && p.meal == meal).toList()
+                case final slot when slot.isNotEmpty && slot.every((p) => p.cooked))
+              meal,
+        },
       );
     });
   }

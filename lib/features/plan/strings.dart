@@ -1,3 +1,5 @@
+import 'package:recipe_mobile_app/core/models/models.dart';
+
 abstract final class PlanStrings {
   static const title = 'Thực đơn';
   static const shopping = 'Đi chợ';
@@ -24,4 +26,10 @@ abstract final class PlanStrings {
   static const cancel = 'Huỷ';
   static String addConfirm(String when) => 'Thêm vào $when';
   static const addNotFound = 'Không tìm thấy món này.';
+
+  static const cookMeal = 'Nấu bữa này';
+  static String cookMealLabel(Meal meal, List<String> names) =>
+      'Nấu cả bữa ${meal.label.toLowerCase()}: ${names.join(', ')}';
+  static const cooked = 'Đã nấu';
+  static String cookAgainLabel(Meal meal) => 'Đã nấu bữa ${meal.label.toLowerCase()}, nấu lại';
 }

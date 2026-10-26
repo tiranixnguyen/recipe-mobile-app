@@ -35,6 +35,7 @@ const detailRecipeFixture = Recipe(
 const cookIngredientsFixture = [
   ...detailIngredientsFixture,
   Ingredient(id: 'chili', name: 'Ớt', group: IngredientGroup.vegetable),
+  Ingredient(id: 'tomato', name: 'Cà chua', group: IngredientGroup.vegetable),
 ];
 
 /// Món để test chế độ nấu: có nguyên liệu tuỳ chọn kèm ghi chú thay thế, bước có hẹn giờ.
@@ -66,5 +67,28 @@ const cookRecipeFixture = Recipe(
     RecipeStep(text: 'Làm nóng dầu', timerSeconds: 60),
     RecipeStep(text: 'Chiên mặt dưới', timerSeconds: 180),
     RecipeStep(text: 'Lật trứng, xúc ra đĩa'),
+  ],
+);
+
+/// Món thứ hai cho Nấu cả bữa: lâu hơn [cookRecipeFixture] nên được gợi ý nấu trước.
+const soupRecipeFixture = Recipe(
+  id: 'canh',
+  name: 'Canh cà chua trứng',
+  description: '',
+  imageAsset: '',
+  minutes: 20,
+  servings: 2,
+  tools: [Tool.stove],
+  diets: [],
+  meals: [],
+  ingredients: [
+    RecipeIngredient(id: 'tomato', amount: 2, unit: 'quả'),
+    RecipeIngredient(id: 'egg', amount: 1, unit: 'quả'),
+    RecipeIngredient(id: 'oil', amount: 1, unit: 'muỗng cà phê'),
+  ],
+  steps: [
+    RecipeStep(text: 'Xào cà chua'),
+    RecipeStep(text: 'Đổ nước, đun sôi', timerSeconds: 300),
+    RecipeStep(text: 'Đổ trứng, tắt bếp'),
   ],
 );
