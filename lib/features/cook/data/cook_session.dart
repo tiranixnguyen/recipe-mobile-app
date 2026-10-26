@@ -32,9 +32,11 @@ class CookSession {
     Set<int> finished = const {},
     this.planned,
     required this.startedAt,
+    Map<int, DateTime> timerEnds = const {},
   }) : dishes = List.unmodifiable(dishes),
        positions = List.unmodifiable(positions ?? List.filled(dishes.length, 0)),
-       finished = Set.unmodifiable(finished);
+       finished = Set.unmodifiable(finished),
+       timerEnds = Map.unmodifiable(timerEnds);
 
   /// Món theo thứ tự nấu.
   final List<CookDish> dishes;
@@ -52,6 +54,10 @@ class CookSession {
   final PlannedSlot? planned;
   final DateTime startedAt;
 
+  /// Mốc hết giờ của đồng hồ đang chạy, theo key `cookTimerKey(món, bước)`: mở lại màn nấu thì đồng
+  /// hồ chạy tiếp.
+  final Map<int, DateTime> timerEnds;
+
   /// Nấu cả bữa (mở từ Thực đơn) thay vì một món.
   bool get isMeal => planned != null || dishes.length > 1;
 
@@ -60,13 +66,19 @@ class CookSession {
   /// Mọi món đã xong: phiên chỉ còn chờ màn Hoàn thành, không hiện "Nấu tiếp".
   bool get isDone => finished.length >= dishes.length;
 
-  CookSession copyWith({int? current, List<int>? positions, Set<int>? finished}) => CookSession(
+  CookSession copyWith({
+    int? current,
+    List<int>? positions,
+    Set<int>? finished,
+    Map<int, DateTime>? timerEnds,
+  }) => CookSession(
     dishes: dishes,
     current: current ?? this.current,
     positions: positions ?? this.positions,
     finished: finished ?? this.finished,
     planned: planned,
     startedAt: startedAt,
+    timerEnds: timerEnds ?? this.timerEnds,
   );
 
   Map<String, dynamic> toJson() => {
@@ -79,6 +91,8 @@ class CookSession {
     if (planned case final p?)
       'planned': {'day': p.day.toIso8601String().substring(0, 10), 'meal': p.meal.id},
     'startedAt': startedAt.toIso8601String(),
+    if (timerEnds.isNotEmpty)
+      'timerEnds': {for (final e in timerEnds.entries) '${e.key}': e.value.toIso8601String()},
   };
 
   /// Trả null khi dữ liệu hỏng (thiếu trường, sai kiểu, chỉ số ngoài khoảng).
@@ -115,6 +129,16 @@ class CookSession {
         if (date == null || parsedMeal == null) return null;
         planned = (day: date, meal: parsedMeal);
       }
+      // Đồng hồ hỏng thì bỏ riêng đồng hồ đó.
+      final timerEnds = <int, DateTime>{
+        if (json['timerEnds'] case final Map<String, dynamic> raw)
+          for (final MapEntry(:key, :value) in raw.entries)
+            if ((int.tryParse(key), value is String ? DateTime.tryParse(value) : null) case (
+              final int k,
+              final DateTime at,
+            ))
+              k: at,
+      };
       return CookSession(
         dishes: dishes,
         current: current,
@@ -122,6 +146,7 @@ class CookSession {
         finished: finished,
         planned: planned,
         startedAt: startedAt,
+        timerEnds: timerEnds,
       );
     }
     return null;
@@ -135,7 +160,8 @@ class CookSession {
       listEquals(other.positions, positions) &&
       setEquals(other.finished, finished) &&
       other.planned == planned &&
-      other.startedAt == startedAt;
+      other.startedAt == startedAt &&
+      mapEquals(other.timerEnds, timerEnds);
 
   @override
   int get hashCode => Object.hash(
@@ -145,6 +171,7 @@ class CookSession {
     Object.hashAllUnordered(finished),
     planned,
     startedAt,
+    Object.hashAllUnordered(timerEnds.entries.map((e) => Object.hash(e.key, e.value))),
   );
 
   @override
@@ -205,6 +232,15 @@ class CookSessionController extends Notifier<CookSession?> {
     final session = state;
     if (session == null || dish < 0 || dish >= session.dishes.length) return;
     await _save(session.copyWith(finished: {...session.finished, dish}));
+  }
+
+  /// Lưu mốc hết giờ của đồng hồ [key]; [endAt] null khi đồng hồ dừng hoặc đã hết giờ.
+  Future<void> setTimerEnd(int key, DateTime? endAt) async {
+    final session = state;
+    if (session == null || session.timerEnds[key] == endAt) return;
+    final timerEnds = {...session.timerEnds};
+    endAt == null ? timerEnds.remove(key) : timerEnds[key] = endAt;
+    await _save(session.copyWith(timerEnds: timerEnds));
   }
 
   Future<void> clear() async {

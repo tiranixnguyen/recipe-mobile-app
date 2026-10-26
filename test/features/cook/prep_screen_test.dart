@@ -7,6 +7,7 @@ import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
+import 'package:recipe_mobile_app/features/cook/data/cook_device.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
@@ -14,6 +15,7 @@ import 'package:recipe_mobile_app/features/plan/plan.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
 import '../system/fake_notification_plugin.dart';
+import 'fakes.dart';
 import 'fixtures.dart';
 
 /// Mở Chuẩn bị nấu trên màn `/recipe/trung` giả (để có chỗ quay lại).
@@ -49,6 +51,7 @@ Future<ProviderContainer> _pump(
       recipesProvider.overrideWith((ref) async => const [cookRecipeFixture]),
       ingredientsProvider.overrideWith((ref) async => cookIngredientsFixture),
       notificationPluginProvider.overrideWithValue(FakeNotificationPlugin(permitted: permitted)),
+      wakelockProvider.overrideWithValue(FakeWakelock()),
     ],
   );
   addTearDown(container.dispose);
@@ -118,9 +121,9 @@ void main() {
     await tester.tap(find.text(CookStrings.startCooking));
     await tester.pumpAndSettle();
     expect(container.read(cookSessionProvider)?.currentDish.recipeId, 'trung');
-    expect(find.text(CookStrings.cookStep), findsOneWidget);
+    expect(find.text('Bước 1/4'), findsOneWidget);
 
-    await tester.pageBack();
+    await tester.tap(find.byTooltip(CookStrings.exitCooking));
     await tester.pumpAndSettle();
     expect(find.text('at /'), findsOneWidget);
   });
@@ -135,7 +138,7 @@ void main() {
 
     await tester.tap(find.text('at notif'));
     await tester.pumpAndSettle();
-    expect(find.text(CookStrings.cookStep), findsOneWidget);
+    expect(find.text('Bước 1/4'), findsOneWidget);
     expect(container.read(cookSessionProvider), isNotNull);
   });
 

@@ -40,6 +40,8 @@ void main() {
       completes,
     );
     await expectLater(service.cancelMealReminders(), completes);
+    await expectLater(service.scheduleTimer(key: 0, recipeTitle: 't', at: tomorrow), completes);
+    await expectLater(service.cancelTimer(0), completes);
   });
 
   test('hẹn giờ xong: hiện ngay trên kênh timer', () async {
@@ -55,6 +57,47 @@ void main() {
     await service().timerDone(recipeTitle: 'Trứng rán');
 
     expect(plugin.shown, isEmpty);
+  });
+
+  test('hẹn báo hết giờ: mỗi key một id, hẹn lại thay lịch cũ, huỷ theo key', () async {
+    final soon = DateTime.now().add(const Duration(minutes: 3));
+    await service().scheduleTimer(key: 0, recipeTitle: 'Trứng rán', at: soon);
+    await service().scheduleTimer(key: 5, recipeTitle: 'Canh rau', at: soon);
+    await service().scheduleTimer(key: 0, recipeTitle: 'Trứng rán', at: tomorrow);
+
+    expect(plugin.scheduled, hasLength(2));
+    final first = plugin.scheduled[LocalNotificationService.scheduledTimerId(0)]!;
+    expect(
+      (first.channel, first.at, first.title),
+      (NotificationChannel.timer, tomorrow, 'Hết giờ rồi'),
+    );
+    expect(first.body, contains('Trứng rán'));
+
+    await service().cancelTimer(0);
+    expect(plugin.scheduled.keys, [LocalNotificationService.scheduledTimerId(5)]);
+  });
+
+  test('hẹn báo hết giờ: bỏ qua khi tắt trong Cài đặt hoặc giờ đã qua', () async {
+    await prefs().setTimerDone(false);
+    await service().scheduleTimer(key: 0, recipeTitle: 'Trứng rán', at: tomorrow);
+    await prefs().setTimerDone(true);
+    await service().scheduleTimer(
+      key: 1,
+      recipeTitle: 'Trứng rán',
+      at: DateTime.now().subtract(const Duration(seconds: 1)),
+    );
+
+    expect(plugin.scheduled, isEmpty);
+  });
+
+  test('id báo hết giờ nằm giữa id báo ngay và id nhắc bữa; key ngoài khoảng thì lỗi', () {
+    final ids = {
+      for (var k = 0; k <= maxTimerKey; k++) LocalNotificationService.scheduledTimerId(k),
+    };
+    expect(ids, hasLength(maxTimerKey + 1));
+    final firstMeal = LocalNotificationService.mealReminderId(DateTime(1970), Meal.breakfast);
+    expect(ids.every((id) => id > LocalNotificationService.timerId && id < firstMeal), isTrue);
+    expect(() => LocalNotificationService.scheduledTimerId(maxTimerKey + 1), throwsRangeError);
   });
 
   test('nhắc bữa: chỉ hẹn khi đã bật', () async {
