@@ -157,6 +157,38 @@ void main() {
     });
   });
 
+  group('Recipe.notes', () {
+    test('tuỳ chọn, mặc định rỗng, chỉ ghi khi có', () {
+      const base = Recipe(
+        id: 'r1',
+        name: 'Món test',
+        description: '',
+        imageAsset: '',
+        minutes: 15,
+        servings: 1,
+        tools: [],
+        diets: [],
+        meals: [],
+        ingredients: [],
+        steps: [],
+      );
+      expect(base.notes, isEmpty);
+      expect(base.toJson().containsKey('notes'), isFalse);
+      expect(Recipe.fromJson(base.toJson()).notes, isEmpty);
+
+      final withNotes = Recipe.fromJson({
+        ...base.toJson(),
+        'notes': ['Ăn nóng.', 'Ăn trong ngày.'],
+      });
+      expect(withNotes.notes, ['Ăn nóng.', 'Ăn trong ngày.']);
+      expect(withNotes.toJson()['notes'], ['Ăn nóng.', 'Ăn trong ngày.']);
+      expect(withNotes, isNot(base));
+      expect(Recipe.fromJson(withNotes.toJson()), withNotes);
+      expect(Recipe.fromJson(withNotes.toJson()).hashCode, withNotes.hashCode);
+      expect(() => withNotes.notes.add('x'), throwsUnsupportedError);
+    });
+  });
+
   group('gatherIngredients', () {
     Recipe recipe(String id, int servings, List<RecipeIngredient> ingredients) => Recipe(
       id: id,

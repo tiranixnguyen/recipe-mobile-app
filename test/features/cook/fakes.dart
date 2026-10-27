@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/cook/data/app_review.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_device.dart';
@@ -46,4 +48,20 @@ class FakeAppReview implements AppReview {
 
   @override
   Future<void> request() async => requests++;
+}
+
+/// `Random` luôn trả [value] cho `nextInt`: câu chúc cố định trong test.
+class FakeRandom implements math.Random {
+  FakeRandom([this.value = 0]);
+
+  final int value;
+
+  @override
+  int nextInt(int max) => value % max;
+
+  @override
+  double nextDouble() => 0;
+
+  @override
+  bool nextBool() => false;
 }

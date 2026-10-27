@@ -94,7 +94,42 @@ void main() {
     expect(session.prepDone, {'scallion/Thái nhỏ'});
   });
 
-  test('phiên không có inPrep, prepDone (lưu trước COOK-06) vẫn đọc được', () async {
+  test('trang Lưu ý: lưu qua JSON; sang bước hoặc về Sơ chế thì rời Lưu ý', () async {
+    await controller().startMeal(
+      [(recipeId: 'dau', servings: 2), (recipeId: 'canh', servings: 2)],
+      (day: DateTime(2026, 10, 27), meal: Meal.dinner),
+      prep: true,
+    );
+    await controller().showNotes();
+    container.invalidate(cookSessionProvider);
+    var session = container.read(cookSessionProvider)!;
+    expect((session.inNotes, session.inPrep), (true, false));
+    expect(session.toJson()['inNotes'], isTrue);
+    expect(session.toString(), contains('inNotes'));
+
+    await controller().goTo(1, 0);
+    session = container.read(cookSessionProvider)!;
+    expect((session.inNotes, session.current), (false, 1));
+    expect(session.toJson().containsKey('inNotes'), isFalse);
+
+    await controller().showNotes();
+    await controller().showPrep();
+    session = container.read(cookSessionProvider)!;
+    expect((session.inNotes, session.inPrep), (false, true));
+    expect(session, isNot(session.copyWith(inNotes: true)));
+
+    // Xong hết món mà còn ở Lưu ý thì chưa xong phiên; Xong cả bữa rời Lưu ý.
+    await controller().finishDish(0);
+    await controller().finishDish(1);
+    await controller().showNotes();
+    session = container.read(cookSessionProvider)!;
+    expect((session.inNotes, session.isDone), (true, false));
+    await controller().finishDish(1);
+    session = container.read(cookSessionProvider)!;
+    expect((session.inNotes, session.isDone), (false, true));
+  });
+
+  test('phiên không có inPrep, prepDone, inNotes (lưu trước COOK-06) vẫn đọc được', () async {
     await store().writeString(
       'cook.session',
       jsonEncode({
@@ -109,7 +144,7 @@ void main() {
     );
     container.invalidate(cookSessionProvider);
     final session = container.read(cookSessionProvider)!;
-    expect((session.inPrep, session.prepDone.isEmpty), (false, true));
+    expect((session.inPrep, session.prepDone.isEmpty, session.inNotes), (false, true, false));
     expect(session.positions, [1]);
     expect(session.toJson().containsKey('inPrep'), isFalse);
   });

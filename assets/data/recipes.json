@@ -22,6 +22,10 @@
       { "text": "Làm nóng dầu trên chảo, lửa vừa.", "timerSeconds": 60 },
       { "text": "Đổ trứng vào, chiên mặt dưới đến khi vàng.", "timerSeconds": 120 },
       { "text": "Lật trứng, chiên mặt trên thêm một chút rồi tắt bếp.", "timerSeconds": 60 }
+    ],
+    "notes": [
+      "Ăn nóng với cơm hoặc kẹp bánh mì.",
+      "Chấm thêm nước mắm hoặc tương ớt nếu thích."
     ]
   },
   {
@@ -49,6 +53,10 @@
       { "text": "Đổ khoảng 500 ml nước, đun sôi.", "timerSeconds": 300 },
       { "text": "Đổ trứng từ từ vào nồi, khuấy nhẹ." },
       { "text": "Nêm nước mắm, thả hành lá rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn nóng cùng cơm.",
+      "Còn thừa thì đun sôi lại trước khi ăn, ăn hết trong ngày."
     ]
   },
   {
@@ -74,6 +82,10 @@
       { "text": "Luộc mì trong nước sôi cho vừa mềm, vớt ra để ráo.", "timerSeconds": 120 },
       { "text": "Phi tỏi với dầu, cho rau cải vào xào nhanh.", "timerSeconds": 90 },
       { "text": "Cho mì vào, thêm xì dầu, đảo đều rồi tắt bếp.", "timerSeconds": 60 }
+    ],
+    "notes": [
+      "Ăn ngay khi còn nóng, để lâu mì bị bết.",
+      "Thêm chút tương ớt nếu bạn ăn được cay."
     ]
   },
   {
@@ -97,6 +109,10 @@
       { "text": "Đập trứng vào chảo, giữ lòng đỏ nguyên." },
       { "text": "Ốp đến khi lòng trắng chín, lòng đỏ còn hơi mềm.", "timerSeconds": 150 },
       { "text": "Rưới xì dầu, kẹp trứng vào bánh mì." }
+    ],
+    "notes": [
+      "Ăn ngay khi trứng còn nóng.",
+      "Ăn kèm dưa chuột hoặc rau sống cho đỡ ngán."
     ]
   },
   {
@@ -125,6 +141,10 @@
       { "text": "Để lại ít dầu, xào cà chua với muối cho nát.", "timerSeconds": 180 },
       { "text": "Cho đậu vào, thêm 3 muỗng canh nước, xì dầu và đường. Đun nhỏ lửa cho thấm.", "timerSeconds": 300 },
       { "text": "Rắc hành lá rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn nóng với cơm trắng.",
+      "Còn thừa thì cho vào hộp, cất tủ lạnh, ăn trong 1 ngày."
     ]
   },
   {
@@ -149,6 +169,10 @@
       { "text": "Đổ vào bát chịu nhiệt." },
       { "text": "Đặt bát lên xửng hấp khi nấu cơm. Nồi không có xửng thì đổ 2 bát nước vào lòng nồi rồi đặt bát vào." },
       { "text": "Bấm nấu, hấp đến khi xiên đũa vào không còn chảy nước.", "timerSeconds": 1200 }
+    ],
+    "notes": [
+      "Ăn nóng với cơm, chấm thêm nước mắm.",
+      "Món có thịt, đừng để qua đêm ngoài tủ lạnh."
     ]
   },
   {
@@ -176,6 +200,10 @@
       { "text": "Đổ trứng vào cháo, khuấy đều." },
       { "text": "Nấu thêm cho trứng chín.", "timerSeconds": 120 },
       { "text": "Nêm nước mắm, rắc hành lá." }
+    ],
+    "notes": [
+      "Ăn khi còn nóng, rắc thêm tiêu cho thơm.",
+      "Cháo để lâu sẽ đặc lại, thêm chút nước rồi đun sôi lại."
     ]
   },
   {
@@ -203,6 +231,10 @@
       { "text": "Cho cơm nguội vào, đảo tơi.", "timerSeconds": 180 },
       { "text": "Đập trứng vào, đảo nhanh cho trứng bám đều hạt cơm.", "timerSeconds": 60 },
       { "text": "Nêm nước mắm nếu cần rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn nóng, có canh ăn kèm thì càng ngon.",
+      "Cơm rang để nguội thì rang lại cho nóng trước khi ăn."
     ]
   },
   {
@@ -230,6 +262,10 @@
       { "text": "Phi tỏi, xào thịt băm đến khi săn, nêm nước mắm.", "timerSeconds": 180 },
       { "text": "Cho khoai tây và hành tây vào xào, thêm 3 muỗng canh nước, đậy nắp.", "timerSeconds": 480 },
       { "text": "Khoai mềm thì rắc tiêu, đảo đều rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn nóng với cơm.",
+      "Còn thừa thì cất tủ lạnh, hâm nóng lại, ăn trong 1 ngày."
     ]
   },
   {
@@ -256,6 +292,9 @@
       { "text": "Đập trứng vào nồi, không khuấy để trứng nguyên quả." },
       { "text": "Đun thêm cho mì mềm và trứng chín.", "timerSeconds": 120 },
       { "text": "Rắc hành lá rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn ngay khi mì còn nóng, để lâu mì nở."
     ]
   },
   {
@@ -282,6 +321,10 @@
       { "text": "Đổ khoảng 600 ml nước, đun sôi rồi hớt bọt.", "timerSeconds": 300 },
       { "text": "Cho rau cải vào, đun đến khi rau chín.", "timerSeconds": 180 },
       { "text": "Nêm nước mắm rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn nóng cùng cơm.",
+      "Rau cải để qua bữa dễ bị thâm, nên ăn hết trong bữa."
     ]
   },
   {
@@ -309,6 +352,10 @@
       { "text": "Chiên xúc xích với ít dầu cho săn vỏ, gắp ra.", "timerSeconds": 180 },
       { "text": "Xào cà chua và hành tây với muối, đường cho nát.", "timerSeconds": 180 },
       { "text": "Cho xúc xích và tương cà vào, đảo đến khi sốt sệt lại.", "timerSeconds": 120 }
+    ],
+    "notes": [
+      "Ăn với cơm hoặc chấm bánh mì.",
+      "Còn thừa thì cất tủ lạnh, ăn trong 1 ngày."
     ]
   },
   {
@@ -333,6 +380,10 @@
       { "text": "Bọc khoai bằng giấy ăn ẩm, đặt lên đĩa." },
       { "text": "Quay vi sóng mức cao.", "timerSeconds": 240 },
       { "text": "Lật khoai, quay thêm đến khi xiên đũa thấy mềm.", "timerSeconds": 180 }
+    ],
+    "notes": [
+      "Khoai rất nóng, để nguội bớt 1–2 phút rồi bóc vỏ.",
+      "Ăn kèm một cốc sữa cho no lâu."
     ]
   },
   {
@@ -358,6 +409,9 @@
       { "text": "Cho mì vào bát tô, đổ nước sôi ngập mì, đậy kín.", "timerSeconds": 180 },
       { "text": "Chắt hết nước, trộn mì với gói gia vị và dầu." },
       { "text": "Cho xúc xích và dưa chuột lên trên rồi trộn đều." }
+    ],
+    "notes": [
+      "Trộn xong ăn ngay cho mì không bị khô."
     ]
   },
   {
@@ -386,6 +440,10 @@
       { "text": "Trải xúc xích, cà rốt và ngô lên mặt gạo. Rưới xì dầu và dầu ăn." },
       { "text": "Bấm nấu, chờ nồi chuyển sang chế độ ủ.", "timerSeconds": 1500 },
       { "text": "Ủ thêm cho cơm chín đều rồi xới trộn trước khi ăn.", "timerSeconds": 300 }
+    ],
+    "notes": [
+      "Ăn nóng, chấm thêm xì dầu hoặc tương ớt.",
+      "Ngâm nồi bằng nước ngay sau khi xới cho dễ rửa."
     ]
   }
 ]

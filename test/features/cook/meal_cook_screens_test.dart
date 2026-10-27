@@ -77,6 +77,7 @@ Future<(ProviderContainer, GoRouter)> _pump(
       notificationServiceProvider.overrideWithValue(FakeNotificationService()),
       appInForegroundProvider.overrideWithValue(() => true),
       appReviewProvider.overrideWithValue(FakeAppReview()),
+      cookRandomProvider.overrideWithValue(FakeRandom()),
     ],
   );
   addTearDown(container.dispose);
@@ -278,7 +279,7 @@ void main() {
     expect(container.read(cookSessionProvider)!.inPrep, isTrue);
   });
 
-  testWidgets('nấu cả bữa: Xong món 1, thoát rồi Nấu tiếp, Xong cả bữa, chấm, xong', (
+  testWidgets('nấu cả bữa: Xong món 1, thoát rồi Nấu tiếp, Xong món 2 vào Lưu ý, Xong cả bữa', (
     tester,
   ) async {
     final (container, router) = await _pump(tester);
@@ -314,7 +315,26 @@ void main() {
     for (var i = 0; i < 2; i++) {
       await _tap(tester, find.text(CookStrings.nextStep));
     }
-    // Mọi món khác đã xong: không hỏi lại.
+    // Bước cuối món cuối cũng là "Xong món 2"; "Xong cả bữa" chỉ có ở chặng Lưu ý.
+    expect(find.text(CookStrings.finishMeal), findsNothing);
+    await _tap(tester, find.text(CookStrings.finishDish(2)));
+    expect(find.text('Bữa tối · lưu ý'), findsOneWidget);
+    expect(find.text(CookStrings.notesLabel), findsOneWidget);
+    // Chỉ món có lưu ý: món canh không có thì không có nhóm.
+    expect(find.text('Trứng chiên hành'), findsOneWidget);
+    expect(find.text('Canh cà chua trứng'), findsNothing);
+    expect(find.text('Ăn nóng với cơm.'), findsOneWidget);
+    expect(find.text(CookStrings.cheers[0]), findsOneWidget);
+
+    // Thoát ở chặng Lưu ý: Nấu tiếp ghi "Bữa tối · lưu ý", mở lại đúng chặng.
+    await _tap(tester, find.byTooltip(CookStrings.exitCooking));
+    router.go('/');
+    await tester.pumpAndSettle();
+    expect(find.text('Bữa tối · lưu ý'), findsOneWidget);
+    await _tap(tester, find.text(CookStrings.resumeAction));
+    expect(find.text(CookStrings.notesLabel), findsOneWidget);
+
+    // Mọi món đã xong: không hỏi lại.
     await _tap(tester, find.text(CookStrings.finishMeal));
     expect(find.text(CookStrings.mealConfirmTitle), findsNothing);
     expect(find.text('Xong bữa tối! Ăn ngon nhé'), findsOneWidget);
@@ -345,7 +365,7 @@ void main() {
   });
 
   testWidgets(
-    'Xong cả bữa khi món 1 chưa xong: hỏi lại, Nấu tiếp thì ở lại, đồng ý thì sang Hoàn thành',
+    'tab Lưu ý khi món 1 chưa xong: Xong cả bữa hỏi lại, Nấu tiếp thì ở lại, đồng ý thì xong',
     (
       tester,
     ) async {
@@ -356,13 +376,25 @@ void main() {
       for (var i = 0; i < 2; i++) {
         await _tap(tester, find.text(CookStrings.nextStep));
       }
+      // Xong món 2 khi món 1 chưa xong: sang món 1, chưa vào Lưu ý.
+      await _tap(tester, find.text(CookStrings.finishDish(2)));
+      expect(find.text('Bữa tối · món 1/2'), findsOneWidget);
+
+      await _tap(tester, find.text(CookStrings.notesTab));
+      expect(find.text('Bữa tối · lưu ý'), findsOneWidget);
+      expect(find.text(CookStrings.notesTabHint), findsOneWidget);
       await _tap(tester, find.text(CookStrings.finishMeal));
       expect(find.text(CookStrings.mealConfirmTitle), findsOneWidget);
       expect(find.text(CookStrings.mealConfirmBody(['Canh cà chua trứng'])), findsOneWidget);
       await _tap(tester, find.text(CookStrings.keepCooking));
       expect(find.text(CookStrings.mealConfirmTitle), findsNothing);
-      expect(find.text('Bữa tối · món 2/2'), findsOneWidget);
-      expect(container.read(cookSessionProvider)!.finished, isEmpty);
+      expect(find.text('Bữa tối · lưu ý'), findsOneWidget);
+      expect(container.read(cookSessionProvider)!.finished, {1});
+
+      // Bước trước về món 1 ở bước đang dở.
+      await _tap(tester, find.text(CookStrings.previousStep));
+      expect(find.text('CANH CÀ CHUA TRỨNG · BƯỚC 1/3'), findsOneWidget);
+      await _tap(tester, find.text(CookStrings.notesTab));
 
       await _tap(tester, find.text(CookStrings.finishMeal));
       await _tap(tester, find.text(CookStrings.confirmFinishMeal));
@@ -422,7 +454,7 @@ void main() {
   });
 
   for (final (name, theme) in [('sáng', AppTheme.light), ('tối', AppTheme.dark)]) {
-    testWidgets('360dp, chữ 1.3, theme $name: bốn chặng không tràn', (tester) async {
+    testWidgets('360dp, chữ 1.3, theme $name: các chặng không tràn', (tester) async {
       await _pump(tester, theme: theme, size: const Size(360, 640), textScale: 1.3);
       expect(tester.takeException(), isNull);
       await _startAnyway(tester, CookStrings.startPrep, CookStrings.confirmStartPrep);
@@ -434,11 +466,15 @@ void main() {
       await _tap(tester, find.text(CookStrings.nextStep));
       await _tap(tester, find.text('Hẹn 5 phút', skipOffstage: false));
       expect(tester.takeException(), isNull);
-      // Nhảy sang món 2, nấu hết: Xong cả bữa hỏi lại vì món 1 chưa xong.
+      // Nhảy sang món 2, nấu hết, rồi tab Lưu ý: Xong cả bữa hỏi lại vì món 1 chưa xong.
       await _tap(tester, find.text('2. Trứng chiên hành'));
       for (var i = 0; i < 2; i++) {
         await _tap(tester, find.text(CookStrings.nextStep));
       }
+      await _tap(tester, find.text(CookStrings.finishDish(2)));
+      await _tap(tester, find.text(CookStrings.notesTab));
+      expect(tester.takeException(), isNull);
+      expect(find.text(CookStrings.cheers[0]), findsOneWidget);
       await _tap(tester, find.text(CookStrings.finishMeal));
       expect(find.text(CookStrings.mealConfirmTitle), findsOneWidget);
       expect(tester.takeException(), isNull);
@@ -479,6 +515,13 @@ void main() {
       await _tap(tester, find.textContaining('5. '));
       expect(find.text('Bữa tối · món 5/5'), findsOneWidget);
       expect(tester.takeException(), isNull);
+      // Tab Lưu ý cuối dải: nhóm theo tên món dài, câu chúc, Xong cả bữa.
+      await _tap(tester, find.text(CookStrings.notesTab));
+      expect(tester.takeException(), isNull);
+      expect(find.text('Bữa tối · lưu ý'), findsOneWidget);
+      expect(find.text(_longRecipes[0].name), findsOneWidget);
+      expect(find.text(CookStrings.cheers[0]), findsOneWidget);
+      expect(find.text(CookStrings.finishMeal), findsOneWidget);
     });
   }
 }

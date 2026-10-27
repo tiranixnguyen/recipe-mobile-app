@@ -22,21 +22,27 @@ final resumeCookingProvider = Provider.autoDispose<ResumeCooking?>((ref) {
   final recipe = recipes?.where((r) => r.id == dish.recipeId).firstOrNull;
   if (recipe == null || recipe.steps.isEmpty) return null;
   if (!session.isMeal) {
+    if (session.inNotes) {
+      return (text: CookStrings.resumeNotes(recipe.name), location: cookStepLocation(recipe.id));
+    }
     final step = session.positions[session.current].clamp(0, recipe.steps.length - 1);
     return (
       text: CookStrings.resumeStep(recipe.name, step + 1, recipe.steps.length),
       location: cookStepLocation(recipe.id),
     );
   }
-  // Nấu cả bữa: bước tính trên bước đứng bếp, chặng Sơ chế hiện "Bữa tối · sơ chế".
+  // Nấu cả bữa: bước tính trên bước đứng bếp, chặng Sơ chế hiện "Bữa tối · sơ chế", chặng Lưu ý
+  // hiện "Bữa tối · lưu ý".
   final planned = session.planned;
   final steps = cookSteps(recipe).length;
   if (steps == 0) return null;
   final step = session.positions[session.current].clamp(0, steps - 1);
   return (
-    text: session.inPrep && planned != null
-        ? CookStrings.mealPrepStageTitle(planned.meal)
-        : CookStrings.resumeStep(recipe.name, step + 1, steps),
+    text: switch (planned) {
+      final p? when session.inPrep => CookStrings.mealPrepStageTitle(p.meal),
+      final p? when session.inNotes => CookStrings.mealNotesStageTitle(p.meal),
+      _ => CookStrings.resumeStep(recipe.name, step + 1, steps),
+    },
     location: mealCookStepLocation,
   );
 });

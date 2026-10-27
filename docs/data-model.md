@@ -86,7 +86,8 @@ test chặn nếu nhập sai.
     { "text": "Rửa sạch hành lá, thái nhỏ.", "prep": [{ "id": "scallion", "action": "Rửa sạch, thái nhỏ" }] },
     { "text": "Đập trứng vào bát, thêm hành lá và nước mắm. Đánh tan.", "prep": [{ "id": "egg", "action": "Đập ra bát, thêm hành lá, nước mắm rồi đánh tan" }] },
     { "text": "Chiên trên chảo nóng đến khi vàng.", "timerSeconds": 180 }
-  ]
+  ],
+  "notes": ["Ăn nóng với cơm hoặc kẹp bánh mì."]
 }
 ```
 
@@ -127,6 +128,9 @@ test chặn nếu nhập sai.
 - `prepMinutes`: phút sơ chế, đã tính trong `minutes`. Bắt buộc khi món có bước sơ chế,
   `0 < prepMinutes < minutes`; không có bước sơ chế thì bỏ trống. Nấu cả bữa cộng lại thành "sơ chế ~8
   phút, nấu ~27 phút".
+- `notes`: lưu ý cách dùng (ăn nóng, ăn kèm gì, để được bao lâu), tuỳ chọn, mặc định rỗng. Mỗi mục một
+  câu ngắn, viết hoa chữ đầu, có dấu chấm cuối, không ghi giá. Màn Nấu hiện ở trang "Lưu ý cách dùng" sau
+  bước cuối (nấu cả bữa: chặng Lưu ý gom mọi món); bỏ trống thì hiện "Món ăn không có lưu ý nào."
 - `servings`, `minutes`, `ingredients[].amount` > 0; `ingredients`, `steps` không rỗng.
 
 Mọi id (`tools`, `diets`, `meals`, `group`) phải đúng danh sách trên. Id lạ không bị bỏ qua:

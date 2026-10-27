@@ -11,6 +11,7 @@ import 'package:recipe_mobile_app/features/cook/data/cook_timers.dart';
 import 'package:recipe_mobile_app/features/cook/domain/cook_step.dart';
 import 'package:recipe_mobile_app/features/cook/domain/meal_cook.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_prep/meal_prep_view_model.dart';
+import 'package:recipe_mobile_app/features/cook/strings.dart';
 
 /// Một việc ở chặng Sơ chế, đã sẵn chữ để hiện: "Tỏi · Băm nhỏ · 3 tép", tag món kèm phần lượng.
 @immutable
@@ -77,6 +78,8 @@ class MealStepState {
     this.inPrep = false,
     this.prep = const [],
     this.prepDone = const {},
+    this.inNotes = false,
+    this.cheer = '',
   });
 
   final Meal meal;
@@ -84,7 +87,7 @@ class MealStepState {
   /// Món theo thứ tự nấu.
   final List<MealDish> dishes;
 
-  /// Món đang xem (ở chặng Sơ chế: tab món đang mở; bấm "Xong sơ chế" luôn vào món đầu).
+  /// Món đang xem (ở chặng Sơ chế, Lưu ý: món đang nấu dở; bấm "Xong sơ chế" luôn vào món đầu).
   final int current;
 
   /// Bước đang ở của từng món, chỉ số trong [stepsOf] (bước đứng bếp).
@@ -110,6 +113,12 @@ class MealStepState {
   /// Việc lá đã tick.
   final Set<String> prepDone;
 
+  /// Đang ở chặng Lưu ý cuối bữa.
+  final bool inNotes;
+
+  /// Câu chúc cuối chặng Lưu ý, cố định trong một lần mở màn.
+  final String cheer;
+
   MealStepState copyWith({Map<int, StepTimerStatus>? timers}) => MealStepState(
     meal: meal,
     dishes: dishes,
@@ -123,6 +132,8 @@ class MealStepState {
     inPrep: inPrep,
     prep: prep,
     prepDone: prepDone,
+    inNotes: inNotes,
+    cheer: cheer,
   );
 
   bool get hasPrep => prep.isNotEmpty;
@@ -153,22 +164,23 @@ class MealStepState {
   RecipeStep get step => steps[index].step;
 
   /// Không lùi được nữa: ở chặng Sơ chế, hoặc bước đầu món đầu khi bữa không có chặng Sơ chế.
-  bool get isFirst => inPrep || (current == 0 && index == 0 && !hasPrep);
+  bool get isFirst => inPrep || (!inNotes && current == 0 && index == 0 && !hasPrep);
   bool get isLastStep => index == steps.length - 1;
-  bool get isLastDish => current == dishes.length - 1;
 
-  /// Mọi món khác món đang nấu đã xong.
-  bool get othersFinished => unfinishedOthers.isEmpty;
+  /// Mọi món đã xong (tab Lưu ý có dấu check).
+  bool get allFinished => finished.length >= dishes.length;
 
-  /// Tên các món khác món đang nấu mà chưa xong, theo thứ tự nấu.
-  List<String> get unfinishedOthers => [
+  /// Tên các món chưa xong, theo thứ tự nấu: "Xong cả bữa" hỏi lại khi còn món.
+  List<String> get unfinished => [
     for (final (i, d) in dishes.indexed)
-      if (i != current && !finished.contains(i)) d.recipe.name,
+      if (!finished.contains(i)) d.recipe.name,
   ];
 
-  /// Nút chính ở bước cuối món là "Xong cả bữa": món cuối, hoặc mọi món khác đã xong. Không thì
-  /// "Xong món n".
-  bool get finishesMeal => isLastDish || othersFinished;
+  /// Lưu ý cách dùng theo món, chỉ món có lưu ý.
+  List<({String dish, List<String> notes})> get notes => [
+    for (final d in dishes)
+      if (d.recipe.notes.isNotEmpty) (dish: d.recipe.name, notes: d.recipe.notes),
+  ];
 
   /// Bước có hẹn giờ của mọi món: (món, bước gốc).
   List<(int, int)> get timedSteps => [
@@ -180,9 +192,10 @@ class MealStepState {
   /// Số thứ tự hiển thị ("Bước 2") của bước gốc [step] món [dish], đếm trên bước đứng bếp.
   int stepNumber(int dish, int step) => stepsOf(dish).indexWhere((s) => s.index == step) + 1;
 
-  /// Đồng hồ hiện ra: ở đúng bước đang xem, hoặc đang chạy / hết giờ (ở mọi món, cả chặng Sơ chế).
+  /// Đồng hồ hiện ra: ở đúng bước đang xem, hoặc đang chạy / hết giờ (ở mọi món, cả chặng Sơ chế,
+  /// Lưu ý).
   bool showsTimer(int dish, int step) {
-    if (!inPrep && dish == current && step == steps[index].index) return true;
+    if (!inPrep && !inNotes && dish == current && step == steps[index].index) return true;
     final key = cookTimerKey(dish, step);
     return switch (timers[key]) {
       null => timerEnds.containsKey(key),
@@ -192,10 +205,15 @@ class MealStepState {
 }
 
 /// Nấu cả bữa từng bước (prototype `MealCookStep`): chặng Sơ chế chung, rồi tab món, mỗi món giữ
-/// bước đứng bếp riêng, đồng hồ của mọi món chạy tiếp khi chuyển món. Đọc và ghi phiên nấu
+/// bước đứng bếp riêng, đồng hồ của mọi món chạy tiếp khi chuyển món, cuối cùng chặng Lưu ý có nút
+/// "Xong cả bữa". Đọc và ghi phiên nấu
 /// ([cookSessionProvider]).
 class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
   Map<int, StepTimerStatus> _timers = const {};
+
+  /// Câu chúc chọn một lần khi mở màn, giữ nguyên khi chuyển bước, chuyển món.
+  late final String _cheer =
+      CookStrings.cheers[ref.read(cookRandomProvider).nextInt(CookStrings.cheers.length)];
 
   DateTime Function() get clock => ref.read(cookClockProvider);
 
@@ -257,6 +275,8 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
         inPrep: session.inPrep && prep.isNotEmpty,
         prep: prep,
         prepDone: session.prepDone,
+        inNotes: session.inNotes,
+        cheer: _cheer,
       ),
     );
   }
@@ -291,13 +311,18 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
   /// Bấm tab món [dish]: xem món đó ở bước đang dở.
   Future<void> selectDish(int dish) async {
     final value = state.value;
-    if (value == null || (dish == value.current && !value.inPrep)) return;
+    if (value == null || (dish == value.current && !value.inPrep && !value.inNotes)) return;
     await _sessions.goTo(dish, value.positions[dish]);
   }
 
   /// Bấm tab Sơ chế.
   Future<void> showPrep() async {
     if (state.value?.hasPrep ?? false) await _sessions.showPrep();
+  }
+
+  /// Bấm tab Lưu ý.
+  Future<void> showNotes() async {
+    if (state.value != null) await _sessions.showNotes();
   }
 
   /// Bấm ô tick của [item]: việc lá thì đảo; việc cha thì tick hết việc con, đã đủ thì bỏ hết.
@@ -308,19 +333,20 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
   }
 
   /// "Bước tiếp"; ở chặng Sơ chế thì "Xong sơ chế", vào món đầu (màn đã hỏi lại khi chưa tick đủ);
-  /// ở bước cuối món mà chưa xong cả bữa thì "Xong món n": món này xong, sang món chưa xong kế tiếp.
+  /// ở bước cuối món thì "Xong món n": món này xong, sang món chưa xong kế tiếp, hết món thì sang
+  /// chặng Lưu ý.
   Future<void> next() async {
     final value = state.value;
-    if (value == null) return;
+    if (value == null || value.inNotes) return;
     if (value.inPrep) return _sessions.goTo(0, value.positions[0]);
     if (!value.isLastStep) return _sessions.goTo(value.current, value.index + 1);
-    if (value.finishesMeal) return;
     await _finishDish(value, value.current);
     // Món sau món đang nấu, hết thì vòng về đầu; bỏ qua món đã xong (có thể đã nhảy tab nấu trước).
     final count = value.dishes.length;
     final dish = [
       for (var k = 1; k < count; k++) (value.current + k) % count,
-    ].firstWhere((d) => !value.finished.contains(d));
+    ].where((d) => !value.finished.contains(d)).firstOrNull;
+    if (dish == null) return _sessions.showNotes();
     await _sessions.goTo(dish, value.positions[dish]);
   }
 
@@ -332,10 +358,12 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
     await _sessions.goTo(0, value.positions[0]);
   }
 
-  /// "Bước trước"; ở bước đầu món thì về bước cuối món trước, bước đầu món đầu thì về chặng Sơ chế.
+  /// "Bước trước"; ở bước đầu món thì về bước cuối món trước, bước đầu món đầu thì về chặng Sơ chế;
+  /// ở chặng Lưu ý thì về món đang nấu ở bước đang dở.
   Future<void> previous() async {
     final value = state.value;
     if (value == null || value.isFirst) return;
+    if (value.inNotes) return _sessions.goTo(value.current, value.index);
     if (value.index > 0) return _sessions.goTo(value.current, value.index - 1);
     if (value.current == 0) return _sessions.showPrep();
     final dish = value.current - 1;

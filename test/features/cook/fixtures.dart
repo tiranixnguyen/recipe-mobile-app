@@ -75,10 +75,12 @@ const cookRecipeFixture = Recipe(
     RecipeStep(text: 'Lật trứng, xúc ra đĩa'),
   ],
   prepMinutes: 3,
+  notes: ['Ăn nóng với cơm.', 'Chấm thêm nước mắm nếu thích.'],
 );
 
 /// Món thứ hai cho Nấu cả bữa: lâu hơn [cookRecipeFixture] nên được gợi ý nấu trước. Sơ chế chung
-/// với món trứng: trứng cùng cách làm (một việc), hành lá khác cách (việc cha, hai việc con).
+/// với món trứng: trứng cùng cách làm (một việc), hành lá khác cách (việc cha, hai việc con). Không có
+/// lưu ý cách dùng.
 const soupRecipeFixture = Recipe(
   id: 'canh',
   name: 'Canh cà chua trứng',

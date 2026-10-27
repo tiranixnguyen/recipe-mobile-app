@@ -333,6 +333,10 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(find.text('Bước 4/4'), findsOneWidget);
+    // Sau bước cuối là trang Lưu ý cách dùng, nút Xong ở đó.
+    await tester.tap(find.text(CookStrings.nextStep));
+    await tester.pumpAndSettle();
+    expect(find.text(CookStrings.notesTitle), findsOneWidget);
     await tester.tap(find.text(CookStrings.finish));
     await tester.pumpAndSettle();
 

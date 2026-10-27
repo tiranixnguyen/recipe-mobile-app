@@ -164,6 +164,7 @@ class Recipe {
     required this.meals,
     required this.ingredients,
     required this.steps,
+    this.notes = const [],
   });
 
   final String id;
@@ -198,6 +199,10 @@ class Recipe {
   final List<RecipeIngredient> ingredients;
   final List<RecipeStep> steps;
 
+  /// Lưu ý cách dùng (ăn nóng, ăn kèm gì, để được bao lâu), mỗi mục một câu ngắn; rỗng = không có.
+  /// Màn Nấu hiện ở trang "Lưu ý cách dùng" sau bước cuối.
+  final List<String> notes;
+
   /// Ném [FormatException] kèm id món khi có dụng cụ, chế độ ăn hoặc bữa không thuộc danh sách.
   factory Recipe.fromJson(Map<String, dynamic> json) {
     final id = json['id'] as String;
@@ -223,6 +228,7 @@ class Recipe {
             (e) => RecipeStep.fromJson(e as Map<String, dynamic>),
           ),
         ),
+        notes: List.unmodifiable(((json['notes'] as List<dynamic>?) ?? const []).cast<String>()),
       );
     } on FormatException catch (e) {
       throw FormatException('Món "$id": ${e.message}');
@@ -242,6 +248,7 @@ class Recipe {
     'meals': meals.map((e) => e.id).toList(),
     'ingredients': ingredients.map((e) => e.toJson()).toList(),
     'steps': steps.map((e) => e.toJson()).toList(),
+    if (notes.isNotEmpty) 'notes': notes,
   };
 
   @override
@@ -258,7 +265,8 @@ class Recipe {
       listEquals(other.diets, diets) &&
       listEquals(other.meals, meals) &&
       listEquals(other.ingredients, ingredients) &&
-      listEquals(other.steps, steps);
+      listEquals(other.steps, steps) &&
+      listEquals(other.notes, notes);
 
   @override
   int get hashCode => Object.hash(
@@ -274,6 +282,7 @@ class Recipe {
     Object.hashAll(meals),
     Object.hashAll(ingredients),
     Object.hashAll(steps),
+    Object.hashAll(notes),
   );
 
   static List<T> _parseEnumList<T>(dynamic value, T Function(String) parser) {

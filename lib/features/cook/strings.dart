@@ -110,7 +110,7 @@ abstract final class CookStrings {
   // Sheet hỏi lại khi "Xong sơ chế" chưa tick đủ, "Xong cả bữa" còn món chưa xong.
   static const prepConfirmTitle = 'Chưa sơ chế xong';
   static String prepConfirmBody(int done, int total) =>
-      'Bạn mới xong $done/$total việc. Đồng ý thì app đánh dấu xong hết và sang món 1.';
+      'Bạn mới xong $done/$total việc.\nĐồng ý thì các việc còn lại tự động được đánh dấu và bắt đầu nấu món đầu tiên.';
   static const keepPrepping = 'Làm tiếp';
   static const mealConfirmTitle = 'Còn món chưa xong';
   static String mealConfirmBody(List<String> names) {
@@ -118,6 +118,28 @@ abstract final class CookStrings {
     final more = names.length > 2 ? ' và ${names.length - 2} món khác' : '';
     return 'Chưa xong: $shown$more. Bạn vẫn muốn kết thúc bữa?';
   }
+
+  // Trang "Lưu ý cách dùng" sau bước cuối, chặng Lưu ý cuối bữa.
+  static const notesTab = 'Lưu ý';
+  static const notesTabHint = 'Cuối bữa';
+  static const notesLabel = 'LƯU Ý CÁCH DÙNG';
+  static const notesTitle = 'Lưu ý cách dùng';
+  static String mealNotesStageTitle(Meal meal) => 'Bữa ${meal.label.toLowerCase()} · lưu ý';
+  static const noNotes = 'Món ăn không có lưu ý nào.';
+
+  /// Câu chúc cuối trang Lưu ý, chọn ngẫu nhiên mỗi lần mở màn nấu.
+  static const cheers = [
+    'Con mời cả nhà ăn!',
+    'Thơm ngon mời bạn ăn nha!',
+    'Thưởng thức ngay thôi nào!',
+    'Nóng hổi vừa thổi vừa ăn!',
+    'Xong rồi, ăn cho no nha!',
+    'Tự nấu tự khen: ngon quá trời!',
+    'Bày ra bàn thôi nào!',
+    'Ăn ngon miệng nhé bạn!',
+    'Bếp hôm nay đỉnh ghê!',
+    'Ngồi xuống ăn thôi, mệt rồi!',
+  ];
 
   static const confirmFinishMeal = 'Vẫn xong cả bữa';
   static const keepCooking = 'Nấu tiếp';
@@ -142,5 +164,6 @@ abstract final class CookStrings {
   // Thanh "Đang nấu dở" ở Khám phá.
   static const resumeTitle = 'Đang nấu dở';
   static String resumeStep(String name, int step, int total) => '$name · bước $step/$total';
+  static String resumeNotes(String name) => '$name · lưu ý';
   static const resumeAction = 'Nấu tiếp';
 }

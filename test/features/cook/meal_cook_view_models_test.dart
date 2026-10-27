@@ -15,6 +15,7 @@ import 'package:recipe_mobile_app/features/cook/domain/cook_step.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_done/meal_done_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_prep/meal_prep_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_step/meal_step_view_model.dart';
+import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
@@ -37,6 +38,7 @@ class _Env {
         notificationServiceProvider.overrideWithValue(notifications),
         appInForegroundProvider.overrideWithValue(() => true),
         appReviewProvider.overrideWithValue(review),
+        cookRandomProvider.overrideWithValue(FakeRandom(2)),
       ],
     );
     addTearDown(container.dispose);
@@ -281,7 +283,7 @@ void main() {
 
       await viewModel(env).next();
       await viewModel(env).next();
-      expect((state(env).isLastStep, state(env).isLastDish), (true, false));
+      expect(state(env).isLastStep, isTrue);
       await viewModel(env).next();
       expect((state(env).current, state(env).index), (1, 0));
       expect(state(env).finished, {0});
@@ -303,8 +305,11 @@ void main() {
 
     test('Xong món n sang món chưa xong kế tiếp, bỏ qua món đã nhảy tab nấu xong', () async {
       final env = await started(dishes: ['canh', 'trung', 'canh']);
-      expect(state(env).unfinishedOthers, ['Trứng chiên hành', 'Canh cà chua trứng']);
-      expect(state(env).othersFinished, isFalse);
+      expect(state(env).unfinished, [
+        'Canh cà chua trứng',
+        'Trứng chiên hành',
+        'Canh cà chua trứng',
+      ]);
 
       // Nhảy tab nấu xong món 2 trước: "Xong món 2" sang món 3.
       await viewModel(env).selectDish(1);
@@ -318,27 +323,76 @@ void main() {
       await viewModel(env).selectDish(0);
       await viewModel(env).next();
       await viewModel(env).next();
-      expect((state(env).isLastStep, state(env).finishesMeal), (true, false));
+      expect(state(env).isLastStep, isTrue);
       await viewModel(env).next();
       final s = state(env);
       expect(s.current, 2);
       expect(s.finished, {0, 1});
-      expect((s.othersFinished, s.finishesMeal), (true, true));
-      expect(s.unfinishedOthers, isEmpty);
+      expect(s.unfinished, ['Canh cà chua trứng']);
+      expect(s.allFinished, isFalse);
     });
 
-    test('bước cuối món cuối là Xong cả bữa dù món trước chưa xong', () async {
+    test('Xong món cuối khi món trước chưa xong: sang món chưa xong, không vào Lưu ý', () async {
       final env = await started();
       await viewModel(env).selectDish(1);
       await viewModel(env).next();
       await viewModel(env).next();
-      final s = state(env);
-      expect((s.isLastStep, s.finishesMeal, s.othersFinished), (true, true, false));
-      expect(s.unfinishedOthers, ['Canh cà chua trứng']);
-      // "Bước tiếp" không làm gì ở đây; màn gọi finishMeal sau khi hỏi lại.
+      expect(state(env).isLastStep, isTrue);
       await viewModel(env).next();
-      expect(state(env).current, 1);
-      expect(state(env).finished, isEmpty);
+      final s = state(env);
+      expect((s.inNotes, s.current), (false, 0));
+      expect(s.finished, {1});
+      expect(s.unfinished, ['Canh cà chua trứng']);
+    });
+
+    test('Xong món 1 rồi Xong món 2 thì sang chặng Lưu ý; Bước trước về món đang dở', () async {
+      final env = await started();
+      for (var i = 0; i < 6; i++) {
+        await viewModel(env).next();
+      }
+      var s = state(env);
+      expect((s.inNotes, s.allFinished), (true, true));
+      expect(s.finished, {0, 1});
+      expect(s.unfinished, isEmpty);
+      expect((s.isFirst, s.isLastStep), (false, true));
+      expect(env.container.read(cookSessionProvider)!.inNotes, isTrue);
+      // "Bước tiếp" không làm gì ở chặng Lưu ý; nút chính là "Xong cả bữa".
+      await viewModel(env).next();
+      expect(state(env).inNotes, isTrue);
+
+      await viewModel(env).previous();
+      s = state(env);
+      expect((s.inNotes, s.current, s.index), (false, 1, 2));
+    });
+
+    test('tab Lưu ý khi món 1 đang dở: Bước trước về món 1 ở bước đang dở', () async {
+      final env = await started();
+      await viewModel(env).next();
+      await viewModel(env).showNotes();
+      var s = state(env);
+      expect((s.inNotes, s.inPrep, s.unfinished.length), (true, false, 2));
+      // Đồng hồ của bước đang dở không hiện ở chặng Lưu ý khi chưa chạy.
+      expect(s.showsTimer(0, 2), isFalse);
+
+      await viewModel(env).previous();
+      s = state(env);
+      expect((s.inNotes, s.current, s.index), (false, 0, 1));
+
+      // Từ Lưu ý bấm tab món 2 thì mở món 2.
+      await viewModel(env).showNotes();
+      await viewModel(env).selectDish(0);
+      expect((state(env).inNotes, state(env).current), (false, 0));
+    });
+
+    test('lưu ý gom theo món, bỏ món không có lưu ý; câu chúc cố định khi chuyển bước', () async {
+      final env = await started();
+      final s = state(env);
+      expect(s.notes.map((n) => n.dish), ['Trứng chiên hành']);
+      expect(s.notes.single.notes, ['Ăn nóng với cơm.', 'Chấm thêm nước mắm nếu thích.']);
+      expect(s.cheer, CookStrings.cheers[2]);
+      await viewModel(env).next();
+      await viewModel(env).showNotes();
+      expect(state(env).cheer, CookStrings.cheers[2]);
     });
 
     test('bấm tab món giữ bước riêng của từng món', () async {

@@ -13,14 +13,15 @@ import 'package:recipe_mobile_app/features/cook/presentation/widgets/confirm_she
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_layout.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_step_widgets.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/prep_task_tile.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/widgets/usage_notes.dart';
 import 'package:recipe_mobile_app/features/cook/routes.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
 
 /// Nấu cả bữa từng bước (prototype `MealCookStep`): chặng Sơ chế chung, tab món, bước đứng bếp của
-/// món đang xem, đồng hồ của mọi món. Nút chính: "Xong sơ chế" ở chặng Sơ chế, "Xong món n" ở bước
-/// cuối món, "Xong cả bữa" ở bước cuối món cuối hoặc khi mọi món khác đã xong. Sơ chế chưa tick đủ,
-/// còn món chưa xong thì hỏi lại trước khi đi tiếp.
+/// món đang xem, đồng hồ của mọi món, chặng Lưu ý cuối bữa. Nút chính: "Xong sơ chế" ở chặng Sơ
+/// chế, "Xong món n" ở bước cuối món, "Xong cả bữa" chỉ ở chặng Lưu ý. Sơ chế chưa tick đủ, còn món
+/// chưa xong thì hỏi lại trước khi đi tiếp.
 class MealStepScreen extends ConsumerWidget {
   const MealStepScreen({super.key});
 
@@ -60,7 +61,7 @@ class _MealStep extends ConsumerWidget {
 
     Future<void> finish() async {
       final router = GoRouter.of(context);
-      final unfinished = state.unfinishedOthers;
+      final unfinished = state.unfinished;
       if (unfinished.isNotEmpty &&
           !await showCookConfirmSheet(
             context,
@@ -79,20 +80,20 @@ class _MealStep extends ConsumerWidget {
     final Widget nextButton;
     if (state.inPrep) {
       nextButton = _NextButton(label: CookStrings.finishPrep, onPressed: finishPrep);
-    } else if (!state.isLastStep) {
-      nextButton = _NextButton(label: CookStrings.nextStep, onPressed: viewModel.next);
-    } else if (!state.finishesMeal) {
-      nextButton = _NextButton(
-        label: CookStrings.finishDish(state.current + 1),
-        onPressed: viewModel.next,
-      );
-    } else {
+    } else if (state.inNotes) {
       nextButton = AppButton(
         label: CookStrings.finishMeal,
         icon: AppIcons.check,
         size: AppButtonSize.lg,
         block: true,
         onPressed: finish,
+      );
+    } else if (!state.isLastStep) {
+      nextButton = _NextButton(label: CookStrings.nextStep, onPressed: viewModel.next);
+    } else {
+      nextButton = _NextButton(
+        label: CookStrings.finishDish(state.current + 1),
+        onPressed: viewModel.next,
       );
     }
 
@@ -126,11 +127,14 @@ class _MealStep extends ConsumerWidget {
               done: state.index + 1,
               title: state.inPrep
                   ? CookStrings.mealPrepStageTitle(state.meal)
+                  : state.inNotes
+                  ? CookStrings.mealNotesStageTitle(state.meal)
                   : CookStrings.mealStepTitle(state.meal, state.current + 1, state.dishes.length),
               showProgress: false,
               below: _StageTabs(
                 state: state,
                 onPrep: viewModel.showPrep,
+                onNotes: viewModel.showNotes,
                 onSelect: viewModel.selectDish,
               ),
               onClose: () => context.canPop() ? context.pop() : context.go(planLocation()),
@@ -143,7 +147,7 @@ class _MealStep extends ConsumerWidget {
               ),
             ),
             Expanded(
-              child: state.inPrep
+              child: state.inPrep || state.inNotes
                   ? StepBody.custom(
                       padding: const EdgeInsets.fromLTRB(
                         AppSpacing.s4,
@@ -152,7 +156,11 @@ class _MealStep extends ConsumerWidget {
                         AppSpacing.s4,
                       ),
                       timers: timers,
-                      child: _PrepStage(state: state, onToggle: viewModel.togglePrep),
+                      child: state.inPrep
+                          ? _PrepStage(state: state, onToggle: viewModel.togglePrep)
+                          : UsageNotes(
+                              groups: [for (final n in state.notes) (dish: n.dish, notes: n.notes)],
+                            ),
                     )
                   : StepBody(
                       label: CookStrings.mealStepLabel(
@@ -164,6 +172,7 @@ class _MealStep extends ConsumerWidget {
                       timers: timers,
                     ),
             ),
+            if (state.inNotes) CheerLine(text: state.cheer),
             CookFooter(
               child: Row(
                 spacing: AppSpacing.s3,
@@ -275,13 +284,19 @@ class _PrepStage extends StatelessWidget {
   }
 }
 
-/// Dải chặng: tab "Sơ chế" (khi bữa có việc sơ chế) rồi tab từng món; cuộn ngang khi nhiều món,
-/// tab món rộng tối thiểu 112, chia đều chỗ còn lại.
+/// Dải chặng: tab "Sơ chế" (khi bữa có việc sơ chế), tab từng món, tab "Lưu ý" cuối; cuộn ngang
+/// khi nhiều món, tab món rộng tối thiểu 112, chia đều chỗ còn lại.
 class _StageTabs extends StatefulWidget {
-  const _StageTabs({required this.state, required this.onPrep, required this.onSelect});
+  const _StageTabs({
+    required this.state,
+    required this.onPrep,
+    required this.onNotes,
+    required this.onSelect,
+  });
 
   final MealStepState state;
   final VoidCallback onPrep;
+  final VoidCallback onNotes;
   final ValueChanged<int> onSelect;
 
   @override
@@ -289,6 +304,7 @@ class _StageTabs extends StatefulWidget {
 }
 
 class _StageTabsState extends State<_StageTabs> {
+  /// Bề rộng tab Sơ chế, tab Lưu ý.
   static const _prepWidth = 88.0;
   static const _minDishWidth = 112.0;
 
@@ -303,7 +319,9 @@ class _StageTabsState extends State<_StageTabs> {
   @override
   void didUpdateWidget(_StageTabs old) {
     super.didUpdateWidget(old);
-    if (old.state.inPrep != widget.state.inPrep || old.state.current != widget.state.current) {
+    if (old.state.inPrep != widget.state.inPrep ||
+        old.state.inNotes != widget.state.inNotes ||
+        old.state.current != widget.state.current) {
       _revealSelected();
     }
   }
@@ -337,6 +355,7 @@ class _StageTabsState extends State<_StageTabs> {
               constraints.maxWidth -
               AppSpacing.s3 -
               (state.hasPrep ? _prepWidth + gap : 0) -
+              (_prepWidth + gap) -
               gap * (count - 1);
           final dishWidth = math.max(_minDishWidth, room / count);
           return SingleChildScrollView(
@@ -368,10 +387,28 @@ class _StageTabsState extends State<_StageTabs> {
                     ),
                   for (final (i, dish) in state.dishes.indexed)
                     SizedBox(
-                      key: !state.inPrep && i == state.current ? _selectedKey : null,
+                      key: !state.inPrep && !state.inNotes && i == state.current
+                          ? _selectedKey
+                          : null,
                       width: dishWidth,
                       child: _dishTab(context, i, dish.recipe.name),
                     ),
+                  SizedBox(
+                    key: state.inNotes ? _selectedKey : null,
+                    width: _prepWidth,
+                    child: _StageTab(
+                      label: CookStrings.notesTab,
+                      selected: state.inNotes,
+                      finished: state.allFinished,
+                      progress: CookStrings.notesTabHint,
+                      bar: _FractionBar(
+                        value: state.finished.length / state.dishes.length,
+                        color: colors.chili,
+                        track: colors.line,
+                      ),
+                      onTap: widget.onNotes,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -386,7 +423,7 @@ class _StageTabsState extends State<_StageTabs> {
     final colors = context.colors;
     final steps = state.stepsOf(i).length;
     final position = state.positions[i];
-    final selected = !state.inPrep && i == state.current;
+    final selected = !state.inPrep && !state.inNotes && i == state.current;
     final finished = state.finished.contains(i);
     final started = selected || position > 0;
     return _StageTab(
