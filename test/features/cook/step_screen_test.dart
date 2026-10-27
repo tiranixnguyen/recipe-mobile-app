@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/step_timer.dart';
@@ -23,10 +24,13 @@ class _Env {
   late ProviderContainer container;
 }
 
-/// Mở Khám phá giả có `ResumeCookingBanner`; [step] thì mở sẵn phiên ở bước đó rồi vào Từng bước.
+/// Mở Khám phá giả có `ResumeCookingBanner`; [step] thì mở sẵn phiên ở bước đó rồi vào Từng bước,
+/// [notes] thì ở trang Lưu ý.
 Future<_Env> _pump(
   WidgetTester tester, {
   int? step = 0,
+  bool notes = false,
+  Recipe recipe = cookRecipeFixture,
   ThemeData? theme,
   Size size = const Size(390, 844),
   double textScale = 1,
@@ -48,12 +52,13 @@ Future<_Env> _pump(
   env.container = ProviderContainer(
     overrides: [
       localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
-      recipesProvider.overrideWith((ref) async => const [cookRecipeFixture]),
+      recipesProvider.overrideWith((ref) async => [recipe]),
       ingredientsProvider.overrideWith((ref) async => cookIngredientsFixture),
       cookClockProvider.overrideWithValue(() => env.now),
       wakelockProvider.overrideWithValue(env.wakelock),
       notificationServiceProvider.overrideWithValue(env.notifications),
       appInForegroundProvider.overrideWithValue(() => true),
+      cookRandomProvider.overrideWithValue(FakeRandom()),
     ],
   );
   addTearDown(env.container.dispose);
@@ -61,6 +66,7 @@ Future<_Env> _pump(
     final sessions = env.container.read(cookSessionProvider.notifier);
     await sessions.startRecipe('trung', 2);
     await sessions.goTo(0, step);
+    if (notes) await sessions.showNotes();
   }
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -99,11 +105,28 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(find.text('Bước 4/4'), findsOneWidget);
-    expect(find.text(CookStrings.nextStep), findsNothing);
+    // Bước cuối chưa có Xong: Bước tiếp sang trang Lưu ý.
+    expect(find.text(CookStrings.finish), findsNothing);
 
     await tester.tap(find.text(CookStrings.previousStep));
     await tester.pumpAndSettle();
     expect(find.text('Chiên mặt dưới'), findsOneWidget);
+    for (var i = 0; i < 2; i++) {
+      await tester.tap(find.text(CookStrings.nextStep));
+      await tester.pumpAndSettle();
+    }
+
+    expect(find.text(CookStrings.notesTitle), findsOneWidget);
+    expect(find.text(CookStrings.notesLabel), findsOneWidget);
+    expect(find.text('Ăn nóng với cơm.'), findsOneWidget);
+    expect(find.text('Chấm thêm nước mắm nếu thích.'), findsOneWidget);
+    expect(find.text(CookStrings.cheers[0]), findsOneWidget);
+    expect(find.text(CookStrings.nextStep), findsNothing);
+
+    await tester.tap(find.text(CookStrings.previousStep));
+    await tester.pumpAndSettle();
+    expect(find.text('Lật trứng, xúc ra đĩa'), findsOneWidget);
+    expect(find.text(CookStrings.cheers[0]), findsNothing);
     await tester.tap(find.text(CookStrings.nextStep));
     await tester.pumpAndSettle();
 
@@ -181,6 +204,29 @@ void main() {
     expect(find.text('Bước 2/4'), findsOneWidget);
   });
 
+  testWidgets('món không có lưu ý: hiện Món ăn không có lưu ý nào.', (tester) async {
+    await _pump(
+      tester,
+      step: 3,
+      notes: true,
+      recipe: Recipe.fromJson({...cookRecipeFixture.toJson(), 'notes': <String>[]}),
+    );
+    expect(find.text(CookStrings.noNotes), findsOneWidget);
+    expect(find.text(CookStrings.cheers[0]), findsOneWidget);
+    expect(find.text(CookStrings.finish), findsOneWidget);
+  });
+
+  testWidgets('thoát ở trang Lưu ý: thanh Nấu tiếp ghi lưu ý, mở lại đúng trang', (tester) async {
+    await _pump(tester, step: 3, notes: true);
+    await tester.tap(find.byTooltip(CookStrings.exitCooking));
+    await tester.pumpAndSettle();
+    expect(find.text('Trứng chiên hành · lưu ý'), findsOneWidget);
+
+    await tester.tap(find.text(CookStrings.resumeAction));
+    await tester.pumpAndSettle();
+    expect(find.text(CookStrings.notesTitle), findsOneWidget);
+  });
+
   testWidgets('không nấu dở thì không có thanh Nấu tiếp', (tester) async {
     await _pump(tester, step: null);
     expect(find.text(CookStrings.resumeTitle), findsNothing);
@@ -193,6 +239,16 @@ void main() {
       await tester.pump();
       expect(tester.takeException(), isNull);
       expect(find.text(CookStrings.nextStep), findsOneWidget);
+
+      // Trang Lưu ý: đồng hồ đang chạy vẫn hiện, câu chúc và nút Xong không tràn.
+      await tester.tap(find.text(CookStrings.nextStep));
+      await tester.pump();
+      await tester.tap(find.text(CookStrings.nextStep));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.text(CookStrings.notesTitle), findsOneWidget);
+      expect(find.text(CookStrings.cheers[0]), findsOneWidget);
+      expect(find.text(CookStrings.finish), findsOneWidget);
     });
   }
 }

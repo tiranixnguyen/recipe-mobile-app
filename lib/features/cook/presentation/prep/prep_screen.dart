@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/core/widgets/empty_state.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/prep/prep_view_model.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/widgets/confirm_sheet.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_layout.dart';
 import 'package:recipe_mobile_app/features/cook/routes.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
@@ -65,6 +65,16 @@ class _Prep extends ConsumerWidget {
 
     Future<void> start() async {
       final router = GoRouter.of(context);
+      if (!state.allGathered &&
+          !await showCookConfirmSheet(
+            context,
+            title: CookStrings.gatherConfirmTitle,
+            body: CookStrings.gatherConfirmBody(state.checkedCount, state.total),
+            cancelLabel: CookStrings.gatherConfirmBack,
+            confirmLabel: CookStrings.confirmStartCooking,
+          )) {
+        return;
+      }
       if (await viewModel.shouldAskNotificationPermission()) {
         await router.push<bool>(notifPermissionLocation);
       }
@@ -88,6 +98,7 @@ class _Prep extends ConsumerWidget {
             CookHeader(
               title: CookStrings.prepTitle,
               subtitle: recipe.name,
+              subtitleMaxLines: 1,
               icon: AppIcons.back,
               tooltip: CookStrings.backToDetail,
               onPressed: () => context.canPop() ? context.pop() : context.go(discoverLocation),

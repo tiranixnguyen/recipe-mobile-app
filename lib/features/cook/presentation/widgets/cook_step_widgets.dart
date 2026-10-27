@@ -114,51 +114,75 @@ class StepHeader extends StatelessWidget {
   }
 }
 
-/// Phần giữa màn Từng bước: nhãn "BƯỚC n", chữ bước 24/34, đồng hồ sát footer. Màn thấp hoặc chữ
-/// to thì cả phần này cuộn, để header và footer luôn hiện.
+/// Phần giữa màn Từng bước: nhãn "BƯỚC n" (1 dòng, cắt "…"), chữ bước 24/34, đồng hồ sát footer.
+/// Màn thấp hoặc chữ to thì cả phần này cuộn, để header và footer luôn hiện.
+///
+/// [StepBody.custom] thay phần chữ bằng [child] (chặng Sơ chế cả bữa) mà vẫn giữ nguyên chỗ của
+/// [timers], nên đồng hồ đang chạy không bị dựng lại khi đổi chặng.
 class StepBody extends StatelessWidget {
-  const StepBody({super.key, required this.label, required this.text, required this.timers});
+  StepBody({super.key, required String label, required String text, required this.timers})
+    : padding = const EdgeInsets.fromLTRB(
+        AppSpacing.s6,
+        AppSpacing.s8,
+        AppSpacing.s6,
+        AppSpacing.s4,
+      ),
+      child = _StepText(label: label, text: text);
 
-  final String label;
-  final String text;
+  const StepBody.custom({
+    super.key,
+    required this.padding,
+    required this.child,
+    required this.timers,
+  });
+
+  final EdgeInsets padding;
+  final Widget child;
   final StepTimers timers;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return CustomScrollView(
       slivers: [
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.s6,
-            AppSpacing.s8,
-            AppSpacing.s6,
-            AppSpacing.s4,
-          ),
-          sliver: SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              spacing: AppSpacing.s5,
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyles.label.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 13 * 0.04,
-                    color: colors.chiliDeep,
-                  ),
-                ),
-                Semantics(
-                  liveRegion: true,
-                  child: Text(text, style: AppTextStyles.step.copyWith(color: colors.ink)),
-                ),
-              ],
-            ),
-          ),
+          padding: padding,
+          sliver: SliverToBoxAdapter(child: child),
         ),
         SliverFillRemaining(
           hasScrollBody: false,
           child: Align(alignment: Alignment.bottomCenter, child: timers),
+        ),
+      ],
+    );
+  }
+}
+
+class _StepText extends StatelessWidget {
+  const _StepText({required this.label, required this.text});
+
+  final String label;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: AppSpacing.s5,
+      children: [
+        Text(
+          label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyles.label.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 13 * 0.04,
+            color: colors.chiliDeep,
+          ),
+        ),
+        Semantics(
+          liveRegion: true,
+          child: Text(text, style: AppTextStyles.step.copyWith(color: colors.ink)),
         ),
       ],
     );
@@ -262,6 +286,8 @@ Future<void> showStepIngredients(
                   header: true,
                   child: Text(
                     title ?? CookStrings.sheetTitle(servings),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.subtitle.copyWith(color: colors.ink),
                   ),
                 ),

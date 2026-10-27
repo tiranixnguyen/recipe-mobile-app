@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/widgets/step_timer.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_device.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
 import 'package:recipe_mobile_app/features/cook/domain/cook_step.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/step/step_view_model.dart';
+import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
 import 'fakes.dart';
@@ -15,16 +17,17 @@ import 'fixtures.dart';
 final _now = DateTime(2026, 10, 26, 18);
 
 class _Env {
-  _Env() {
+  _Env({List<Recipe> recipes = const [cookRecipeFixture]}) {
     container = ProviderContainer(
       overrides: [
         localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
-        recipesProvider.overrideWith((ref) async => const [cookRecipeFixture]),
+        recipesProvider.overrideWith((ref) async => recipes),
         ingredientsProvider.overrideWith((ref) async => cookIngredientsFixture),
         cookClockProvider.overrideWithValue(() => _now),
         wakelockProvider.overrideWithValue(wakelock),
         notificationServiceProvider.overrideWithValue(notifications),
         appInForegroundProvider.overrideWithValue(() => foreground),
+        cookRandomProvider.overrideWithValue(FakeRandom(3)),
       ],
     );
     addTearDown(container.dispose);
@@ -69,13 +72,53 @@ void main() {
 
     await env.viewModel.previous();
     expect(env.state.isFirst, isTrue);
-    for (var i = 0; i < 5; i++) {
+    for (var i = 0; i < 3; i++) {
       await env.viewModel.next();
     }
-    expect((env.state.index, env.state.isLast), (3, true));
+    expect((env.state.index, env.state.isLastStep, env.state.isLast), (3, true, false));
     expect(env.container.read(cookSessionProvider)!.positions, [3]);
     await env.viewModel.previous();
     expect(env.container.read(cookSessionProvider)!.positions, [2]);
+  });
+
+  test('Bước tiếp ở bước cuối sang trang Lưu ý; Bước trước về bước cuối', () async {
+    final env = _Env();
+    await env.container.read(cookSessionProvider.notifier).startRecipe('trung', 1);
+    await env.open();
+    final cheer = env.state.cheer;
+    expect(cheer, CookStrings.cheers[3]);
+
+    for (var i = 0; i < 6; i++) {
+      await env.viewModel.next();
+    }
+    var state = env.state;
+    expect((state.inNotes, state.isLast, state.isFirst, state.index), (true, true, false, 3));
+    expect(state.notes, ['Ăn nóng với cơm.', 'Chấm thêm nước mắm nếu thích.']);
+    expect(state.cheer, cheer);
+    expect(env.container.read(cookSessionProvider)!.inNotes, isTrue);
+    // Đồng hồ của bước cuối không hiện ở trang Lưu ý khi chưa chạy.
+    expect(state.showsTimer(2), isFalse);
+
+    await env.viewModel.previous();
+    state = env.state;
+    expect((state.inNotes, state.index, state.cheer), (false, 3, cheer));
+  });
+
+  test('mở thẳng không có phiên ở món một bước: Bước tiếp mở phiên, sang Lưu ý', () async {
+    final oneStep = Recipe.fromJson({
+      ...cookRecipeFixture.toJson(),
+      'steps': [
+        {'text': 'Lật trứng'},
+      ],
+      'notes': <String>[],
+    });
+    final env = _Env(recipes: [oneStep]);
+    await env.open();
+    expect((env.state.isFirst, env.state.isLastStep), (true, true));
+    await env.viewModel.next();
+    expect(env.state.inNotes, isTrue);
+    expect(env.state.notes, isEmpty);
+    expect(env.container.read(cookSessionProvider)!.currentDish.recipeId, 'trung');
   });
 
   test('mở thẳng không có phiên: bước đầu, qua bước thì mở phiên', () async {

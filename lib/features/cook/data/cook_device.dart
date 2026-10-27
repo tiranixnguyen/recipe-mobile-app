@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -48,3 +50,6 @@ final appInForegroundProvider = Provider<bool Function()>(
   (ref) =>
       () => WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed,
 );
+
+/// Nguồn ngẫu nhiên của feature Nấu (câu chúc ở trang Lưu ý); test override bằng `Random(seed)`.
+final cookRandomProvider = Provider<math.Random>((ref) => math.Random());

@@ -110,6 +110,12 @@ void main() {
           expect(r.prepMinutes, isNull, reason: 'không có bước sơ chế nhưng có prepMinutes');
         }
       });
+
+      test('lưu ý cách dùng: câu không rỗng', () {
+        for (final note in r.notes) {
+          expect(note.trim(), isNotEmpty, reason: 'notes có mục rỗng');
+        }
+      });
     });
   }
 

@@ -94,7 +94,10 @@ void main() {
   for (final (name, theme) in [('sáng', AppTheme.light), ('tối', AppTheme.dark)]) {
     testWidgets('màn 360dp, chữ 1.3, theme $name: không tràn', (tester) async {
       await _pump(tester, theme: theme, size: const Size(360, 640), textScale: 1.3);
+      // Danh sách dựng lười: cuộn tới cho dựng, rồi đưa hẳn lên trên footer.
       await tester.scrollUntilVisible(find.text('Chê'), 100);
+      await tester.ensureVisible(find.text('Chê'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Chê'));
       await tester.pump();
       expect(tester.takeException(), isNull);

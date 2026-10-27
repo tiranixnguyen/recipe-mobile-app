@@ -168,8 +168,11 @@ class _StepTimerState extends State<StepTimer> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Nhãn dài ("<món> · <bước>") cắt "…", không đẩy nút Dừng.
                   Text(
                     done ? 'Hết giờ · ${widget.label}' : widget.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.caption.copyWith(
                       color: foreground.withValues(alpha: 0.85),
                     ),

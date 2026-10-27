@@ -37,6 +37,8 @@ class DoneHero extends StatelessWidget {
         Text(
           meta,
           textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
           style: AppTextStyles.meta.copyWith(color: colors.inkMuted),
         ),
       ],
@@ -116,6 +118,8 @@ class _UsedUpRow extends StatelessWidget {
                       children: [
                         Text(
                           item.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.body.copyWith(
                             fontWeight: FontWeight.w600,
                             color: colors.ink,
@@ -123,6 +127,8 @@ class _UsedUpRow extends StatelessWidget {
                         ),
                         Text(
                           item.note,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
                         ),
                       ],

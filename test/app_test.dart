@@ -323,6 +323,9 @@ void main() {
     expect(find.text('Trứng gà · 4 quả'), findsOneWidget);
     await tester.tap(find.text(CookStrings.startCooking).last);
     await tester.pumpAndSettle();
+    // Chưa tick "Lấy đồ ra": sheet hỏi lại.
+    await tester.tap(find.text(CookStrings.confirmStartCooking));
+    await tester.pumpAndSettle();
 
     expect(find.text('Bước 1/4'), findsOneWidget);
     for (var i = 0; i < 3; i++) {
@@ -330,6 +333,10 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(find.text('Bước 4/4'), findsOneWidget);
+    // Sau bước cuối là trang Lưu ý cách dùng, nút Xong ở đó.
+    await tester.tap(find.text(CookStrings.nextStep));
+    await tester.pumpAndSettle();
+    expect(find.text(CookStrings.notesTitle), findsOneWidget);
     await tester.tap(find.text(CookStrings.finish));
     await tester.pumpAndSettle();
 

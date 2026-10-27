@@ -15,6 +15,7 @@ class CookHeader extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.subtitleMaxLines = 2,
   });
 
   final String title;
@@ -22,6 +23,9 @@ class CookHeader extends StatelessWidget {
   final IconData icon;
   final String tooltip;
   final VoidCallback onPressed;
+
+  /// Dòng phụ là tên món (Chuẩn bị một món) thì 1 dòng.
+  final int subtitleMaxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +53,7 @@ class CookHeader extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    maxLines: 2,
+                    maxLines: subtitleMaxLines,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
                   ),
@@ -223,7 +227,6 @@ class GatherRow extends StatelessWidget {
     required this.checked,
     required this.onChanged,
     this.muted = false,
-    this.tag,
   });
 
   final String label;
@@ -234,13 +237,9 @@ class GatherRow extends StatelessWidget {
   /// Dòng gia vị cơ bản: trạng thái chữ `inkMuted`.
   final bool muted;
 
-  /// Nhãn nhỏ dưới tên, ví dụ tên món dùng tới khi nấu cả bữa.
-  final String? tag;
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final tag = this.tag;
     return MergeSemantics(
       child: InkWell(
         onTap: onChanged,
@@ -263,20 +262,13 @@ class GatherRow extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.s2),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        label,
-                        style: AppTextStyles.body.copyWith(
-                          color: checked ? colors.inkMuted : colors.ink,
-                          decoration: checked ? TextDecoration.lineThrough : null,
-                          decorationColor: colors.inkMuted,
-                        ),
-                      ),
-                      if (tag != null)
-                        Text(tag, style: AppTextStyles.caption.copyWith(color: colors.inkMuted)),
-                    ],
+                  child: Text(
+                    label,
+                    style: AppTextStyles.body.copyWith(
+                      color: checked ? colors.inkMuted : colors.ink,
+                      decoration: checked ? TextDecoration.lineThrough : null,
+                      decorationColor: colors.inkMuted,
+                    ),
                   ),
                 ),
               ),
@@ -288,6 +280,122 @@ class GatherRow extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Dòng "Lấy đồ ra · cả bữa" hai tầng: ô tick, tên nguyên liệu (tối đa 2 dòng) và tổng lượng căn
+/// phải; dưới là tag tên đầy đủ từng món dùng tới, tự xuống dòng. Tick thì tên gạch ngang, lượng
+/// chuyển `inkMuted`.
+class MealGatherRow extends StatelessWidget {
+  const MealGatherRow({
+    super.key,
+    required this.name,
+    required this.amount,
+    required this.checked,
+    required this.onChanged,
+    this.dishes = const [],
+  });
+
+  final String name;
+  final String amount;
+  final bool checked;
+  final VoidCallback onChanged;
+  final List<String> dishes;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final strong = AppTextStyles.body.copyWith(fontWeight: FontWeight.w600);
+    return MergeSemantics(
+      child: InkWell(
+        onTap: onChanged,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 56),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: 6,
+              children: [
+                Row(
+                  spacing: AppSpacing.s3,
+                  children: [
+                    SizedBox.square(
+                      dimension: 24,
+                      child: Checkbox(
+                        value: checked,
+                        onChanged: (_) => onChanged(),
+                        activeColor: colors.herb,
+                        side: BorderSide(color: colors.outline, width: 2),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: strong.copyWith(
+                          color: checked ? colors.inkMuted : colors.ink,
+                          decoration: checked ? TextDecoration.lineThrough : null,
+                          decorationColor: colors.inkMuted,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      amount,
+                      style: strong.copyWith(color: checked ? colors.inkMuted : colors.ink),
+                    ),
+                  ],
+                ),
+                if (dishes.isNotEmpty)
+                  Padding(
+                    // Thẳng hàng với tên: ô tick 24 + khoảng 12.
+                    padding: const EdgeInsets.only(left: 36),
+                    child: Wrap(
+                      spacing: AppSpacing.s1,
+                      runSpacing: AppSpacing.s1,
+                      children: [for (final dish in dishes) DishTag(text: dish)],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Tag tên món (hoặc phần lượng "~2 tép") dưới một dòng nguyên liệu: nền `surface`, viền `line`,
+/// chữ `inkMuted` 12/16 đậm 600; tên dài tự xuống dòng trong tag.
+class DishTag extends StatelessWidget {
+  const DishTag({super.key, required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border.all(color: colors.line),
+        borderRadius: AppRadius.smAll,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s2, vertical: 1),
+        child: Text(
+          text,
+          style: AppTextStyles.caption.copyWith(
+            fontWeight: FontWeight.w600,
+            color: colors.inkMuted,
           ),
         ),
       ),

@@ -10,12 +10,14 @@ import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_view_
 import 'package:recipe_mobile_app/features/cook/presentation/step/step_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_layout.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_step_widgets.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/widgets/usage_notes.dart';
 import 'package:recipe_mobile_app/features/cook/routes.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 
 /// Nấu từng bước (prototype `CookStep`): mỗi màn một bước chữ lớn, hẹn giờ, sheet Nguyên liệu;
-/// dưới cùng Bước trước / Bước tiếp, bước cuối là "Xong" sang Hoàn thành.
+/// dưới cùng Bước trước / Bước tiếp. Sau bước cuối là trang "Lưu ý cách dùng" kèm câu chúc, nút
+/// "Xong" ở đó sang Hoàn thành.
 class StepScreen extends ConsumerWidget {
   const StepScreen({super.key, required this.recipeId});
 
@@ -68,6 +70,21 @@ class _Step extends ConsumerWidget {
       router.pushReplacement(cookDoneLocation(recipe.id));
     }
 
+    final timers = StepTimers(
+      timers: [
+        for (final i in state.timedSteps)
+          StepTimerSlot(
+            key: ValueKey(i),
+            visible: state.showsTimer(i),
+            seconds: state.steps[i].timerSeconds!,
+            endAt: state.timerEnds[i],
+            label: CookStrings.timerLabel(i + 1),
+            clock: viewModel.clock,
+            onStatusChange: (status) => viewModel.timerChanged(i, status),
+          ),
+      ],
+    );
+
     return Scaffold(
       body: SafeArea(
         bottom: false,
@@ -77,7 +94,8 @@ class _Step extends ConsumerWidget {
             StepHeader(
               step: state.index + 1,
               total: state.steps.length,
-              done: state.index + 1,
+              done: state.inNotes ? state.steps.length : state.index + 1,
+              title: state.inNotes ? CookStrings.notesTitle : null,
               onClose: () => context.canPop() ? context.pop() : context.go(discoverLocation),
               onIngredients: () => showStepIngredients(
                 context,
@@ -87,25 +105,24 @@ class _Step extends ConsumerWidget {
               ),
             ),
             Expanded(
-              child: StepBody(
-                label: CookStrings.stepLabel(state.index + 1),
-                text: state.step.text,
-                timers: StepTimers(
-                  timers: [
-                    for (final i in state.timedSteps)
-                      StepTimerSlot(
-                        key: ValueKey(i),
-                        visible: state.showsTimer(i),
-                        seconds: state.steps[i].timerSeconds!,
-                        endAt: state.timerEnds[i],
-                        label: CookStrings.timerLabel(i + 1),
-                        clock: viewModel.clock,
-                        onStatusChange: (status) => viewModel.timerChanged(i, status),
+              child: state.inNotes
+                  ? StepBody.custom(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.s4,
+                        AppSpacing.s5,
+                        AppSpacing.s4,
+                        AppSpacing.s4,
                       ),
-                  ],
-                ),
-              ),
+                      timers: timers,
+                      child: UsageNotes(groups: [(dish: null, notes: state.notes)]),
+                    )
+                  : StepBody(
+                      label: CookStrings.stepLabel(state.index + 1),
+                      text: state.step.text,
+                      timers: timers,
+                    ),
             ),
+            if (state.inNotes) CheerLine(text: state.cheer),
             CookFooter(
               child: Row(
                 spacing: AppSpacing.s3,

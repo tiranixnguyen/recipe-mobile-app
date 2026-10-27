@@ -9,6 +9,7 @@ import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_timers.dart';
 import 'package:recipe_mobile_app/features/cook/domain/cook_step.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_view_model.dart';
+import 'package:recipe_mobile_app/features/cook/strings.dart';
 
 @immutable
 class CookStepState {
@@ -20,6 +21,8 @@ class CookStepState {
     required this.basicSpices,
     required this.timers,
     this.timerEnds = const {},
+    this.inNotes = false,
+    this.cheer = '',
   });
 
   final Recipe recipe;
@@ -38,6 +41,12 @@ class CookStepState {
   /// Mốc hết giờ đã lưu của đồng hồ đang chạy, theo chỉ số bước: mở lại màn thì chạy tiếp.
   final Map<int, DateTime> timerEnds;
 
+  /// Đang ở trang "Lưu ý cách dùng" sau bước cuối.
+  final bool inNotes;
+
+  /// Câu chúc cuối trang Lưu ý, cố định trong một lần mở màn.
+  final String cheer;
+
   CookStepState copyWith({Map<int, StepTimerStatus>? timers}) => CookStepState(
     recipe: recipe,
     servings: servings,
@@ -46,12 +55,22 @@ class CookStepState {
     basicSpices: basicSpices,
     timers: timers ?? this.timers,
     timerEnds: timerEnds,
+    inNotes: inNotes,
+    cheer: cheer,
   );
 
   List<RecipeStep> get steps => recipe.steps;
   RecipeStep get step => steps[index];
-  bool get isFirst => index == 0;
-  bool get isLast => index == steps.length - 1;
+
+  /// Lưu ý cách dùng của món; rỗng thì trang Lưu ý hiện "Món ăn không có lưu ý nào.".
+  List<String> get notes => recipe.notes;
+  bool get isFirst => index == 0 && !inNotes;
+
+  /// Bước cuối: "Bước tiếp" sang trang Lưu ý.
+  bool get isLastStep => index == steps.length - 1;
+
+  /// Trang Lưu ý: nút chính là "Xong".
+  bool get isLast => inNotes;
 
   /// Bước có hẹn giờ, theo thứ tự.
   List<int> get timedSteps => [
@@ -59,9 +78,9 @@ class CookStepState {
       if ((s.timerSeconds ?? 0) > 0) i,
   ];
 
-  /// Đồng hồ của bước [i] hiện ra: ở đúng bước đó, hoặc đang chạy / hết giờ (ở mọi bước).
+  /// Đồng hồ của bước [i] hiện ra: ở đúng bước đó (không phải trang Lưu ý), hoặc đang chạy / hết giờ (ở mọi bước).
   bool showsTimer(int i) =>
-      i == index ||
+      (i == index && !inNotes) ||
       switch (timers[i]) {
         null => timerEnds.containsKey(i),
         final status => status != StepTimerStatus.idle,
@@ -77,6 +96,10 @@ class StepViewModel extends Notifier<AsyncValue<CookStepState>> {
 
   /// Giữ qua các lần build lại (sang bước khác), chỉ mất khi rời màn.
   Map<int, StepTimerStatus> _timers = const {};
+
+  /// Câu chúc chọn một lần khi mở màn, giữ nguyên khi sang bước.
+  late final String _cheer =
+      CookStrings.cheers[ref.read(cookRandomProvider).nextInt(CookStrings.cheers.length)];
 
   /// Giờ cho `StepTimer`, cùng đồng hồ với lịch báo hết giờ.
   DateTime Function() get clock => ref.read(cookClockProvider);
@@ -122,6 +145,8 @@ class StepViewModel extends Notifier<AsyncValue<CookStepState>> {
           for (var i = 0; i < recipe.steps.length; i++)
             if (ends[cookTimerKey(0, i)] case final at? when at.isAfter(now)) i: at,
         },
+        inNotes: session?.inNotes ?? false,
+        cheer: _cheer,
       ),
     );
   }
@@ -133,33 +158,43 @@ class StepViewModel extends Notifier<AsyncValue<CookStepState>> {
     return session;
   }
 
-  Future<void> next() => _goTo(1);
-
-  Future<void> previous() => _goTo(-1);
-
-  Future<void> _goTo(int delta) async {
+  /// "Bước tiếp"; ở bước cuối thì sang trang Lưu ý.
+  Future<void> next() async {
     final value = state.value;
-    if (value == null) return;
-    final target = (value.index + delta).clamp(0, value.steps.length - 1);
+    if (value == null || value.inNotes) return;
+    final sessions = await _sessions(value);
+    if (value.isLastStep) return sessions.showNotes();
+    await sessions.goTo(0, value.index + 1);
+  }
+
+  /// "Bước trước"; ở trang Lưu ý thì về bước cuối.
+  Future<void> previous() async {
+    final value = state.value;
+    if (value == null || value.isFirst) return;
+    final sessions = await _sessions(value);
+    await sessions.goTo(0, value.inNotes ? value.steps.length - 1 : value.index - 1);
+  }
+
+  /// Phiên của món này; mở thẳng màn (không qua Chuẩn bị) thì bắt đầu phiên với khẩu phần chuẩn.
+  Future<CookSessionController> _sessions(CookStepState value) async {
     final sessions = ref.read(cookSessionProvider.notifier);
     if (ref.read(cookSessionProvider) case final s?
         when !s.isMeal && s.currentDish.recipeId == recipeId) {
-      await sessions.goTo(0, target);
-    } else {
-      // Mở thẳng màn này (không qua Chuẩn bị): bắt đầu phiên với khẩu phần chuẩn của món.
-      await sessions.startRecipe(recipeId, value.servings);
-      await sessions.goTo(0, target);
+      return sessions;
     }
+    // Không có phiên thì màn đang ở bước đầu, khớp với phiên mới.
+    await sessions.startRecipe(recipeId, value.servings);
+    return sessions;
   }
 
-  /// "Xong" ở bước cuối: đánh dấu món đã nấu xong (phiên chờ màn Hoàn thành), huỷ lịch báo hết giờ.
+  /// "Xong" ở trang Lưu ý: đánh dấu món đã nấu xong (phiên chờ màn Hoàn thành), huỷ lịch báo hết giờ.
   Future<void> finish() async {
     final value = state.value;
     if (value == null) return;
     final sessions = ref.read(cookSessionProvider.notifier);
     if (_session == null) await sessions.startRecipe(recipeId, value.servings);
     await ref.read(cookTimersProvider).cancel(0, value.timedSteps);
-    await sessions.finishDish(0);
+    await sessions.complete();
   }
 
   /// `StepTimer` của bước [step] đổi trạng thái; xem [CookTimers.changed].
