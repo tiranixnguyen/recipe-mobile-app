@@ -127,7 +127,7 @@ abstract final class CookStrings {
 
   /// Câu chúc cuối trang Lưu ý, chọn ngẫu nhiên mỗi lần mở màn nấu.
   static const cheers = [
-    'Con mời cả nhà ăn!',
+    'Mời cả nhà vào ăn nha!',
     'Thơm ngon mời bạn ăn nha!',
     'Thưởng thức ngay thôi nào!',
     'Nóng hổi vừa thổi vừa ăn!',
