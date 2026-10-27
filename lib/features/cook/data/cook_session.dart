@@ -36,6 +36,7 @@ class CookSession {
     this.inPrep = false,
     Set<String> prepDone = const {},
     this.inNotes = false,
+    this.done = false,
   }) : dishes = List.unmodifiable(dishes),
        positions = List.unmodifiable(positions ?? List.filled(dishes.length, 0)),
        finished = Set.unmodifiable(finished),
@@ -72,14 +73,17 @@ class CookSession {
   /// Đang ở trang "Lưu ý cách dùng" sau bước cuối (một món) hoặc chặng Lưu ý cuối bữa.
   final bool inNotes;
 
+  /// Đã bấm "Xong" / "Xong cả bữa": phiên chỉ còn chờ màn Hoàn thành.
+  final bool done;
+
   /// Nấu cả bữa (mở từ Thực đơn) thay vì một món.
   bool get isMeal => planned != null || dishes.length > 1;
 
   CookDish get currentDish => dishes[current];
 
-  /// Mọi món đã xong và đã rời trang Lưu ý: phiên chỉ còn chờ màn Hoàn thành, không hiện "Nấu
-  /// tiếp". Nấu cả bữa xong món cuối thì vào chặng Lưu ý, vẫn còn "Nấu tiếp" tới khi bấm Xong cả bữa.
-  bool get isDone => !inNotes && finished.length >= dishes.length;
+  /// Đã bấm Xong / Xong cả bữa: không hiện "Nấu tiếp". Xong hết món mà chưa bấm (đang ở chặng Lưu
+  /// ý, hay quay lại xem một món) thì vẫn mời nấu tiếp.
+  bool get isDone => done;
 
   CookSession copyWith({
     int? current,
@@ -89,6 +93,7 @@ class CookSession {
     bool? inPrep,
     Set<String>? prepDone,
     bool? inNotes,
+    bool? done,
   }) => CookSession(
     dishes: dishes,
     current: current ?? this.current,
@@ -100,6 +105,7 @@ class CookSession {
     inPrep: inPrep ?? this.inPrep,
     prepDone: prepDone ?? this.prepDone,
     inNotes: inNotes ?? this.inNotes,
+    done: done ?? this.done,
   );
 
   Map<String, dynamic> toJson() => {
@@ -117,10 +123,12 @@ class CookSession {
     if (inPrep) 'inPrep': true,
     if (prepDone.isNotEmpty) 'prepDone': prepDone.toList(),
     if (inNotes) 'inNotes': true,
+    'done': done,
   };
 
   /// Trả null khi dữ liệu hỏng (thiếu trường, sai kiểu, chỉ số ngoài khoảng). `inPrep`, `prepDone`,
-  /// `inNotes` tuỳ chọn: phiên lưu trước khi có chặng Sơ chế, Lưu ý vẫn đọc được.
+  /// `inNotes`, `done` tuỳ chọn: phiên lưu trước khi có chặng Sơ chế, Lưu ý vẫn đọc được; phiên
+  /// cũ không có `done` thì xong khi mọi món đã xong, như trước.
   static CookSession? tryParse(Object? json) {
     if (json case {
       'dishes': List<dynamic> rawDishes,
@@ -177,6 +185,10 @@ class CookSession {
           if (json['prepDone'] case final List<dynamic> raw) ...raw.whereType<String>(),
         },
         inNotes: json['inNotes'] == true,
+        done: switch (json['done']) {
+          final bool done => done,
+          _ => finished.length >= dishes.length,
+        },
       );
     }
     return null;
@@ -194,7 +206,8 @@ class CookSession {
       mapEquals(other.timerEnds, timerEnds) &&
       other.inPrep == inPrep &&
       setEquals(other.prepDone, prepDone) &&
-      other.inNotes == inNotes;
+      other.inNotes == inNotes &&
+      other.done == done;
 
   @override
   int get hashCode => Object.hash(
@@ -208,12 +221,13 @@ class CookSession {
     inPrep,
     Object.hashAllUnordered(prepDone),
     inNotes,
+    done,
   );
 
   @override
   String toString() =>
       'CookSession($dishes, current: $current, $positions, done: $finished'
-      '${inPrep ? ', inPrep' : ''}${inNotes ? ', inNotes' : ''})';
+      '${inPrep ? ', inPrep' : ''}${inNotes ? ', inNotes' : ''}${done ? ', done' : ''})';
 }
 
 /// Phiên nấu đang dở; null khi không nấu gì. Bắt đầu phiên mới thì thay phiên cũ.
@@ -297,15 +311,22 @@ class CookSessionController extends Notifier<CookSession?> {
     await _save(session.copyWith(prepDone: next));
   }
 
-  /// Đánh dấu món thứ [dish] đã nấu xong; mọi món xong thì rời trang Lưu ý (Xong, Xong cả bữa).
+  /// Đánh dấu món thứ [dish] đã nấu xong.
   Future<void> finishDish(int dish) async {
     final session = state;
     if (session == null || dish < 0 || dish >= session.dishes.length) return;
-    final finished = {...session.finished, dish};
+    await _save(session.copyWith(finished: {...session.finished, dish}));
+  }
+
+  /// "Xong" / "Xong cả bữa": mọi món xong, phiên chờ màn Hoàn thành (không còn "Nấu tiếp").
+  Future<void> complete() async {
+    final session = state;
+    if (session == null || session.done) return;
     await _save(
       session.copyWith(
-        finished: finished,
-        inNotes: finished.length >= session.dishes.length ? false : null,
+        finished: {for (var i = 0; i < session.dishes.length; i++) i},
+        inNotes: false,
+        done: true,
       ),
     );
   }

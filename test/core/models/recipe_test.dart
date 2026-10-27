@@ -186,6 +186,13 @@ void main() {
       expect(Recipe.fromJson(withNotes.toJson()), withNotes);
       expect(Recipe.fromJson(withNotes.toJson()).hashCode, withNotes.hashCode);
       expect(() => withNotes.notes.add('x'), throwsUnsupportedError);
+      expect(
+        () => Recipe.fromJson({
+          ...base.toJson(),
+          'notes': ['Ăn nóng.', 3],
+        }),
+        throwsA(isA<FormatException>().having((e) => e.message, 'message', contains('Món "r1"'))),
+      );
     });
   });
 

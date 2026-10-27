@@ -40,6 +40,10 @@ void main() {
     await controller().finishDish(0);
     session = container.read(cookSessionProvider)!;
     expect(session.positions, [2]);
+    // Món xong mà chưa bấm Xong (còn trang Lưu ý) thì vẫn mời nấu tiếp.
+    expect(session.isDone, isFalse);
+    await controller().complete();
+    session = container.read(cookSessionProvider)!;
     expect(session.isDone, isTrue);
 
     container.invalidate(cookSessionProvider);
@@ -118,15 +122,19 @@ void main() {
     expect((session.inNotes, session.inPrep), (false, true));
     expect(session, isNot(session.copyWith(inNotes: true)));
 
-    // Xong hết món mà còn ở Lưu ý thì chưa xong phiên; Xong cả bữa rời Lưu ý.
+    // Xong hết món mà chưa bấm Xong cả bữa (ở Lưu ý, hay quay lại một món) thì chưa xong phiên.
     await controller().finishDish(0);
     await controller().finishDish(1);
     await controller().showNotes();
-    session = container.read(cookSessionProvider)!;
-    expect((session.inNotes, session.isDone), (true, false));
-    await controller().finishDish(1);
+    expect(container.read(cookSessionProvider)!.isDone, isFalse);
+    await controller().goTo(0, 0);
+    expect(container.read(cookSessionProvider)!.isDone, isFalse);
+    await controller().showNotes();
+    await controller().complete();
+    container.invalidate(cookSessionProvider);
     session = container.read(cookSessionProvider)!;
     expect((session.inNotes, session.isDone), (false, true));
+    expect(session.finished, {0, 1});
   });
 
   test('phiên không có inPrep, prepDone, inNotes (lưu trước COOK-06) vẫn đọc được', () async {
@@ -145,6 +153,13 @@ void main() {
     container.invalidate(cookSessionProvider);
     final session = container.read(cookSessionProvider)!;
     expect((session.inPrep, session.prepDone.isEmpty, session.inNotes), (false, true, false));
+    expect(session.isDone, isFalse);
+    // Phiên cũ không có `done`: xong khi mọi món đã xong, như trước.
+    final legacyDone = CookSession.tryParse({
+      ...session.toJson()..remove('done'),
+      'finished': [0],
+    });
+    expect(legacyDone!.isDone, isTrue);
     expect(session.positions, [1]);
     expect(session.toJson().containsKey('inPrep'), isFalse);
   });

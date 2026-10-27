@@ -378,7 +378,7 @@ class _StageTabsState extends State<_StageTabs> {
                             ? CookStrings.finish
                             : CookStrings.prepProgress(state.prepDoneCount, state.prepTotal),
                         bar: _FractionBar(
-                          value: state.prepTotal == 0 ? 0 : state.prepDoneCount / state.prepTotal,
+                          value: state.prepFraction,
                           color: colors.chili,
                           track: colors.line,
                         ),
@@ -402,7 +402,7 @@ class _StageTabsState extends State<_StageTabs> {
                       finished: state.allFinished,
                       progress: CookStrings.notesTabHint,
                       bar: _FractionBar(
-                        value: state.finished.length / state.dishes.length,
+                        value: state.finishedFraction,
                         color: colors.chili,
                         track: colors.line,
                       ),

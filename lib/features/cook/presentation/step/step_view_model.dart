@@ -194,7 +194,7 @@ class StepViewModel extends Notifier<AsyncValue<CookStepState>> {
     final sessions = ref.read(cookSessionProvider.notifier);
     if (_session == null) await sessions.startRecipe(recipeId, value.servings);
     await ref.read(cookTimersProvider).cancel(0, value.timedSteps);
-    await sessions.finishDish(0);
+    await sessions.complete();
   }
 
   /// `StepTimer` của bước [step] đổi trạng thái; xem [CookTimers.changed].

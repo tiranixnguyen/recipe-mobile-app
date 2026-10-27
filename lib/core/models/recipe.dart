@@ -228,7 +228,11 @@ class Recipe {
             (e) => RecipeStep.fromJson(e as Map<String, dynamic>),
           ),
         ),
-        notes: List.unmodifiable(((json['notes'] as List<dynamic>?) ?? const []).cast<String>()),
+        notes: List.unmodifiable(
+          ((json['notes'] as List<dynamic>?) ?? const []).map(
+            (e) => e is String ? e : throw FormatException('lưu ý "$e" không phải chuỗi'),
+          ),
+        ),
       );
     } on FormatException catch (e) {
       throw FormatException('Món "$id": ${e.message}');

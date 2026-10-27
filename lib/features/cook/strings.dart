@@ -102,8 +102,6 @@ abstract final class CookStrings {
   static const prepTip = ' Sơ chế sẵn mọi thứ tại đây để lúc đứng bếp chỉ việc nấu liền một mạch.';
   static const prepSkipHint = 'Đã sơ chế từ trước? Bấm nút bên dưới để vào nấu luôn.';
   static String prepShare(String amountText) => '~$amountText';
-  static String prepTaskLabel(String ingredient, String action) =>
-      action.isEmpty ? ingredient : '$ingredient: $action';
   static const finishPrep = 'Xong sơ chế';
   static const finishMeal = 'Xong cả bữa';
 

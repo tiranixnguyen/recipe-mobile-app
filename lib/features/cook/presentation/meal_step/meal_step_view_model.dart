@@ -170,6 +170,12 @@ class MealStepState {
   /// Mọi món đã xong (tab Lưu ý có dấu check).
   bool get allFinished => finished.length >= dishes.length;
 
+  /// Thanh tiến độ tab Lưu ý: phần món đã xong.
+  double get finishedFraction => finished.length / dishes.length;
+
+  /// Thanh tiến độ tab Sơ chế: phần việc lá đã tick.
+  double get prepFraction => prepTotal == 0 ? 0 : prepDoneCount / prepTotal;
+
   /// Tên các món chưa xong, theo thứ tự nấu: "Xong cả bữa" hỏi lại khi còn món.
   List<String> get unfinished => [
     for (final (i, d) in dishes.indexed)
@@ -375,17 +381,22 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
     final value = state.value;
     if (value == null) return;
     for (var dish = 0; dish < value.dishes.length; dish++) {
-      await _finishDish(value, dish);
+      await _cancelTimers(value, dish);
     }
+    await _sessions.complete();
   }
 
   Future<void> _finishDish(MealStepState value, int dish) async {
-    await ref.read(cookTimersProvider).cancel(dish, [
-      for (final (d, step) in value.timedSteps)
-        if (d == dish) step,
-    ]);
+    await _cancelTimers(value, dish);
     await _sessions.finishDish(dish);
   }
+
+  /// Huỷ lịch báo hết giờ của món [dish].
+  Future<void> _cancelTimers(MealStepState value, int dish) =>
+      ref.read(cookTimersProvider).cancel(dish, [
+        for (final (d, step) in value.timedSteps)
+          if (d == dish) step,
+      ]);
 
   /// `StepTimer` của bước [step] món [dish] đổi trạng thái.
   Future<void> timerChanged(int dish, int step, StepTimerStatus status) async {
