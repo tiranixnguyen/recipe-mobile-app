@@ -323,6 +323,9 @@ void main() {
     expect(find.text('Trứng gà · 4 quả'), findsOneWidget);
     await tester.tap(find.text(CookStrings.startCooking).last);
     await tester.pumpAndSettle();
+    // Chưa tick "Lấy đồ ra": sheet hỏi lại.
+    await tester.tap(find.text(CookStrings.confirmStartCooking));
+    await tester.pumpAndSettle();
 
     expect(find.text('Bước 1/4'), findsOneWidget);
     for (var i = 0; i < 3; i++) {

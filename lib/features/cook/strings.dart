@@ -27,6 +27,14 @@ abstract final class CookStrings {
   static String gathered(int done, int total) => 'Đã lấy $done/$total';
   static const addToShopping = 'Thêm vào đi chợ';
 
+  // Sheet hỏi lại khi "Lấy đồ ra" chưa tick đủ (Chuẩn bị một món và cả bữa).
+  static const gatherConfirmTitle = 'Chưa lấy đủ đồ';
+  static String gatherConfirmBody(int done, int total) =>
+      'Bạn mới lấy $done/$total thứ. Thiếu gì thì lấy nốt, đủ rồi thì cứ bắt đầu.';
+  static const confirmStartCooking = 'Vẫn bắt đầu nấu';
+  static const confirmStartPrep = 'Vẫn bắt đầu sơ chế';
+  static const gatherConfirmBack = 'Lấy tiếp';
+
   // Nấu từng bước (`CookStep`).
   static const exitCooking = 'Thoát chế độ nấu';
   static String stepOf(int step, int total) => 'Bước $step/$total';
@@ -82,8 +90,7 @@ abstract final class CookStrings {
   static String mealStepLabel(String name, int step, int total) =>
       '${name.toUpperCase()} · BƯỚC $step/$total';
   static String mealTimerLabel(String name, int step) => '$name · Bước $step';
-  static String nextDish(int number, String name) => 'Sang món $number: $name';
-  static String nextDishShort(int number) => 'Sang món $number';
+  static String finishDish(int number) => 'Xong món $number';
 
   // Chặng "Sơ chế cả bữa" đầu `MealCookStep`.
   static String mealPrepStageTitle(Meal meal) => 'Bữa ${meal.label.toLowerCase()} · sơ chế';
@@ -97,9 +104,23 @@ abstract final class CookStrings {
   static String prepShare(String amountText) => '~$amountText';
   static String prepTaskLabel(String ingredient, String action) =>
       action.isEmpty ? ingredient : '$ingredient: $action';
-  static String startCookingDish(String name) => 'Bắt đầu nấu: $name';
-  static String startCookingNumber(int number) => 'Bắt đầu nấu món $number';
+  static const finishPrep = 'Xong sơ chế';
   static const finishMeal = 'Xong cả bữa';
+
+  // Sheet hỏi lại khi "Xong sơ chế" chưa tick đủ, "Xong cả bữa" còn món chưa xong.
+  static const prepConfirmTitle = 'Chưa sơ chế xong';
+  static String prepConfirmBody(int done, int total) =>
+      'Bạn mới xong $done/$total việc. Đồng ý thì app đánh dấu xong hết và sang món 1.';
+  static const keepPrepping = 'Làm tiếp';
+  static const mealConfirmTitle = 'Còn món chưa xong';
+  static String mealConfirmBody(List<String> names) {
+    final shown = names.take(2).join(', ');
+    final more = names.length > 2 ? ' và ${names.length - 2} món khác' : '';
+    return 'Chưa xong: $shown$more. Bạn vẫn muốn kết thúc bữa?';
+  }
+
+  static const confirmFinishMeal = 'Vẫn xong cả bữa';
+  static const keepCooking = 'Nấu tiếp';
   static String mealSheetTitle(String name, int servings) =>
       'Nguyên liệu · $name · $servings người';
   static String mealDoneTitle(Meal meal) => 'Xong bữa ${meal.label.toLowerCase()}! Ăn ngon nhé';

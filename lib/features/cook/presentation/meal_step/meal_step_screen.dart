@@ -3,13 +3,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/features/cook/domain/cook_step.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_prep/meal_prep_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_step/meal_step_view_model.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/widgets/confirm_sheet.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_layout.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_step_widgets.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/prep_task_tile.dart';
@@ -18,7 +18,9 @@ import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
 
 /// Nấu cả bữa từng bước (prototype `MealCookStep`): chặng Sơ chế chung, tab món, bước đứng bếp của
-/// món đang xem, đồng hồ của mọi món; bước cuối món là "Sang món n", bước cuối bữa là "Xong cả bữa".
+/// món đang xem, đồng hồ của mọi món. Nút chính: "Xong sơ chế" ở chặng Sơ chế, "Xong món n" ở bước
+/// cuối món, "Xong cả bữa" ở bước cuối món cuối hoặc khi mọi món khác đã xong. Sơ chế chưa tick đủ,
+/// còn món chưa xong thì hỏi lại trước khi đi tiếp.
 class MealStepScreen extends ConsumerWidget {
   const MealStepScreen({super.key});
 
@@ -32,9 +34,6 @@ class MealStepScreen extends ConsumerWidget {
   }
 }
 
-/// Tên món ghi trên nút chính ("Sang món 2: Trứng", "Bắt đầu nấu: Trứng") chỉ khi tên ngắn.
-const _shortName = 12;
-
 class _MealStep extends ConsumerWidget {
   const _MealStep({required this.state});
 
@@ -45,28 +44,46 @@ class _MealStep extends ConsumerWidget {
     final viewModel = ref.read(mealStepViewModelProvider.notifier);
     final recipe = state.recipe;
 
+    // Chỉ hỏi lại khi còn việc chưa làm: sơ chế chưa tick đủ, còn món khác chưa xong.
+    Future<void> finishPrep() async {
+      if (state.prepFinished) return viewModel.next();
+      if (await showCookConfirmSheet(
+        context,
+        title: CookStrings.prepConfirmTitle,
+        body: CookStrings.prepConfirmBody(state.prepDoneCount, state.prepTotal),
+        confirmLabel: CookStrings.finishPrep,
+        cancelLabel: CookStrings.keepPrepping,
+      )) {
+        await viewModel.finishPrep();
+      }
+    }
+
     Future<void> finish() async {
       final router = GoRouter.of(context);
+      final unfinished = state.unfinishedOthers;
+      if (unfinished.isNotEmpty &&
+          !await showCookConfirmSheet(
+            context,
+            title: CookStrings.mealConfirmTitle,
+            body: CookStrings.mealConfirmBody(unfinished),
+            confirmLabel: CookStrings.confirmFinishMeal,
+            cancelLabel: CookStrings.keepCooking,
+          )) {
+        return;
+      }
       await viewModel.finishMeal();
       router.pushReplacement(mealCookDoneLocation);
     }
 
+    // Nhãn cố định, không ghi tên món: tên dài không làm tràn nút.
     final Widget nextButton;
     if (state.inPrep) {
-      final first = state.dishes.first.recipe.name;
-      nextButton = _NextButton(
-        label: first.length <= _shortName ? CookStrings.startCookingDish(first) : null,
-        fallback: CookStrings.startCookingNumber(1),
-        onPressed: viewModel.next,
-      );
+      nextButton = _NextButton(label: CookStrings.finishPrep, onPressed: finishPrep);
     } else if (!state.isLastStep) {
-      nextButton = _NextButton(fallback: CookStrings.nextStep, onPressed: viewModel.next);
-    } else if (!state.isLastDish) {
-      final number = state.current + 2;
-      final name = state.dishes[state.current + 1].recipe.name;
+      nextButton = _NextButton(label: CookStrings.nextStep, onPressed: viewModel.next);
+    } else if (!state.finishesMeal) {
       nextButton = _NextButton(
-        label: name.length <= _shortName ? CookStrings.nextDish(number, name) : null,
-        fallback: CookStrings.nextDishShort(number),
+        label: CookStrings.finishDish(state.current + 1),
         onPressed: viewModel.next,
       );
     } else {
@@ -173,36 +190,16 @@ class _MealStep extends ConsumerWidget {
   }
 }
 
-/// Nút chính: ghi [label] (có tên món) khi vừa một dòng trong nút, không thì [fallback].
+/// Nút chính lg chiếm hết chỗ.
 class _NextButton extends StatelessWidget {
-  const _NextButton({this.label, required this.fallback, required this.onPressed});
+  const _NextButton({required this.label, required this.onPressed});
 
-  final String? label;
-  final String fallback;
+  final String label;
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) {
-    final scaler = MediaQuery.textScalerOf(context);
-    final direction = Directionality.of(context);
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        var text = fallback;
-        if (label case final label?) {
-          final painter = TextPainter(
-            text: TextSpan(text: label, style: AppTextStyles.buttonLg),
-            textDirection: direction,
-            textScaler: scaler,
-            maxLines: 1,
-          )..layout();
-          // Nút `block` có padding ngang 8 mỗi bên.
-          if (painter.width <= constraints.maxWidth - AppSpacing.s2 * 2) text = label;
-          painter.dispose();
-        }
-        return AppButton(label: text, size: AppButtonSize.lg, block: true, onPressed: onPressed);
-      },
-    );
-  }
+  Widget build(BuildContext context) =>
+      AppButton(label: label, size: AppButtonSize.lg, block: true, onPressed: onPressed);
 }
 
 /// Chặng "Sơ chế cả bữa": nhãn kèm phút, câu mẹo, danh sách việc, dòng gợi ý vào nấu luôn.

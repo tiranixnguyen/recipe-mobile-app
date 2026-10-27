@@ -84,7 +84,7 @@ class MealStepState {
   /// Món theo thứ tự nấu.
   final List<MealDish> dishes;
 
-  /// Món đang xem (ở chặng Sơ chế: món sẽ nấu khi bấm "Bắt đầu nấu").
+  /// Món đang xem (ở chặng Sơ chế: tab món đang mở; bấm "Xong sơ chế" luôn vào món đầu).
   final int current;
 
   /// Bước đang ở của từng món, chỉ số trong [stepsOf] (bước đứng bếp).
@@ -156,6 +156,19 @@ class MealStepState {
   bool get isFirst => inPrep || (current == 0 && index == 0 && !hasPrep);
   bool get isLastStep => index == steps.length - 1;
   bool get isLastDish => current == dishes.length - 1;
+
+  /// Mọi món khác món đang nấu đã xong.
+  bool get othersFinished => unfinishedOthers.isEmpty;
+
+  /// Tên các món khác món đang nấu mà chưa xong, theo thứ tự nấu.
+  List<String> get unfinishedOthers => [
+    for (final (i, d) in dishes.indexed)
+      if (i != current && !finished.contains(i)) d.recipe.name,
+  ];
+
+  /// Nút chính ở bước cuối món là "Xong cả bữa": món cuối, hoặc mọi món khác đã xong. Không thì
+  /// "Xong món n".
+  bool get finishesMeal => isLastDish || othersFinished;
 
   /// Bước có hẹn giờ của mọi món: (món, bước gốc).
   List<(int, int)> get timedSteps => [
@@ -294,16 +307,29 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
     await _sessions.setPrepDone(item.leafIds, done: value.checkedOf(item) != true);
   }
 
-  /// "Bước tiếp"; ở chặng Sơ chế thì "Bắt đầu nấu" món đầu (chưa tick đủ vẫn được); ở bước cuối
-  /// món chưa phải món cuối thì "Sang món n": món này xong, sang món sau.
+  /// "Bước tiếp"; ở chặng Sơ chế thì "Xong sơ chế", vào món đầu (màn đã hỏi lại khi chưa tick đủ);
+  /// ở bước cuối món mà chưa xong cả bữa thì "Xong món n": món này xong, sang món chưa xong kế tiếp.
   Future<void> next() async {
     final value = state.value;
     if (value == null) return;
     if (value.inPrep) return _sessions.goTo(0, value.positions[0]);
     if (!value.isLastStep) return _sessions.goTo(value.current, value.index + 1);
-    if (value.isLastDish) return;
+    if (value.finishesMeal) return;
     await _finishDish(value, value.current);
-    await _sessions.goTo(value.current + 1, value.positions[value.current + 1]);
+    // Món sau món đang nấu, hết thì vòng về đầu; bỏ qua món đã xong (có thể đã nhảy tab nấu trước).
+    final count = value.dishes.length;
+    final dish = [
+      for (var k = 1; k < count; k++) (value.current + k) % count,
+    ].firstWhere((d) => !value.finished.contains(d));
+    await _sessions.goTo(dish, value.positions[dish]);
+  }
+
+  /// "Xong sơ chế" khi chưa tick đủ và người dùng đồng ý: tick hết mọi việc, vào món đầu.
+  Future<void> finishPrep() async {
+    final value = state.value;
+    if (value == null) return;
+    await _sessions.setPrepDone([for (final p in value.prep) ...p.leafIds], done: true);
+    await _sessions.goTo(0, value.positions[0]);
   }
 
   /// "Bước trước"; ở bước đầu món thì về bước cuối món trước, bước đầu món đầu thì về chặng Sơ chế.

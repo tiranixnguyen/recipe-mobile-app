@@ -75,6 +75,9 @@ class MealPrepState {
       gather.where((i) => checked.contains(i.ingredientId)).length +
       (basicSpices.isNotEmpty && checked.contains(MealPrepViewModel.spicesKey) ? 1 : 0);
 
+  /// Đã tick hết "Lấy đồ ra · cả bữa"; chưa thì hỏi lại trước khi bắt đầu.
+  bool get allGathered => checkedCount >= total;
+
   List<String> get notes => [for (final m in missing) ?m.note];
 
   String nameOf(String recipeId) =>

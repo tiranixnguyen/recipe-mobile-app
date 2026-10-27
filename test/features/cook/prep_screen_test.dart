@@ -115,11 +115,17 @@ void main() {
     expect(find.text('at shopping'), findsOneWidget);
   });
 
-  testWidgets('Bắt đầu nấu: mở phiên rồi sang Từng bước, thay màn Chuẩn bị', (tester) async {
+  testWidgets('đã lấy đủ đồ: Bắt đầu nấu mở phiên rồi sang Từng bước, thay màn Chuẩn bị', (
+    tester,
+  ) async {
     final container = await _pump(tester);
 
+    await tester.tap(find.text('Trứng gà · 2 quả'));
+    await tester.tap(find.text('Dầu ăn, tiêu'));
+    await tester.pump();
     await tester.tap(find.text(CookStrings.startCooking));
     await tester.pumpAndSettle();
+    expect(find.text(CookStrings.gatherConfirmTitle), findsNothing);
     expect(container.read(cookSessionProvider)?.currentDish.recipeId, 'trung');
     expect(find.text('Bước 1/4'), findsOneWidget);
 
@@ -133,6 +139,8 @@ void main() {
 
     await tester.tap(find.text(CookStrings.startCooking));
     await tester.pumpAndSettle();
+    await tester.tap(find.text(CookStrings.confirmStartCooking));
+    await tester.pumpAndSettle();
     expect(find.text('at notif'), findsOneWidget);
     expect(container.read(cookSessionProvider), isNull);
 
@@ -142,11 +150,40 @@ void main() {
     expect(container.read(cookSessionProvider), isNotNull);
   });
 
+  testWidgets('chưa lấy đủ đồ: hỏi lại; Lấy tiếp thì ở lại, Vẫn bắt đầu nấu thì vào nấu', (
+    tester,
+  ) async {
+    final container = await _pump(tester);
+
+    await tester.tap(find.text('Trứng gà · 2 quả'));
+    await tester.pump();
+    await tester.tap(find.text(CookStrings.startCooking));
+    await tester.pumpAndSettle();
+    expect(find.text(CookStrings.gatherConfirmTitle), findsOneWidget);
+    expect(find.text(CookStrings.gatherConfirmBody(1, 2)), findsOneWidget);
+
+    await tester.tap(find.text(CookStrings.gatherConfirmBack));
+    await tester.pumpAndSettle();
+    expect(find.text(CookStrings.gatherConfirmTitle), findsNothing);
+    expect(find.text('Đã lấy 1/2'), findsOneWidget);
+    expect(container.read(cookSessionProvider), isNull);
+
+    await tester.tap(find.text(CookStrings.startCooking));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(CookStrings.confirmStartCooking));
+    await tester.pumpAndSettle();
+    expect(container.read(cookSessionProvider)?.currentDish.recipeId, 'trung');
+    expect(find.text('Bước 1/4'), findsOneWidget);
+  });
+
   for (final (name, theme) in [('sáng', AppTheme.light), ('tối', AppTheme.dark)]) {
-    testWidgets('màn 360dp, chữ 1.3, theme $name: không tràn', (tester) async {
+    testWidgets('màn 360dp, chữ 1.3, theme $name: màn và sheet hỏi lại không tràn', (tester) async {
       await _pump(tester, theme: theme, size: const Size(360, 640), textScale: 1.3);
       expect(tester.takeException(), isNull);
-      expect(find.text(CookStrings.startCooking), findsOneWidget);
+      await tester.tap(find.text(CookStrings.startCooking));
+      await tester.pumpAndSettle();
+      expect(find.text(CookStrings.confirmStartCooking), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
   }
 }

@@ -113,6 +113,24 @@ Future<void> _tap(WidgetTester tester, Finder finder) async {
   await tester.pumpAndSettle();
 }
 
+/// Bấm nút bắt đầu [start] khi "Lấy đồ ra" chưa tick đủ: qua sheet hỏi lại bằng nút [confirm].
+Future<void> _startAnyway(WidgetTester tester, String start, String confirm) async {
+  await _tap(tester, find.text(start));
+  expect(find.text(CookStrings.gatherConfirmTitle), findsOneWidget);
+  await _tap(tester, find.text(confirm));
+}
+
+/// Nút [label] trong sheet hỏi lại (nút cùng chữ ở chân màn nằm dưới sheet).
+Finder _inSheet(String label) =>
+    find.descendant(of: find.byType(BottomSheet), matching: find.text(label));
+
+/// Bấm "Xong sơ chế" khi chưa tick đủ: qua sheet "Chưa sơ chế xong" bằng nút đồng ý.
+Future<void> _finishPrepAnyway(WidgetTester tester) async {
+  await _tap(tester, find.text(CookStrings.finishPrep));
+  expect(find.text(CookStrings.prepConfirmTitle), findsOneWidget);
+  await _tap(tester, _inSheet(CookStrings.finishPrep));
+}
+
 /// Ô tick ba trạng thái của việc cha (Hành lá).
 Finder _parentBox(bool? value) => find.byWidgetPredicate(
   (w) => w is Checkbox && w.tristate && w.value == value,
@@ -178,11 +196,33 @@ void main() {
     expect(container.read(cookSessionProvider), isNull);
   });
 
-  testWidgets('chặng Sơ chế: ba kiểu việc, ô tick lửng, Bắt đầu nấu, Bước trước về Sơ chế', (
+  testWidgets('chưa lấy đủ đồ: hỏi lại, Lấy tiếp thì ở lại; lấy đủ thì vào thẳng Sơ chế', (
     tester,
   ) async {
     final (container, _) = await _pump(tester);
+
     await _tap(tester, find.text(CookStrings.startPrep));
+    final total = find.byType(MealGatherRow).evaluate().length;
+    expect(find.text(CookStrings.gatherConfirmBody(0, total)), findsOneWidget);
+    expect(find.text(CookStrings.confirmStartPrep), findsOneWidget);
+    await _tap(tester, find.text(CookStrings.gatherConfirmBack));
+    expect(find.text(CookStrings.gatherConfirmTitle), findsNothing);
+    expect(container.read(cookSessionProvider), isNull);
+
+    for (var i = 0; i < total; i++) {
+      await _tap(tester, find.byType(MealGatherRow).at(i));
+    }
+    expect(find.text(CookStrings.gathered(total, total)), findsOneWidget);
+    await _tap(tester, find.text(CookStrings.startPrep));
+    expect(find.text(CookStrings.gatherConfirmTitle), findsNothing);
+    expect(find.text('Bữa tối · sơ chế'), findsOneWidget);
+  });
+
+  testWidgets('chặng Sơ chế: ba kiểu việc, ô tick lửng, Xong sơ chế, Bước trước về Sơ chế', (
+    tester,
+  ) async {
+    final (container, _) = await _pump(tester);
+    await _startAnyway(tester, CookStrings.startPrep, CookStrings.confirmStartPrep);
 
     expect(find.text('Bữa tối · sơ chế'), findsOneWidget);
     expect(find.text('SƠ CHẾ CẢ BỮA · ~8 PHÚT'), findsOneWidget);
@@ -212,12 +252,21 @@ void main() {
     await _tap(tester, find.text('Hành lá'));
     expect(find.text('2/4 việc'), findsOneWidget);
 
-    // Tên món đầu dài hơn 12 ký tự: nút không ghi tên. Chưa tick đủ vẫn vào nấu được.
-    await _tap(tester, find.text(CookStrings.startCookingNumber(1)));
+    // Chưa tick đủ: hỏi lại, Làm tiếp thì ở lại; đồng ý thì tick hết rồi vào món 1.
+    await _tap(tester, find.text(CookStrings.finishPrep));
+    expect(find.text(CookStrings.prepConfirmTitle), findsOneWidget);
+    expect(find.text(CookStrings.prepConfirmBody(2, 4)), findsOneWidget);
+    await _tap(tester, find.text(CookStrings.keepPrepping));
+    expect(find.text(CookStrings.prepConfirmTitle), findsNothing);
+    expect(find.text('Bữa tối · sơ chế'), findsOneWidget);
+    expect(find.text('2/4 việc'), findsOneWidget);
+    await _finishPrepAnyway(tester);
     expect(find.text('Bữa tối · món 1/2'), findsOneWidget);
     expect(find.text('CANH CÀ CHUA TRỨNG · BƯỚC 1/3'), findsOneWidget);
     expect(find.text('Xào cà chua'), findsOneWidget);
-    expect(find.text('2/4 việc'), findsOneWidget);
+    expect(container.read(cookSessionProvider)!.prepDone, hasLength(4));
+    // Tab Sơ chế báo xong thay cho "4/4 việc".
+    expect(find.text(CookStrings.finish), findsOneWidget);
 
     await _tap(tester, find.text(CookStrings.previousStep));
     expect(find.text('SƠ CHẾ CẢ BỮA · ~8 PHÚT'), findsOneWidget);
@@ -229,13 +278,13 @@ void main() {
     expect(container.read(cookSessionProvider)!.inPrep, isTrue);
   });
 
-  testWidgets('nấu cả bữa: Sang món 2, thoát rồi Nấu tiếp, Xong cả bữa, chấm, xong', (
+  testWidgets('nấu cả bữa: Xong món 1, thoát rồi Nấu tiếp, Xong cả bữa, chấm, xong', (
     tester,
   ) async {
     final (container, router) = await _pump(tester);
 
-    await _tap(tester, find.text(CookStrings.startPrep));
-    await _tap(tester, find.text(CookStrings.startCookingNumber(1)));
+    await _startAnyway(tester, CookStrings.startPrep, CookStrings.confirmStartPrep);
+    await _finishPrepAnyway(tester);
     expect(find.text('1. Canh cà chua trứng'), findsOneWidget);
     expect(find.text('Bước 1/3'), findsOneWidget);
     expect(find.text('3 bước'), findsOneWidget);
@@ -243,11 +292,11 @@ void main() {
     await _tap(tester, find.text(CookStrings.nextStep));
     await _tap(tester, find.text('Hẹn 5 phút', skipOffstage: false));
     await _tap(tester, find.text(CookStrings.nextStep));
-    // "Trứng chiên hành" dài hơn 12 ký tự: chỉ "Sang món 2".
-    await _tap(tester, find.text(CookStrings.nextDishShort(2)));
+    await _tap(tester, find.text(CookStrings.finishDish(1)));
     expect(find.text('TRỨNG CHIÊN HÀNH · BƯỚC 1/3'), findsOneWidget);
     expect(find.text('Làm nóng dầu'), findsOneWidget);
-    expect(find.text(CookStrings.finish), findsOneWidget);
+    // Tab Sơ chế và món 1 đều "Xong".
+    expect(find.text(CookStrings.finish), findsNWidgets(2));
     // Đồng hồ món canh vẫn chạy khi sang món trứng.
     expect(find.text('Canh cà chua trứng · Bước 2'), findsOneWidget);
 
@@ -265,7 +314,9 @@ void main() {
     for (var i = 0; i < 2; i++) {
       await _tap(tester, find.text(CookStrings.nextStep));
     }
+    // Mọi món khác đã xong: không hỏi lại.
     await _tap(tester, find.text(CookStrings.finishMeal));
+    expect(find.text(CookStrings.mealConfirmTitle), findsNothing);
     expect(find.text('Xong bữa tối! Ăn ngon nhé'), findsOneWidget);
     expect(find.text('2 món · 1 người · khoảng 35 phút'), findsOneWidget);
     expect(find.text('Đã dùng 2,5 quả · 2 món'), findsOneWidget);
@@ -281,9 +332,48 @@ void main() {
     expect(find.text(CookStrings.resumeTitle), findsNothing);
   });
 
+  testWidgets('sơ chế đã tick đủ: Xong sơ chế vào thẳng món 1, không hỏi lại', (tester) async {
+    await _pump(tester);
+    await _startAnyway(tester, CookStrings.startPrep, CookStrings.confirmStartPrep);
+    for (final task in ['Bổ múi cau', 'Đập ra bát rồi đánh tan', 'Hành lá']) {
+      await _tap(tester, find.text(task));
+    }
+    expect(find.text(CookStrings.finish), findsOneWidget);
+    await _tap(tester, find.text(CookStrings.finishPrep));
+    expect(find.text(CookStrings.prepConfirmTitle), findsNothing);
+    expect(find.text('Bữa tối · món 1/2'), findsOneWidget);
+  });
+
+  testWidgets(
+    'Xong cả bữa khi món 1 chưa xong: hỏi lại, Nấu tiếp thì ở lại, đồng ý thì sang Hoàn thành',
+    (
+      tester,
+    ) async {
+      final (container, _) = await _pump(tester);
+      await _startAnyway(tester, CookStrings.startPrep, CookStrings.confirmStartPrep);
+      await _finishPrepAnyway(tester);
+      await _tap(tester, find.text('2. Trứng chiên hành'));
+      for (var i = 0; i < 2; i++) {
+        await _tap(tester, find.text(CookStrings.nextStep));
+      }
+      await _tap(tester, find.text(CookStrings.finishMeal));
+      expect(find.text(CookStrings.mealConfirmTitle), findsOneWidget);
+      expect(find.text(CookStrings.mealConfirmBody(['Canh cà chua trứng'])), findsOneWidget);
+      await _tap(tester, find.text(CookStrings.keepCooking));
+      expect(find.text(CookStrings.mealConfirmTitle), findsNothing);
+      expect(find.text('Bữa tối · món 2/2'), findsOneWidget);
+      expect(container.read(cookSessionProvider)!.finished, isEmpty);
+
+      await _tap(tester, find.text(CookStrings.finishMeal));
+      await _tap(tester, find.text(CookStrings.confirmFinishMeal));
+      expect(find.text('Xong bữa tối! Ăn ngon nhé'), findsOneWidget);
+      expect(find.byTooltip('Ngon · Canh cà chua trứng'), findsOneWidget);
+    },
+  );
+
   testWidgets('thoát ở chặng Sơ chế: Nấu tiếp mở lại đúng chặng, giữ việc đã tick', (tester) async {
     final (_, router) = await _pump(tester);
-    await _tap(tester, find.text(CookStrings.startPrep));
+    await _startAnyway(tester, CookStrings.startPrep, CookStrings.confirmStartPrep);
     await _tap(tester, find.text('Bổ múi cau'));
     await _tap(tester, find.byTooltip(CookStrings.exitCooking));
     router.go('/');
@@ -309,7 +399,11 @@ void main() {
       recipes: [noPrep(cookRecipeFixture), noPrep(soupRecipeFixture)],
     );
     expect(find.text('Thứ Ba · 2 món · khoảng 35 phút · Bếp từ'), findsOneWidget);
-    await _tap(tester, find.text('Bắt đầu: Canh cà chua trứng'));
+    await _startAnyway(
+      tester,
+      'Bắt đầu: Canh cà chua trứng',
+      CookStrings.confirmStartCooking,
+    );
     expect(find.text(CookStrings.prepTab), findsNothing);
     expect(find.text('CANH CÀ CHUA TRỨNG · BƯỚC 1/4'), findsOneWidget);
     expect(
@@ -331,19 +425,24 @@ void main() {
     testWidgets('360dp, chữ 1.3, theme $name: bốn chặng không tràn', (tester) async {
       await _pump(tester, theme: theme, size: const Size(360, 640), textScale: 1.3);
       expect(tester.takeException(), isNull);
-      await _tap(tester, find.text(CookStrings.startPrep));
+      await _startAnyway(tester, CookStrings.startPrep, CookStrings.confirmStartPrep);
       await _tap(tester, find.text('Cắt khúc'));
       expect(tester.takeException(), isNull);
-      await _tap(tester, find.text(CookStrings.startCookingNumber(1)));
+      await _tap(tester, find.text(CookStrings.finishPrep));
+      expect(tester.takeException(), isNull);
+      await _tap(tester, _inSheet(CookStrings.finishPrep));
       await _tap(tester, find.text(CookStrings.nextStep));
       await _tap(tester, find.text('Hẹn 5 phút', skipOffstage: false));
       expect(tester.takeException(), isNull);
-      await _tap(tester, find.text(CookStrings.nextStep));
-      await _tap(tester, find.text(CookStrings.nextDishShort(2)));
+      // Nhảy sang món 2, nấu hết: Xong cả bữa hỏi lại vì món 1 chưa xong.
+      await _tap(tester, find.text('2. Trứng chiên hành'));
       for (var i = 0; i < 2; i++) {
         await _tap(tester, find.text(CookStrings.nextStep));
       }
       await _tap(tester, find.text(CookStrings.finishMeal));
+      expect(find.text(CookStrings.mealConfirmTitle), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await _tap(tester, find.text(CookStrings.confirmFinishMeal));
       expect(tester.takeException(), isNull);
       expect(find.text(CookStrings.finishAndUpdate), findsOneWidget);
     });
@@ -359,19 +458,19 @@ void main() {
       );
       expect(tester.takeException(), isNull);
       expect(find.text(_longRecipes.first.name), findsWidgets);
-      await _tap(tester, find.text(CookStrings.startPrep));
+      await _startAnyway(tester, CookStrings.startPrep, CookStrings.confirmStartPrep);
       expect(tester.takeException(), isNull);
       // Tag món tên đầy đủ, tự xuống dòng; cặp [Món] [~lượng] khi nhiều món cùng cách làm.
       expect(find.text(_longRecipes[1].name), findsWidgets);
-      await _tap(tester, find.text(CookStrings.startCookingNumber(1)));
+      await _finishPrepAnyway(tester);
       expect(tester.takeException(), isNull);
       // Nhãn hẹn giờ "<tên dài> · Bước 1" cắt "…", không đẩy nút Dừng.
       await _tap(tester, find.text('Hẹn 1 phút'));
       expect(tester.takeException(), isNull);
       await _tap(tester, find.text(CookStrings.nextStep));
       await _tap(tester, find.text(CookStrings.nextStep));
-      expect(find.text(CookStrings.nextDishShort(2)), findsOneWidget);
-      await _tap(tester, find.text(CookStrings.nextDishShort(2)));
+      expect(find.text(CookStrings.finishDish(1)), findsOneWidget);
+      await _tap(tester, find.text(CookStrings.finishDish(1)));
       expect(tester.takeException(), isNull);
       await _tap(tester, find.text(CookStrings.ingredients));
       expect(tester.takeException(), isNull);
