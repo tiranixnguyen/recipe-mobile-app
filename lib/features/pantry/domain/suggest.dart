@@ -1,8 +1,9 @@
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/pantry/domain/availability.dart';
 
-/// Chọn tối đa [count] món. So lần lượt: ít thiếu đồ, đã lưu, không bị chê,
-/// chưa vừa nấu, đúng bữa, rồi thứ tự dữ liệu; không dùng trọng số tùy ý.
+/// Chọn tối đa [count] món. Loại món bị chê trong 3 ngày (caller tính cửa sổ),
+/// không tự gợi ý lại khi hết ứng viên. Các món còn lại so lần lượt: ít thiếu đồ,
+/// đã lưu, chưa vừa nấu, đúng bữa, rồi thứ tự dữ liệu; không dùng trọng số tùy ý.
 /// Hồ sơ chưa chọn dụng cụ/chế độ ăn (set rỗng) không giới hạn tương ứng.
 List<Recipe> suggest(
   List<Recipe> recipes, {
@@ -20,6 +21,7 @@ List<Recipe> suggest(
   if (count <= 0) return const [];
   final candidates = <({Recipe recipe, int position, int missing})>[];
   for (final (position, recipe) in recipes.indexed) {
+    if (disliked.contains(recipe.id)) continue;
     if (tools.isNotEmpty && !tools.containsAll(recipe.tools)) continue;
     if (diets.isNotEmpty && !recipe.diets.toSet().containsAll(diets)) continue;
     // Món không gắn bữa vẫn được xét, nhưng xếp sau món ghi rõ bữa phù hợp.
@@ -36,11 +38,11 @@ List<Recipe> suggest(
     if (byMissing != 0) return byMissing;
     final bySaved = compareBool(!saved.contains(a.recipe.id), !saved.contains(b.recipe.id));
     if (bySaved != 0) return bySaved;
-    final byDislike = compareBool(
-      disliked.contains(a.recipe.id) || demoted.contains(a.recipe.id),
-      disliked.contains(b.recipe.id) || demoted.contains(b.recipe.id),
+    final byBadRating = compareBool(
+      demoted.contains(a.recipe.id),
+      demoted.contains(b.recipe.id),
     );
-    if (byDislike != 0) return byDislike;
+    if (byBadRating != 0) return byBadRating;
     final byCooked = compareBool(
       recentlyCooked.contains(a.recipe.id),
       recentlyCooked.contains(b.recipe.id),

@@ -134,13 +134,15 @@ void main() {
   });
 
   group('suggestionsProvider', () {
-    test('lọc bữa, chê gần đây hạ ưu tiên và lý do cập nhật theo tủ', () async {
+    test('lọc bữa, chê gần đây loại món và lý do cập nhật theo tủ', () async {
       const args = (meal: Meal.dinner, count: 3);
       container.listen(suggestionsProvider(args), (_, _) {});
       expect((await container.read(suggestionsProvider(args).future)).map((r) => r.id), ['a', 'c']);
 
       await container.read(dislikedProvider.notifier).dislike('a', DislikeReason.justAte);
-      expect((await container.read(suggestionsProvider(args).future)).map((r) => r.id), ['c', 'a']);
+      expect((await container.read(suggestionsProvider(args).future)).map((r) => r.id), ['c']);
+      await container.read(dislikedProvider.notifier).dislike('c', DislikeReason.notMyTaste);
+      expect(await container.read(suggestionsProvider(args).future), isEmpty);
       final reason = container.listen(suggestionReasonProvider(recipes.first), (_, _) {});
       await container.read(ingredientsProvider.future);
       expect(reason.read(), 'Thiếu 1 thứ, 10 phút, bếp từ');
@@ -173,6 +175,33 @@ void main() {
       expect(await c.read(suggestionsProvider(args).future), isEmpty);
       await c.read(kitchenProfileProvider.notifier).save(const KitchenProfile());
       expect((await c.read(suggestionsProvider(args).future)).map((r) => r.id), ['c', 'a']);
+    });
+
+    test('đúng mốc 3 ngày vẫn tránh; sau mốc được gợi ý lại', () async {
+      final now = DateTime(2026, 10, 26, 18);
+      final c = ProviderContainer(
+        overrides: [
+          localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
+          ingredientsProvider.overrideWith((ref) async => const [_egg]),
+          recipesProvider.overrideWith((ref) async => recipes),
+          pantryClockProvider.overrideWithValue(() => now),
+        ],
+      );
+      addTearDown(c.dispose);
+      const args = (meal: Meal.dinner, count: 3);
+      c.listen(suggestionsProvider(args), (_, _) {});
+      await c
+          .read(dislikedProvider.notifier)
+          .dislike('a', DislikeReason.justAte, at: now.subtract(const Duration(days: 3)));
+      expect((await c.read(suggestionsProvider(args).future)).map((r) => r.id), ['c']);
+      await c
+          .read(dislikedProvider.notifier)
+          .dislike(
+            'a',
+            DislikeReason.justAte,
+            at: now.subtract(const Duration(days: 3, seconds: 1)),
+          );
+      expect((await c.read(suggestionsProvider(args).future)).map((r) => r.id), ['a', 'c']);
     });
   });
 

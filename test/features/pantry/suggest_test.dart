@@ -35,10 +35,14 @@ void main() {
     expect(ids(suggest(recipes, meal: Meal.dinner, count: 2)), ['toi', 'trua-toi']);
   });
 
-  test('món đã chê bị hạ ưu tiên chứ không biến mất', () {
+  test('món đã chê không xuất hiện, kể cả đã lưu; không fallback nếu hết món', () {
     expect(
       ids(suggest(recipes, meal: Meal.dinner, count: 10, disliked: {'toi'})),
-      ['trua-toi', 'moi-bua', 'toi'],
+      ['trua-toi', 'moi-bua'],
+    );
+    expect(
+      suggest([recipes[2]], meal: Meal.dinner, count: 3, saved: {'toi'}, disliked: {'toi'}),
+      isEmpty,
     );
   });
 
@@ -104,7 +108,7 @@ void main() {
           recentlyCooked: {'cooked'},
         ),
       ),
-      ['saved', 'missing', 'ready', 'general', 'cooked', 'disliked'],
+      ['saved', 'missing', 'ready', 'general', 'cooked'],
     );
     expect(ids(suggest(list, meal: Meal.dinner, count: 2)), ['missing', 'ready']);
     final ready = Recipe(
