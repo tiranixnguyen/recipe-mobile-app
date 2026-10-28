@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
+import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/pantry/data/dislikes.dart';
 import 'package:recipe_mobile_app/features/pantry/data/pantry_items.dart';
 import 'package:recipe_mobile_app/features/pantry/domain/availability.dart';
 import 'package:recipe_mobile_app/features/pantry/domain/matches.dart';
 import 'package:recipe_mobile_app/features/pantry/domain/suggest.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Danh mục nguyên liệu theo id; null khi chưa tải xong (hoặc lỗi).
 final _ingredientsByIdProvider = Provider<Map<String, Ingredient>?>((ref) {
@@ -76,19 +78,44 @@ final pantryMatchesProvider = Provider<AsyncValue<PantryMatches>>((ref) {
   };
 });
 
-/// Món gợi ý cho một bữa: `ref.watch(suggestionsProvider((meal: Meal.dinner, count: 3)))`.
-///
-/// Stub (PAN-00), xem [suggest]; PAN-02 làm bản thật, giữ nguyên chữ ký.
+/// Món gợi ý cho một bữa; giữ `List<Recipe>` để màn Today hiện có không phải đổi.
+/// Thay đổi tủ/hồ sơ/lưu món/lịch sử/chê món sẽ tính lại danh sách.
 final suggestionsProvider = FutureProvider.family<List<Recipe>, ({Meal meal, int count})>((
   ref,
   args,
 ) async {
   final recipes = await ref.watch(recipesProvider.future);
+  final ingredients = await ref.watch(ingredientsProvider.future);
+  final now = ref.watch(pantryClockProvider)();
+  final since = now.subtract(demoteAfterBadRating);
+  final recentDislikes = {
+    for (final MapEntry(:key, :value) in ref.watch(dislikedProvider).entries)
+      if (!value.at.isBefore(since) && !value.at.isAfter(now)) key,
+  };
+  final history = ref.watch(cookHistoryProvider);
+  final recentCooking = {
+    for (final record in history)
+      if (!record.cookedAt.isBefore(since) && !record.cookedAt.isAfter(now)) record.recipeId,
+  };
+  final profile = ref.watch(kitchenProfileProvider);
   return suggest(
     recipes,
     meal: args.meal,
     count: args.count,
-    disliked: ref.watch(dislikedProvider).keys.toSet(),
+    tools: profile.tools,
+    diets: profile.diets,
+    pantry: ref.watch(pantryItemsProvider),
+    ingredientsById: {for (final ingredient in ingredients) ingredient.id: ingredient},
+    saved: ref.watch(savedIdsProvider),
+    disliked: recentDislikes,
     demoted: ref.watch(_demotedProvider),
+    recentlyCooked: recentCooking,
   );
+});
+
+/// Lý do cho món trong gợi ý; null khi danh mục nguyên liệu chưa tải.
+/// Today dùng `ref.watch(suggestionReasonProvider(recipe))` sau khi nhận món.
+final suggestionReasonProvider = Provider.family<String?, Recipe>((ref, recipe) {
+  final availability = ref.watch(availabilityProvider(recipe));
+  return availability == null ? null : suggestionReason(recipe, availability);
 });
