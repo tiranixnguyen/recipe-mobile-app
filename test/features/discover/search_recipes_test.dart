@@ -49,5 +49,9 @@ void main() {
       ['a'],
     );
     expect(searchRecipes(recipes, ingredients, tool: Tool.stove), isEmpty);
+    expect(searchRecipes(recipes, ingredients, query: 'TRUNG').map((r) => r.id), ['a']);
+    expect(searchRecipes(recipes, ingredients, maxMinutes: 10).map((r) => r.id), ['a']);
+    expect(searchRecipes(recipes, ingredients, meal: Meal.breakfast), isEmpty);
+    expect(searchRecipes(recipes, ingredients, diet: Diet.nospicy), isEmpty);
   });
 }

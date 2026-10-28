@@ -19,6 +19,17 @@ class SearchState {
   final Tool? tool;
   final Diet? diet;
   final Meal? meal;
+
+  String summary(int count) {
+    final parts = <String>[
+      if (query.trim().isNotEmpty) 'có ${query.trim()}',
+      if (maxMinutes != null) 'dưới $maxMinutes phút',
+      if (tool != null) 'dùng ${tool!.label.toLowerCase()}',
+      if (meal != null) 'cho bữa ${meal!.label.toLowerCase()}',
+      if (diet != null) 'hợp ${diet!.label.toLowerCase()}',
+    ];
+    return '$count món${parts.isEmpty ? ' phù hợp' : ' ${parts.join(', ')}'}';
+  }
 }
 
 class SearchViewModel extends Notifier<SearchState> {

@@ -6,7 +6,8 @@ import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
-import 'package:recipe_mobile_app/core/widgets/recipe_row.dart';
+import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
+import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
 import 'package:recipe_mobile_app/core/widgets/search_field.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/search/search_view_model.dart';
@@ -136,7 +137,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   itemBuilder: (context, index) {
                     if (index == 0) {
                       return Text(
-                        '${value.length} món phù hợp',
+                        state.summary(value.length),
                         style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
                       );
                     }
@@ -144,15 +145,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                     return Consumer(
                       builder: (context, ref, _) {
                         final availability = ref.watch(availabilityProvider(recipe));
-                        return RecipeRow(
-                          title: recipe.name,
-                          imageAsset: recipe.imageAsset,
-                          thumbSize: 88,
-                          meta: availability == null
-                              ? '${recipe.minutes} phút · ${recipe.servings} người'
-                              : '${recipe.minutes} phút · ${availability.missing.isEmpty ? 'Đủ đồ' : 'Thiếu ${availability.missing.length} thứ'}',
-                          onTap: () => context.push(recipeLocation(recipe.id)),
-                        );
+                        return _SearchResult(recipe: recipe, availability: availability?.missing);
                       },
                     );
                   },
@@ -167,6 +160,60 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               },
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchResult extends StatelessWidget {
+  const _SearchResult({required this.recipe, required this.availability});
+
+  final Recipe recipe;
+  final List<String>? availability;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Material(
+      color: colors.surfaceRaised,
+      borderRadius: AppRadius.mdAll,
+      child: InkWell(
+        borderRadius: AppRadius.mdAll,
+        onTap: () => context.push(recipeLocation(recipe.id)),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.s2),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 72,
+                height: 72,
+                child: ClipRRect(
+                  borderRadius: AppRadius.smAll,
+                  child: RecipeCover(imageAsset: recipe.imageAsset),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recipe.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.subtitle.copyWith(color: colors.ink),
+                    ),
+                    Text(
+                      '${recipe.minutes} phút · ${recipe.servings} người',
+                      style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+                    ),
+                    if (availability != null) AvailabilityBadge(missing: availability!),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
