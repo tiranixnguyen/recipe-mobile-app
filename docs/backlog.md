@@ -34,31 +34,39 @@ còn sót gộp vào issue v2. Prototype: `docs/design/prototype/` (sync 29/10, 
 | #118 DSC-13 | Đã lưu: tab Món ăn / Bữa ăn, kéo vào thùng rác, `savedMealsProvider` | Lead + Claude | P0 |
 | #119 PAN-11 | Tủ đồ v2: nhóm, tìm, chip 3 trạng thái, kéo vào Đi chợ | Lead + Claude | P0 |
 | #120 PLAN-11 | Thực đơn v2 chế độ Ngày: bữa tâm điểm, lịch tháng, thêm cả bữa | Lead + Claude | P0 |
-| #48 PLAN-02 | Thực đơn v2 chế độ Tuần: lưới tuần, Gợi ý cả tuần | Lead + Claude | P0 |
+| #48 PLAN-02 | Thực đơn v2 chế độ Tuần: lưới tuần, Gợi ý cả tuần | Antigravity | P0 |
 | #49 SHP-01 | Danh sách đi chợ, nhận đồ từ Tủ đồ / Khám phá / Chuẩn bị nấu | Lead + Claude | P0 |
-| #35, #45, #50 | Polish & test theo màn v2 | Cline | P1 |
+| #35, #45, #50 | Polish & test theo màn v2 | Antigravity | P1 |
 
 Thứ tự: #112, #113, #114 (Lead) → #120, #119, #118 → #116, #117, #48, #49 → polish. Màn Nấu (F2) và Hệ thống
 (F5) không đổi thiết kế ở v2, chỉ chuyển snackbar sang widget chung (#112).
 
-Từ 30/10 Lead nhận lại toàn bộ issue đang mở (các thành viên bận). Mọi issue assign cho Lead, label cho biết
-ai làm: `agent:claude` (Lead + Claude Code: việc sâu, chặn issue khác), `agent:cline` (Cline chạy model free:
-#24, #27, #35, #45, #50, #59, #126, #127, #128, spec rõ, phạm vi nhỏ, PR để Lead review). #60, #61, #83 Lead tự làm.
-Issue lớn tách phần độc lập cho Cline: #119 → #126 (hàm tìm/lọc Tủ đồ), #117 → #127 (màn Gợi ý cho mình),
-#116 → #128 (banner carousel).
+### Chia việc từ 30/10: Lead + agent
+
+Các thành viên khác bận, nên Lead nhận lại mọi issue đang mở. GitHub chỉ assign được cho người thật, nên mọi
+issue assign cho @tiranixnguyen; ai làm thì xem label:
+
+- `agent:claude`: Lead làm cùng Claude Code. Việc sâu, nhiều phụ thuộc hoặc chặn issue khác: #120, #49, #118,
+  #119, #117, #116, #115, #25, #26, #28.
+- `agent:antigravity`: Google Antigravity (Gemini 3.8 Flash, mức High). Việc nhỏ, spec rõ: #24, #27, #48, #45,
+  #50, #35, #59, #126, #127, #128. Comment trên từng issue ghi issue phải merge trước. Lead review mọi PR trước
+  khi merge.
+- Issue lớn tách phần độc lập cho Antigravity: #119 → #126 (hàm tìm/lọc Tủ đồ), #117 → #127 (màn Gợi ý cho
+  mình), #116 → #128 (banner carousel).
+- Việc cần người thật (#83, #60, #61): Lead tự làm. Stretch (#62, #63, #64, #107): để sau MVP.
 
 Luật mới ở v2: thời tiết là ngoại lệ duy nhất của luật offline, chỉ chạy khi người dùng bật (#115); vẫn không có
 giá tiền ("Tiết kiệm" là tag món, không phải ngân sách).
 
-## 5 feature — mỗi người một feature
+## 5 feature
 
 | Feature | Chủ | Thư mục | Màn (prototype) | Khối lượng |
 |---|---|---|---|---|
-| F1 · Khám phá | TV1 | `features/discover` | Main, Search, Today, Saved | ~8 ngày |
-| F2 · Nấu | TV2 | `features/cook` | Detail, CookPrep, CookStep, CookDone, RateApp | ~8 ngày |
-| F3 · Tủ đồ & gợi ý | **Lead** | `features/pantry` | Pantry + bộ gợi ý dùng chung | ~5,5 ngày + setup |
-| F4 · Thực đơn & đi chợ | TV3 | `features/plan` | MealPlan (ngày/tuần), Shopping | ~8 ngày |
-| F5 · Hệ thống | TV4 | `features/system` | Onboarding, Settings, NotifPermission, Feedback, About, Policy, ClearData | ~8 ngày |
+| F1 · Khám phá | Lead | `features/discover` | Main, Search, Today, Saved | ~8 ngày |
+| F2 · Nấu | Lead | `features/cook` | Detail, CookPrep, CookStep, CookDone, RateApp | ~8 ngày |
+| F3 · Tủ đồ & gợi ý | Lead | `features/pantry` | Pantry + bộ gợi ý dùng chung | ~5,5 ngày + setup |
+| F4 · Thực đơn & đi chợ | Lead | `features/plan` | MealPlan (ngày/tuần), Shopping | ~8 ngày |
+| F5 · Hệ thống | Lead | `features/system` | Onboarding, Settings, NotifPermission, Feedback, About, Policy, ClearData | ~8 ngày |
 
 Lead còn làm `app/` + `core/` (Splash, Error, theme, dữ liệu) và toàn bộ setup. Ai cũng góp phần như nhau
 vào việc chung: 8 công thức/người, mời 2 người test, bug bash.
@@ -114,7 +122,7 @@ W4 cố ý nhẹ để làm buffer. Nếu trễ, cắt P1 trước (polish, Cras
 |---|---|
 | Milestone | `W1 · Nền tảng & component` (25/10), `W2 · Luồng chính` (1/11), `W3 · Hoàn thiện tính năng` (8/11), `W4 · Kiểm thử & phát hành` (15/11) |
 | Feature | `feature:discover` `feature:cook` `feature:pantry` `feature:plan` `feature:system` — bug cũng gắn để về đúng chủ |
-| Agent | `agent:claude` Lead + Claude Code · `agent:cline` Cline (model free), Lead review |
+| Agent | `agent:claude` Lead + Claude Code · `agent:antigravity` Antigravity (Gemini), Lead review |
 | Khác | `track:lead` setup · `shared` việc chung · `release` · `stretch` · `ai-workflow` |
 | Priority | `P0` bắt buộc · `P1` nên có · `P2` stretch |
 | Size | `size:S` ≤ ½ ngày · `size:M` 1–2 ngày · `size:L` ~3 ngày |

@@ -116,7 +116,7 @@ thì ghi vào bảng này.
 
 Lead làm `app/`, `core/` (Splash, Error, theme, dữ liệu), `pubspec.yaml`, `assets/` và review mọi widget trong
 `lib/core/widgets/`. Mọi issue assign cho Lead; ai làm thì xem label: `agent:claude` (Lead + Claude Code),
-`agent:cline` (Cline, PR để Lead review). Luật ranh giới feature bên dưới vẫn áp dụng cho từng issue.
+`agent:antigravity` (Antigravity, PR để Lead review). Luật ranh giới feature bên dưới vẫn áp dụng cho từng issue.
 
 ## Ranh giới feature (quan trọng)
 
