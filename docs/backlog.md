@@ -29,30 +29,42 @@ còn sót gộp vào issue v2. Prototype: `docs/design/prototype/` (sync 29/10, 
 | #113 CORE-01 | `MealMosaic`, `ShoppingFab` (nút Đi chợ tròn có badge), quy ước kéo thả nhấn giữ | Lead | P0 |
 | #114 CORE-02 | Tag công thức (`role`, `feel`, `tags`), `suggestMeal()` gợi ý cả bữa | Lead | P0 |
 | #115 CORE-03 | Gợi ý theo thời tiết, tuỳ chọn, mặc định tắt | Lead | P1 |
-| #116 DSC-11 | Khám phá v2: banner, "Sắp tới bữa … rồi", Nấu được ngay, Thiếu 1–2 thứ, Đi chợ | F1 | P0 |
-| #117 DSC-12 | Gợi ý cho mình (`TodayPrefs`) + Hôm nay ăn gì theo bữa, Lưu lại / Thêm vào thực đơn | F1 | P0 |
-| #118 DSC-13 | Đã lưu: tab Món ăn / Bữa ăn, kéo vào thùng rác, `savedMealsProvider` | F1 | P0 |
-| #119 PAN-11 | Tủ đồ v2: nhóm, tìm, chip 3 trạng thái, kéo vào Đi chợ | F3 | P0 |
-| #120 PLAN-11 | Thực đơn v2 chế độ Ngày: bữa tâm điểm, lịch tháng, thêm cả bữa | F4 | P0 |
-| #48 PLAN-02 | Thực đơn v2 chế độ Tuần: lưới tuần, Gợi ý cả tuần | F4 | P0 |
-| #49 SHP-01 | Danh sách đi chợ, nhận đồ từ Tủ đồ / Khám phá / Chuẩn bị nấu | F4 | P0 |
-| #35, #45, #50 | Polish & test theo màn v2 | F1, F3, F4 | P1 |
+| #116 DSC-11 | Khám phá v2: banner, "Sắp tới bữa … rồi", Nấu được ngay, Thiếu 1–2 thứ, Đi chợ | Lead + Claude | P0 |
+| #117 DSC-12 | Gợi ý cho mình (`TodayPrefs`) + Hôm nay ăn gì theo bữa, Lưu lại / Thêm vào thực đơn | Lead + Claude | P0 |
+| #118 DSC-13 | Đã lưu: tab Món ăn / Bữa ăn, kéo vào thùng rác, `savedMealsProvider` | Lead + Claude | P0 |
+| #119 PAN-11 | Tủ đồ v2: nhóm, tìm, chip 3 trạng thái, kéo vào Đi chợ | Lead + Claude | P0 |
+| #120 PLAN-11 | Thực đơn v2 chế độ Ngày: bữa tâm điểm, lịch tháng, thêm cả bữa | Lead + Claude | P0 |
+| #48 PLAN-02 | Thực đơn v2 chế độ Tuần: lưới tuần, Gợi ý cả tuần | Antigravity | P0 |
+| #49 SHP-01 | Danh sách đi chợ, nhận đồ từ Tủ đồ / Khám phá / Chuẩn bị nấu | Lead + Claude | P0 |
+| #35, #45, #50 | Polish & test theo màn v2 | Antigravity | P1 |
 
 Thứ tự: #112, #113, #114 (Lead) → #120, #119, #118 → #116, #117, #48, #49 → polish. Màn Nấu (F2) và Hệ thống
 (F5) không đổi thiết kế ở v2, chỉ chuyển snackbar sang widget chung (#112).
 
+### Chia việc từ 30/10: Lead + agent
+
+Các thành viên khác bận, nên Lead nhận lại mọi issue đang mở. GitHub chỉ assign được cho người thật, nên mọi
+issue assign cho @tiranixnguyen; ai làm thì xem label:
+
+- `agent:claude`: Lead làm cùng Claude Code. Việc sâu, nhiều phụ thuộc hoặc chặn issue khác: #120, #49, #118,
+  #119, #117, #116, #115, #25, #26, #28.
+- `agent:antigravity`: Google Antigravity (Gemini 3.8 Flash, mức High). Việc nhỏ, spec rõ: #24, #27, #48, #45,
+  #50, #35, #59, #126, #127, #128. Comment trên từng issue ghi issue phải merge trước. Lead review mọi PR trước
+  khi merge.
+- Việc cần người thật (#83, #60, #61): Lead tự làm. Stretch (#62, #63, #64, #107): để sau MVP.
+
 Luật mới ở v2: thời tiết là ngoại lệ duy nhất của luật offline, chỉ chạy khi người dùng bật (#115); vẫn không có
 giá tiền ("Tiết kiệm" là tag món, không phải ngân sách).
 
-## 5 feature — mỗi người một feature
+## 5 feature
 
 | Feature | Chủ | Thư mục | Màn (prototype) | Khối lượng |
 |---|---|---|---|---|
-| F1 · Khám phá | TV1 | `features/discover` | Main, Search, Today, Saved | ~8 ngày |
-| F2 · Nấu | TV2 | `features/cook` | Detail, CookPrep, CookStep, CookDone, RateApp | ~8 ngày |
-| F3 · Tủ đồ & gợi ý | **Lead** | `features/pantry` | Pantry + bộ gợi ý dùng chung | ~5,5 ngày + setup |
-| F4 · Thực đơn & đi chợ | TV3 | `features/plan` | MealPlan (ngày/tuần), Shopping | ~8 ngày |
-| F5 · Hệ thống | TV4 | `features/system` | Onboarding, Settings, NotifPermission, Feedback, About, Policy, ClearData | ~8 ngày |
+| F1 · Khám phá | Lead | `features/discover` | Main, Search, Today, Saved | ~8 ngày |
+| F2 · Nấu | Lead | `features/cook` | Detail, CookPrep, CookStep, CookDone, RateApp | ~8 ngày |
+| F3 · Tủ đồ & gợi ý | Lead | `features/pantry` | Pantry + bộ gợi ý dùng chung | ~5,5 ngày + setup |
+| F4 · Thực đơn & đi chợ | Lead | `features/plan` | MealPlan (ngày/tuần), Shopping | ~8 ngày |
+| F5 · Hệ thống | Lead | `features/system` | Onboarding, Settings, NotifPermission, Feedback, About, Policy, ClearData | ~8 ngày |
 
 Lead còn làm `app/` + `core/` (Splash, Error, theme, dữ liệu) và toàn bộ setup. Ai cũng góp phần như nhau
 vào việc chung: 8 công thức/người, mời 2 người test, bug bash.
