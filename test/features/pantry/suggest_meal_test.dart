@@ -212,6 +212,24 @@ void main() {
     });
   });
 
+  test('nới đủ bốn bước: câu hạ quy mô trước, rồi một câu gộp phần còn lại', () {
+    final meal = _suggest(
+      [_recipe('kho', DishRole.main, minutes: 50)],
+      const MealPrefs(
+        scale: MealScale.two,
+        maxMinutes: 15,
+        feel: DishFeel.cooling,
+        tags: {RecipeTag.snack, RecipeTag.cheap},
+      ),
+    );
+    expect(_ids(meal), ['kho']);
+    expect(
+      meal!.relaxedNote,
+      'Chưa đủ món cho cơm nhà 2 món, đã gợi ý 1 món gọn lẹ. '
+      'Đã bỏ tiêu chí Tiết kiệm, Mồi bén và Giải nhiệt, bỏ giới hạn thời gian để có đủ gợi ý.',
+    );
+  });
+
   group('xếp hạng', () {
     test('đủ đồ lên trước thiếu đồ', () {
       final recipes = [

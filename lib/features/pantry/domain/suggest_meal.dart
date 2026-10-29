@@ -129,7 +129,9 @@ class MealSuggestion {
       '${relaxedNote == null ? '' : ', "$relaxedNote"'})';
 }
 
-/// Ứng viên tối đa mỗi vai, để số tổ hợp không bùng nổ khi dữ liệu nhiều món.
+/// Ứng viên tối đa mỗi vai, để số tổ hợp không bùng nổ khi dữ liệu nhiều món. Ứng viên được chọn theo
+/// điểm từng món, nên khi dữ liệu lớn bữa trả về có thể không phải tổ hợp tốt nhất tuyệt đối; tăng số này
+/// nếu thấy gợi ý kém đi.
 const _perRole = 8;
 
 /// Thang nới thời gian: lên mốc kế tiếp, quá mốc cuối thì bỏ giới hạn.
