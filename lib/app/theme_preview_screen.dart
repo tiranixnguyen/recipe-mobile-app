@@ -9,11 +9,14 @@ import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 import 'package:recipe_mobile_app/core/widgets/confirm_dialog.dart';
 import 'package:recipe_mobile_app/core/widgets/day_strip.dart';
 import 'package:recipe_mobile_app/core/widgets/empty_state.dart';
+import 'package:recipe_mobile_app/core/widgets/hold_draggable.dart';
 import 'package:recipe_mobile_app/core/widgets/inline_banner.dart';
+import 'package:recipe_mobile_app/core/widgets/meal_mosaic.dart';
 import 'package:recipe_mobile_app/core/widgets/meal_slot.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_card.dart';
 import 'package:recipe_mobile_app/core/widgets/search_field.dart';
 import 'package:recipe_mobile_app/core/widgets/serving_stepper.dart';
+import 'package:recipe_mobile_app/core/widgets/shopping_fab.dart';
 import 'package:recipe_mobile_app/core/widgets/step_timer.dart';
 import 'package:recipe_mobile_app/core/widgets/tip_bubble.dart';
 
@@ -396,6 +399,7 @@ class _ComponentSamples extends StatelessWidget {
           onAction: () {},
         ),
         const _NoticeSamples(),
+        const _MealSamples(),
       ],
     );
   }
@@ -475,6 +479,79 @@ class _NoticeSamples extends StatelessWidget {
         const InlineBanner(
           kind: BannerKind.success,
           text: 'Sẽ thêm cùng Canh cà chua trứng · bữa này thành 2 món',
+        ),
+      ],
+    );
+  }
+}
+
+/// Widget dùng chung v2: mosaic một bữa, nút nổi Đi chợ nhận chip kéo thả.
+class _MealSamples extends StatefulWidget {
+  const _MealSamples();
+
+  @override
+  State<_MealSamples> createState() => _MealSamplesState();
+}
+
+class _MealSamplesState extends State<_MealSamples> {
+  static const _dishes = [
+    MosaicDish('Đậu phụ sốt cà chua', 'assets/images/recipes/dau-phu-sot-ca-chua.jpg'),
+    MosaicDish('Canh cà chua trứng', 'assets/images/recipes/canh-ca-chua-trung.jpg'),
+    MosaicDish('Trứng chiên hành', 'assets/images/recipes/trung-chien-hanh.jpg'),
+    MosaicDish('Mì xào rau cải', 'assets/images/recipes/mi-xao-rau-cai.jpg'),
+    MosaicDish('Cơm rang dưa cải', 'assets/images/recipes/com-rang-dua-cai.jpg'),
+    MosaicDish('Rau cải luộc'),
+  ];
+
+  var _shopping = 2;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: AppSpacing.s3,
+      children: [
+        SizedBox(
+          height: 168,
+          child: MealMosaic(dishes: _dishes.take(3).toList(), radius: AppRadius.mdAll),
+        ),
+        Wrap(
+          spacing: AppSpacing.s2,
+          runSpacing: AppSpacing.s2,
+          children: [
+            for (final n in [1, 2, 4, 6])
+              MealMosaic(
+                dishes: _dishes.take(n).toList(),
+                size: n == 6 ? 96 : 48,
+                radius: AppRadius.smAll,
+              ),
+          ],
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Wrap(
+                spacing: AppSpacing.s2,
+                children: [
+                  for (final item in ['Trứng gà', 'Hành lá'])
+                    HoldDraggable<String>(
+                      data: item,
+                      semanticsActionLabel: 'Thêm vào đi chợ',
+                      onSemanticsAction: () => setState(() => _shopping++),
+                      child: AppChip(label: item, selected: false, onTap: () {}),
+                    ),
+                ],
+              ),
+            ),
+            ShoppingFab<String>(
+              count: _shopping,
+              onPressed: () {},
+              onAccept: (item) {
+                setState(() => _shopping++);
+                AppSnackbar.show(context, 'Đã thêm ${item.toLowerCase()} vào đi chợ');
+              },
+            ),
+          ],
         ),
       ],
     );
