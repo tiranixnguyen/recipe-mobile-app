@@ -51,6 +51,8 @@ issue assign cho @tiranixnguyen; ai làm thì xem label:
 - `agent:antigravity`: Google Antigravity (Gemini 3.8 Flash, mức High). Việc nhỏ, spec rõ: #24, #27, #48, #45,
   #50, #35, #59, #126, #127, #128. Comment trên từng issue ghi issue phải merge trước. Lead review mọi PR trước
   khi merge.
+- Issue lớn tách phần độc lập cho Antigravity: #119 → #126 (hàm tìm/lọc Tủ đồ), #117 → #127 (màn Gợi ý cho
+  mình), #116 → #128 (banner carousel).
 - Việc cần người thật (#83, #60, #61): Lead tự làm. Stretch (#62, #63, #64, #107): để sau MVP.
 
 Luật mới ở v2: thời tiết là ngoại lệ duy nhất của luật offline, chỉ chạy khi người dùng bật (#115); vẫn không có
@@ -120,13 +122,14 @@ W4 cố ý nhẹ để làm buffer. Nếu trễ, cắt P1 trước (polish, Cras
 |---|---|
 | Milestone | `W1 · Nền tảng & component` (25/10), `W2 · Luồng chính` (1/11), `W3 · Hoàn thiện tính năng` (8/11), `W4 · Kiểm thử & phát hành` (15/11) |
 | Feature | `feature:discover` `feature:cook` `feature:pantry` `feature:plan` `feature:system` — bug cũng gắn để về đúng chủ |
+| Agent | `agent:claude` Lead + Claude Code · `agent:antigravity` Antigravity (Gemini), Lead review |
 | Khác | `track:lead` setup · `shared` việc chung · `release` · `stretch` · `ai-workflow` |
 | Priority | `P0` bắt buộc · `P1` nên có · `P2` stretch |
 | Size | `size:S` ≤ ½ ngày · `size:M` 1–2 ngày · `size:L` ~3 ngày |
 
 ## AI workflow: GitHub ↔ Slack ↔ IDE
 
-Đã chạy thử trọn vòng trên nhánh `demo` — xem `docs/demo-flow.md` ở nhánh đó.
+Đã chạy thử trọn vòng trên nhánh `demo` (đã xoá 30/10, lưu ở tag `archive/demo`) — xem `docs/demo-flow.md` trong tag đó.
 
 ```
 Issue (spec cho agent, label feature:<f> → đúng chủ)

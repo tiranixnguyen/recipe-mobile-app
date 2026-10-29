@@ -115,7 +115,8 @@ thì ghi vào bảng này.
 | F5 Hệ thống | @tiranixnguyen (Lead) | `features/system` | Onboarding, Settings, NotifPermission, Feedback, About, Policy, ClearData | `kitchenProfileProvider`, `themeModeProvider`, `NotificationService` |
 
 Lead làm `app/`, `core/` (Splash, Error, theme, dữ liệu), `pubspec.yaml`, `assets/` và review mọi widget trong
-`lib/core/widgets/`. Component của design system chia theo người cần đầu tiên, xem `docs/backlog.md`.
+`lib/core/widgets/`. Mọi issue assign cho Lead; ai làm thì xem label: `agent:claude` (Lead + Claude Code),
+`agent:antigravity` (Antigravity, PR để Lead review). Luật ranh giới feature bên dưới vẫn áp dụng cho từng issue.
 
 ## Ranh giới feature (quan trọng)
 

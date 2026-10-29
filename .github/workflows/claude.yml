@@ -1,5 +1,5 @@
 # Gọi Claude bằng "@claude ..." trong comment của PR/issue: hỏi giải thích, xin review lại, nhờ sửa.
-# Chỉ người có quyền ghi vào repo mới gọi được. File phải giống hệt nhau trên main và demo.
+# Chỉ người có quyền ghi vào repo mới gọi được.
 name: Claude
 
 on:
