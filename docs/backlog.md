@@ -29,17 +29,21 @@ còn sót gộp vào issue v2. Prototype: `docs/design/prototype/` (sync 29/10, 
 | #113 CORE-01 | `MealMosaic`, `ShoppingFab` (nút Đi chợ tròn có badge), quy ước kéo thả nhấn giữ | Lead | P0 |
 | #114 CORE-02 | Tag công thức (`role`, `feel`, `tags`), `suggestMeal()` gợi ý cả bữa | Lead | P0 |
 | #115 CORE-03 | Gợi ý theo thời tiết, tuỳ chọn, mặc định tắt | Lead | P1 |
-| #116 DSC-11 | Khám phá v2: banner, "Sắp tới bữa … rồi", Nấu được ngay, Thiếu 1–2 thứ, Đi chợ | F1 | P0 |
-| #117 DSC-12 | Gợi ý cho mình (`TodayPrefs`) + Hôm nay ăn gì theo bữa, Lưu lại / Thêm vào thực đơn | F1 | P0 |
-| #118 DSC-13 | Đã lưu: tab Món ăn / Bữa ăn, kéo vào thùng rác, `savedMealsProvider` | F1 | P0 |
-| #119 PAN-11 | Tủ đồ v2: nhóm, tìm, chip 3 trạng thái, kéo vào Đi chợ | F3 | P0 |
-| #120 PLAN-11 | Thực đơn v2 chế độ Ngày: bữa tâm điểm, lịch tháng, thêm cả bữa | F4 | P0 |
-| #48 PLAN-02 | Thực đơn v2 chế độ Tuần: lưới tuần, Gợi ý cả tuần | F4 | P0 |
-| #49 SHP-01 | Danh sách đi chợ, nhận đồ từ Tủ đồ / Khám phá / Chuẩn bị nấu | F4 | P0 |
-| #35, #45, #50 | Polish & test theo màn v2 | F1, F3, F4 | P1 |
+| #116 DSC-11 | Khám phá v2: banner, "Sắp tới bữa … rồi", Nấu được ngay, Thiếu 1–2 thứ, Đi chợ | Lead + Claude | P0 |
+| #117 DSC-12 | Gợi ý cho mình (`TodayPrefs`) + Hôm nay ăn gì theo bữa, Lưu lại / Thêm vào thực đơn | Lead + Claude | P0 |
+| #118 DSC-13 | Đã lưu: tab Món ăn / Bữa ăn, kéo vào thùng rác, `savedMealsProvider` | Lead + Claude | P0 |
+| #119 PAN-11 | Tủ đồ v2: nhóm, tìm, chip 3 trạng thái, kéo vào Đi chợ | Lead + Claude | P0 |
+| #120 PLAN-11 | Thực đơn v2 chế độ Ngày: bữa tâm điểm, lịch tháng, thêm cả bữa | Lead + Claude | P0 |
+| #48 PLAN-02 | Thực đơn v2 chế độ Tuần: lưới tuần, Gợi ý cả tuần | Lead + Claude | P0 |
+| #49 SHP-01 | Danh sách đi chợ, nhận đồ từ Tủ đồ / Khám phá / Chuẩn bị nấu | Lead + Claude | P0 |
+| #35, #45, #50 | Polish & test theo màn v2 | Cline | P1 |
 
 Thứ tự: #112, #113, #114 (Lead) → #120, #119, #118 → #116, #117, #48, #49 → polish. Màn Nấu (F2) và Hệ thống
 (F5) không đổi thiết kế ở v2, chỉ chuyển snackbar sang widget chung (#112).
+
+Từ 30/10 Lead nhận lại toàn bộ issue đang mở (các thành viên bận). Mọi issue assign cho Lead, label cho biết
+ai làm: `agent:claude` (Lead + Claude Code: việc sâu, chặn issue khác), `agent:cline` (Cline chạy model free:
+#24, #27, #35, #45, #50, #59, spec rõ, phạm vi nhỏ, PR để Lead review). #60, #61, #83 Lead tự làm.
 
 Luật mới ở v2: thời tiết là ngoại lệ duy nhất của luật offline, chỉ chạy khi người dùng bật (#115); vẫn không có
 giá tiền ("Tiết kiệm" là tag món, không phải ngân sách).
@@ -108,6 +112,7 @@ W4 cố ý nhẹ để làm buffer. Nếu trễ, cắt P1 trước (polish, Cras
 |---|---|
 | Milestone | `W1 · Nền tảng & component` (25/10), `W2 · Luồng chính` (1/11), `W3 · Hoàn thiện tính năng` (8/11), `W4 · Kiểm thử & phát hành` (15/11) |
 | Feature | `feature:discover` `feature:cook` `feature:pantry` `feature:plan` `feature:system` — bug cũng gắn để về đúng chủ |
+| Agent | `agent:claude` Lead + Claude Code · `agent:cline` Cline (model free), Lead review |
 | Khác | `track:lead` setup · `shared` việc chung · `release` · `stretch` · `ai-workflow` |
 | Priority | `P0` bắt buộc · `P1` nên có · `P2` stretch |
 | Size | `size:S` ≤ ½ ngày · `size:M` 1–2 ngày · `size:L` ~3 ngày |

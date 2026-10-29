@@ -108,14 +108,15 @@ thì ghi vào bảng này.
 
 | Feature | Chủ | Thư mục | Màn (prototype) | Public API (`<f>.dart`) |
 |---|---|---|---|---|
-| F1 Khám phá | @hu666-dot | `features/discover` | Main, Search, TodayPrefs, Today, Saved | `SaveButton`, `savedIdsProvider`, `savedMealsProvider`, route `/search` |
-| F2 Nấu | @dtranh2005 | `features/cook` | Detail, CookPrep, CookStep, CookDone, RateApp | route `/recipe/:id`, `ResumeCookingBanner`, `cookHistoryProvider` |
+| F1 Khám phá | @tiranixnguyen (Lead) | `features/discover` | Main, Search, TodayPrefs, Today, Saved | `SaveButton`, `savedIdsProvider`, `savedMealsProvider`, route `/search` |
+| F2 Nấu | @tiranixnguyen (Lead) | `features/cook` | Detail, CookPrep, CookStep, CookDone, RateApp | route `/recipe/:id`, `ResumeCookingBanner`, `cookHistoryProvider` |
 | F3 Tủ đồ & gợi ý | @tiranixnguyen (Lead) | `features/pantry` | Pantry | `availabilityFor`, `suggest`, `suggestMeal`/`mealSuggesterProvider`, `dislike`, `pantryItemsProvider`, `addToPantry`, `removeFromPantry` |
-| F4 Thực đơn & đi chợ | @SeiGirl | `features/plan` | MealPlan, Shopping | `addToPlan`, `addToShopping`, `plannedMealsProvider`, route `/shopping` |
-| F5 Hệ thống | @huytq160871 | `features/system` | Onboarding, Settings, NotifPermission, Feedback, About, Policy, ClearData | `kitchenProfileProvider`, `themeModeProvider`, `NotificationService` |
+| F4 Thực đơn & đi chợ | @tiranixnguyen (Lead) | `features/plan` | MealPlan, Shopping | `addToPlan`, `addToShopping`, `plannedMealsProvider`, route `/shopping` |
+| F5 Hệ thống | @tiranixnguyen (Lead) | `features/system` | Onboarding, Settings, NotifPermission, Feedback, About, Policy, ClearData | `kitchenProfileProvider`, `themeModeProvider`, `NotificationService` |
 
 Lead làm `app/`, `core/` (Splash, Error, theme, dữ liệu), `pubspec.yaml`, `assets/` và review mọi widget trong
-`lib/core/widgets/`. Component của design system chia theo người cần đầu tiên, xem `docs/backlog.md`.
+`lib/core/widgets/`. Mọi issue assign cho Lead; ai làm thì xem label: `agent:claude` (Lead + Claude Code),
+`agent:cline` (Cline, PR để Lead review). Luật ranh giới feature bên dưới vẫn áp dụng cho từng issue.
 
 ## Ranh giới feature (quan trọng)
 
