@@ -57,8 +57,10 @@ class HoldDraggable<T extends Object> extends StatelessWidget {
           HapticFeedback.mediumImpact();
           AppDrag.active.value = data;
         },
-        onDragEnd: (details) {
-          if (details.wasAccepted) HapticFeedback.selectionClick();
+        // Không dùng onDragEnd: nó bị bỏ qua khi widget đã gỡ giữa lúc kéo (ví dụ chip biến mất sau
+        // khi thả), làm AppDrag kẹt ở trạng thái đang kéo. Hai callback dưới luôn được gọi.
+        onDragCompleted: () {
+          HapticFeedback.selectionClick();
           AppDrag.active.value = null;
         },
         onDraggableCanceled: (_, _) => AppDrag.active.value = null,

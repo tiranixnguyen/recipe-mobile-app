@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
@@ -47,10 +46,8 @@ class ShoppingFab<T extends Object> extends StatelessWidget {
       valueListenable: AppDrag.active,
       builder: (context, dragging, _) => DragTarget<T>(
         onWillAcceptWithDetails: (details) => onWillAccept?.call(details.data) ?? true,
-        onAcceptWithDetails: (details) {
-          HapticFeedback.selectionClick();
-          onAccept(details.data);
-        },
+        // Rung khi thả do HoldDraggable lo.
+        onAcceptWithDetails: (details) => onAccept(details.data),
         builder: (context, candidates, _) {
           final lifting = dragging is T;
           return AnimatedScale(
