@@ -10,6 +10,9 @@ abstract final class DiscoverStrings {
   static const heroTitle = 'Hôm nay ăn gì?';
   static const heroBody = 'Gợi ý theo đồ trong tủ, bếp của bạn và bữa sắp tới.';
   static const heroAction = 'Gợi ý cho mình';
+  static const suggestionBannerAria = 'Gợi ý hôm nay';
+  static const viewDish = 'Xem món';
+  static String cardSemanticLabel(int current, int total) => 'Thẻ $current trên $total';
   static const searchPlaceholder = 'Tìm món hoặc nguyên liệu';
   static const quickUnder15 = 'Dưới 15 phút';
   static const quickRiceCooker = 'Nồi cơm điện';
