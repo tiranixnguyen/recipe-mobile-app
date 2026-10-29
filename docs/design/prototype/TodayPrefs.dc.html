@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Bạn muốn ăn thế nào?</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a{color:var(--chili-deep)}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+.opt{width:100%;min-height:56px;padding:8px 12px;display:flex;align-items:center;gap:12px;border-radius:12px;cursor:pointer;text-align:left;font-family:'Be Vietnam Pro',sans-serif;color:var(--ink)}
+.opt:focus-visible,.sw:focus-visible,.more:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.dot{width:20px;height:20px;flex-shrink:0;border-radius:999px;display:flex;align-items:center;justify-content:center}
+.sw{width:52px;height:32px;flex-shrink:0;padding:0;border-radius:999px;cursor:pointer;position:relative;transition:background .15s}
+.sw i{position:absolute;top:4px;width:24px;height:24px;border-radius:999px;background:#FFFFFF;transition:left .15s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; align-items: center; gap: 4px; padding: 8px 16px 0 4px; min-height: 72px; flex-shrink: 0">
+    <a href="Main.dc.html" aria-label="Quay lại Khám phá" style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <div style="display: flex; flex-direction: column">
+      <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Hôm nay bạn muốn ăn thế nào?</h1>
+      <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{sub}}</span>
+    </div>
+  </header>
+
+  <!-- Flutter (F1): choices persist in LocalStore 'discover.todayPrefs'; the weather option needs the opt-in from Cài đặt
+       (coarse location + network). No budget or price criteria: "Tiết kiệm" is a tag on cheap, pantry-friendly dishes. -->
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 12px 16px 16px 16px">
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="3">
+      <section role="radiogroup" aria-labelledby="{{g.id}}" style="display: flex; flex-direction: column; gap: 8px">
+        <h2 id="{{g.id}}" style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 700">{{g.label}}</h2>
+        <sc-for list="{{g.opts}}" as="o" hint-placeholder-count="3">
+          <button class="opt" role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="{{o.style}}">
+            <span class="dot" style="{{o.ring}}"><span style="width: 10px; height: 10px; border-radius: 999px; {{o.fill}}"></span></span>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+              <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{o.label}}</span>
+              <span class="c2" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{o.hint}}</span>
+            </span>
+            <sc-if value="{{o.hasBadge}}" hint-placeholder-val="{{false}}">
+              <span style="flex-shrink: 0; padding: 1px 8px; border-radius: 8px; background: var(--surface); color: var(--ink-muted); font-size: 12px; line-height: 18px; font-weight: 600">{{o.badge}}</span>
+            </sc-if>
+          </button>
+        </sc-for>
+      </section>
+    </sc-for>
+
+    <section style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line)">
+      <span style="flex: 1; display: flex; flex-direction: column">
+        <span id="fridge-lbl" style="font-size: 15px; line-height: 22px; font-weight: 600">Dọn tủ lạnh</span>
+        <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">Ưu tiên món dùng đồ đang có trong tủ</span>
+      </span>
+      <button class="sw" role="switch" aria-checked="{{fridge}}" aria-labelledby="fridge-lbl" onClick="{{toggleFridge}}" style="{{swStyle}}"><i style="{{knob}}"></i></button>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <button class="more" onClick="{{toggleMore}}" aria-expanded="{{moreOpen}}" style="align-self: flex-start; min-height: 44px; padding: 0 4px; display: flex; align-items: center; gap: 6px; border: 0; background: transparent; color: var(--chili-deep); cursor: pointer; font: 600 15px/22px 'Be Vietnam Pro', sans-serif">
+        {{moreLabel}}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{moreIcon}}"><path d="M6 9l6 6 6-6"></path></svg>
+      </button>
+      <sc-if value="{{moreOpen}}" hint-placeholder-val="{{false}}">
+        <sc-for list="{{extras}}" as="x" hint-placeholder-count="3">
+          <div role="group" aria-label="{{x.label}}" style="display: flex; flex-direction: column; gap: 8px">
+            <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{x.label}}</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 8px">
+              <sc-for list="{{x.tags}}" as="t" hint-placeholder-count="3">
+                <x-import component-from-global-scope="BepHoaLac.Chip" selected="{{t.on}}" on-click="{{t.pick}}">{{t.label}}</x-import>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </sc-if>
+    </section>
+  </main>
+
+  <footer style="flex-shrink: 0; display: flex; gap: 12px; padding: 12px 16px 24px 16px; border-top: 1px solid var(--line); background: var(--surface-raised)">
+    <a href="Today.dc.html" class="bh-btn bh-btn-ghost" style="flex: 0 0 auto; text-decoration: none">Bỏ qua</a>
+    <a href="Today.dc.html" class="bh-btn bh-btn-primary bh-btn-lg" style="flex: 1; text-decoration: none">{{cta}}</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"weather":{"editor":"enum","options":["nắng nóng","mưa lạnh","tắt"],"default":"nắng nóng"},"$preview":{"width":390,"height":844}}'>
+var GROUPS = [
+{ id: 'scale', label: 'Quy mô bữa', opts: [
+['one', '1 món gọn lẹ', 'Bún, miến, cơm rang, mì xào: ăn nhanh, ít rửa bát'],
+['two', 'Cơm nhà 2 món', '1 món mặn + 1 canh hoặc xào, hợp 1–2 người'],
+['tray', 'Mâm cơm (3+ món)', 'Đủ mặn, canh, xào, nấu chung cả phòng']
+] },
+{ id: 'time', label: 'Thời gian nấu', opts: [
+['15', 'Siêu tốc', 'Dưới 15 phút: trứng, mì, món luộc'],
+['30', 'Nhanh gọn', 'Dưới 30 phút: món xào, canh thịt băm'],
+['45', 'Thong thả', 'Trên 45 phút: kho, hầm, ninh']
+] },
+{ id: 'feel', label: 'Cảm giác', opts: [
+['auto', 'Theo thời tiết', 'App tự chọn theo trời hôm nay'],
+['hot', 'Nóng bức · Giải nhiệt', 'Canh chua, món luộc, gỏi, ít dầu mỡ'],
+['cold', 'Mưa lạnh · Ấm bụng', 'Món kho, canh nóng, cay, đậm đà']
+] }
+];
+var EXTRAS = [
+{ label: 'Tiết kiệm', tags: [['cheap', 'Hệ cuối tháng']] },
+{ label: 'Khẩu vị', tags: [['healthy', 'Healthy · Eat clean'], ['veg', 'Thanh đạm · Món chay'], ['mild', 'Dịu nhẹ, không cay']] },
+{ label: 'Dịp', tags: [['snack', 'Mồi bén · Lai rai'], ['party', 'Đãi bạn · Cuối tuần']] }
+];
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { scale: 'two', time: '30', feel: 'auto', fridge: true, more: false, tags: {} };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var w = this.props.weather || 'nắng nóng';
+var wxBadge = w === 'tắt' ? 'Chưa bật' : w === 'mưa lạnh' ? 'Mưa 19°' : 'Nắng 35°';
+var picked = Object.keys(st.tags).filter(function (k) { return st.tags[k]; }).length;
+var scaleLabel = GROUPS[0].opts.filter(function (o) { return o[0] === st.scale; })[0][1];
+return {
+theme: this.props.theme ?? 'system',
+sub: 'Chọn nhanh, app lo phần còn lại',
+groups: GROUPS.map(function (g) {
+return {
+id: 'grp-' + g.id,
+label: g.label,
+opts: g.opts.map(function (o) {
+var on = st[g.id] === o[0];
+var badge = g.id === 'feel' && o[0] === 'auto' ? wxBadge : '';
+return {
+label: o[1], hint: o[2], on: on, badge: badge, hasBadge: !!badge,
+style: on ? 'border: 2px solid var(--chili); background: var(--chili-soft);' : 'border: 1px solid var(--outline); background: var(--surface-raised);',
+ring: on ? 'border: 2px solid var(--chili);' : 'border: 2px solid var(--outline);',
+fill: on ? 'background: var(--chili);' : 'background: transparent;',
+pick: function () { var n = {}; n[g.id] = o[0]; self.setState(n); }
+};
+})
+};
+}),
+fridge: st.fridge,
+toggleFridge: function () { self.setState({ fridge: !self.state.fridge }); },
+swStyle: st.fridge ? 'border: 0; background: var(--herb);' : 'border: 2px solid var(--outline); background: var(--surface);',
+knob: st.fridge ? 'left: 24px;' : 'left: 2px; top: 2px;',
+moreOpen: st.more,
+toggleMore: function () { self.setState({ more: !self.state.more }); },
+moreLabel: 'Thêm tiêu chí' + (picked ? ' (' + picked + ')' : ''),
+moreIcon: st.more ? 'transform: rotate(180deg);' : '',
+extras: EXTRAS.map(function (x) {
+return { label: x.label, tags: x.tags.map(function (t) {
+var on = !!st.tags[t[0]];
+return { label: t[1], on: on, pick: function () { var n = Object.assign({}, self.state.tags); n[t[0]] = !on; self.setState({ tags: n }); } };
+}) };
+}),
+cta: 'Gợi ý ' + scaleLabel.toLowerCase()
+};
+}
+}
+</script>
+</body>
+</html>

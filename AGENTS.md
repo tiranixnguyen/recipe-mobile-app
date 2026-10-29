@@ -13,7 +13,10 @@ dụng cụ trong phòng. Setup máy: xem `README.md`. Kế hoạch và issue: `
 - **Không tài khoản, không đăng nhập.** Dữ liệu cá nhân (tủ đồ, thực đơn, món đã lưu, lịch sử nấu, dụng cụ,
   chế độ ăn, giao diện) chỉ lưu trên máy qua `LocalStore`. Chỉ nội dung góp ý người dùng tự gửi mới rời máy.
 - **Công thức đóng gói sẵn** trong `assets/data/`, app chạy offline hoàn toàn. Firebase chỉ dùng cho
-  Crashlytics/Analytics và nhận góp ý.
+  Crashlytics/Analytics và nhận góp ý. Ngoại lệ duy nhất: gợi ý theo thời tiết (#115), mặc định tắt, chỉ gọi
+  mạng và xin vị trí gần đúng khi người dùng tự bật.
+- Thông báo (snackbar, mẹo, banner, hộp thoại xác nhận) chỉ dùng widget chung trong `lib/core/widgets/` theo
+  `docs/design/prototype/Toasts.dc.html` (#112), không tự `SnackBar(...)`.
 - Giọng văn UI: tiếng Việt có dấu, xưng "bạn", câu ngắn, không emoji. Chi tiết trong
   `docs/design/design-system/README.md`.
 
@@ -101,7 +104,7 @@ thì ghi vào bảng này.
 
 | Feature | Chủ | Thư mục | Màn (prototype) | Public API (`<f>.dart`) |
 |---|---|---|---|---|
-| F1 Khám phá | @hu666-dot | `features/discover` | Main, Search, Today, Saved | `SaveButton`, `savedIdsProvider`, route `/search` |
+| F1 Khám phá | @hu666-dot | `features/discover` | Main, Search, TodayPrefs, Today, Saved | `SaveButton`, `savedIdsProvider`, `savedMealsProvider`, route `/search` |
 | F2 Nấu | @dtranh2005 | `features/cook` | Detail, CookPrep, CookStep, CookDone, RateApp | route `/recipe/:id`, `ResumeCookingBanner`, `cookHistoryProvider` |
 | F3 Tủ đồ & gợi ý | @tiranixnguyen (Lead) | `features/pantry` | Pantry | `availabilityFor`, `suggest`, `dislike`, `pantryItemsProvider`, `addToPantry`, `removeFromPantry` |
 | F4 Thực đơn & đi chợ | @SeiGirl | `features/plan` | MealPlan, Shopping | `addToPlan`, `addToShopping`, `plannedMealsProvider`, route `/shopping` |

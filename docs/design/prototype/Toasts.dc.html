@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Thông báo chung</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+*{box-sizing:border-box}
+h2{margin:0;font-size:20px;line-height:28px;font-weight:600}
+h3{margin:0;font-size:15px;line-height:22px;font-weight:600}
+.note{margin:0;color:var(--ink-muted);font-size:13px;line-height:18px}
+.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;font-size:13px;line-height:18px}
+.card{display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface-raised)}
+.lbl{color:var(--ink-muted);font-size:12px;line-height:16px;font-weight:600}
+.snack{width:358px;min-height:48px;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 14px;border-radius:12px;background:var(--ink);color:var(--surface);font-size:13px;line-height:18px;box-shadow:0 6px 16px rgba(20,14,10,.2)}
+.snack .bh-icon{width:20px;height:20px;flex-shrink:0}
+.snack .txt{flex:1;min-width:0;padding:7px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.snack button{min-height:40px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--chili-soft);cursor:pointer;font:700 13px/18px 'Be Vietnam Pro',sans-serif;flex-shrink:0}
+.snack.err{background:var(--danger);color:#FFFFFF}
+.snack.err button{color:#FFFFFF;text-decoration:underline}
+.tip{position:relative;display:flex;align-items:flex-start;gap:6px;padding:10px 6px 10px 12px;border-radius:12px;background:var(--ink);color:var(--surface);font-size:12px;line-height:16px;box-shadow:0 6px 16px rgba(20,14,10,.2)}
+.tip.arrow:after{content:"";position:absolute;right:-6px;top:22px;border:6px solid transparent;border-left-color:var(--ink);border-right:0}
+.tip button{width:28px;height:28px;padding:0;border:0;background:transparent;color:inherit;cursor:pointer;font:700 13px/18px 'Be Vietnam Pro',sans-serif;flex-shrink:0}
+.banner{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;font-size:13px;line-height:18px}
+.banner .bh-icon{width:18px;height:18px;flex-shrink:0}
+.banner a{margin-left:auto;font-weight:700;color:var(--chili-deep);text-decoration:none;flex-shrink:0}
+.demo-btn{min-height:36px;padding:0 12px;border:1px solid var(--outline);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer;font:600 12px/16px 'Be Vietnam Pro',sans-serif}
+.demo-btn:focus-visible,.snack button:focus-visible,.tip button:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+table{width:100%;border-collapse:collapse;font-size:13px;line-height:18px}
+th{text-align:left;color:var(--ink-muted);font-size:12px;line-height:16px;font-weight:600;padding:0 8px 6px 0;border-bottom:1px solid var(--line)}
+td{padding:8px 8px 8px 0;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 900px; min-height: 1160px; display: flex; flex-direction: column; gap: 20px; padding: 32px; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif">
+
+  <header style="display: flex; flex-direction: column; gap: 4px">
+    <h1 style="margin: 0; font-size: 28px; line-height: 34px; font-weight: 700">Thông báo chung</h1>
+    <p class="note" style="font-size: 15px; line-height: 22px">Snackbar, mẹo, banner trong màn và hộp thoại xác nhận. Mọi màn dùng đúng các mẫu này, không tự làm kiểu riêng.</p>
+  </header>
+
+  <div style="display: grid; grid-template-columns: 390px minmax(0, 1fr); gap: 20px; align-items: start">
+
+    <div style="display: flex; flex-direction: column; gap: 20px">
+      <section class="card">
+        <h2>Snackbar</h2>
+        <p class="note">Báo kết quả một thao tác vừa xong. Nổi ở đáy, tự ẩn.</p>
+        <span class="lbl">Thành công</span>
+        <div class="snack" role="status"><span style="color: var(--herb-soft); display: flex"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span><span class="txt">Đã thêm trứng gà vào đi chợ</span></div>
+        <span class="lbl">Có hành động: Hoàn tác hoặc Xem</span>
+        <div class="snack" role="status"><span style="color: var(--herb-soft); display: flex"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span><span class="txt">Đã bỏ lưu món</span><button>Hoàn tác</button></div>
+        <div class="snack" role="status"><span style="color: var(--herb-soft); display: flex"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span><span class="txt">Đã lưu bữa vào Đã lưu</span><button>Xem</button></div>
+        <span class="lbl">Đã tồn tại</span>
+        <div class="snack" role="status"><span style="display: flex"><x-import component-from-global-scope="BepHoaLac.Icon" name="info"></x-import></span><span class="txt">Trứng gà đã có trong đi chợ</span><button>Xem</button></div>
+        <span class="lbl">Lỗi nhẹ, thử lại được</span>
+        <div class="snack err" role="alert"><span style="display: flex"><x-import component-from-global-scope="BepHoaLac.Icon" name="alert"></x-import></span><span class="txt">Chưa lưu được thực đơn. Kiểm tra bộ nhớ máy.</span><button>Thử lại</button></div>
+        <ul class="rules">
+          <li>Rộng bằng màn trừ lề 16. Nằm trên thanh điều hướng, footer hoặc nút nổi, cách 16. Không che nút chính.</li>
+          <li>Mỗi lúc một snackbar. Cái mới thay cái cũ ngay, không xếp hàng.</li>
+          <li>Tự ẩn sau <b>4 giây</b>. Có nút hành động thì <b>6 giây</b>. Chữ tối đa 2 dòng, tối đa 1 nút.</li>
+          <li>Thao tác hoàn tác được (bỏ lưu, xoá khỏi danh sách) thì làm ngay và cho Hoàn tác, không hỏi lại.</li>
+          <li>Snackbar thường dùng <code>role="status"</code>. Lỗi dùng <code>role="alert"</code>.</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h2>Mẹo</h2>
+        <p class="note">Chỉ cách dùng một thao tác ẩn (nhấn giữ, kéo thả). Mỗi mẹo chỉ hiện một lần.</p>
+        <span class="lbl">Trỏ vào nút</span>
+        <div style="display: flex; align-items: center; gap: 14px">
+          <div class="tip arrow" role="note" style="flex: 1"><span style="flex: 1"><b>Mẹo:</b> Nhấn giữ một nguyên liệu rồi kéo thả vào giỏ để thêm vào đi chợ.</span><button aria-label="Ẩn mẹo">✕</button></div>
+          <span aria-hidden="true" style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 999px; background: var(--chili)"></span>
+        </div>
+        <span class="lbl">Không trỏ</span>
+        <div class="tip" role="note"><span style="flex: 1"><b>Mẹo:</b> Nhấn giữ một món rồi kéo vào thùng rác để bỏ lưu.</span><button aria-label="Ẩn mẹo">✕</button></div>
+        <ul class="rules">
+          <li>Ẩn khi bấm ✕ hoặc khi người dùng làm đúng thao tác đó. Đã ẩn thì không hiện lại.</li>
+          <li>Đang có snackbar thì ẩn mẹo. Snackbar luôn được ưu tiên.</li>
+          <li>Mở đầu bằng "Mẹo:" in đậm, một câu.</li>
+        </ul>
+      </section>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 20px">
+      <section class="card">
+        <h2>Thử trên màn</h2>
+        <p class="note">Bấm liên tục để thấy cái mới thay cái cũ. Bấm "Thêm lần nữa" để ra thông báo đã tồn tại.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{demos}}" as="dm" hint-placeholder-count="4">
+            <button class="demo-btn" onClick="{{dm.run}}">{{dm.label}}</button>
+          </sc-for>
+        </div>
+        <div data-theme="{{theme}}" style="position: relative; height: 300px; border: 1px solid var(--line); border-radius: 24px; overflow: hidden; background: var(--surface)">
+          <div style="padding: 16px; display: flex; flex-direction: column; gap: 10px" aria-hidden="true">
+            <span style="width: 120px; height: 20px; border-radius: 6px; background: var(--line)"></span>
+            <span style="height: 64px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line)"></span>
+            <span style="height: 64px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line)"></span>
+          </div>
+          <sc-if value="{{hasSnack}}" hint-placeholder-val="{{true}}">
+            <div class="{{snackCls}}" role="{{snackRole}}" aria-live="polite" style="position: absolute; left: 16px; right: 16px; bottom: 80px; width: auto">
+              <span style="display: flex; {{snackIconStyle}}"><x-import component-from-global-scope="BepHoaLac.Icon" name="{{snackIcon}}"></x-import></span>
+              <span class="txt">{{snackText}}</span>
+              <sc-if value="{{snackHasAction}}" hint-placeholder-val="{{true}}"><button onClick="{{dismiss}}">{{snackAction}}</button></sc-if>
+            </div>
+          </sc-if>
+          <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 64px; background: var(--surface-raised); border-top: 1px solid var(--line)"></div>
+        </div>
+        <span class="lbl">{{timerText}}</span>
+      </section>
+
+      <section class="card">
+        <h2>Banner trong màn</h2>
+        <p class="note">Trạng thái kéo dài khi người dùng còn ở màn. Nằm trong nội dung, không tự ẩn.</p>
+        <div class="banner" style="background: var(--chili-soft); color: var(--chili-deep)"><x-import component-from-global-scope="BepHoaLac.Icon" name="info"></x-import><span>Đã nới thời gian lên 45 phút để có đủ gợi ý.</span><a href="TodayPrefs.dc.html">Sửa</a></div>
+        <div class="banner" style="background: var(--herb-soft); color: var(--ink)"><span style="color: var(--herb-ink); display: flex"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span><span>Sẽ thêm cùng Canh cà chua trứng · bữa này thành 2 món</span></div>
+      </section>
+
+      <section class="card">
+        <h2>Hộp thoại xác nhận</h2>
+        <p class="note">Chỉ dùng cho thao tác không hoàn tác được. Nút nguy hiểm nằm bên phải, chữ nói rõ việc sẽ làm.</p>
+        <div role="alertdialog" aria-labelledby="dlg-t" style="display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line)">
+          <h3 id="dlg-t" style="font-size: 17px; line-height: 24px">Xoá toàn bộ dữ liệu?</h3>
+          <span style="font-size: 13px; line-height: 18px; color: var(--ink-muted)">Không có tài khoản nên không khôi phục được.</span>
+          <div style="display: flex; gap: 12px">
+            <span class="bh-btn bh-btn-secondary" style="flex: 1">Huỷ</span>
+            <span class="bh-btn" style="flex: 1; background: var(--danger); color: #FFFFFF">Xoá hết</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Khi nào dùng loại nào</h2>
+        <table>
+          <thead><tr><th>Tình huống</th><th>Dùng</th><th>Câu mẫu</th></tr></thead>
+          <tbody>
+            <sc-for list="{{usage}}" as="u" hint-placeholder-count="7">
+              <tr><td>{{u.when}}</td><td style="font-weight: 600; white-space: nowrap">{{u.kind}}</td><td>{{u.text}}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <h3>Câu chữ</h3>
+        <ul class="rules">
+          <li>Thành công: "Đã + việc + nơi". Không viết "thành công", không dấu chấm than, không emoji.</li>
+          <li>Đã tồn tại: "<i>Tên</i> đã có trong <i>nơi</i>", kèm nút Xem.</li>
+          <li>Lỗi: "Chưa <i>việc</i> được" + lý do ngắn nếu biết, kèm nút Thử lại.</li>
+          <li>Tên món, nguyên liệu viết thường sau chữ "Đã thêm".</li>
+        </ul>
+      </section>
+    </div>
+  </div>
+
+  <p class="note">Flutter (Lead, <code>core/widgets</code>): <code>AppSnackbar.show(context, text, kind: success|info|error, action: SnackAction(label, onTap))</code> dựa trên ScaffoldMessenger, gọi <code>hideCurrentSnackBar()</code> trước khi hiện, floating, lề 16, duration 4s hoặc 6s. <code>TipBubble(id, text, anchor)</code> lưu đã xem trong LocalStore key <code>app.tipsSeen</code>. <code>InlineBanner(kind, text, action)</code>. <code>ConfirmDialog</code> cho thao tác không hoàn tác.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":900,"height":1160}}'>
+// One snackbar at a time: a new one replaces the old. 4 s without an action, 6 s with one.
+var KINDS = {
+success: { cls: 'snack', role: 'status', icon: 'check', iconStyle: 'color: var(--herb-soft);' },
+info: { cls: 'snack', role: 'status', icon: 'info', iconStyle: '' },
+error: { cls: 'snack err', role: 'alert', icon: 'alert', iconStyle: '' }
+};
+var USAGE = [
+{ when: 'Thêm, lưu, bỏ lưu, xoá khỏi danh sách', kind: 'Snackbar', text: 'Đã bỏ lưu món · Hoàn tác' },
+{ when: 'Thêm thứ đã có', kind: 'Snackbar', text: 'Trứng gà đã có trong đi chợ · Xem' },
+{ when: 'Lưu không được, thử lại được', kind: 'Snackbar lỗi', text: 'Chưa lưu được thực đơn · Thử lại' },
+{ when: 'Thao tác ẩn lần đầu gặp', kind: 'Mẹo', text: 'Mẹo: Nhấn giữ … rồi kéo …' },
+{ when: 'Trạng thái còn đúng khi ở màn', kind: 'Banner', text: 'Đã nới thời gian lên 45 phút…' },
+{ when: 'Việc không hoàn tác được', kind: 'Hộp thoại', text: 'Xoá toàn bộ dữ liệu?' },
+{ when: 'Lỗi chặn cả màn', kind: 'Màn Lỗi', text: 'Xem Error' }
+];
+var timer = null;
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { snack: { kind: 'success', text: 'Đã bỏ lưu món', action: 'Hoàn tác' }, inShop: false, n: 0 };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+function show(kind, text, action) {
+if (timer) { clearTimeout(timer); }
+self.setState({ snack: { kind: kind, text: text, action: action || null }, n: self.state.n + 1 });
+timer = setTimeout(function () { self.setState({ snack: null }); }, action ? 6000 : 4000);
+}
+var s = st.snack;
+var k = s ? KINDS[s.kind] : KINDS.success;
+return {
+theme: this.props.theme ?? 'system',
+demos: [
+{ label: 'Thêm vào đi chợ', run: function () { self.setState({ inShop: true }); show('success', 'Đã thêm trứng gà vào đi chợ', 'Hoàn tác'); } },
+{ label: 'Thêm lần nữa', run: function () { if (self.state.inShop) { show('info', 'Trứng gà đã có trong đi chợ', 'Xem'); } else { self.setState({ inShop: true }); show('success', 'Đã thêm trứng gà vào đi chợ', 'Hoàn tác'); } } },
+{ label: 'Lưu bữa', run: function () { show('success', 'Đã lưu bữa vào Đã lưu', 'Xem'); } },
+{ label: 'Đánh dấu đã nấu', run: function () { show('success', 'Đã đánh dấu bữa tối là đã nấu'); } },
+{ label: 'Lỗi lưu', run: function () { show('error', 'Chưa lưu được thực đơn. Kiểm tra bộ nhớ máy.', 'Thử lại'); } }
+],
+hasSnack: !!s,
+snackCls: k.cls,
+snackRole: k.role,
+snackIcon: k.icon,
+snackIconStyle: k.iconStyle,
+snackText: s ? s.text : '',
+snackHasAction: !!(s && s.action),
+snackAction: s && s.action ? s.action : '',
+dismiss: function () {
+if (self.state.snack && self.state.snack.action === 'Hoàn tác') { self.setState({ inShop: false }); }
+if (timer) { clearTimeout(timer); }
+self.setState({ snack: null });
+},
+timerText: s ? (s.action ? 'Tự ẩn sau 6 giây (có nút hành động)' : 'Tự ẩn sau 4 giây') : 'Chưa có thông báo. Bấm một nút ở trên.',
+usage: USAGE
+};
+}
+}
+</script>
+</body>
+</html>

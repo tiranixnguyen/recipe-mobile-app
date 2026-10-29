@@ -37,7 +37,7 @@ main{scrollbar-width:none}
 
       <div style="display: flex; flex-direction: column; gap: 2px">
         <h1 id="sheet-title" style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Thêm vào thực đơn</h1>
-        <span class="c1" style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{dishName}} · 15 phút · Bếp từ</span>
+        <span class="c1" style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{subline}}</span>
       </div>
 
       <section style="display: flex; flex-direction: column; gap: 8px">
@@ -76,14 +76,14 @@ main{scrollbar-width:none}
       </section>
 
       <div style="display: flex; gap: 12px; padding-top: 4px">
-        <a href="Detail.dc.html" class="bh-btn bh-btn-secondary" style="flex: 0 0 96px; padding: 0 12px; text-decoration: none">Huỷ</a>
+        <a href="{{cancelHref}}" class="bh-btn bh-btn-secondary" style="flex: 0 0 96px; padding: 0 12px; text-decoration: none">Huỷ</a>
         <a href="MealPlan.dc.html" class="bh-btn bh-btn-primary" style="flex: 1; padding: 0 12px; text-decoration: none">{{cta}}</a>
       </div>
     </div>
   </div>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"now":{"editor":"enum","options":["07:30","11:30","18:30"],"default":"18:30"},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"now":{"editor":"enum","options":["07:30","11:30","18:30"],"default":"18:30"},"source":{"editor":"enum","options":["món","bữa"],"default":"món"},"$preview":{"width":390,"height":844}}'>
 // Rolling 7 days from today (Tuesday), so every cell can be picked and the most likely days come first.
 var DAYS = [
 { short: 'T3', name: 'nay', full: 'Thứ Ba, hôm nay', week: 1 },
@@ -139,6 +139,9 @@ var self = this;
 // meal stays null until the user picks one, so the default follows the 'now' tweak.
 var st = Object.assign({}, this.state, { meal: this.state.meal === null ? nextMeal(this.props.now) : this.state.meal });
 var plan = function (i) { var w = DAYS[i].week; return PLAN[w].map(function (v, j) { return STRESS && w === 1 && j === 2 ? v.concat(EXTRA) : v; }); };
+// source 'bữa': a whole meal from Hôm nay ăn gì or Đã lưu is added; its dishes join the chosen slot.
+var isMeal = this.props.source === 'bữa';
+var adding = isMeal ? ['Đậu phụ luộc chấm tương', 'Canh chua cà chua'] : ['Trứng chiên hành'];
 var existing = plan(st.day)[st.meal];
 var when = MEALS[st.meal] + ' ' + DAYS[st.day].name;
 return {
@@ -171,8 +174,10 @@ pick: function () { self.setState({ meal: j }); }
 };
 }),
 joining: existing.length > 0,
-joinText: existing.length ? 'Sẽ thêm cùng ' + summary(existing) + ' · bữa này thành ' + (existing.length + 1) + ' món' : '',
-dishName: L('Trứng chiên hành'),
+joinText: existing.length ? 'Sẽ thêm cùng ' + summary(existing) + ' · bữa này thành ' + (existing.length + adding.length) + ' món' : '',
+subline: isMeal ? adding.map(L).join(' + ') + ' · ' + adding.length + ' món' : L('Trứng chiên hành') + ' · 15 phút · Bếp từ',
+dishName: isMeal ? 'Bữa gợi ý cho bạn' : L('Trứng chiên hành'),
+cancelHref: isMeal ? 'Today.dc.html' : 'Detail.dc.html',
 cta: 'Thêm vào ' + when
 };
 }
