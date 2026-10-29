@@ -6,7 +6,7 @@ import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/features/system/presentation/onboarding/onboarding_view_model.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
-import 'fake_analytics.dart';
+import '../../core/fake_analytics.dart';
 
 void main() {
   late ProviderContainer container;

@@ -5,6 +5,7 @@
     "description": "Món nhanh cho bữa sáng hoặc bữa trưa.",
     "imageAsset": "assets/images/recipes/trung-chien-hanh.jpg",
     "minutes": 15,
+    "prepMinutes": 5,
     "servings": 2,
     "tools": ["stove"],
     "diets": ["nospicy", "nopork"],
@@ -16,11 +17,15 @@
       { "id": "oil", "amount": 1, "unit": "muỗng canh" }
     ],
     "steps": [
-      { "text": "Rửa sạch hành lá, thái nhỏ." },
-      { "text": "Đập trứng vào bát, thêm hành lá và nước mắm. Đánh tan." },
+      { "text": "Rửa sạch hành lá, thái nhỏ.", "prep": [{ "id": "scallion", "action": "Rửa sạch, thái nhỏ" }] },
+      { "text": "Đập trứng vào bát, thêm hành lá và nước mắm. Đánh tan.", "prep": [{ "id": "egg", "action": "Đập ra bát, thêm hành lá, nước mắm rồi đánh tan" }] },
       { "text": "Làm nóng dầu trên chảo, lửa vừa.", "timerSeconds": 60 },
       { "text": "Đổ trứng vào, chiên mặt dưới đến khi vàng.", "timerSeconds": 120 },
       { "text": "Lật trứng, chiên mặt trên thêm một chút rồi tắt bếp.", "timerSeconds": 60 }
+    ],
+    "notes": [
+      "Ăn nóng với cơm hoặc kẹp bánh mì.",
+      "Chấm thêm nước mắm hoặc tương ớt nếu thích."
     ]
   },
   {
@@ -29,6 +34,7 @@
     "description": "Canh nóng cho bữa cơm.",
     "imageAsset": "assets/images/recipes/canh-ca-chua-trung.jpg",
     "minutes": 15,
+    "prepMinutes": 5,
     "servings": 2,
     "tools": ["stove"],
     "diets": ["nospicy", "nopork", "light"],
@@ -41,11 +47,16 @@
       { "id": "oil", "amount": 1, "unit": "muỗng cà phê" }
     ],
     "steps": [
-      { "text": "Cà chua bổ múi cau. Hành lá thái nhỏ." },
+      { "text": "Cà chua bổ múi cau. Hành lá thái nhỏ.", "prep": [{ "id": "tomato", "action": "Bổ múi cau" }, { "id": "scallion", "action": "Thái nhỏ" }] },
+      { "text": "Đánh tan trứng ra bát.", "prep": [{ "id": "egg", "action": "Đập ra bát rồi đánh tan" }] },
       { "text": "Làm nóng dầu, xào cà chua cho mềm.", "timerSeconds": 120 },
       { "text": "Đổ khoảng 500 ml nước, đun sôi.", "timerSeconds": 300 },
-      { "text": "Đánh tan trứng, đổ từ từ vào nồi, khuấy nhẹ." },
+      { "text": "Đổ trứng từ từ vào nồi, khuấy nhẹ." },
       { "text": "Nêm nước mắm, thả hành lá rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn nóng cùng cơm.",
+      "Còn thừa thì đun sôi lại trước khi ăn, ăn hết trong ngày."
     ]
   },
   {
@@ -54,6 +65,7 @@
     "description": "Món mì nhanh bằng mì gói.",
     "imageAsset": "assets/images/recipes/mi-xao-rau-cai.jpg",
     "minutes": 15,
+    "prepMinutes": 5,
     "servings": 1,
     "tools": ["stove"],
     "diets": ["nospicy"],
@@ -66,10 +78,14 @@
       { "id": "soysauce", "amount": 1, "unit": "muỗng cà phê", "optional": true, "substituteNote": "Có thể dùng gói gia vị của mì" }
     ],
     "steps": [
-      { "text": "Rau cải rửa sạch, cắt khúc. Tỏi đập dập." },
+      { "text": "Rau cải rửa sạch, cắt khúc. Tỏi đập dập.", "prep": [{ "id": "greens", "action": "Rửa sạch, cắt khúc" }, { "id": "garlic", "action": "Đập dập" }] },
       { "text": "Luộc mì trong nước sôi cho vừa mềm, vớt ra để ráo.", "timerSeconds": 120 },
       { "text": "Phi tỏi với dầu, cho rau cải vào xào nhanh.", "timerSeconds": 90 },
       { "text": "Cho mì vào, thêm xì dầu, đảo đều rồi tắt bếp.", "timerSeconds": 60 }
+    ],
+    "notes": [
+      "Ăn ngay khi còn nóng, để lâu mì bị bết.",
+      "Thêm chút tương ớt nếu bạn ăn được cay."
     ]
   },
   {
@@ -93,6 +109,10 @@
       { "text": "Đập trứng vào chảo, giữ lòng đỏ nguyên." },
       { "text": "Ốp đến khi lòng trắng chín, lòng đỏ còn hơi mềm.", "timerSeconds": 150 },
       { "text": "Rưới xì dầu, kẹp trứng vào bánh mì." }
+    ],
+    "notes": [
+      "Ăn ngay khi trứng còn nóng.",
+      "Ăn kèm dưa chuột hoặc rau sống cho đỡ ngán."
     ]
   },
   {
@@ -101,6 +121,7 @@
     "description": "Món chay đưa cơm, nguyên liệu dễ mua.",
     "imageAsset": "assets/images/recipes/dau-phu-sot-ca-chua.jpg",
     "minutes": 20,
+    "prepMinutes": 5,
     "servings": 2,
     "tools": ["stove"],
     "diets": ["veg", "nospicy", "noseafood", "nopork"],
@@ -115,11 +136,15 @@
       { "id": "salt", "amount": 0.5, "unit": "muỗng cà phê" }
     ],
     "steps": [
-      { "text": "Đậu phụ cắt miếng vừa ăn, thấm khô. Cà chua thái nhỏ." },
+      { "text": "Đậu phụ cắt miếng vừa ăn, thấm khô. Cà chua thái nhỏ.", "prep": [{ "id": "tofu", "action": "Cắt miếng vừa ăn, thấm khô" }, { "id": "tomato", "action": "Thái nhỏ" }] },
       { "text": "Chiên đậu với dầu đến khi vàng các mặt, gắp ra.", "timerSeconds": 300 },
       { "text": "Để lại ít dầu, xào cà chua với muối cho nát.", "timerSeconds": 180 },
       { "text": "Cho đậu vào, thêm 3 muỗng canh nước, xì dầu và đường. Đun nhỏ lửa cho thấm.", "timerSeconds": 300 },
       { "text": "Rắc hành lá rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn nóng với cơm trắng.",
+      "Còn thừa thì cho vào hộp, cất tủ lạnh, ăn trong 1 ngày."
     ]
   },
   {
@@ -128,6 +153,7 @@
     "description": "Hấp ngay trong nồi cơm điện, không cần bếp.",
     "imageAsset": "assets/images/recipes/trung-hap-thit-bam.jpg",
     "minutes": 25,
+    "prepMinutes": 5,
     "servings": 2,
     "tools": ["rice"],
     "diets": ["nospicy", "light"],
@@ -139,10 +165,14 @@
       { "id": "fishsauce", "amount": 1, "unit": "muỗng canh" }
     ],
     "steps": [
-      { "text": "Đánh tan trứng với thịt băm, hành lá thái nhỏ và nước mắm." },
+      { "text": "Đánh tan trứng với thịt băm, hành lá thái nhỏ và nước mắm.", "prep": [{ "id": "scallion", "action": "Thái nhỏ" }, { "id": "egg", "action": "Đập ra bát rồi đánh tan" }, { "id": "pork", "action": "Trộn vào trứng cùng hành lá và nước mắm" }] },
       { "text": "Đổ vào bát chịu nhiệt." },
       { "text": "Đặt bát lên xửng hấp khi nấu cơm. Nồi không có xửng thì đổ 2 bát nước vào lòng nồi rồi đặt bát vào." },
       { "text": "Bấm nấu, hấp đến khi xiên đũa vào không còn chảy nước.", "timerSeconds": 1200 }
+    ],
+    "notes": [
+      "Ăn nóng với cơm, chấm thêm nước mắm.",
+      "Món có thịt, đừng để qua đêm ngoài tủ lạnh."
     ]
   },
   {
@@ -151,6 +181,7 @@
     "description": "Cháo nóng dễ ăn, hợp lúc mệt.",
     "imageAsset": "assets/images/recipes/chao-trung-hanh.jpg",
     "minutes": 40,
+    "prepMinutes": 5,
     "servings": 1,
     "tools": ["rice"],
     "diets": ["nospicy", "nopork", "light"],
@@ -162,11 +193,17 @@
       { "id": "fishsauce", "amount": 1, "unit": "muỗng cà phê", "optional": true, "substituteNote": "Có thể dùng muối" }
     ],
     "steps": [
-      { "text": "Vo gạo, cho vào nồi cơm điện với khoảng 600 ml nước." },
+      { "text": "Vo gạo.", "prep": [{ "id": "ricegrain", "action": "Vo sạch" }] },
+      { "text": "Đánh tan trứng ra bát. Hành lá thái nhỏ.", "prep": [{ "id": "egg", "action": "Đập ra bát rồi đánh tan" }, { "id": "scallion", "action": "Thái nhỏ" }] },
+      { "text": "Cho gạo vào nồi cơm điện với khoảng 600 ml nước." },
       { "text": "Bấm nấu, thỉnh thoảng khuấy đến khi gạo nở bung.", "timerSeconds": 1800 },
-      { "text": "Đánh tan trứng, đổ vào cháo và khuấy đều." },
+      { "text": "Đổ trứng vào cháo, khuấy đều." },
       { "text": "Nấu thêm cho trứng chín.", "timerSeconds": 120 },
-      { "text": "Nêm nước mắm, rắc hành lá thái nhỏ." }
+      { "text": "Nêm nước mắm, rắc hành lá." }
+    ],
+    "notes": [
+      "Ăn khi còn nóng, rắc thêm tiêu cho thơm.",
+      "Cháo để lâu sẽ đặc lại, thêm chút nước rồi đun sôi lại."
     ]
   },
   {
@@ -175,6 +212,7 @@
     "description": "Tận dụng cơm nguội còn trong nồi.",
     "imageAsset": "assets/images/recipes/com-rang-dua-cai.jpg",
     "minutes": 15,
+    "prepMinutes": 5,
     "servings": 1,
     "tools": ["stove"],
     "diets": ["nospicy", "nopork"],
@@ -188,11 +226,15 @@
       { "id": "fishsauce", "amount": 1, "unit": "muỗng cà phê", "optional": true, "substituteNote": "Có thể dùng muối" }
     ],
     "steps": [
-      { "text": "Dưa cải vắt ráo, thái nhỏ. Tỏi băm." },
+      { "text": "Dưa cải vắt ráo, thái nhỏ. Tỏi băm.", "prep": [{ "id": "pickledgreens", "action": "Vắt ráo, thái nhỏ" }, { "id": "garlic", "action": "Bóc vỏ, băm nhỏ" }] },
       { "text": "Phi tỏi với dầu, xào dưa cải cho khô nước.", "timerSeconds": 120 },
       { "text": "Cho cơm nguội vào, đảo tơi.", "timerSeconds": 180 },
       { "text": "Đập trứng vào, đảo nhanh cho trứng bám đều hạt cơm.", "timerSeconds": 60 },
       { "text": "Nêm nước mắm nếu cần rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn nóng, có canh ăn kèm thì càng ngon.",
+      "Cơm rang để nguội thì rang lại cho nóng trước khi ăn."
     ]
   },
   {
@@ -201,6 +243,7 @@
     "description": "Món mặn đưa cơm cho hai người.",
     "imageAsset": "assets/images/recipes/khoai-tay-xao-thit-bam.jpg",
     "minutes": 25,
+    "prepMinutes": 8,
     "servings": 2,
     "tools": ["stove"],
     "diets": [],
@@ -215,10 +258,14 @@
       { "id": "pepper", "amount": 0.5, "unit": "muỗng cà phê", "optional": true }
     ],
     "steps": [
-      { "text": "Khoai tây gọt vỏ, thái sợi, ngâm nước cho bớt bột. Tỏi băm." },
+      { "text": "Khoai tây gọt vỏ, thái sợi, ngâm nước cho bớt bột. Tỏi băm.", "prep": [{ "id": "potato", "action": "Gọt vỏ, thái sợi, ngâm nước cho bớt bột" }, { "id": "garlic", "action": "Bóc vỏ, băm nhỏ" }] },
       { "text": "Phi tỏi, xào thịt băm đến khi săn, nêm nước mắm.", "timerSeconds": 180 },
       { "text": "Cho khoai tây và hành tây vào xào, thêm 3 muỗng canh nước, đậy nắp.", "timerSeconds": 480 },
       { "text": "Khoai mềm thì rắc tiêu, đảo đều rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn nóng với cơm.",
+      "Còn thừa thì cất tủ lạnh, hâm nóng lại, ăn trong 1 ngày."
     ]
   },
   {
@@ -227,6 +274,7 @@
     "description": "Bát mì nóng cho tối muộn.",
     "imageAsset": "assets/images/recipes/mi-trung-hanh.jpg",
     "minutes": 10,
+    "prepMinutes": 3,
     "servings": 1,
     "tools": ["stove"],
     "diets": [],
@@ -238,11 +286,15 @@
       { "id": "greens", "amount": 50, "unit": "g", "optional": true }
     ],
     "steps": [
+      { "text": "Rau cải rửa sạch. Hành lá thái nhỏ.", "prep": [{ "id": "greens", "action": "Rửa sạch" }, { "id": "scallion", "action": "Thái nhỏ" }] },
       { "text": "Đun sôi khoảng 400 ml nước.", "timerSeconds": 240 },
       { "text": "Cho mì, gói gia vị và rau cải vào." },
       { "text": "Đập trứng vào nồi, không khuấy để trứng nguyên quả." },
       { "text": "Đun thêm cho mì mềm và trứng chín.", "timerSeconds": 120 },
-      { "text": "Rắc hành lá thái nhỏ rồi tắt bếp." }
+      { "text": "Rắc hành lá rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn ngay khi mì còn nóng, để lâu mì nở."
     ]
   },
   {
@@ -251,6 +303,7 @@
     "description": "Canh thanh, nấu nhanh cho bữa cơm.",
     "imageAsset": "assets/images/recipes/canh-rau-cai-thit-bam.jpg",
     "minutes": 15,
+    "prepMinutes": 5,
     "servings": 2,
     "tools": ["stove"],
     "diets": ["nospicy", "light"],
@@ -263,11 +316,15 @@
       { "id": "oil", "amount": 1, "unit": "muỗng cà phê" }
     ],
     "steps": [
-      { "text": "Rau cải rửa sạch, cắt khúc. Hành khô băm." },
+      { "text": "Rau cải rửa sạch, cắt khúc. Hành khô băm.", "prep": [{ "id": "greens", "action": "Rửa sạch, cắt khúc" }, { "id": "shallot", "action": "Bóc vỏ, băm nhỏ" }] },
       { "text": "Phi hành với dầu, xào thịt băm cho săn.", "timerSeconds": 120 },
       { "text": "Đổ khoảng 600 ml nước, đun sôi rồi hớt bọt.", "timerSeconds": 300 },
       { "text": "Cho rau cải vào, đun đến khi rau chín.", "timerSeconds": 180 },
       { "text": "Nêm nước mắm rồi tắt bếp." }
+    ],
+    "notes": [
+      "Ăn nóng cùng cơm.",
+      "Rau cải để qua bữa dễ bị thâm, nên ăn hết trong bữa."
     ]
   },
   {
@@ -276,6 +333,7 @@
     "description": "Vị chua ngọt, ăn với cơm hoặc bánh mì.",
     "imageAsset": "assets/images/recipes/xuc-xich-sot-ca-chua.jpg",
     "minutes": 15,
+    "prepMinutes": 5,
     "servings": 2,
     "tools": ["stove"],
     "diets": ["nospicy", "noseafood"],
@@ -290,10 +348,14 @@
       { "id": "salt", "amount": 0.5, "unit": "muỗng cà phê" }
     ],
     "steps": [
-      { "text": "Xúc xích khứa chéo. Cà chua thái hạt lựu." },
+      { "text": "Xúc xích khứa chéo. Cà chua thái hạt lựu.", "prep": [{ "id": "sausage", "action": "Khứa chéo" }, { "id": "tomato", "action": "Thái hạt lựu" }] },
       { "text": "Chiên xúc xích với ít dầu cho săn vỏ, gắp ra.", "timerSeconds": 180 },
       { "text": "Xào cà chua và hành tây với muối, đường cho nát.", "timerSeconds": 180 },
       { "text": "Cho xúc xích và tương cà vào, đảo đến khi sốt sệt lại.", "timerSeconds": 120 }
+    ],
+    "notes": [
+      "Ăn với cơm hoặc chấm bánh mì.",
+      "Còn thừa thì cất tủ lạnh, ăn trong 1 ngày."
     ]
   },
   {
@@ -302,6 +364,7 @@
     "description": "Chỉ cần lò vi sóng, ăn sáng hoặc ăn nhẹ buổi tối.",
     "imageAsset": "assets/images/recipes/khoai-lang-vi-song.jpg",
     "minutes": 10,
+    "prepMinutes": 3,
     "servings": 1,
     "tools": ["micro"],
     "diets": ["veg", "nospicy", "noseafood", "nopork", "light"],
@@ -312,11 +375,15 @@
       { "id": "salt", "amount": 0.25, "unit": "muỗng cà phê", "optional": true }
     ],
     "steps": [
-      { "text": "Rửa sạch khoai, để nguyên vỏ, dùng nĩa xiên vài lỗ." },
+      { "text": "Rửa sạch khoai, để nguyên vỏ, dùng nĩa xiên vài lỗ.", "prep": [{ "id": "sweetpotato", "action": "Rửa sạch, để nguyên vỏ, xiên vài lỗ bằng nĩa" }] },
+      { "text": "Trộn vừng với chút muối để chấm.", "prep": [{ "id": "sesame", "action": "Trộn với chút muối để chấm" }] },
       { "text": "Bọc khoai bằng giấy ăn ẩm, đặt lên đĩa." },
       { "text": "Quay vi sóng mức cao.", "timerSeconds": 240 },
-      { "text": "Lật khoai, quay thêm đến khi xiên đũa thấy mềm.", "timerSeconds": 180 },
-      { "text": "Trộn vừng với chút muối để chấm khi khoai còn nóng." }
+      { "text": "Lật khoai, quay thêm đến khi xiên đũa thấy mềm.", "timerSeconds": 180 }
+    ],
+    "notes": [
+      "Khoai rất nóng, để nguội bớt 1–2 phút rồi bóc vỏ.",
+      "Ăn kèm một cốc sữa cho no lâu."
     ]
   },
   {
@@ -325,6 +392,7 @@
     "description": "Chỉ cần ấm siêu tốc và một cái bát tô.",
     "imageAsset": "assets/images/recipes/mi-tron-xuc-xich.jpg",
     "minutes": 10,
+    "prepMinutes": 3,
     "servings": 1,
     "tools": ["kettle"],
     "diets": [],
@@ -336,10 +404,14 @@
       { "id": "oil", "amount": 1, "unit": "muỗng cà phê" }
     ],
     "steps": [
+      { "text": "Thái xúc xích và dưa chuột.", "prep": [{ "id": "sausage", "action": "Thái lát" }, { "id": "cucumber", "action": "Thái lát" }] },
       { "text": "Đun sôi khoảng 500 ml nước bằng ấm siêu tốc." },
       { "text": "Cho mì vào bát tô, đổ nước sôi ngập mì, đậy kín.", "timerSeconds": 180 },
       { "text": "Chắt hết nước, trộn mì với gói gia vị và dầu." },
-      { "text": "Thái xúc xích và dưa chuột, cho lên trên rồi trộn đều." }
+      { "text": "Cho xúc xích và dưa chuột lên trên rồi trộn đều." }
+    ],
+    "notes": [
+      "Trộn xong ăn ngay cho mì không bị khô."
     ]
   },
   {
@@ -348,6 +420,7 @@
     "description": "Cho hết vào nồi, bấm nút là xong.",
     "imageAsset": "assets/images/recipes/com-xuc-xich-noi-com.jpg",
     "minutes": 35,
+    "prepMinutes": 5,
     "servings": 2,
     "tools": ["rice"],
     "diets": ["nospicy", "noseafood"],
@@ -361,11 +434,16 @@
       { "id": "oil", "amount": 1, "unit": "muỗng cà phê" }
     ],
     "steps": [
-      { "text": "Vo gạo, cho vào nồi cơm điện với lượng nước như nấu cơm thường." },
-      { "text": "Xúc xích thái lát. Cà rốt thái hạt lựu." },
+      { "text": "Vo gạo.", "prep": [{ "id": "ricegrain", "action": "Vo sạch" }] },
+      { "text": "Xúc xích thái lát. Cà rốt thái hạt lựu.", "prep": [{ "id": "sausage", "action": "Thái lát" }, { "id": "carrot", "action": "Thái hạt lựu" }] },
+      { "text": "Cho gạo vào nồi cơm điện với lượng nước như nấu cơm thường." },
       { "text": "Trải xúc xích, cà rốt và ngô lên mặt gạo. Rưới xì dầu và dầu ăn." },
       { "text": "Bấm nấu, chờ nồi chuyển sang chế độ ủ.", "timerSeconds": 1500 },
       { "text": "Ủ thêm cho cơm chín đều rồi xới trộn trước khi ăn.", "timerSeconds": 300 }
+    ],
+    "notes": [
+      "Ăn nóng, chấm thêm xì dầu hoặc tương ớt.",
+      "Ngâm nồi bằng nước ngay sau khi xới cho dễ rửa."
     ]
   }
 ]

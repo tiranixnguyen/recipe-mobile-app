@@ -64,6 +64,10 @@ review:
 | **Lead** Setup | SET-05, 06, 01, 15, 08 | SET-09, 16, 17 | SET-18, SET-13 (v0.1.0) | REL-03 |
 | **Cả nhóm** | CNT-01 (3 món/người) | CNT-02 (5 món/người) | — | REL-06, REL-07 |
 
+**Sau MVP (`stretch`, P2):** STR-01 Người dùng đăng công thức, STR-02 Gợi ý thực đơn tuần bằng AI, STR-03
+Cập nhật công thức không cần ra bản app mới, STR-04 Setup animation cho app, bắt đầu với câu chúc ở trang
+Lưu ý (#107).
+
 **Đường găng:** PR #18 merge → SET-01 (22/10) → SET-15 theme + SET-08 dữ liệu (23/10) → component + stub
 của mọi feature (24/10) → luồng chính W2.
 

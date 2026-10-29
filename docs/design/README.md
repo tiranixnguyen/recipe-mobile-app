@@ -5,9 +5,9 @@ Bản sao trong repo của hai artifact thiết kế trên claude.ai, để cả
 | Phần | Thư mục | Bản gốc (cần quyền xem trên claude.ai) |
 |---|---|---|
 | Design system | [`design-system/`](design-system/) | https://claude.ai/artifact/KMviZS2qvYfCv3YdyvCYsn |
-| Prototype Android (23 màn) | [`prototype/`](prototype/) | https://claude.ai/artifact/8Bxj3zhHYamZgfue2wXUii |
+| Prototype Android (27 màn) | [`prototype/`](prototype/) | https://claude.ai/artifact/8Bxj3zhHYamZgfue2wXUii |
 
-> **Nguồn sự thật là artifact.** Thư mục này là ảnh chụp tại thời điểm sync (2026-10-20). Sửa thiết kế trên artifact rồi sync lại; đừng sửa tay ở đây.
+> **Nguồn sự thật là artifact.** Thư mục này là ảnh chụp tại thời điểm sync (2026-10-26). Sửa thiết kế trên artifact rồi sync lại; đừng sửa tay ở đây.
 
 ## Đọc theo thứ tự nào
 
@@ -40,8 +40,9 @@ Khung điện thoại 390×844 (riêng hai bảng logo rộng 1440). Mọi màn 
 | Nhóm | File → tên màn |
 |---|---|
 | Tab chính | `Main` Khám phá · `Pantry` Tủ đồ · `MealPlan` Thực đơn · `Saved` Đã lưu (trống) |
-| Luồng | `Onboarding` Làm quen lần đầu · `Today` Hôm nay ăn gì · `Search` Tìm kiếm · `Detail` Chi tiết món · `Shopping` Danh sách đi chợ |
+| Luồng | `Onboarding` Làm quen lần đầu · `Today` Hôm nay ăn gì · `Search` Tìm kiếm · `Detail` Chi tiết món · `Shopping` Danh sách đi chợ · `AddToPlan` Thêm vào thực đơn (chọn ngày, bữa; một bữa nhiều món) |
 | Nấu | `CookPrep` Chuẩn bị · `CookStep` Từng bước · `CookDone` Hoàn thành |
+| Nấu cả bữa | `MealCookPrep` Chuẩn bị cả bữa, thứ tự món · `MealCookStep` Từng bước, chuyển món · `MealCookDone` Xong, chấm từng món. Mở từ Thực đơn ("Nấu bữa này"), banner bữa sắp tới ở Khám phá, chế độ "Cả bữa" ở Hôm nay ăn gì |
 | Hệ thống | `Splash` Khởi động · `NotifPermission` Xin quyền thông báo · `Settings` Cài đặt (Sáng/Tối/Hệ thống) · `About` Giới thiệu · `Policy` Chính sách quyền riêng tư · `Feedback` Góp ý & báo lỗi · `RateApp` Đánh giá trên Google Play · `ClearData` Xoá dữ liệu (gõ `CONFIRM DELETE`) · `Error` Lỗi (biến thể `crash`/`notfound`/`storage`) |
 | Logo | `Logo` 4 hướng (đã chọn C) · `LogoC` Bát & đũa — bộ nhận diện |
 

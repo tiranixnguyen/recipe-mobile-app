@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Thêm vào thực đơn</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+a.bh-btn-secondary,a.bh-btn-secondary:hover{color:var(--ink)}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; position: relative; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <div aria-hidden="true" style="display: flex; flex-direction: column; gap: 12px">
+    <div style="height: 240px; background: var(--line)"></div>
+    <span class="c2" style="padding: 0 16px; font-size: 28px; line-height: 34px; font-weight: 700">{{dishName}}</span>
+  </div>
+
+  <div style="position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(20, 14, 10, 0.55)">
+    <div role="dialog" aria-labelledby="sheet-title" style="max-height: 92%; overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 16px; padding: 8px 16px 24px 16px; border-radius: 20px 20px 0 0; background: var(--surface-raised)">
+      <span aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: var(--line)"></span>
+
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <h1 id="sheet-title" style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Thêm vào thực đơn</h1>
+        <span class="c1" style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{dishName}} · 15 phút · Bếp từ</span>
+      </div>
+
+      <section style="display: flex; flex-direction: column; gap: 8px">
+        <span id="lbl-day" style="font-size: 13px; line-height: 18px; font-weight: 600">Các ngày tới</span>
+        <div role="radiogroup" aria-labelledby="lbl-day" style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+          <sc-for list="{{days}}" as="d" hint-placeholder-count="7">
+            <button role="radio" aria-checked="{{d.on}}" aria-label="{{d.full}}" onClick="{{d.pick}}" style="height: 56px; padding: 0; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; font-family: 'Be Vietnam Pro', sans-serif; {{d.style}}">
+              <span style="font-size: 13px; line-height: 18px; font-weight: 600">{{d.short}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="display: flex; flex-direction: column; gap: 8px">
+        <span id="lbl-meal" style="font-size: 13px; line-height: 18px; font-weight: 600">Bữa</span>
+        <div role="radiogroup" aria-labelledby="lbl-meal" style="display: flex; flex-direction: column; gap: 8px">
+          <sc-for list="{{meals}}" as="m" hint-placeholder-count="3">
+            <button role="radio" aria-checked="{{m.on}}" onClick="{{m.pick}}" style="min-height: 52px; padding: 8px 14px; display: flex; align-items: center; gap: 12px; border-radius: 12px; cursor: pointer; text-align: left; font-family: 'Be Vietnam Pro', sans-serif; color: var(--ink); {{m.style}}">
+              <span style="width: 20px; height: 20px; flex-shrink: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; {{m.ringStyle}}"><span style="width: 10px; height: 10px; border-radius: 999px; {{m.dotStyle}}"></span></span>
+              <span style="width: 44px; font-size: 15px; line-height: 22px; font-weight: 600">{{m.label}}</span>
+              <span style="flex: 1; min-width: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{m.has}}</span>
+            </button>
+          </sc-for>
+        </div>
+        <sc-if value="{{joining}}" hint-placeholder-val="{{true}}">
+          <div aria-live="polite" style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--herb-soft); font-size: 13px; line-height: 18px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color: var(--herb-ink); flex-shrink: 0"><path d="M12 5v14M5 12h14"></path></svg>
+            <span class="c2">{{joinText}}</span>
+          </div>
+        </sc-if>
+      </section>
+
+      <section style="display: flex; align-items: center; justify-content: space-between">
+        <span style="font-size: 15px; line-height: 22px; font-weight: 600">Khẩu phần</span>
+        <x-import component-from-global-scope="BepHoaLac.ServingStepper" value="{{servings}}" min="{{one}}" max="{{six}}" on-change="{{setServings}}" label="Khẩu phần"></x-import>
+      </section>
+
+      <div style="display: flex; gap: 12px; padding-top: 4px">
+        <a href="Detail.dc.html" class="bh-btn bh-btn-secondary" style="flex: 0 0 96px; padding: 0 12px; text-decoration: none">Huỷ</a>
+        <a href="MealPlan.dc.html" class="bh-btn bh-btn-primary" style="flex: 1; padding: 0 12px; text-decoration: none">{{cta}}</a>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"now":{"editor":"enum","options":["07:30","11:30","18:30"],"default":"18:30"},"$preview":{"width":390,"height":844}}'>
+// Rolling 7 days from today (Tuesday), so every cell can be picked and the most likely days come first.
+var DAYS = [
+{ short: 'T3', name: 'nay', full: 'Thứ Ba, hôm nay', week: 1 },
+{ short: 'T4', name: 'mai', full: 'Thứ Tư, ngày mai', week: 2 },
+{ short: 'T5', name: 'thứ Năm', full: 'Thứ Năm', week: 3 },
+{ short: 'T6', name: 'thứ Sáu', full: 'Thứ Sáu', week: 4 },
+{ short: 'T7', name: 'thứ Bảy', full: 'Thứ Bảy', week: 5 },
+{ short: 'CN', name: 'Chủ nhật', full: 'Chủ nhật', week: 6 },
+{ short: 'T2', name: 'thứ Hai tuần sau', full: 'Thứ Hai tuần sau', week: 7 }
+];
+var MEALS = ['Sáng', 'Trưa', 'Tối'];
+// Same plan as the Thực đơn screen, indexed T2..CN of this week; index 7 is next Monday. Each meal holds a list of dishes.
+var PLAN = [
+[['Bánh mì trứng ốp'], ['Mì xào rau cải'], ['Canh cà chua trứng']],
+[[], ['Cơm rang dưa cải'], ['Đậu phụ sốt cà chua']],
+[[], ['Trứng hấp thịt băm'], []],
+[[], [], []],
+[[], [], []],
+[[], [], []],
+[[], [], []],
+[[], [], []]
+];
+// Default to the next meal by the clock: before 10:00 Sáng, before 14:00 Trưa, otherwise Tối.
+function nextMeal(now) {
+var h = parseInt(String(now || '18:30').split(':')[0], 10);
+return h < 10 ? 0 : h < 14 ? 1 : 2;
+}
+// Tweak 'sample' = 'tên dài, nhiều món' swaps in long dish names and extra dishes to stress the layout.
+var LONG = {
+'Đậu phụ sốt cà chua': 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm',
+'Trứng chiên hành': 'Trứng chiên hành lá với thịt băm và mộc nhĩ',
+'Canh cà chua trứng': 'Canh cà chua trứng nấu đậu phụ non và rau mùi',
+'Cơm rang dưa cải': 'Cơm rang dưa cải thịt bò kiểu sinh viên ký túc xá',
+'Mì xào rau cải': 'Mì tôm xào rau cải ngọt với trứng và xúc xích',
+'Trứng hấp thịt băm': 'Trứng hấp thịt băm nấm mèo trong nồi cơm điện'
+};
+var EXTRA = ['Rau muống xào tỏi', 'Canh bí đỏ nấu tôm khô với rau ngót'];
+var STRESS = false;
+function L(n) { return STRESS && LONG[n] ? LONG[n] : n; }
+// Lists of dishes: up to 2 names in full, then "+N món".
+function summary(list) {
+var names = list.map(L);
+return names.length <= 2 ? names.join(', ') : names.slice(0, 2).join(', ') + ' +' + (names.length - 2) + ' món';
+}
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { day: 0, meal: null, servings: 1 };
+}
+renderVals() {
+STRESS = this.props.sample === 'tên dài, nhiều món';
+var self = this;
+// meal stays null until the user picks one, so the default follows the 'now' tweak.
+var st = Object.assign({}, this.state, { meal: this.state.meal === null ? nextMeal(this.props.now) : this.state.meal });
+var plan = function (i) { var w = DAYS[i].week; return PLAN[w].map(function (v, j) { return STRESS && w === 1 && j === 2 ? v.concat(EXTRA) : v; }); };
+var existing = plan(st.day)[st.meal];
+var when = MEALS[st.meal] + ' ' + DAYS[st.day].name;
+return {
+theme: this.props.theme ?? 'system',
+one: 1,
+six: 6,
+servings: st.servings,
+setServings: function (v) { self.setState({ servings: v }); },
+days: DAYS.map(function (d, i) {
+var on = i === st.day;
+return {
+short: d.short,
+full: d.full,
+on: on,
+style: on ? 'border: 1px solid var(--chili); background: var(--chili); color: #FFFFFF;' : 'border: 1px solid var(--line); background: var(--surface); color: var(--ink);',
+pick: function () { self.setState({ day: i }); }
+};
+}),
+meals: MEALS.map(function (m, j) {
+var on = j === st.meal;
+var dishes = plan(st.day)[j];
+return {
+label: m,
+has: dishes.length ? summary(dishes) : 'Trống',
+on: on,
+style: on ? 'border: 2px solid var(--chili); background: var(--chili-soft);' : 'border: 1px solid var(--outline); background: var(--surface-raised);',
+ringStyle: on ? 'border: 2px solid var(--chili);' : 'border: 2px solid var(--outline);',
+dotStyle: on ? 'background: var(--chili);' : 'background: transparent;',
+pick: function () { self.setState({ meal: j }); }
+};
+}),
+joining: existing.length > 0,
+joinText: existing.length ? 'Sẽ thêm cùng ' + summary(existing) + ' · bữa này thành ' + (existing.length + 1) + ' món' : '',
+dishName: L('Trứng chiên hành'),
+cta: 'Thêm vào ' + when
+};
+}
+}
+</script>
+</body>
+</html>

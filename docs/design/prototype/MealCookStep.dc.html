@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Nấu cả bữa · từng bước</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a{color:var(--chili-deep)}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+.dish{flex:1 0 112px;min-width:0;display:flex;flex-direction:column;gap:6px;padding:8px 10px;border-radius:12px;cursor:pointer;text-align:left;font-family:'Be Vietnam Pro',sans-serif;color:var(--ink)}
+.dish:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.dish .bh-icon{width:16px;height:16px}
+input[type=checkbox]{accent-color:var(--herb)}
+.c3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.cb{width:22px;height:22px;flex-shrink:0;padding:0;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#FFFFFF}
+.cb:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
+.bh-timer-text{min-width:0}
+.bh-timer-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="width: 390px; height: 844px; position: relative; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; flex-direction: column; gap: 8px; padding: 8px 16px 0 4px; flex-shrink: 0">
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <a href="MealCookPrep.dc.html" aria-label="Thoát chế độ nấu" style="width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <x-import component-from-global-scope="BepHoaLac.Icon" name="close"></x-import>
+      </a>
+      <span style="font-size: 15px; line-height: 22px; font-weight: 600">{{headTitle}}</span>
+      <x-import component-from-global-scope="BepHoaLac.Button" variant="ghost" icon="list" on-click="{{openSheet}}">Nguyên liệu</x-import>
+    </div>
+    <div role="tablist" aria-label="Món trong bữa" style="display: flex; gap: 8px; padding: 2px 12px 2px 14px; margin-right: -16px; overflow-x: auto; scrollbar-width: none">
+      <button class="dish" role="tab" aria-selected="{{prepTab.on}}" onClick="{{prepTab.pick}}" style="flex: 0 0 88px; {{prepTab.style}}">
+        <span style="display: flex; align-items: center; gap: 4px; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap">
+          <sc-if value="{{prepTab.done}}" hint-placeholder-val="{{false}}"><span style="display: flex; color: var(--herb-ink)"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span></sc-if>
+          Sơ chế
+        </span>
+        <span aria-hidden="true" style="height: 4px; border-radius: 999px; {{prepTab.bar}}"></span>
+        <span style="color: var(--ink-muted); font-size: 11px; line-height: 14px; font-weight: 600">{{prepTab.progress}}</span>
+      </button>
+      <sc-for list="{{dishes}}" as="dh" hint-placeholder-count="2">
+        <button class="dish" role="tab" aria-selected="{{dh.on}}" onClick="{{dh.pick}}" style="{{dh.style}}">
+          <span style="display: flex; align-items: center; gap: 4px; font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
+            <sc-if value="{{dh.done}}" hint-placeholder-val="{{false}}"><span style="display: flex; color: var(--herb-ink)"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span></sc-if>
+            {{dh.label}}
+          </span>
+          <span aria-hidden="true" style="display: grid; gap: 3px; {{dh.grid}}">
+            <sc-for list="{{dh.segments}}" as="sg" hint-placeholder-count="4">
+              <span style="height: 4px; border-radius: 999px; {{sg.style}}"></span>
+            </sc-for>
+          </span>
+          <span style="color: var(--ink-muted); font-size: 11px; line-height: 14px; font-weight: 600">{{dh.progress}}</span>
+        </button>
+      </sc-for>
+    </div>
+  </header>
+
+  <sc-if value="{{isPrep}}" hint-placeholder-val="{{true}}">
+    <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 20px 16px 16px 16px">
+      <span style="padding: 0 8px; font-size: 13px; line-height: 18px; font-weight: 700; color: var(--chili-deep); letter-spacing: .04em">SƠ CHẾ CẢ BỮA · ~8 PHÚT</span>
+      <!-- Flutter: bodySmall italic, onSurfaceVariant; "Mẹo:" is an upright w600 TextSpan in chili-deep. -->
+      <p style="margin: 0; padding: 0 8px; color: var(--ink-muted); font-size: 14px; line-height: 20px; font-style: italic; font-weight: 400"><span style="font-style: normal; font-weight: 600; color: var(--chili-deep)">Mẹo:</span> Sơ chế sẵn mọi thứ tại đây để lúc đứng bếp chỉ việc nấu liền một mạch.</p>
+      <ul style="margin: 0; padding: 0 12px; list-style: none; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
+        <sc-for list="{{prepTasks}}" as="t" hint-placeholder-count="5">
+          <li style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 0; {{t.rowStyle}}">
+            <button class="cb" role="checkbox" aria-checked="{{t.aria}}" aria-label="{{t.label}}" onClick="{{t.toggle}}" style="{{t.boxStyle}}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{t.checkShow}}"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true" style="{{t.dashShow}}"><path d="M6 12h12"></path></svg>
+            </button>
+            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+              <div style="display: flex; align-items: flex-start; gap: 8px">
+                <span style="flex-shrink: 0; padding: 2px 8px; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); font-size: 12px; line-height: 18px; font-weight: 700; white-space: nowrap">{{t.ing}}</span>
+                <sc-if value="{{t.inline}}" hint-placeholder-val="{{true}}">
+                  <span class="c2" style="flex: 1; min-width: 0; font-size: 15px; line-height: 22px; {{t.textStyle}}">{{t.text}}</span>
+                </sc-if>
+                <span style="flex-shrink: 0; margin-left: auto; padding: 1px 8px; border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; {{t.qtyStyle}}">{{t.qty}}</span>
+              </div>
+              <sc-if value="{{t.below}}" hint-placeholder-val="{{false}}">
+                <span class="c3" style="font-size: 15px; line-height: 22px; {{t.textStyle}}">{{t.text}}</span>
+              </sc-if>
+              <sc-if value="{{t.hasTags}}" hint-placeholder-val="{{true}}">
+                <span style="display: flex; flex-wrap: wrap; gap: 4px">
+                  <sc-for list="{{t.tags}}" as="tg" hint-placeholder-count="1">
+                    <span style="max-width: 100%; display: inline-flex; flex-wrap: nowrap; gap: 4px">
+                      <span style="min-width: 0; padding: 1px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600; overflow-wrap: anywhere">{{tg.dish}}</span>
+                      <sc-if value="{{tg.hasShare}}" hint-placeholder-val="{{false}}"><span style="flex-shrink: 0; padding: 1px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap">{{tg.share}}</span></sc-if>
+                    </span>
+                  </sc-for>
+                </span>
+              </sc-if>
+              <sc-if value="{{t.hasKids}}" hint-placeholder-val="{{false}}">
+                <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px">
+                  <sc-for list="{{t.kids}}" as="k" hint-placeholder-count="2">
+                    <li style="display: flex; align-items: flex-start; gap: 10px">
+                      <button class="cb" role="checkbox" aria-checked="{{k.aria}}" aria-label="{{k.label}}" onClick="{{k.toggle}}" style="{{k.boxStyle}}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="{{k.checkShow}}"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+                      </button>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                        <span style="display: flex; align-items: flex-start">
+                          <span class="c3" style="flex: 1; min-width: 0; font-size: 15px; line-height: 22px; {{k.textStyle}}">{{k.text}}</span>
+                          <span style="flex-shrink: 0; margin-left: auto; padding: 1px 8px; border-radius: 8px; background: var(--surface); color: var(--ink); font-size: 13px; line-height: 18px; font-weight: 600; white-space: nowrap; {{k.qtyStyle}}">{{k.qty}}</span>
+                        </span>
+                        <span style="display: flex; flex-wrap: wrap; gap: 4px">
+                          <sc-for list="{{k.tags}}" as="tg" hint-placeholder-count="1">
+                            <span style="max-width: 100%; display: inline-flex; flex-wrap: nowrap; gap: 4px">
+                      <span style="min-width: 0; padding: 1px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600; overflow-wrap: anywhere">{{tg.dish}}</span>
+                      <sc-if value="{{tg.hasShare}}" hint-placeholder-val="{{false}}"><span style="flex-shrink: 0; padding: 1px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap">{{tg.share}}</span></sc-if>
+                    </span>
+                          </sc-for>
+                        </span>
+                      </span>
+                    </li>
+                  </sc-for>
+                </ul>
+              </sc-if>
+            </div>
+          </li>
+        </sc-for>
+      </ul>
+      <span style="padding: 0 8px; color: var(--ink-muted); font-size: 12px; line-height: 16px">Đã sơ chế từ trước? Bấm nút bên dưới để vào nấu luôn.</span>
+    </main>
+  </sc-if>
+  <sc-if value="{{isCook}}" hint-placeholder-val="{{false}}">
+    <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 24px 24px 16px 24px">
+      <span class="c1" style="font-size: 13px; line-height: 18px; font-weight: 700; color: var(--chili-deep); letter-spacing: .04em">{{stepTag}}</span>
+      <p aria-live="polite" style="margin: 0; font-size: 24px; line-height: 34px; font-weight: 400">{{step.text}}</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{step.uses}}" as="u" hint-placeholder-count="2">
+          <span style="padding: 4px 10px; border-radius: 999px; background: var(--surface-raised); border: 1px solid var(--line); font-size: 13px; line-height: 18px; font-weight: 600">{{u}}</span>
+        </sc-for>
+      </div>
+      <sc-if value="{{hasTip}}" hint-placeholder-val="{{false}}">
+        <div style="display: flex; gap: 8px; padding: 10px 12px; border-radius: 12px; background: var(--herb-soft); font-size: 13px; line-height: 18px">
+          <span style="display: flex; color: var(--herb-ink)"><x-import component-from-global-scope="BepHoaLac.Icon" name="info"></x-import></span>
+          <span>{{step.tip}}</span>
+        </div>
+      </sc-if>
+    </main>
+  </sc-if>
+
+  <section aria-label="Hẹn giờ" style="flex-shrink: 0; display: flex; flex-direction: column; gap: 8px; padding: 0 16px 12px 16px">
+    <sc-for list="{{timers}}" as="tm" hint-placeholder-count="1">
+      <div style="{{tm.style}}">
+        <x-import component-from-global-scope="BepHoaLac.StepTimer" seconds="{{tm.sec}}" label="{{tm.name}}" on-status-change="{{tm.onStatus}}"></x-import>
+      </div>
+    </sc-for>
+  </section>
+
+  <footer style="flex-shrink: 0; display: flex; gap: 12px; padding: 12px 16px 24px 16px; border-top: 1px solid var(--line); background: var(--surface-raised)">
+    <x-import component-from-global-scope="BepHoaLac.Button" variant="secondary" icon="back" size="lg" block="{{yes}}" disabled="{{isFirst}}" on-click="{{prev}}" style="flex: 1">Bước trước</x-import>
+    <sc-if value="{{showNext}}" hint-placeholder-val="{{true}}">
+      <x-import component-from-global-scope="BepHoaLac.Button" size="lg" block="{{yes}}" on-click="{{next}}" style="flex: 1.6">{{nextLabel}}</x-import>
+    </sc-if>
+    <sc-if value="{{showFinish}}" hint-placeholder-val="{{false}}">
+      <a href="MealCookDone.dc.html" class="bh-btn bh-btn-primary bh-btn-lg" style="flex: 1.6; padding: 0 12px; text-decoration: none">
+        <x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import>
+        Xong cả bữa
+      </a>
+    </sc-if>
+  </footer>
+
+  <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(20, 14, 10, 0.55)">
+      <div role="dialog" aria-label="Nguyên liệu" style="padding: 8px 16px 24px 16px; border-radius: 16px 16px 0 0; background: var(--surface-raised); display: flex; flex-direction: column; gap: 12px">
+        <span aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: var(--line)"></span>
+        <div style="display: flex; align-items: center; justify-content: space-between">
+          <h2 class="c2" style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">{{sheetTitle}}</h2>
+          <x-import component-from-global-scope="BepHoaLac.Button" variant="ghost" on-click="{{closeSheet}}">Đóng</x-import>
+        </div>
+        <ul style="margin: 0; padding: 0; list-style: none">
+          <sc-for list="{{sheetItems}}" as="si" hint-placeholder-count="4">
+            <li style="display: flex; justify-content: space-between; padding: 12px 0; font-size: 15px; line-height: 22px; {{si.rowStyle}}"><span>{{si.name}}</span><span style="font-weight: 600">{{si.qty}}</span></li>
+          </sc-for>
+        </ul>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"$preview":{"width":390,"height":844}}'>
+var DISHES = [
+{ name: 'Đậu phụ sốt cà chua', short: 'Đậu phụ', ingredients: [['Đậu phụ', '2 bìa'], ['Cà chua', '2 quả'], ['Hành lá', '1 nắm'], ['Dầu ăn, nước mắm', 'Vừa đủ']], steps: [
+{ text: 'Cho 2 thìa dầu vào chảo, chiên đậu đến khi vàng các mặt rồi gắp ra đĩa.', uses: ['Dầu ăn', 'Chảo'], sec: 300, timerName: 'Chiên đậu' },
+{ text: 'Xào cà chua đến khi nhuyễn, thêm 1 thìa nước mắm và nửa bát nước.', uses: ['Cà chua', 'Nước mắm'], sec: 180, timerName: 'Xào cà chua' },
+{ text: 'Cho đậu vào, om nhỏ lửa cho ngấm sốt. Rắc hành, tắt bếp và đậy nắp.', uses: ['Đậu đã chiên', 'Hành lá'], sec: 480, timerName: 'Om nhỏ lửa', tip: 'Đậy nắp là giữ ấm được tới lúc ăn. Om xong thì sang món trứng.' }
+] },
+{ name: 'Trứng chiên hành', short: 'Trứng', ingredients: [['Trứng gà', '2 quả'], ['Hành lá', '1 nắm'], ['Cơm trắng', '1 suất'], ['Dầu ăn, nước mắm, tiêu', 'Vừa đủ']], steps: [
+{ text: 'Bật bếp từ mức vừa, cho 1 thìa dầu vào chảo và đợi dầu nóng.', uses: ['Dầu ăn', 'Chảo'], sec: 60, timerName: 'Làm nóng dầu', tip: 'Dùng luôn chảo vừa làm đậu, lau qua là được.' },
+{ text: 'Đổ trứng vào chảo, nghiêng chảo cho trứng dàn đều. Chiên đến khi mặt dưới vàng.', uses: ['Trứng đã đánh'], sec: 180, timerName: 'Chiên mặt dưới' },
+{ text: 'Lật trứng, chiên thêm một chút rồi xúc ra đĩa. Dọn cả hai món ra ăn nóng.', uses: ['Cơm trắng'], sec: 60, timerName: 'Chiên mặt trên' }
+] }
+];
+// Prep steps (kind: prep) of every dish are pulled to the front so the stove part runs without stopping.
+// Flutter: PrepTask { ingredientId, action, qty, dishIds, children? }. Prep steps of different dishes on the same
+// ingredient with the same action merge into one task (quantities summed, each dish tag keeps its share); different
+// actions become child tasks, and the parent is a tristate Checkbox checked once every child is.
+var PREP = [
+{ id: 'tofu', ing: 'Đậu phụ', action: 'Cắt thành miếng vuông', qty: '2 bìa', dishes: [[0, '']] },
+{ id: 'tomato', ing: 'Cà chua', action: 'Bổ múi cau', qty: '2 quả', dishes: [[0, '']] },
+{ id: 'garlic', ing: 'Tỏi', action: 'Bóc và băm nhỏ', qty: '3 tép', dishes: [[0, '2 tép'], [1, '1 tép']] },
+{ id: 'onion', ing: 'Hành lá', action: '', qty: '2 nắm', kids: [
+{ id: 'onion-cut', action: 'Cắt khúc 3cm', qty: '1 nắm', dishes: [[0, '']] },
+{ id: 'onion-chop', action: 'Thái nhỏ', qty: '1 nắm', dishes: [[1, '']] }
+] },
+{ id: 'egg', ing: 'Trứng gà', action: 'Đập ra bát, thêm nước mắm, tiêu, tỏi và hành thái rồi đánh tan', qty: '2 quả', dishes: [[1, '']] }
+];
+// Leaf tasks are what gets ticked and counted: tasks without children, plus every child.
+var LEAVES = [];
+PREP.forEach(function (t) { if (t.kids) { t.kids.forEach(function (k) { LEAVES.push(k.id); }); } else { LEAVES.push(t.id); } });
+// Tweak 'sample' = 'tên dài, nhiều món' swaps in long dish names and extra dishes to stress the layout.
+var LONG = {
+'Đậu phụ sốt cà chua': 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm',
+'Trứng chiên hành': 'Trứng chiên hành lá với thịt băm và mộc nhĩ',
+'Canh cà chua trứng': 'Canh cà chua trứng nấu đậu phụ non và rau mùi',
+'Cơm rang dưa cải': 'Cơm rang dưa cải thịt bò kiểu sinh viên ký túc xá',
+'Mì xào rau cải': 'Mì tôm xào rau cải ngọt với trứng và xúc xích',
+'Trứng hấp thịt băm': 'Trứng hấp thịt băm nấm mèo trong nồi cơm điện'
+};
+var EXTRA = ['Rau muống xào tỏi', 'Canh bí đỏ nấu tôm khô với rau ngót'];
+var STRESS = false;
+function L(n) { return STRESS && LONG[n] ? LONG[n] : n; }
+// Lists of dishes: up to 2 names in full, then "+N món".
+function summary(list) {
+var names = list.map(L);
+return names.length <= 2 ? names.join(', ') : names.slice(0, 2).join(', ') + ' +' + (names.length - 2) + ' món';
+}
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { prep: true, prepDone: {}, d: 0, pos: [0, 0], done: {}, sheet: false, status: {} };
+}
+renderVals() {
+STRESS = this.props.sample === 'tên dài, nhiều món';
+var self = this;
+var st = this.state;
+var short = function (x) { return STRESS ? L(x.name) : x.short; };
+var dish = DISHES[st.d];
+var i = st.pos[st.d];
+var s = dish.steps[i];
+var lastDish = st.d === DISHES.length - 1;
+var lastStep = i === dish.steps.length - 1;
+function go(d, k) {
+var pos = self.state.pos.slice();
+pos[d] = k;
+self.setState({ prep: false, d: d, pos: pos });
+}
+var timers = [];
+DISHES.forEach(function (x, di) {
+x.steps.forEach(function (y, k) {
+// One StepTimer per timed step of every dish, kept mounted; a running or finished one stays visible across dishes.
+if (y.sec > 0) {
+var key = di + '-' + k;
+var shown = (!st.prep && di === st.d && k === i) || (st.status[key] || 'idle') !== 'idle';
+timers.push({
+sec: y.sec,
+name: short(x) + ' · ' + y.timerName,
+style: shown ? 'display: block;' : 'display: none;',
+onStatus: function (v) {
+var next = Object.assign({}, self.state.status);
+next[key] = v;
+self.setState({ status: next });
+}
+});
+}
+});
+});
+var prepCount = LEAVES.filter(function (id) { return st.prepDone[id]; }).length;
+var prepAll = prepCount === LEAVES.length;
+// Each dish tag is kept together with its share tag (~2 tép) so the pair wraps as one.
+var tagsOf = function (x) { return x.dishes.map(function (dd) { return { dish: L(DISHES[dd[0]].name), share: dd[1] ? '~' + dd[1] : '', hasShare: !!dd[1] }; }); };
+var setDone = function (ids, v) {
+var next = Object.assign({}, self.state.prepDone);
+ids.forEach(function (id) { next[id] = v; });
+self.setState({ prepDone: next });
+};
+var box = function (state) {
+return {
+boxStyle: state === 'false' ? 'border: 2px solid var(--outline); background: var(--surface-raised);' : 'border: 2px solid var(--herb); background: var(--herb);',
+checkShow: state === 'true' ? 'display: block;' : 'display: none;',
+dashShow: state === 'mixed' ? 'display: block;' : 'display: none;'
+};
+};
+// Short actions sit beside the ingredient tag; longer ones move to their own line under it. Flutter: measure with TextPainter instead.
+var INLINE_MAX = 26;
+// Quantity tags follow the task: struck through and muted once ticked.
+var muted = function (done) { return done ? 'color: var(--ink-muted); text-decoration: line-through;' : ''; };
+var strike = function (done) { return done ? 'color: var(--ink-muted); text-decoration: line-through;' : ''; };
+var startCook = function () { self.setState({ prep: false, d: 0 }); };
+return {
+theme: this.props.theme ?? 'system',
+yes: true,
+isPrep: st.prep,
+isCook: !st.prep,
+headTitle: st.prep ? 'Bữa tối · sơ chế' : 'Bữa tối · món ' + (st.d + 1) + '/' + DISHES.length,
+prepTab: {
+on: st.prep,
+done: prepAll,
+pick: function () { self.setState({ prep: true }); },
+style: st.prep ? 'border: 2px solid var(--chili); background: var(--chili-soft);' : 'border: 1px solid var(--outline); background: var(--surface-raised);',
+bar: prepAll ? 'background: var(--chili);' : prepCount ? 'background: linear-gradient(90deg, var(--chili) ' + Math.round(prepCount / LEAVES.length * 100) + '%, var(--line) 0);' : 'background: var(--line);',
+progress: prepAll ? 'Xong' : prepCount + '/' + LEAVES.length + ' việc'
+},
+prepTasks: PREP.map(function (x, k) {
+var ids = x.kids ? x.kids.map(function (c) { return c.id; }) : [x.id];
+var n = ids.filter(function (id) { return st.prepDone[id]; }).length;
+var state = n === ids.length ? 'true' : n > 0 ? 'mixed' : 'false';
+var b = box(state);
+return {
+ing: x.ing,
+text: x.action,
+qty: x.qty,
+qtyStyle: muted(state === 'true'),
+inline: x.action.length <= INLINE_MAX,
+below: x.action.length > INLINE_MAX,
+label: x.action ? x.ing + ': ' + x.action : x.ing,
+aria: state,
+boxStyle: b.boxStyle, checkShow: b.checkShow, dashShow: b.dashShow,
+textStyle: strike(state === 'true'),
+rowStyle: k < PREP.length - 1 ? 'border-bottom: 1px solid var(--line);' : '',
+hasKids: !!x.kids,
+hasTags: !x.kids,
+tags: x.kids ? [] : tagsOf(x),
+// Ticking the parent ticks or clears every child.
+toggle: function () { setDone(ids, state !== 'true'); },
+kids: (x.kids || []).map(function (c) {
+var d = !!st.prepDone[c.id];
+var cb = box(d ? 'true' : 'false');
+return {
+text: c.action,
+qty: c.qty,
+qtyStyle: muted(d),
+label: x.ing + ': ' + c.action,
+aria: d ? 'true' : 'false',
+boxStyle: cb.boxStyle, checkShow: cb.checkShow,
+textStyle: strike(d),
+tags: tagsOf(c),
+toggle: function () { setDone([c.id], !d); }
+};
+})
+};
+}),
+dishes: DISHES.map(function (x, di) {
+var on = !st.prep && di === st.d;
+var p = st.pos[di];
+var finished = !!st.done[di];
+return {
+label: (di + 1) + '. ' + short(x),
+on: on,
+done: finished,
+pick: function () { self.setState({ prep: false, d: di }); },
+style: on ? 'border: 2px solid var(--chili); background: var(--chili-soft);' : 'border: 1px solid var(--outline); background: var(--surface-raised);',
+grid: 'grid-template-columns: repeat(' + x.steps.length + ', minmax(0, 1fr));',
+segments: x.steps.map(function (y, k) { return { style: (finished || k <= p && (on || p > 0)) ? 'background: var(--chili);' : 'background: var(--line);' }; }),
+progress: finished ? 'Xong' : (on || p > 0 ? 'Bước ' + (p + 1) + '/' + x.steps.length : x.steps.length + ' bước')
+};
+}),
+stepTag: short(dish).toUpperCase() + ' · BƯỚC ' + (i + 1) + '/' + dish.steps.length,
+step: { text: s.text, uses: s.uses, tip: s.tip || '' },
+hasTip: !!s.tip,
+timers: timers,
+isFirst: st.prep,
+showNext: st.prep || !(lastDish && lastStep),
+showFinish: !st.prep && lastDish && lastStep,
+nextLabel: st.prep ? (short(DISHES[0]).length <= 12 ? 'Bắt đầu nấu: ' + short(DISHES[0]) : 'Bắt đầu nấu món 1') : lastStep && !lastDish ? 'Sang món ' + (st.d + 2) + (short(DISHES[st.d + 1]).length <= 12 ? ': ' + short(DISHES[st.d + 1]) : '') : 'Bước tiếp',
+next: function () {
+if (st.prep) { startCook(); return; }
+if (!lastStep) { go(st.d, i + 1); return; }
+if (lastDish) { return; }
+var done = Object.assign({}, self.state.done);
+done[st.d] = true;
+var pos = self.state.pos.slice();
+self.setState({ done: done, d: st.d + 1, pos: pos });
+},
+prev: function () {
+if (st.prep) { return; }
+if (i > 0) { go(st.d, i - 1); return; }
+if (st.d > 0) { go(st.d - 1, DISHES[st.d - 1].steps.length - 1); return; }
+self.setState({ prep: true });
+},
+sheetOpen: st.sheet,
+sheetTitle: 'Nguyên liệu · ' + L(dish.name),
+sheetItems: dish.ingredients.map(function (g, k) { return { name: g[0], qty: g[1], rowStyle: k < dish.ingredients.length - 1 ? 'border-bottom: 1px solid var(--line);' : '' }; }),
+openSheet: function () { self.setState({ sheet: true }); },
+closeSheet: function () { self.setState({ sheet: false }); }
+};
+}
+}
+</script>
+</body>
+</html>

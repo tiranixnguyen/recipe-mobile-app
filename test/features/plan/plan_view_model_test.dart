@@ -4,8 +4,8 @@ import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
+import 'package:recipe_mobile_app/features/plan/data/planned_meals.dart';
 import 'package:recipe_mobile_app/features/plan/domain/recipe_picker.dart';
-import 'package:recipe_mobile_app/features/plan/plan.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/plan/plan_view_model.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/plan/recipe_picker_view_model.dart';
 
@@ -62,33 +62,68 @@ void main() {
     expect(state.today, 1);
     expect(state.selectedDate, DateTime(2026, 10, 20));
     expect(state.meals.keys, Meal.values);
-    expect(state.meals.values, everyElement(isNull));
+    expect(state.meals.values, everyElement(isEmpty));
     expect(state.plannedCount, 0);
     expect(state.daysWithMeals, isEmpty);
   });
 
-  test('thêm, đổi, xoá món ở ngày đang chọn và lưu lại', () async {
+  test('thêm nhiều món vào một bữa, xoá một món, lưu lại', () async {
     await loaded();
     viewModel().selectDay(3);
-    await viewModel().setMeal(Meal.dinner, 'a');
-    await viewModel().setMeal(Meal.lunch, 'b');
+    await viewModel().addDish(Meal.dinner, 'a');
+    await viewModel().addDish(Meal.dinner, 'c');
+    await viewModel().addDish(Meal.lunch, 'b');
 
     var state = sub.read().requireValue;
     expect(state.selectedDate, DateTime(2026, 10, 22));
-    expect(state.meals[Meal.dinner]?.id, 'a');
+    expect(state.meals[Meal.dinner]!.map((d) => d.recipe.id), ['a', 'c']);
+    expect(state.meals[Meal.lunch]!.map((d) => d.recipe.id), ['b']);
+    // Đếm bữa, không đếm món.
     expect(state.plannedCount, 2);
     expect(state.daysWithMeals, {3});
 
-    await viewModel().setMeal(Meal.dinner, 'c');
-    await viewModel().clearMeal(Meal.lunch);
+    await viewModel().removeDish(Meal.dinner, 'a');
+    await viewModel().removeDish(Meal.lunch, 'b');
     state = sub.read().requireValue;
-    expect(state.meals[Meal.dinner]?.id, 'c');
-    expect(state.meals[Meal.lunch], isNull);
+    expect(state.meals[Meal.dinner]!.map((d) => d.recipe.id), ['c']);
+    expect(state.meals[Meal.lunch], isEmpty);
     expect(state.plannedCount, 1);
 
     expect(container.read(localStoreProvider).readString('plan.meals'), contains('2026-10-22'));
     container.invalidate(plannedMealsProvider);
-    expect(sub.read().requireValue.meals[Meal.dinner]?.id, 'c');
+    expect(sub.read().requireValue.meals[Meal.dinner]!.single.recipe.id, 'c');
+  });
+
+  test('thêm lại món đã có không nhân đôi, giữ khẩu phần', () async {
+    await loaded();
+    await container
+        .read(plannedMealsProvider.notifier)
+        .addToPlan('a', DateTime(2026, 10, 20), Meal.dinner, servings: 3);
+    await viewModel().addDish(Meal.dinner, 'a');
+
+    final dishes = sub.read().requireValue.meals[Meal.dinner]!;
+    expect(dishes.single.recipe.id, 'a');
+    expect(dishes.single.servings, 3);
+  });
+
+  test('bữa đã nấu khi mọi món trong bữa đã nấu', () async {
+    final plan = container.read(plannedMealsProvider.notifier);
+    await plan.addToPlan('a', _now, Meal.dinner);
+    await plan.addToPlan('c', _now, Meal.dinner);
+    await plan.addToPlan('a', _now, Meal.lunch);
+    expect((await loaded()).cookedMeals, isEmpty);
+
+    await plan.markCooked(_now, Meal.dinner, ['a', 'c']);
+    expect(sub.read().requireValue.cookedMeals, {Meal.dinner});
+  });
+
+  test('món không còn trong dữ liệu bị bỏ khỏi bữa', () async {
+    await loaded();
+    final plan = container.read(plannedMealsProvider.notifier);
+    await plan.addToPlan('mon-cu', DateTime(2026, 10, 20), Meal.dinner);
+    await plan.addToPlan('a', DateTime(2026, 10, 20), Meal.dinner);
+
+    expect(sub.read().requireValue.meals[Meal.dinner]!.map((d) => d.recipe.id), ['a']);
   });
 
   test('chỉ đếm món trong tuần này (T2 19/10 … CN 25/10)', () async {
@@ -97,6 +132,7 @@ void main() {
     await plan.addToPlan('a', DateTime(2026, 10, 18), Meal.dinner);
     await plan.addToPlan('a', DateTime(2026, 10, 19), Meal.breakfast);
     await plan.addToPlan('a', DateTime(2026, 10, 25), Meal.dinner);
+    await plan.addToPlan('c', DateTime(2026, 10, 25), Meal.dinner);
     await plan.addToPlan('a', DateTime(2026, 10, 26), Meal.dinner);
 
     final state = sub.read().requireValue;

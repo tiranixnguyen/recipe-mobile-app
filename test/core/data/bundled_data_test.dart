@@ -62,6 +62,60 @@ void main() {
           }
         }
       });
+
+      test('bước prep không hẹn giờ, đứng trước bước nấu; còn ít nhất một bước nấu', () {
+        for (final (i, step) in r.steps.indexed) {
+          if (step.isPrep) {
+            expect(step.timerSeconds, isNull, reason: 'bước ${i + 1} prep nhưng có timerSeconds');
+          }
+        }
+        final firstCook = r.steps.indexWhere((s) => !s.isPrep);
+        expect(firstCook, isNot(-1), reason: 'mọi bước đều là prep');
+        expect(
+          r.steps.skip(firstCook).where((s) => s.isPrep),
+          isEmpty,
+          reason: 'bước prep nằm sau bước nấu đầu tiên (bước ${firstCook + 1})',
+        );
+      });
+
+      test('việc sơ chế: nguyên liệu của món, có cách làm, lượng không vượt lượng của món', () {
+        final amountOf = {for (final ing in r.ingredients) ing.id: ing.amount};
+        final used = <String, double>{};
+        for (final (i, step) in r.steps.indexed) {
+          for (final task in step.prep) {
+            final where = 'bước ${i + 1}, "${task.id}"';
+            expect(amountOf.keys, contains(task.id), reason: '$where không có trong ingredients');
+            expect(task.action.trim(), isNotEmpty, reason: '$where: action rỗng');
+            if (task.amount != null) {
+              expect(task.amount, greaterThan(0), reason: '$where: amount');
+            }
+            used[task.id] = (used[task.id] ?? 0) + (task.amount ?? amountOf[task.id] ?? 0);
+          }
+        }
+        for (final MapEntry(key: id, value: total) in used.entries) {
+          expect(
+            total,
+            lessThanOrEqualTo(amountOf[id]!),
+            reason: 'tổng lượng sơ chế "$id" vượt lượng của món',
+          );
+        }
+      });
+
+      test('prepMinutes trong khoảng (0, minutes) khi có bước sơ chế, null khi không', () {
+        if (r.steps.any((s) => s.isPrep)) {
+          expect(r.prepMinutes, isNotNull, reason: 'có bước sơ chế nhưng thiếu prepMinutes');
+          expect(r.prepMinutes, greaterThan(0), reason: 'prepMinutes');
+          expect(r.prepMinutes, lessThan(r.minutes), reason: 'prepMinutes không nhỏ hơn minutes');
+        } else {
+          expect(r.prepMinutes, isNull, reason: 'không có bước sơ chế nhưng có prepMinutes');
+        }
+      });
+
+      test('lưu ý cách dùng: câu không rỗng', () {
+        for (final note in r.notes) {
+          expect(note.trim(), isNotEmpty, reason: 'notes có mục rỗng');
+        }
+      });
     });
   }
 

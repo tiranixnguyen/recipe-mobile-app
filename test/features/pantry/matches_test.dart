@@ -57,4 +57,13 @@ void main() {
     final matches = matchPantry(recipes, {'egg'}, _ingredients, maxMissing: 1);
     expect(matches.near.map((m) => m.recipe.id), ['one-missing', 'one-missing-later']);
   });
+
+  test('món vừa bị chê xuống cuối mỗi danh sách', () {
+    final matches = matchPantry(recipes, {'egg'}, _ingredients, demoted: {'one-missing'});
+    expect(matches.near.map((m) => m.recipe.id), [
+      'one-missing-later',
+      'two-missing',
+      'one-missing',
+    ]);
+  });
 }
