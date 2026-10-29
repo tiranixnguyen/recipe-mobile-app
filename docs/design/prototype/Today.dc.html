@@ -21,50 +21,80 @@ a{color:var(--chili-deep)}
 .c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 main{scrollbar-width:none}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+a.bh-btn-secondary,a.bh-btn-secondary:hover{color:var(--ink)}
+.swap{min-height:36px;padding:0 10px;display:inline-flex;align-items:center;gap:4px;flex-shrink:0;border:1px solid var(--outline);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer;font:600 12px/16px 'Be Vietnam Pro',sans-serif}
+.swap:focus-visible,.crit:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
 </style>
 </helmet>
-<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+<div data-theme="{{theme}}" style="position: relative; width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
 
-  <header style="display: flex; align-items: center; gap: 4px; padding: 8px 16px 0 4px; height: 64px; flex-shrink: 0">
-    <a href="Main.dc.html" aria-label="Quay lại" style="width: 48px; height: 48px; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
-    </a>
-    <div style="display: flex; flex-direction: column">
-      <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Hôm nay ăn gì?</h1>
-      <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">Bữa tối · theo tủ đồ và bếp của bạn</span>
+  <header style="display: flex; flex-direction: column; gap: 6px; padding: 8px 0 8px 0; flex-shrink: 0">
+    <div style="display: flex; align-items: center; gap: 4px; padding: 0 16px 0 4px">
+      <a href="Main.dc.html" aria-label="Quay lại" style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 999px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+      </a>
+      <div style="display: flex; flex-direction: column">
+        <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">{{title}}</h1>
+        <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">Gợi ý theo tủ đồ, bếp và nhu cầu của bạn</span>
+      </div>
     </div>
-    <div role="radiogroup" aria-label="Gợi ý" style="margin-left: auto; display: flex; padding: 3px; border-radius: 999px; border: 1px solid var(--outline)">
-      <sc-for list="{{modes}}" as="md" hint-placeholder-count="2">
-        <button role="radio" aria-checked="{{md.on}}" onClick="{{md.pick}}" style="height: 34px; padding: 0 12px; border: 0; border-radius: 999px; cursor: pointer; font: 600 13px/18px 'Be Vietnam Pro', sans-serif; {{md.style}}">{{md.label}}</button>
+    <a href="TodayPrefs.dc.html" class="crit" aria-label="{{critAria}}" style="display: flex; align-items: center; gap: 6px; padding: 2px 16px; overflow: hidden; text-decoration: none">
+      <sc-for list="{{crit}}" as="c" hint-placeholder-count="4">
+        <span style="flex-shrink: 0; padding: 4px 10px; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 600">{{c}}</span>
       </sc-for>
-    </div>
+      <span style="flex-shrink: 0; display: flex; align-items: center; gap: 2px; padding: 4px 6px; color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 600">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"></path></svg>
+        Sửa
+      </span>
+    </a>
   </header>
 
-  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 12px 16px 16px 16px">
-    <div role="group" aria-label="Thời gian nấu" style="display: flex; gap: 8px">
-      <sc-for list="{{times}}" as="t" hint-placeholder-count="3">
-        <button onClick="{{t.pick}}" aria-pressed="{{t.on}}" style="height: 36px; padding: 0 14px; border-radius: 999px; cursor: pointer; font: 600 13px/18px 'Be Vietnam Pro', sans-serif; {{t.style}}">{{t.label}}</button>
-      </sc-for>
-    </div>
-
-    <sc-if value="{{isOne}}" hint-placeholder-val="{{true}}">
-    <a href="Detail.dc.html" style="display: flex; flex-direction: column; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; color: var(--ink); text-decoration: none">
-      <div style="height: 176px; background: var(--line); display: flex; align-items: center; justify-content: center; color: var(--ink-muted); font-size: 12px; line-height: 16px; position: relative">
-        [Ảnh {{main.lower}}]
-        <span style="position: absolute; left: 12px; top: 12px; padding: 2px 8px; border-radius: 8px; font-size: 12px; line-height: 16px; font-weight: 600; {{main.haveStyle}}">{{main.have}}</span>
+  <!-- Flutter (F1): meals come from suggestMeal(prefs) in F3 domain, filtered by recipe tags (scale, role, minutes,
+       feel, cheap, diet, occasion) and pantry; only induction-hob or rice-cooker recipes. No price field anywhere. -->
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 8px 16px 16px 16px">
+    <sc-if value="{{relaxed}}" hint-placeholder-val="{{false}}">
+      <p style="margin: 0; padding: 8px 12px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line); color: var(--ink-muted); font-size: 13px; line-height: 18px">{{relaxedText}}</p>
+    </sc-if>
+    <section aria-label="Bữa gợi ý" style="display: flex; flex-direction: column; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; overflow: hidden">
+      <div style="position: relative; height: 168px; background: var(--surface-raised)">
+        <sc-for list="{{meal.tiles}}" as="t" hint-placeholder-count="2">
+          <div style="position: absolute; padding: 1px; {{t.style}}" role="img" aria-label="{{t.aria}}">
+            <div class="c2" style="position: relative; width: 100%; height: 100%; background: var(--line); color: var(--ink-muted); font-size: 12px; line-height: 16px; text-align: center; padding: 8px; display: flex; align-items: center; justify-content: center">[Ảnh {{t.lower}}]
+              <sc-if value="{{t.more}}" hint-placeholder-val="{{false}}"><span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(20, 14, 10, 0.55); color: #FFFFFF; font-size: 17px; line-height: 24px; font-weight: 700">{{t.moreLabel}}</span></sc-if>
+            </div>
+          </div>
+        </sc-for>
       </div>
-      <div style="padding: 16px; display: flex; flex-direction: column; gap: 4px">
-        <span class="c2" style="font-size: 20px; line-height: 28px; font-weight: 600">{{main.name}}</span>
-        <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{main.meta}}</span>
-        <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{main.why}}</span>
+      <div style="padding: 14px 16px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+          <span style="padding: 2px 8px; border-radius: 8px; font-size: 12px; line-height: 16px; font-weight: 600; {{meal.haveStyle}}">{{meal.have}}</span>
+          <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{meal.meta}}</span>
+        </div>
+        <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px">
+          <sc-for list="{{meal.dishes}}" as="d" hint-placeholder-count="2">
+            <li style="display: flex; align-items: center; gap: 10px">
+              <span style="width: 76px; flex-shrink: 0; padding: 2px 0; border-radius: 8px; background: var(--chili-soft); color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 600; text-align: center">{{d.role}}</span>
+              <a href="Detail.dc.html" style="flex: 1; min-width: 0; display: flex; flex-direction: column; color: var(--ink); text-decoration: none">
+                <span class="c2" style="font-size: 16px; line-height: 22px; font-weight: 600">{{d.name}}</span>
+                <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{d.min}} phút</span>
+              </a>
+              <button class="swap" onClick="{{d.swap}}" aria-label="{{d.swapAria}}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h11l-3-3M20 17H9l3 3"></path></svg>
+                Đổi
+              </button>
+            </li>
+          </sc-for>
+        </ul>
+        <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px">{{meal.why}}</span>
       </div>
-    </a>
+    </section>
 
     <div style="display: flex; gap: 12px">
-      <button onClick="{{toggleReasons}}" aria-expanded="{{showReasons}}" style="flex: 1; height: 48px; border: 0; border-radius: 12px; background: transparent; color: var(--ink); font: 600 15px/22px 'Be Vietnam Pro', sans-serif; cursor: pointer">Không thích</button>
-      <button onClick="{{shuffle}}" style="flex: 1; height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--outline); border-radius: 12px; background: transparent; color: var(--ink); font: 600 15px/22px 'Be Vietnam Pro', sans-serif; cursor: pointer">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h11l-3-3M20 17H9l3 3"></path></svg>
-        Đổi món
+      <button onClick="{{toggleReasons}}" aria-expanded="{{showReasons}}" class="bh-btn bh-btn-ghost" style="flex: 1">Không hợp</button>
+      <button onClick="{{shuffle}}" class="bh-btn bh-btn-secondary" style="flex: 1">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h11l-3-3M20 17H9l3 3"></path></svg>
+        Đổi cả bữa
       </button>
     </div>
 
@@ -79,79 +109,85 @@ main{scrollbar-width:none}
       </div>
     </sc-if>
 
-    <section style="display: flex; flex-direction: column; gap: 8px">
-      <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Hoặc thử</h2>
-      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+    <sc-if value="{{hasAlts}}" hint-placeholder-val="{{true}}">
+      <section style="display: flex; flex-direction: column; gap: 8px">
+        <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Hoặc thử</h2>
         <sc-for list="{{alts}}" as="a" hint-placeholder-count="2">
-          <a href="Detail.dc.html" style="display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
-            <div style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></div>
-            <div style="min-width: 0; display: flex; flex-direction: column">
-              <span class="c2" style="font-size: 13px; line-height: 18px; font-weight: 600">{{a.name}}</span>
-              <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{a.time}}</span>
+          <button onClick="{{a.pick}}" style="display: flex; align-items: center; gap: 10px; padding: 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); cursor: pointer; text-align: left; font-family: 'Be Vietnam Pro', sans-serif">
+            <div aria-hidden="true" style="position: relative; width: 48px; height: 48px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: var(--surface-raised)">
+              <sc-for list="{{a.tiles}}" as="mt" hint-placeholder-count="2">
+                <span style="position: absolute; padding: 1px; {{mt.style}}"><span style="display: block; width: 100%; height: 100%; background: var(--line)"></span></span>
+              </sc-for>
             </div>
-          </a>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+              <span class="c2" style="font-size: 14px; line-height: 20px; font-weight: 600">{{a.names}}</span>
+              <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{a.meta}}</span>
+            </span>
+          </button>
         </sc-for>
-      </div>
-    </section>
-    </sc-if>
-    <sc-if value="{{isMeal}}" hint-placeholder-val="{{false}}">
-      <section style="display: flex; flex-direction: column; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; overflow: hidden">
-        <div style="display: flex; gap: 2px; height: 128px; background: var(--surface-raised)">
-          <sc-for list="{{combo.dishes}}" as="cd" hint-placeholder-count="2">
-            <div class="c2" style="flex: 1; min-width: 0; background: var(--line); color: var(--ink-muted); font-size: 12px; line-height: 16px; text-align: center; padding: 48px 8px 0 8px">[Ảnh {{cd.lower}}]</div>
-          </sc-for>
-        </div>
-        <div style="padding: 14px 16px 16px 16px; display: flex; flex-direction: column; gap: 10px">
-          <div style="display: flex; align-items: center; gap: 8px">
-            <span style="padding: 2px 8px; border-radius: 8px; font-size: 12px; line-height: 16px; font-weight: 600; {{combo.haveStyle}}">{{combo.have}}</span>
-            <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{combo.meta}}</span>
-          </div>
-          <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
-            <sc-for list="{{combo.dishes}}" as="cd" hint-placeholder-count="2">
-              <li>
-                <a href="Detail.dc.html" style="display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none">
-                  <span style="width: 72px; flex-shrink: 0; padding: 2px 0; border-radius: 8px; background: var(--chili-soft); color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 600; text-align: center">{{cd.role}}</span>
-                  <span class="c2" style="flex: 1; min-width: 0; font-size: 17px; line-height: 24px; font-weight: 600">{{cd.name}}</span>
-                  <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600">{{cd.min}} phút</span>
-                </a>
-              </li>
-            </sc-for>
-          </ul>
-          <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{combo.why}}</span>
-        </div>
       </section>
-      <div style="display: flex; gap: 12px">
-        <a href="AddToPlan.dc.html" style="flex: 1; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; color: var(--ink); text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">Thêm vào thực đơn</a>
-        <button onClick="{{shuffle}}" style="flex: 1; height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--outline); border-radius: 12px; background: transparent; color: var(--ink); font: 600 15px/22px 'Be Vietnam Pro', sans-serif; cursor: pointer">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h11l-3-3M20 17H9l3 3"></path></svg>
-          Đổi combo
-        </button>
-      </div>
-      <p style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px">App ghép một món mặn với một món rau hoặc canh, ưu tiên đồ đang có và món nấu được bằng bếp của bạn.</p>
     </sc-if>
   </main>
 
-  <footer style="flex-shrink: 0; padding: 12px 16px 24px 16px; border-top: 1px solid var(--line); background: var(--surface-raised)">
-    <a href="{{cta.href}}" style="height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--chili); color: #FFFFFF; text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">{{cta.label}}</a>
+  <sc-if value="{{hasSnack}}" hint-placeholder-val="{{false}}">
+    <div role="status" aria-live="polite" style="position: absolute; left: 16px; right: 16px; bottom: 96px; z-index: 5; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--ink); color: var(--surface); font-size: 13px; line-height: 18px; box-shadow: 0 6px 16px rgba(20,14,10,.2)">
+      <span style="display: flex; color: var(--herb-soft)"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span>
+      <span style="flex: 1; padding: 7px 0">{{snack}}</span>
+      <sc-if value="{{snackLink}}" hint-placeholder-val="{{false}}"><a href="Saved.dc.html" style="min-height: 40px; padding: 0 10px; display: flex; align-items: center; color: var(--chili-soft); font-weight: 700; text-decoration: none">Xem</a></sc-if>
+    </div>
+  </sc-if>
+
+  <footer style="flex-shrink: 0; display: flex; gap: 12px; padding: 12px 16px 24px 16px; border-top: 1px solid var(--line); background: var(--surface-raised)">
+    <button onClick="{{toggleSave}}" aria-pressed="{{saved}}" class="bh-btn bh-btn-secondary" style="flex: 0 0 auto; padding: 0 16px; {{saveStyle}}">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="{{saveFill}}" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"></path></svg>
+      {{saveLabel}}
+    </button>
+    <a href="AddToPlan.dc.html" class="bh-btn bh-btn-primary" style="flex: 1; padding: 0 12px; text-decoration: none">Thêm vào thực đơn</a>
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"mode":{"editor":"enum","options":["one","meal"],"default":"one"},"$preview":{"width":390,"height":844}}'>
-var DISHES = [
-{ name: 'Trứng chiên hành', min: 15, meta: '15 phút · 1 người · Bếp từ', have: 'Có sẵn 3/3 nguyên liệu', full: true, why: 'Bạn có trứng, hành lá, cơm · chưa ăn món này 5 ngày' },
-{ name: 'Canh cà chua trứng', min: 15, meta: '15 phút · 2 người · Bếp từ', have: 'Có sẵn 3/3 nguyên liệu', full: true, why: 'Dùng nốt cà chua trong tủ · hợp bữa tối' },
-{ name: 'Trứng hấp thịt băm', min: 20, meta: '20 phút · 1 người · Nồi cơm điện', have: 'Thiếu thịt băm', full: false, why: 'Nấu cùng nồi cơm, không cần đứng bếp' },
-{ name: 'Mì xào rau cải', min: 15, meta: '15 phút · 1 người · Bếp từ', have: 'Thiếu rau cải', full: false, why: 'Bạn còn 2 gói mì · món đã lưu' },
-{ name: 'Cháo trứng hành', min: 25, meta: '25 phút · 1 người · Nồi cơm điện', have: 'Có sẵn 3/3 nguyên liệu', full: true, why: 'Bữa tối nhẹ · dùng cơm nguội' }
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"now":{"editor":"enum","options":["07:30","11:30","18:30"],"default":"18:30"},"scale":{"editor":"enum","options":["1 món gọn lẹ","Cơm nhà 2 món","Mâm cơm (3+ món)"],"default":"Cơm nhà 2 món"},"time":{"editor":"enum","options":["Siêu tốc","Nhanh gọn","Thong thả"],"default":"Nhanh gọn"},"feel":{"editor":"enum","options":["Theo thời tiết","Giải nhiệt","Ấm bụng"],"default":"Theo thời tiết"},"weather":{"editor":"enum","options":["nắng nóng","mưa lạnh","tắt"],"default":"nắng nóng"},"fridge":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
+// Sample meals tagged like recipes.json will be: scale, total minutes, feel, whether the pantry covers them, extra tags.
+var MEALS = [
+{ scale: 'one', total: 15, feel: 'any', full: false, missing: 'rau cải', tags: ['cheap'], why: 'Còn 2 gói mì, chỉ một chảo là xong', dishes: [['Món chính', 'Mì xào rau cải', 15]] },
+{ scale: 'one', total: 15, feel: 'any', full: true, tags: ['cheap'], why: 'Dùng cơm nguội và trứng trong tủ', dishes: [['Món chính', 'Cơm rang dưa cải', 15]] },
+{ scale: 'one', total: 20, feel: 'hot', full: false, missing: 'bún khô', tags: ['healthy'], why: 'Mát, ít dầu mỡ, hợp trời nóng', dishes: [['Món chính', 'Bún trộn rau thơm', 20]] },
+{ scale: 'one', total: 25, feel: 'cold', full: true, tags: ['cheap', 'mild'], why: 'Nóng, mềm, dễ ăn khi trời lạnh', dishes: [['Món chính', 'Cháo trứng hành', 25]] },
+{ scale: 'two', total: 25, feel: 'hot', full: true, tags: ['cheap', 'veg'], why: 'Thanh mát, dùng nốt cà chua và đậu phụ', dishes: [['Món mặn', 'Đậu phụ luộc chấm tương', 10], ['Canh', 'Canh chua cà chua', 15]] },
+{ scale: 'two', total: 30, feel: 'cold', full: false, missing: 'rau cải', tags: [], why: 'Trứng hấp trong nồi cơm, trong lúc đó nấu canh', dishes: [['Món mặn', 'Trứng hấp thịt băm', 20], ['Canh', 'Canh rau cải thịt băm', 15]] },
+{ scale: 'two', total: 40, feel: 'cold', full: true, tags: ['cheap'], why: 'Ấm bụng, hai món chung hành lá và cà chua', dishes: [['Món mặn', 'Đậu phụ sốt cà chua', 25], ['Món thêm', 'Trứng chiên hành', 15]] },
+{ scale: 'two', total: 30, feel: 'hot', full: false, missing: 'thịt gà', tags: ['healthy'], why: 'Ít dầu mỡ, giữ dáng', dishes: [['Món mặn', 'Gà luộc lá chanh', 20], ['Xào', 'Salad dưa chuột', 10]] },
+{ scale: 'tray', total: 45, feel: 'hot', full: false, missing: 'cá hộp', tags: [], why: 'Đủ mặn, canh, rau cho cả phòng', dishes: [['Món mặn', 'Cá sốt cà chua', 20], ['Canh', 'Canh chua cà chua', 15], ['Rau', 'Rau muống luộc', 10]] },
+{ scale: 'tray', total: 60, feel: 'cold', full: false, missing: 'ba chỉ, bí đỏ', tags: [], why: 'Mâm cơm nóng, đậm đà cho tối mưa', dishes: [['Món mặn', 'Thịt kho tiêu', 35], ['Canh', 'Canh bí đỏ', 15], ['Xào', 'Rau muống xào tỏi', 10]] }
 ];
-var TIMES = [['15', 'Dưới 15 phút', 15], ['30', 'Dưới 30 phút', 30], ['any', 'Thoải mái', 999]];
-// Cả bữa: one savoury dish plus a vegetable or soup, total time is cooking them one after another.
-var COMBOS = [
-{ dishes: [['Món mặn', 'Đậu phụ sốt cà chua', 25], ['Món thêm', 'Trứng chiên hành', 15]], total: 35, have: 'Có sẵn 6/6 nguyên liệu', full: true, why: 'Dùng nốt cà chua và đậu phụ · hai món chung hành lá' },
-{ dishes: [['Món mặn', 'Trứng hấp thịt băm', 20], ['Canh', 'Canh rau cải thịt băm', 15]], total: 30, have: 'Thiếu rau cải', full: false, why: 'Trứng hấp trong nồi cơm, trong lúc đó nấu canh' },
-{ dishes: [['Món mặn', 'Mì xào rau cải', 15], ['Canh', 'Canh cà chua trứng', 15]], total: 28, have: 'Thiếu rau cải', full: false, why: 'Bạn còn 2 gói mì · nhanh cho tối bận học' }
-];
+// Swap pool per role for "Đổi" on a single dish.
+var SWAP = {
+'Món chính': [['Mì trứng hành', 10], ['Cơm rang trứng', 15]],
+'Món mặn': [['Trứng đúc thịt', 20], ['Đậu phụ rán', 15]],
+'Món thêm': [['Trứng luộc chấm muối', 10], ['Dưa chuột chấm muối', 5]],
+'Canh': [['Canh cà chua trứng', 15], ['Canh rau ngót', 15]],
+'Xào': [['Bắp cải xào', 10], ['Giá xào', 10]],
+'Rau': [['Rau cải luộc', 10], ['Su su luộc', 10]]
+};
+// Mosaic by dish count: 1 full · 2 halves · 3 = big left + two stacked · 4+ = 2x2, last tile "+N".
+// Flutter: MealMosaic(images) in core/widgets (Lead review).
+function mosaic(names) {
+var n = names.length;
+var boxes = n <= 1 ? [[0, 0, 100, 100]] : n === 2 ? [[0, 0, 50, 100], [50, 0, 50, 100]] : n === 3 ? [[0, 0, 60, 100], [60, 0, 40, 50], [60, 50, 40, 50]] : [[0, 0, 50, 50], [50, 0, 50, 50], [0, 50, 50, 50], [50, 50, 50, 50]];
+return boxes.map(function (b, i) {
+var more = n > 4 && i === 3 ? n - 3 : 0;
+return { style: 'left: ' + b[0] + '%; top: ' + b[1] + '%; width: ' + b[2] + '%; height: ' + b[3] + '%;', label: names[i] || '', lower: (names[i] || '').toLowerCase(), more: more > 0, moreLabel: '+' + more + ' món', aria: more > 0 ? names.slice(3).join(', ') : names[i] };
+});
+}
+var snackTimer = null;
+var SCALE = { '1 món gọn lẹ': 'one', 'Cơm nhà 2 món': 'two', 'Mâm cơm (3+ món)': 'tray' };
+var TIME = { 'Siêu tốc': 15, 'Nhanh gọn': 30, 'Thong thả': 999 };
+var MEAL_WORD = ['Bữa sáng', 'Bữa trưa', 'Bữa tối'];
 var REASONS = ['Vừa ăn rồi', 'Thiếu đồ', 'Lâu quá', 'Không hợp khẩu vị'];
+function nextMeal(now) {
+var h = parseInt(String(now || '18:30').split(':')[0], 10);
+return h < 10 ? 0 : h < 14 ? 1 : 2;
+}
 // Tweak 'sample' = 'tên dài, nhiều món' swaps in long dish names and extra dishes to stress the layout.
 var LONG = {
 'Đậu phụ sốt cà chua': 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm',
@@ -172,55 +208,94 @@ return names.length <= 2 ? names.join(', ') : names.slice(0, 2).join(', ') + ' +
 class Component extends DCLogic {
 constructor(props) {
 super(props);
-this.state = { idx: 0, time: '30', showReasons: false, mode: props.mode ?? 'one' };
+this.state = { idx: 0, swaps: {}, showReasons: false, saved: false, snack: null };
 }
 renderVals() {
 STRESS = this.props.sample === 'tên dài, nhiều món';
 var self = this;
 var st = this.state;
-var limit = TIMES.filter(function (t) { return t[0] === st.time; })[0][2];
-var pool = DISHES.filter(function (d) { return d.min <= limit; });
+var p = this.props;
+var scaleLabel = p.scale || 'Cơm nhà 2 món';
+var timeLabel = p.time || 'Nhanh gọn';
+var feelLabel = p.feel || 'Theo thời tiết';
+var scale = SCALE[scaleLabel] || 'two';
+var limit = TIME[timeLabel] || 30;
+var weather = p.weather || 'nắng nóng';
+var feel = feelLabel === 'Giải nhiệt' ? 'hot' : feelLabel === 'Ấm bụng' ? 'cold' : weather === 'mưa lạnh' ? 'cold' : weather === 'nắng nóng' ? 'hot' : 'any';
+var fridge = p.fridge !== false;
+// Filter by scale, then time and feel; if nothing is left, relax feel, then time, and say so.
+var base = MEALS.filter(function (m) { return m.scale === scale; });
+var fitsTime = function (m) { return limit >= 999 ? m.total >= 30 : m.total <= limit; };
+var fitsFeel = function (m) { return feel === 'any' || m.feel === 'any' || m.feel === feel; };
+var pool = base.filter(function (m) { return fitsTime(m) && fitsFeel(m); });
+var relaxed = '';
+if (!pool.length) { pool = base.filter(fitsTime); relaxed = 'Chưa có bữa hợp cả thời gian lẫn cảm giác, app bỏ bớt tiêu chí cảm giác.'; }
+if (!pool.length) { pool = base.slice(); relaxed = 'Chưa có bữa nào trong khung thời gian này, app gợi ý bữa gần nhất.'; }
+if (fridge) { pool = pool.slice().sort(function (a, b) { return (b.full ? 1 : 0) - (a.full ? 1 : 0); }); }
 var n = pool.length;
-var m = pool[st.idx % n];
-var isMeal = st.mode === 'meal';
-var combos = COMBOS.filter(function (c) { return c.total <= limit; });
-if (!combos.length) { combos = COMBOS.slice(0, 1); }
-var c = combos[st.idx % combos.length];
-var count = isMeal ? combos.length : n;
-function next() { self.setState({ idx: (self.state.idx + 1) % count, showReasons: false }); }
+var i = st.idx % n;
+var m = pool[i];
+var key = MEALS.indexOf(m);
+var dishes = m.dishes.map(function (d, k) {
+var s = st.swaps[key + '-' + k] || 0;
+var pick = s === 0 ? [d[1], d[2]] : SWAP[d[0]][(s - 1) % SWAP[d[0]].length];
+return { role: d[0], name: pick[0], min: pick[1], k: k, s: s };
+});
+if (STRESS) { dishes = dishes.concat([{ role: 'Rau', name: EXTRA[0], min: 10, k: dishes.length, s: 0, extra: true }, { role: 'Canh', name: EXTRA[1], min: 20, k: dishes.length + 1, s: 0, extra: true }]); }
+var total = dishes.reduce(function (t, d) { return t + d.min; }, 0);
+var many = dishes.length > 1;
+var crit = [scaleLabel, timeLabel, feelLabel === 'Theo thời tiết' ? (weather === 'mưa lạnh' ? 'Ấm bụng · trời mưa' : weather === 'nắng nóng' ? 'Giải nhiệt · trời nóng' : 'Theo giờ') : feelLabel];
+if (fridge) { crit.push('Dọn tủ lạnh'); }
+// A changed meal is a different meal: it is no longer the saved one.
+function next() { self.setState({ idx: (self.state.idx + 1) % n, showReasons: false, saved: false }); }
+function toast(text, link) {
+if (snackTimer) { clearTimeout(snackTimer); }
+self.setState({ snack: { text: text, link: !!link } });
+// Spec chung (Toasts): 4 s, 6 s when there is an action.
+snackTimer = setTimeout(function () { self.setState({ snack: null }); }, link ? 6000 : 4000);
+}
 return {
-theme: this.props.theme ?? 'system',
-isOne: !isMeal,
-isMeal: isMeal,
-modes: [['one', '1 món'], ['meal', 'Cả bữa']].map(function (md) {
-var on = st.mode === md[0];
-return { label: md[1], on: on, style: on ? 'background: var(--chili-soft); color: var(--chili-deep);' : 'background: transparent; color: var(--ink);', pick: function () { self.setState({ mode: md[0], idx: 0, showReasons: false }); } };
-}),
-combo: {
-meta: (c.dishes.length + (STRESS ? 1 : 0)) + ' món · khoảng ' + c.total + ' phút · Bếp từ',
-have: c.have,
-why: c.why,
-haveStyle: c.full ? 'background: var(--herb); color: #FFFFFF;' : 'background: var(--chili-soft); color: var(--chili-deep);',
-dishes: (STRESS ? c.dishes.concat([['Rau', EXTRA[0], 10]]) : c.dishes).map(function (d) { return { role: d[0], name: L(d[1]), lower: L(d[1]).toLowerCase(), min: d[2] }; })
-},
-cta: isMeal ? { label: 'Nấu cả bữa', href: 'MealCookPrep.dc.html' } : { label: 'Nấu món này', href: 'Detail.dc.html' },
-times: TIMES.map(function (t) {
-var on = t[0] === st.time;
+theme: p.theme ?? 'system',
+title: MEAL_WORD[nextMeal(p.now)] + ' nay',
+crit: crit,
+critAria: 'Tiêu chí: ' + crit.join(', ') + '. Bấm để sửa',
+relaxed: !!relaxed,
+relaxedText: relaxed,
+meal: {
+dishes: dishes.map(function (d) {
 return {
-label: t[1], on: on,
-style: on ? 'border: 1px solid var(--chili-soft); background: var(--chili-soft); color: var(--chili-deep);' : 'border: 1px solid var(--outline); background: transparent; color: var(--ink);',
-pick: function () { self.setState({ time: t[0], idx: 0, showReasons: false }); }
+role: d.role, name: L(d.name), lower: L(d.name).toLowerCase(), min: d.min,
+swapAria: 'Đổi ' + L(d.name),
+swap: function () { if (d.extra) { return; } var sw = Object.assign({}, self.state.swaps); sw[key + '-' + d.k] = d.s + 1; self.setState({ swaps: sw, saved: false }); }
 };
 }),
-main: {
-name: L(m.name), lower: L(m.name).toLowerCase(), meta: m.meta, have: m.have, why: m.why,
-haveStyle: m.full ? 'background: var(--herb); color: #FFFFFF;' : 'background: var(--chili-soft); color: var(--chili-deep);'
+tiles: mosaic(dishes.map(function (d) { return L(d.name); })),
+meta: dishes.length + ' món · ~' + total + ' phút · Bếp từ',
+have: m.full ? 'Đủ đồ' : 'Thiếu: ' + m.missing,
+haveStyle: m.full ? 'background: var(--herb); color: #FFFFFF;' : 'background: var(--chili-soft); color: var(--chili-deep);',
+why: m.why
 },
-alts: [pool[(st.idx + 1) % n], pool[(st.idx + 2) % n]].map(function (d) { return { name: L(d.name), time: d.min + ' phút' }; }),
+alts: [1, 2].filter(function (k) { return k < n; }).map(function (k) {
+var a = pool[(i + k) % n];
+return { names: summary(a.dishes.map(function (d) { return d[1]; })), meta: a.dishes.length + ' món · ~' + a.total + ' phút' + (a.full ? ' · Đủ đồ' : ''), tiles: mosaic(a.dishes.map(function (d) { return d[1]; })), pick: function () { self.setState({ idx: (i + k) % n, showReasons: false, saved: false }); } };
+}),
+hasAlts: n > 1,
 shuffle: next,
 showReasons: st.showReasons,
 toggleReasons: function () { self.setState({ showReasons: !self.state.showReasons }); },
-reasons: REASONS.map(function (r) { return { label: r, pick: next }; })
+reasons: REASONS.map(function (r) { return { label: r, pick: next }; }),
+saved: st.saved,
+saveLabel: st.saved ? 'Đã lưu' : 'Lưu lại',
+saveFill: st.saved ? 'currentColor' : 'none',
+saveStyle: st.saved ? 'color: var(--chili-deep); border-color: var(--chili);' : '',
+toggleSave: function () {
+var on = !self.state.saved;
+self.setState({ saved: on });
+toast(on ? (many ? 'Đã lưu bữa vào Đã lưu' : 'Đã lưu món vào Đã lưu') : 'Đã bỏ lưu', on);
+},
+hasSnack: !!st.snack,
+snack: st.snack ? st.snack.text : '',
+snackLink: !!(st.snack && st.snack.link)
 };
 }
 }

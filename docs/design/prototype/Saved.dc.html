@@ -18,24 +18,137 @@
 body{margin:0}
 *{box-sizing:border-box}
 a{color:var(--chili-deep)}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+.tab{flex:1;min-height:40px;border:0;border-radius:999px;background:transparent;color:var(--ink-muted);cursor:pointer;font:600 14px/20px 'Be Vietnam Pro',sans-serif}
+.tab[aria-selected="true"]{background:var(--surface-raised);color:var(--ink);box-shadow:0 1px 3px rgba(20,14,10,.12)}
+.tab:focus-visible,.card:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.card{color:inherit;text-decoration:none;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.lifted{opacity:.35}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sr:focus{position:static;width:auto;height:auto;clip:auto}
+.ghost{position:absolute;z-index:7;pointer-events:none;transform:translate(-50%,-50%) scale(1.06) rotate(-2deg);max-width:220px;display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:12px;background:var(--surface-raised);color:var(--ink);font-size:13px;line-height:18px;font-weight:600;box-shadow:0 10px 24px rgba(20,14,10,.28)}
+.trash{position:absolute;left:0;right:0;bottom:0;height:128px;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--surface-raised);border-top:1px solid var(--line);box-shadow:0 -6px 16px rgba(20,14,10,.12);font-size:12px;line-height:16px;font-weight:600}
+.trash-dot{width:64px;height:64px;border-radius:999px;display:flex;align-items:center;justify-content:center;transition:transform .12s}
+.tip{position:absolute;left:16px;right:16px;bottom:96px;z-index:4;display:flex;align-items:flex-start;gap:6px;padding:10px 6px 10px 12px;border-radius:12px;background:var(--ink);color:var(--surface);font-size:12px;line-height:16px;box-shadow:0 6px 16px rgba(20,14,10,.2)}
+.tip button{border:0;background:transparent;color:inherit;cursor:pointer;font:700 13px/18px 'Be Vietnam Pro',sans-serif}
 </style>
 </helmet>
-<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+<div data-theme="{{theme}}" data-root="1" style="position: relative; width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
 
-  <header style="display: flex; align-items: center; padding: 16px 16px 8px 16px; height: 64px">
+  <header style="flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 12px 16px">
     <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Đã lưu</h1>
+    <div role="tablist" aria-label="Loại đã lưu" style="display: flex; gap: 4px; padding: 4px; border-radius: 999px; background: var(--line)">
+      <sc-for list="{{tabs}}" as="tb" hint-placeholder-count="2">
+        <button role="tab" class="tab" aria-selected="{{tb.on}}" onClick="{{tb.pick}}">{{tb.label}}</button>
+      </sc-for>
+    </div>
+    <sc-if value="{{hasAny}}" hint-placeholder-val="{{true}}">
+      <label class="bh-search" style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border: 1px solid var(--outline); border-radius: 12px; background: var(--surface-raised)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" style="color: var(--ink-muted)"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <input value="{{q}}" type="search" onChange="{{setQ}}" placeholder="Tìm trong đã lưu" aria-label="Tìm trong đã lưu" style="flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: 400 15px/22px 'Be Vietnam Pro', sans-serif">
+      </label>
+    </sc-if>
   </header>
 
-  <main style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 0 32px 64px 32px; text-align: center">
-    <div style="width: 96px; height: 96px; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); display: flex; align-items: center; justify-content: center">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"></path></svg>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 8px">
-      <h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Chưa lưu món nào</h2>
-      <p style="margin: 0; color: var(--ink-muted); font-size: 15px; line-height: 22px">Bấm biểu tượng lưu trên món bạn thích. Món đã lưu được ưu tiên khi gợi ý và lên thực đơn.</p>
-    </div>
-    <a href="Main.dc.html" style="height: 48px; padding: 0 24px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--chili); color: #FFFFFF; text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">Tìm món để lưu</a>
+  <main style="flex: 1; overflow-y: auto; padding: 4px 16px 16px 16px">
+
+    <sc-if value="{{showDishes}}" hint-placeholder-val="{{true}}">
+      <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+        <sc-for list="{{dishes}}" as="d" hint-placeholder-count="4">
+          <li class="{{d.cls}}" style="position: relative; display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised); overflow: hidden">
+            <a href="Detail.dc.html" class="card" aria-label="{{d.aria}}" onClick="{{tap}}" onPointerDown="{{d.down}}" onPointerMove="{{dragMove}}" onPointerUp="{{dragUp}}" onPointerCancel="{{dragCancel}}" onContextMenu="{{noMenu}}" onKeyDown="{{d.key}}" draggable="false" style="display: flex; flex-direction: column">
+              <div class="c2" style="aspect-ratio: 4 / 3; background: var(--line); color: var(--ink-muted); font-size: 12px; line-height: 16px; text-align: center; padding: 8px; display: flex; align-items: center; justify-content: center">[Ảnh {{d.lower}}]</div>
+              <div style="padding: 8px 10px 10px 10px; display: flex; flex-direction: column; gap: 4px">
+                <span class="c2" style="font-size: 14px; line-height: 20px; font-weight: 600">{{d.name}}</span>
+                <span class="c1" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{d.meta}}</span>
+                <span class="c1" style="align-self: flex-start; max-width: 100%; padding: 2px 8px; border-radius: 999px; font-size: 12px; line-height: 16px; font-weight: 600; {{d.haveStyle}}">{{d.have}}</span>
+              </div>
+            </a>
+            <button class="sr" onClick="{{d.remove}}">{{d.removeLabel}}</button>
+          </li>
+        </sc-for>
+      </ul>
+    </sc-if>
+
+    <sc-if value="{{showMeals}}" hint-placeholder-val="{{false}}">
+      <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px">
+        <sc-for list="{{meals}}" as="m" hint-placeholder-count="2">
+          <li class="{{m.cls}}" style="border: 1px solid var(--line); border-radius: 12px; background: var(--surface-raised)">
+            <a href="Today.dc.html" class="card" aria-label="{{m.aria}}" onClick="{{tap}}" onPointerDown="{{m.down}}" onPointerMove="{{dragMove}}" onPointerUp="{{dragUp}}" onPointerCancel="{{dragCancel}}" onContextMenu="{{noMenu}}" onKeyDown="{{m.key}}" draggable="false" style="display: flex; gap: 12px; padding: 12px">
+              <div aria-hidden="true" style="position: relative; width: 96px; height: 96px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: var(--surface-raised)">
+                <sc-for list="{{m.tiles}}" as="t" hint-placeholder-count="2">
+                  <span style="position: absolute; padding: 1px; {{t.style}}">
+                    <span style="position: relative; display: block; width: 100%; height: 100%; background: var(--line)">
+                      <sc-if value="{{t.more}}" hint-placeholder-val="{{false}}"><span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(20, 14, 10, 0.55); color: #FFFFFF; font-size: 12px; line-height: 16px; font-weight: 700">{{t.moreLabel}}</span></sc-if>
+                    </span>
+                  </span>
+                </sc-for>
+              </div>
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">{{m.names}}</span>
+                <span class="c1" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{m.meta}}</span>
+                <span style="display: flex; flex-wrap: wrap; gap: 4px">
+                  <sc-for list="{{m.tags}}" as="tg" hint-placeholder-count="2">
+                    <span style="padding: 2px 8px; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 600">{{tg}}</span>
+                  </sc-for>
+                </span>
+              </span>
+            </a>
+            <button class="sr" onClick="{{m.remove}}">{{m.removeLabel}}</button>
+          </li>
+        </sc-for>
+      </ul>
+    </sc-if>
+
+    <sc-if value="{{noMatch}}" hint-placeholder-val="{{false}}">
+      <p style="margin: 24px 0 0 0; color: var(--ink-muted); font-size: 15px; line-height: 22px; text-align: center">Không thấy "{{q}}" trong {{tabWord}} đã lưu.</p>
+    </sc-if>
+
+    <sc-if value="{{empty}}" hint-placeholder-val="{{false}}">
+      <div style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 0 16px 48px 16px; text-align: center">
+        <div style="width: 96px; height: 96px; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); display: flex; align-items: center; justify-content: center">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"></path></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">{{emptyTitle}}</h2>
+          <p style="margin: 0; color: var(--ink-muted); font-size: 15px; line-height: 22px">{{emptyBody}}</p>
+        </div>
+        <a href="{{emptyHref}}" class="bh-btn bh-btn-primary" style="text-decoration: none">{{emptyCta}}</a>
+      </div>
+    </sc-if>
   </main>
+
+  <!-- Flutter: each card is a LongPressDraggable; the trash bar is a DragTarget that slides up over the NavigationBar while dragging.
+       HapticFeedback on lift and drop. Screen readers get a 'Bỏ lưu' customSemanticsAction instead of dragging. -->
+  <sc-if value="{{dragging}}" hint-placeholder-val="{{false}}">
+    <div class="trash" aria-hidden="true" style="{{trashStyle}}">
+      <span class="trash-dot" style="{{trashDotStyle}}">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"></path></svg>
+      </span>
+      {{trashText}}
+    </div>
+    <div class="ghost" style="left: {{ghostX}}px; top: {{ghostY}}px">
+      <span aria-hidden="true" style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></span>
+      <span class="c1">{{ghostName}}</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{showTip}}" hint-placeholder-val="{{true}}">
+    <div class="tip" role="note">
+      <span style="flex: 1"><b>Mẹo:</b> Nhấn giữ một {{tabWord}} rồi kéo vào thùng rác để bỏ lưu.</span>
+      <button onClick="{{hideTip}}" aria-label="Ẩn mẹo" style="width: 28px; height: 28px; padding: 0">✕</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{hasSnack}}" hint-placeholder-val="{{false}}">
+    <div role="status" aria-live="polite" style="position: absolute; left: 16px; right: 16px; bottom: 96px; z-index: 5; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--ink); color: var(--surface); font-size: 13px; line-height: 18px; box-shadow: 0 6px 16px rgba(20,14,10,.2)">
+      <span style="display: flex; color: var(--herb-soft)"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span>
+      <span style="flex: 1; padding: 7px 0">{{snack}}</span>
+      <button onClick="{{undo}}" style="min-height: 40px; padding: 0 10px; border: 0; background: transparent; color: var(--chili-soft); cursor: pointer; font: 700 13px/18px 'Be Vietnam Pro', sans-serif">Hoàn tác</button>
+    </div>
+  </sc-if>
 
   <nav aria-label="Điều hướng chính" style="height: 80px; flex-shrink: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface-raised); border-top: 1px solid var(--line)">
     <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
@@ -65,10 +178,192 @@ a{color:var(--chili-deep)}
   </nav>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"data":{"editor":"enum","options":["có dữ liệu","trống"],"default":"có dữ liệu"},"tab":{"editor":"enum","options":["Món ăn","Bữa ăn"],"default":"Món ăn"},"sample":{"editor":"enum","options":["bình thường","tên dài, nhiều món"],"default":"bình thường"},"drag":{"editor":"enum","options":["không","đang kéo","đè thùng rác"],"default":"không"},"tip":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
+// Flutter: món dùng savedIdsProvider; bữa dùng savedMealsProvider (LocalStore 'discover.savedMeals', mỗi bữa: danh sách món, quy mô, tag tiêu chí).
+var DISHES = [
+{ id: 'd1', name: 'Trứng chiên hành', min: 10, full: true },
+{ id: 'd2', name: 'Canh cà chua trứng', min: 15, full: true },
+{ id: 'd3', name: 'Mì xào rau cải', min: 15, full: false, missing: 'rau cải' },
+{ id: 'd4', name: 'Trứng hấp thịt băm', min: 25, full: false, missing: 'thịt băm' }
+];
+var MEALS = [
+{ id: 'm1', dishes: ['Đậu phụ luộc chấm tương', 'Canh chua cà chua'], min: 25, tags: ['Cơm nhà 2 món', 'Giải nhiệt'] },
+{ id: 'm2', dishes: ['Thịt kho tiêu', 'Canh bí đỏ', 'Rau muống xào tỏi'], min: 60, tags: ['Mâm cơm', 'Ấm bụng'] }
+];
+var STRESS_MEAL = { id: 'm3', dishes: ['Cá rô phi kho tộ với riềng và nước dừa', 'Canh bí đỏ nấu tôm khô với rau ngót', 'Rau muống xào tỏi', 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm', 'Dưa chuột chẻ chấm muối vừng'], min: 75, tags: ['Mâm cơm', 'Đãi bạn cùng phòng'] };
+var LONG = {
+'Trứng chiên hành': 'Trứng chiên hành lá với thịt băm và mộc nhĩ',
+'Mì xào rau cải': 'Mì tôm xào rau cải ngọt với trứng và xúc xích',
+'Đậu phụ luộc chấm tương': 'Đậu phụ non luộc chấm tương gừng kiểu nhà quê',
+'Thịt kho tiêu': 'Thịt ba chỉ kho tiêu xanh với trứng cút'
+};
+var STRESS = false;
+function L(n) { return STRESS && LONG[n] ? LONG[n] : n; }
+function fold(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd'); }
+function mosaic(names) {
+var n = names.length;
+var boxes = n <= 1 ? [[0, 0, 100, 100]] : n === 2 ? [[0, 0, 50, 100], [50, 0, 50, 100]] : n === 3 ? [[0, 0, 60, 100], [60, 0, 40, 50], [60, 50, 40, 50]] : [[0, 0, 50, 50], [50, 0, 50, 50], [0, 50, 50, 50], [50, 50, 50, 50]];
+return boxes.map(function (b, i) {
+var more = n > 4 && i === 3 ? n - 3 : 0;
+return { style: 'left: ' + b[0] + '%; top: ' + b[1] + '%; width: ' + b[2] + '%; height: ' + b[3] + '%;', more: more > 0, moreLabel: '+' + more };
+});
+}
+// Lists of dishes: up to 2 names in full, then "+N món".
+function summary(names) {
+return names.length <= 2 ? names.join(' + ') : names.slice(0, 2).join(' + ') + ' +' + (names.length - 2) + ' món';
+}
+var snackTimer = null;
+var holdTimer = null;
+var HOLD_MS = 350;
+// Trash circle centre inside the 390x844 frame: bar is 128px tall at the bottom.
+var TRASH_X = 195;
+var TRASH_Y = 844 - 64 - 10;
+function rootOf(el) { return el && el.closest ? el.closest('[data-root]') : null; }
+function local(e) {
+var root = rootOf(e.currentTarget) || rootOf(e.target);
+if (!root) { return { x: 0, y: 0 }; }
+var r = root.getBoundingClientRect();
+var k = r.width / 390 || 1;
+return { x: (e.clientX - r.left) / k, y: (e.clientY - r.top) / k };
+}
 class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { tab: null, gone: {}, q: '', snack: null, drag: null, tipHidden: false };
+}
 renderVals() {
-return { theme: this.props.theme ?? 'system' };
+var self = this;
+var st = this.state;
+var p = this.props;
+STRESS = p.sample === 'tên dài, nhiều món';
+var emptyData = p.data === 'trống';
+var tab = st.tab || (p.tab === 'Bữa ăn' ? 'meals' : 'dishes');
+var dishes = emptyData ? [] : DISHES.filter(function (d) { return !st.gone[d.id]; });
+var mealsAll = emptyData ? [] : (STRESS ? MEALS.concat([STRESS_MEAL]) : MEALS);
+var meals = mealsAll.filter(function (m) { return !st.gone[m.id]; });
+var q = fold(st.q.trim());
+var dishesShown = dishes.filter(function (d) { return !q || fold(L(d.name)).indexOf(q) >= 0; });
+var mealsShown = meals.filter(function (m) { return !q || m.dishes.some(function (n) { return fold(L(n)).indexOf(q) >= 0; }) || m.tags.some(function (t) { return fold(t).indexOf(q) >= 0; }); });
+var list = tab === 'dishes' ? dishes : meals;
+var shown = tab === 'dishes' ? dishesShown : mealsShown;
+function remove(id, word) {
+var gone = Object.assign({}, self.state.gone);
+gone[id] = true;
+if (snackTimer) { clearTimeout(snackTimer); }
+self.setState({ gone: gone, snack: { id: id, text: 'Đã bỏ lưu ' + word } });
+// Spec chung (Toasts): has Hoàn tác, so 6 s.
+snackTimer = setTimeout(function () { self.setState({ snack: null }); }, 6000);
+}
+// Tweak 'drag' freezes the drag states on the canvas; Play drags for real.
+var dr = st.drag;
+if (!dr && p.drag && p.drag !== 'không' && shown.length) {
+var first = shown[0];
+var over = p.drag === 'đè thùng rác';
+dr = { id: first.id, name: first.name ? L(first.name) : first.dishes.map(L).join(' + '), x: over ? TRASH_X : 140, y: over ? TRASH_Y - 6 : 420, over: over };
+}
+function holder(id, name, word) {
+return {
+cls: dr && dr.id === id ? 'lifted' : '',
+down: function (e) {
+if (e.button !== undefined && e.button !== 0) { return; }
+var pt = local(e);
+var target = e.currentTarget;
+var pid = e.pointerId;
+self.press = { id: id, x: pt.x, y: pt.y };
+if (holdTimer) { clearTimeout(holdTimer); }
+holdTimer = setTimeout(function () {
+if (!self.press || self.press.id !== id) { return; }
+if (target && target.setPointerCapture) { try { target.setPointerCapture(pid); } catch (err) {} }
+self.setState({ drag: { id: id, name: name, word: word, x: self.press.x, y: self.press.y, over: false }, tipHidden: true });
+}, HOLD_MS);
+},
+key: function (e) { if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); remove(id, word); } }
+};
+}
+return {
+theme: p.theme ?? 'system',
+tabs: [['dishes', 'Món ăn (' + dishes.length + ')'], ['meals', 'Bữa ăn (' + meals.length + ')']].map(function (t) {
+return { label: t[1], on: tab === t[0], pick: function () { self.setState({ tab: t[0] }); } };
+}),
+hasAny: list.length > 0,
+q: st.q,
+setQ: function (e) { self.setState({ q: e.target.value }); },
+showDishes: tab === 'dishes' && dishesShown.length > 0,
+dishes: dishesShown.map(function (d) {
+var name = L(d.name);
+return Object.assign(holder(d.id, name, 'món'), {
+name: name, lower: name.toLowerCase(),
+aria: name + '. Nhấn giữ rồi kéo vào thùng rác để bỏ lưu',
+meta: d.min + ' phút · Bếp từ',
+have: d.full ? 'Đủ đồ' : 'Thiếu: ' + d.missing,
+haveStyle: d.full ? 'background: var(--herb); color: #FFFFFF;' : 'background: var(--chili-soft); color: var(--chili-deep);',
+removeLabel: 'Bỏ lưu ' + name,
+remove: function () { remove(d.id, 'món'); }
+});
+}),
+showMeals: tab === 'meals' && mealsShown.length > 0,
+meals: mealsShown.map(function (m) {
+var names = m.dishes.map(L);
+return Object.assign(holder(m.id, summary(names), 'bữa'), {
+names: summary(names),
+aria: 'Bữa ' + names.join(', ') + '. Nhấn giữ rồi kéo vào thùng rác để bỏ lưu',
+meta: names.length + ' món · ~' + m.min + ' phút · Bếp từ',
+tags: m.tags,
+tiles: mosaic(names),
+removeLabel: 'Bỏ lưu bữa ' + names.join(', '),
+remove: function () { remove(m.id, 'bữa'); }
+});
+}),
+noMatch: list.length > 0 && shown.length === 0,
+tabWord: tab === 'dishes' ? 'món' : 'bữa',
+empty: list.length === 0,
+emptyTitle: tab === 'dishes' ? 'Chưa lưu món nào' : 'Chưa lưu bữa nào',
+emptyBody: tab === 'dishes' ? 'Bấm biểu tượng lưu trên món bạn thích. Món đã lưu được ưu tiên khi gợi ý và lên thực đơn.' : 'Ở Hôm nay ăn gì, bấm Lưu lại để giữ cả bữa và nấu lại sau.',
+emptyHref: tab === 'dishes' ? 'Search.dc.html' : 'TodayPrefs.dc.html',
+emptyCta: tab === 'dishes' ? 'Khám phá món' : 'Gợi ý cho mình',
+tap: function (e) { if (self.suppress) { self.suppress = false; if (e && e.preventDefault) { e.preventDefault(); } } },
+noMenu: function (e) { if (e && e.preventDefault) { e.preventDefault(); } },
+// Moving before the hold fires is a scroll, not a drag.
+dragMove: function (e) {
+var pt = local(e);
+if (!self.state.drag) {
+if (self.press && Math.abs(pt.y - self.press.y) + Math.abs(pt.x - self.press.x) > 8) { self.press = null; if (holdTimer) { clearTimeout(holdTimer); } }
+return;
+}
+var over = pt.y > 844 - 128 || Math.hypot(pt.x - TRASH_X, pt.y - TRASH_Y) < 64;
+self.setState({ drag: Object.assign({}, self.state.drag, { x: pt.x, y: pt.y, over: over }) });
+},
+dragUp: function () {
+if (holdTimer) { clearTimeout(holdTimer); }
+self.press = null;
+var d = self.state.drag;
+if (!d) { return; }
+self.suppress = true;
+setTimeout(function () { self.suppress = false; }, 0);
+self.setState({ drag: null });
+if (d.over) { remove(d.id, d.word); }
+},
+dragCancel: function () { if (holdTimer) { clearTimeout(holdTimer); } self.press = null; self.setState({ drag: null }); },
+dragging: !!dr,
+ghostX: dr ? Math.round(dr.x) : 0,
+ghostY: dr ? Math.round(dr.y) : 0,
+ghostName: dr ? dr.name : '',
+trashText: dr && dr.over ? 'Thả để bỏ lưu' : 'Kéo vào đây để bỏ lưu',
+trashStyle: dr && dr.over ? 'color: var(--danger-ink);' : 'color: var(--ink-muted);',
+trashDotStyle: dr && dr.over ? 'background: var(--danger); color: #FFFFFF; transform: scale(1.15);' : 'background: var(--line); color: var(--ink);',
+showTip: p.tip !== false && !st.tipHidden && !st.snack && !dr && shown.length > 0,
+hideTip: function () { self.setState({ tipHidden: true }); },
+hasSnack: !!st.snack,
+snack: st.snack ? st.snack.text : '',
+undo: function () {
+var s = self.state.snack;
+if (!s) { return; }
+var gone = Object.assign({}, self.state.gone);
+delete gone[s.id];
+if (snackTimer) { clearTimeout(snackTimer); }
+self.setState({ gone: gone, snack: null });
+}
+};
 }
 }
 </script>

@@ -17,6 +17,33 @@ là nguồn gốc, file này là bản tổng quan.
 - Giọng văn, màu, chữ, component: theo `docs/design/design-system/README.md` và `tokens.json`; hai theme
   sáng/tối, mặc định theo hệ thống.
 
+## v2 — thiết kế mới (từ 29/10)
+
+Thiết kế đổi nhiều sau vòng v1, nên phần còn lại của MVP làm theo **v2**: issue gắn label `v2`, milestone W3/W4 giữ
+nguyên hạn 15/11. Màn v1 đã làm mà thiết kế đổi thì **dựng lại theo prototype v2**, không sửa dần bản cũ; việc v1
+còn sót gộp vào issue v2. Prototype: `docs/design/prototype/` (sync 29/10, 29 màn).
+
+| Issue | Việc | Chủ | Ưu tiên |
+|---|---|---|---|
+| #112 UI-01 | Thông báo dùng chung: `AppSnackbar`, `TipBubble`, `InlineBanner`, `ConfirmDialog` (board `Toasts`) | Lead | P0, làm trước |
+| #113 CORE-01 | `MealMosaic`, `ShoppingFab` (nút Đi chợ tròn có badge), quy ước kéo thả nhấn giữ | Lead | P0 |
+| #114 CORE-02 | Tag công thức (`role`, `feel`, `tags`), `suggestMeal()` gợi ý cả bữa | Lead | P0 |
+| #115 CORE-03 | Gợi ý theo thời tiết, tuỳ chọn, mặc định tắt | Lead | P1 |
+| #116 DSC-11 | Khám phá v2: banner, "Sắp tới bữa … rồi", Nấu được ngay, Thiếu 1–2 thứ, Đi chợ | F1 | P0 |
+| #117 DSC-12 | Gợi ý cho mình (`TodayPrefs`) + Hôm nay ăn gì theo bữa, Lưu lại / Thêm vào thực đơn | F1 | P0 |
+| #118 DSC-13 | Đã lưu: tab Món ăn / Bữa ăn, kéo vào thùng rác, `savedMealsProvider` | F1 | P0 |
+| #119 PAN-11 | Tủ đồ v2: nhóm, tìm, chip 3 trạng thái, kéo vào Đi chợ | F3 | P0 |
+| #120 PLAN-11 | Thực đơn v2 chế độ Ngày: bữa tâm điểm, lịch tháng, thêm cả bữa | F4 | P0 |
+| #48 PLAN-02 | Thực đơn v2 chế độ Tuần: lưới tuần, Gợi ý cả tuần | F4 | P0 |
+| #49 SHP-01 | Danh sách đi chợ, nhận đồ từ Tủ đồ / Khám phá / Chuẩn bị nấu | F4 | P0 |
+| #35, #45, #50 | Polish & test theo màn v2 | F1, F3, F4 | P1 |
+
+Thứ tự: #112, #113, #114 (Lead) → #120, #119, #118 → #116, #117, #48, #49 → polish. Màn Nấu (F2) và Hệ thống
+(F5) không đổi thiết kế ở v2, chỉ chuyển snackbar sang widget chung (#112).
+
+Luật mới ở v2: thời tiết là ngoại lệ duy nhất của luật offline, chỉ chạy khi người dùng bật (#115); vẫn không có
+giá tiền ("Tiết kiệm" là tag món, không phải ngân sách).
+
 ## 5 feature — mỗi người một feature
 
 | Feature | Chủ | Thư mục | Màn (prototype) | Khối lượng |

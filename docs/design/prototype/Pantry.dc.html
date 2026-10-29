@@ -21,66 +21,105 @@ a{color:var(--chili-deep)}
 .c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 main{scrollbar-width:none}
+.fab{position:absolute;right:16px;bottom:96px;z-index:3;width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--chili);color:#FFFFFF;text-decoration:none;box-shadow:0 6px 16px rgba(20,14,10,.24)}
+.fab:hover{color:#FFFFFF}
+.fab:focus-visible{outline:2px solid var(--chili-deep);outline-offset:3px}
+.fab b{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;border:2px solid var(--chili);background:var(--surface-raised);color:var(--chili-deep);font-size:12px;line-height:16px;font-weight:700;text-align:center;box-sizing:content-box}
+.chip{height:36px;padding:0 14px;display:flex;align-items:center;gap:4px;border-radius:999px;font:600 13px/18px 'Be Vietnam Pro',sans-serif;cursor:pointer;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.chip:focus-visible,.flt:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.chip.have{border:1px solid var(--chili-soft);background:var(--chili-soft);color:var(--chili-deep)}
+.chip.shop{border:1.5px dashed var(--chili);background:var(--surface-raised);color:var(--ink)}
+.chip.shop svg{color:var(--chili)}
+.chip.none{border:1px solid var(--outline);background:transparent;color:var(--ink)}
+.chip.lifted{opacity:.35}
+.flt{height:32px;padding:0 12px;border-radius:999px;font:600 13px/18px 'Be Vietnam Pro',sans-serif;cursor:pointer}
+.ghost{position:absolute;z-index:6;pointer-events:none;transform:translate(-50%,-50%) scale(1.06);box-shadow:0 10px 24px rgba(20,14,10,.28)}
+.fab{transition:transform .15s,box-shadow .15s}
+.fab b{transition:transform .2s}
+.drop{position:absolute;right:12px;bottom:164px;z-index:4;padding:6px 10px;border-radius:8px;background:var(--ink);color:var(--surface);font-size:12px;line-height:16px;font-weight:600;pointer-events:none}
+.tip{position:absolute;left:16px;right:88px;bottom:100px;z-index:4;display:flex;align-items:flex-start;gap:6px;padding:10px 6px 10px 12px;border-radius:12px;background:var(--ink);color:var(--surface);font-size:12px;line-height:16px;box-shadow:0 6px 16px rgba(20,14,10,.2)}
+.tip:after{content:"";position:absolute;right:-6px;top:22px;border:6px solid transparent;border-left-color:var(--ink);border-right:0}
+.tip button,.snack button{border:0;background:transparent;color:inherit;cursor:pointer;font:700 13px/18px 'Be Vietnam Pro',sans-serif}
+.snack{position:absolute;left:16px;right:88px;bottom:100px;z-index:5;min-height:48px;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 14px;border-radius:12px;background:var(--ink);color:var(--surface);font-size:13px;line-height:18px;box-shadow:0 6px 16px rgba(20,14,10,.2)}
+.snack button{color:var(--chili-soft);min-height:40px;padding:0 10px}
 </style>
 </helmet>
-<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+<div data-theme="{{theme}}" data-root="1" style="position: relative; width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
 
-  <header style="display: flex; flex-direction: column; gap: 2px; padding: 16px 16px 8px 16px; flex-shrink: 0">
-    <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Tủ đồ</h1>
-    <p style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px">Bấm vào thứ bạn đang có, app tìm món nấu được.</p>
+  <header style="display: flex; flex-direction: column; gap: 10px; padding: 16px 16px 8px 16px; flex-shrink: 0">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Tủ đồ</h1>
+      <p style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px">{{headMeta}}</p>
+    </div>
+    <label class="bh-search">
+      <svg class="bh-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <input type="search" value="{{q}}" onChange="{{onQuery}}" placeholder="Tìm nguyên liệu hoặc nhóm…" aria-label="Tìm nguyên liệu hoặc nhóm" autocomplete="off">
+      <sc-if value="{{hasQuery}}" hint-placeholder-val="{{false}}">
+        <button onClick="{{clearQuery}}" aria-label="Xoá từ khoá" style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: transparent; color: var(--ink-muted); cursor: pointer; padding: 0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </sc-if>
+    </label>
+    <div role="group" aria-label="Lọc" style="display: flex; gap: 8px">
+      <sc-for list="{{filters}}" as="fl" hint-placeholder-count="3">
+        <button class="flt" onClick="{{fl.pick}}" aria-pressed="{{fl.on}}" style="{{fl.style}}">{{fl.label}}</button>
+      </sc-for>
+    </div>
   </header>
 
-  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 8px 16px 16px 16px">
-    <section aria-label="Nguyên liệu đang có" style="display: flex; flex-direction: column; gap: 12px">
-      <sc-for list="{{groups}}" as="group" hint-placeholder-count="3">
-        <div style="display: flex; flex-direction: column; gap: 8px">
-          <span style="font-size: 13px; line-height: 18px; font-weight: 600; color: var(--ink-muted)">{{group.label}}</span>
-          <div style="display: flex; flex-wrap: wrap; gap: 8px">
-            <sc-for list="{{group.items}}" as="ing" hint-placeholder-count="4">
-              <button onClick="{{ing.toggle}}" aria-pressed="{{ing.on}}" style="height: 36px; padding: 0 14px; display: flex; align-items: center; gap: 4px; border-radius: 999px; font: 600 13px/18px 'Be Vietnam Pro', sans-serif; cursor: pointer; {{ing.chipStyle}}">
-                <sc-if value="{{ing.on}}" hint-placeholder-val="{{false}}">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>
-                </sc-if>
-                {{ing.name}}
-              </button>
-            </sc-for>
-          </div>
+  <!-- Flutter: state from pantryItemsProvider (F3) and the shopping list via addToShopping (F4 public API).
+       Chips are LongPressDraggable<Ingredient>, the basket FAB is the DragTarget; HapticFeedback on lift and drop.
+       Search folds case and Vietnamese marks; that filter lives in features/pantry/domain with unit tests. -->
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 8px 16px 152px 16px">
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+      <section style="display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: baseline; justify-content: space-between">
+          <h2 style="margin: 0; font-size: 15px; line-height: 22px; font-weight: 700">{{g.label}}</h2>
+          <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px; font-weight: 600">{{g.count}}</span>
         </div>
-      </sc-for>
-    </section>
-
-    <section style="display: flex; flex-direction: column; gap: 8px">
-      <h2 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 17px; line-height: 24px; font-weight: 600">
-        Nấu được ngay
-        <span style="padding: 0 8px; border-radius: 8px; background: var(--herb); color: #FFFFFF; font-size: 12px; line-height: 20px; font-weight: 600">{{readyCount}}</span>
-      </h2>
-      <sc-if value="{{noReady}}" hint-placeholder-val="{{false}}">
-        <p style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px">Chưa đủ đồ cho món nào. Thử bật thêm vài nguyên liệu.</p>
-      </sc-if>
-      <sc-for list="{{ready}}" as="r" hint-placeholder-count="2">
-        <a href="Detail.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
-          <div style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></div>
-          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
-            <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">{{r.name}}</span>
-            <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{r.meta}}</span>
-          </div>
-        </a>
-      </sc-for>
-    </section>
-
-    <section style="display: flex; flex-direction: column; gap: 8px">
-      <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Thiếu 1–2 thứ</h2>
-      <sc-for list="{{near}}" as="r" hint-placeholder-count="2">
-        <a href="Detail.dc.html" style="display: flex; align-items: center; gap: 12px; padding: 8px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); text-decoration: none">
-          <div style="width: 48px; height: 48px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></div>
-          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
-            <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">{{r.name}}</span>
-            <span style="color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 600">{{r.missing}}</span>
-          </div>
-        </a>
-      </sc-for>
-    </section>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{g.items}}" as="it" hint-placeholder-count="6">
+            <button class="{{it.cls}}" aria-pressed="{{it.on}}" aria-label="{{it.aria}}" onClick="{{it.tap}}" onPointerDown="{{it.down}}" onPointerMove="{{dragMove}}" onPointerUp="{{dragUp}}" onPointerCancel="{{dragCancel}}" onKeyDown="{{it.key}}" onContextMenu="{{noMenu}}">
+              <sc-if value="{{it.on}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></sc-if>
+              <sc-if value="{{it.inShop}}" hint-placeholder-val="{{false}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.6 9.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8z"></path><path d="M8.5 9l2-5M15.5 9l-2-5"></path></svg></sc-if>
+              {{it.name}}
+            </button>
+          </sc-for>
+        </div>
+      </section>
+    </sc-for>
+    <sc-if value="{{noResult}}" hint-placeholder-val="{{false}}">
+      <section style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-raised)">
+        <span style="font-size: 15px; line-height: 22px">{{noResultText}}</span>
+        <button class="bh-btn bh-btn-secondary" onClick="{{addQuery}}" style="min-height: 44px">{{addQueryLabel}}</button>
+      </section>
+    </sc-if>
   </main>
+
+  <sc-if value="{{dragging}}" hint-placeholder-val="{{false}}">
+    <span class="drop">Thả vào đây để thêm vào đi chợ</span>
+    <span class="chip none ghost" style="left: {{ghostX}}px; top: {{ghostY}}px; background: var(--surface-raised)">{{ghostName}}</span>
+  </sc-if>
+
+  <sc-if value="{{showTip}}" hint-placeholder-val="{{true}}">
+    <div class="tip" role="note">
+      <span style="flex: 1"><b>Mẹo:</b> Nhấn giữ một nguyên liệu rồi kéo thả vào giỏ để thêm vào đi chợ.</span>
+      <button onClick="{{hideTip}}" aria-label="Ẩn mẹo" style="width: 28px; height: 28px; padding: 0">✕</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{hasSnack}}" hint-placeholder-val="{{false}}">
+    <div class="snack" role="status" aria-live="polite">
+      <span style="display: flex; {{snackIconStyle}}"><x-import component-from-global-scope="BepHoaLac.Icon" name="{{snackIcon}}"></x-import></span>
+      <span style="flex: 1; padding: 7px 0">{{snackText}}</span>
+      <sc-if value="{{snackUndo}}" hint-placeholder-val="{{false}}"><button onClick="{{undo}}">Hoàn tác</button></sc-if>
+      <sc-if value="{{snackSee}}" hint-placeholder-val="{{false}}"><a href="Shopping.dc.html" style="min-height: 40px; padding: 0 10px; display: flex; align-items: center; color: var(--chili-soft); font-weight: 700; text-decoration: none">Xem</a></sc-if>
+    </div>
+  </sc-if>
+
+  <!-- Flutter: round FloatingActionButton with tooltip 'Đi chợ' (core/widgets, Lead); Badge counts unticked shopping rows. -->
+  <a href="Shopping.dc.html" class="fab" aria-label="{{fabLabel}}" style="{{fabStyle}}">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.6 9.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8z"></path><path d="M8.5 9l2-5M15.5 9l-2-5"></path></svg>
+    <b aria-hidden="true" style="{{badgeStyle}}">{{shopCount}}</b>
+  </a>
 
   <nav aria-label="Điều hướng chính" style="height: 80px; flex-shrink: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface-raised); border-top: 1px solid var(--line)">
     <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
@@ -110,57 +149,198 @@ main{scrollbar-width:none}
   </nav>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","nhiều nguyên liệu"],"default":"thường"},"tip":{"editor":"boolean","default":true},"$preview":{"width":390,"height":844}}'>
 var GROUPS = [
-{ label: 'Đạm', items: [['egg', 'Trứng'], ['tofu', 'Đậu phụ'], ['pork', 'Thịt băm'], ['sausage', 'Xúc xích']] },
-{ label: 'Rau củ', items: [['tomato', 'Cà chua'], ['scallion', 'Hành lá'], ['greens', 'Rau cải'], ['potato', 'Khoai tây']] },
-{ label: 'Tinh bột', items: [['rice', 'Cơm'], ['noodle', 'Mì gói'], ['bread', 'Bánh mì']] }
+{ id: 'starch', label: 'Tinh bột', items: [['rice', 'Cơm'], ['noodle', 'Mì gói'], ['bread', 'Bánh mì'], ['bun', 'Bún khô'], ['mien', 'Miến'], ['pho', 'Bánh phở'], ['sweetpotato', 'Khoai lang']] },
+{ id: 'protein', label: 'Đạm', items: [['egg', 'Trứng gà'], ['tofu', 'Đậu phụ'], ['pork', 'Thịt băm'], ['sausage', 'Xúc xích'], ['chicken', 'Thịt gà'], ['shrimp', 'Tôm khô'], ['fish', 'Cá hộp']] },
+{ id: 'veg', label: 'Rau củ', items: [['tomato', 'Cà chua'], ['scallion', 'Hành lá'], ['greens', 'Rau cải'], ['potato', 'Khoai tây'], ['morning', 'Rau muống'], ['carrot', 'Cà rốt'], ['pumpkin', 'Bí đỏ'], ['mushroom', 'Nấm hương'], ['cucumber', 'Dưa chuột']] },
+{ id: 'other', label: 'Gia vị & khác', items: [['pepper', 'Hạt tiêu'], ['garlic', 'Tỏi'], ['chili', 'Ớt'], ['oyster', 'Dầu hào'], ['soy', 'Xì dầu'], ['sugar', 'Đường'], ['sesame', 'Vừng']] }
 ];
-var NAMES = {};
-GROUPS.forEach(function (g) { g.items.forEach(function (it) { NAMES[it[0]] = it[1].toLowerCase(); }); });
-var RECIPES = [
-{ name: 'Trứng chiên hành', meta: '15 phút · Bếp từ', needs: ['egg', 'scallion', 'rice'] },
-{ name: 'Canh cà chua trứng', meta: '15 phút · Bếp từ', needs: ['egg', 'tomato', 'scallion'] },
-{ name: 'Mì xào rau cải', meta: '15 phút · Bếp từ', needs: ['noodle', 'greens'] },
-{ name: 'Đậu phụ sốt cà chua', meta: '20 phút · Bếp từ', needs: ['tofu', 'tomato', 'scallion'] },
-{ name: 'Bánh mì trứng ốp', meta: '10 phút · Bếp từ', needs: ['bread', 'egg'] },
-{ name: 'Trứng hấp thịt băm', meta: '20 phút · Nồi cơm điện', needs: ['egg', 'pork', 'scallion'] },
-{ name: 'Khoai tây xào thịt băm', meta: '25 phút · Bếp từ', needs: ['potato', 'pork', 'scallion'] }
-];
+// Tweak 'sample' = 'nhiều nguyên liệu' pads each group to about 20 items to try long groups and search.
+var MORE = {
+starch: ['Gạo nếp', 'Bột mì', 'Mì Ý', 'Bánh đa', 'Ngô', 'Khoai môn', 'Yến mạch', 'Bánh bao', 'Mì trứng', 'Bánh gạo', 'Hủ tiếu', 'Bánh tráng', 'Sắn'],
+protein: ['Thịt bò', 'Sườn heo', 'Ba chỉ', 'Cá thu', 'Mực', 'Ngao', 'Trứng vịt', 'Chả lụa', 'Giò sống', 'Pate', 'Lạp xưởng', 'Đậu nành', 'Tôm tươi'],
+veg: ['Bắp cải', 'Su hào', 'Mướp', 'Bầu', 'Giá đỗ', 'Rau ngót', 'Cải thảo', 'Hành tây', 'Đậu cove', 'Súp lơ', 'Ớt chuông'],
+other: ['Gừng', 'Sả', 'Me', 'Tương ớt', 'Hạt nêm', 'Mắm tôm', 'Giấm', 'Dầu vừng', 'Bột canh', 'Sữa đặc', 'Bơ', 'Mật ong', 'Rau mùi']
+};
+function fold(t) { return String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').toLowerCase().trim(); }
+// FAB centre inside the 390x844 frame: right 16, bottom 96, 56px wide.
+var FAB_X = 390 - 16 - 28;
+var FAB_Y = 844 - 96 - 28;
+var HOLD_MS = 350;
+var snackTimer = null;
+var holdTimer = null;
 class Component extends DCLogic {
 constructor(props) {
 super(props);
-this.state = { have: { egg: true, scallion: true, rice: true, tomato: true, noodle: true } };
+this.state = {
+have: { egg: true, scallion: true, rice: true, tomato: true, noodle: true },
+shop: { bread: true, pepper: true, mushroom: true },
+custom: [],
+q: '', filter: 'all', open: {}, drag: null, snack: null, tipHidden: false, bump: false
+};
+this.press = null;
+this.suppress = false;
 }
 renderVals() {
-var have = this.state.have;
 var self = this;
-var groups = GROUPS.map(function (g) {
-return {
+var st = this.state;
+var many = this.props.sample === 'nhiều nguyên liệu';
+var groupsData = GROUPS.map(function (g) {
+var items = g.items.slice();
+if (many) { MORE[g.id].forEach(function (n, i) { items.push([g.id + '-x' + i, n]); }); }
+return { id: g.id, label: g.label, items: items };
+});
+var names = {};
+groupsData.forEach(function (g) { g.items.forEach(function (it) { names[it[0]] = it[1]; }); });
+var shopIds = Object.keys(st.shop).filter(function (k) { return st.shop[k]; });
+var shopCount = shopIds.length + st.custom.length;
+var haveCount = Object.keys(st.have).filter(function (k) { return st.have[k]; }).length;
+var q = fold(st.q);
+// Spec chung (Toasts): success has a check, "already there" has info + Xem; 4 s, 6 s with an action.
+function toast(text, undo, info) {
+if (snackTimer) { clearTimeout(snackTimer); }
+self.setState({ snack: { text: text, undo: undo || null, info: info || null }, bump: !info });
+setTimeout(function () { self.setState({ bump: false }); }, 200);
+snackTimer = setTimeout(function () { self.setState({ snack: null }); }, undo || info === 'see' ? 6000 : 4000);
+}
+function addToShop(id) {
+var name = names[id];
+if (st.have[id]) { toast(name + ' đang có trong tủ', null, 'plain'); return; }
+if (self.state.shop[id]) { toast(name + ' đã có trong đi chợ', null, 'see'); return; }
+var before = self.state.shop;
+var next = Object.assign({}, before); next[id] = true;
+self.setState({ shop: next, tipHidden: true });
+toast('Đã thêm ' + name.toLowerCase() + ' vào đi chợ', function () { self.setState({ shop: before, snack: null }); });
+}
+function rootOf(el) { return el && el.closest ? el.closest('[data-root]') : null; }
+function local(e) {
+var root = rootOf(e.currentTarget) || rootOf(e.target);
+if (!root) { return { x: 0, y: 0 }; }
+var r = root.getBoundingClientRect();
+var k = r.width / 390 || 1;
+return { x: (e.clientX - r.left) / k, y: (e.clientY - r.top) / k };
+}
+var groups = [];
+var anyMatch = false;
+groupsData.forEach(function (g) {
+// Typing a group name ("tinh bot", "đạm") shows the whole group.
+var groupHit = !!q && fold(g.label).indexOf(q) >= 0;
+var list = g.items.filter(function (it) {
+var id = it[0];
+if (st.filter === 'have' && !st.have[id]) { return false; }
+if (st.filter === 'shop' && !(st.shop[id] && !st.have[id])) { return false; }
+return !q || groupHit || fold(it[1]).indexOf(q) >= 0;
+});
+if (!list.length) { return; }
+anyMatch = true;
+var shown = list;
+var gotten = g.items.filter(function (it) { return st.have[it[0]]; }).length;
+var needed = g.items.filter(function (it) { return st.shop[it[0]] && !st.have[it[0]]; }).length;
+groups.push({
 label: g.label,
-items: g.items.map(function (it) {
-var on = !!have[it[0]];
+count: 'đang có ' + gotten + ', cần mua ' + needed,
+items: shown.map(function (it) {
+var id = it[0];
+var on = !!st.have[id];
+var inShop = !on && !!st.shop[id];
+var lifted = st.drag && st.drag.id === id;
 return {
 name: it[1],
 on: on,
-chipStyle: on ? 'border: 1px solid var(--chili-soft); background: var(--chili-soft); color: var(--chili-deep);' : 'border: 1px solid var(--outline); background: transparent; color: var(--ink);',
-toggle: function () {
-var next = Object.assign({}, self.state.have);
-next[it[0]] = !on;
-self.setState({ have: next });
+inShop: inShop,
+cls: 'chip ' + (on ? 'have' : inShop ? 'shop' : 'none') + (lifted ? ' lifted' : ''),
+aria: it[1] + (on ? ', có trong tủ' : inShop ? ', đang cần mua' : ', chưa có') + (on ? '' : '. Shift+Enter để thêm vào đi chợ'),
+// Tap: have / not have. Tapping an item on the list means it was bought: into the pantry, off the list.
+tap: function () {
+if (self.suppress) { self.suppress = false; return; }
+var have = Object.assign({}, self.state.have); have[id] = !on;
+var shop = Object.assign({}, self.state.shop);
+if (!on && shop[id]) { delete shop[id]; }
+self.setState({ have: have, shop: shop });
+},
+key: function (e) { if (e.key === 'Enter' && e.shiftKey) { e.preventDefault(); addToShop(id); } },
+down: function (e) {
+if (e.button !== undefined && e.button !== 0) { return; }
+var p = local(e);
+var target = e.currentTarget;
+var pid = e.pointerId;
+self.press = { id: id, x: p.x, y: p.y };
+if (holdTimer) { clearTimeout(holdTimer); }
+holdTimer = setTimeout(function () {
+if (!self.press || self.press.id !== id) { return; }
+if (target && target.setPointerCapture) { try { target.setPointerCapture(pid); } catch (err) {} }
+self.setState({ drag: { id: id, name: it[1], x: self.press.x, y: self.press.y, over: false } });
+}, HOLD_MS);
 }
 };
 })
+});
+});
+var custom = st.custom;
+var dr = st.drag;
+var near = dr && dr.over;
+return {
+theme: this.props.theme ?? 'system',
+headMeta: 'Có ' + haveCount + ' thứ · ' + shopCount + ' thứ đang cần mua',
+q: st.q,
+hasQuery: !!st.q,
+onQuery: function (e) { self.setState({ q: e && e.target ? e.target.value : '' }); },
+clearQuery: function () { self.setState({ q: '' }); },
+filters: [['all', 'Tất cả'], ['have', 'Đang có (' + haveCount + ')'], ['shop', 'Cần mua (' + shopIds.length + ')']].map(function (f) {
+var on = st.filter === f[0];
+return { label: f[1], on: on, style: on ? 'border: 1px solid var(--chili-deep); background: var(--chili-soft); color: var(--chili-deep);' : 'border: 1px solid var(--outline); background: transparent; color: var(--ink);', pick: function () { self.setState({ filter: f[0] }); } };
+}),
+groups: groups,
+noResult: !anyMatch,
+noResultText: q ? 'Chưa có "' + st.q.trim() + '" trong danh sách.' : 'Chưa có nguyên liệu nào ở mục này.',
+addQueryLabel: '+ Thêm "' + st.q.trim() + '" vào đi chợ',
+addQuery: function () {
+var n = st.q.trim();
+if (!n) { return; }
+self.setState({ custom: custom.concat([n]), q: '' });
+toast('Đã thêm ' + n.toLowerCase() + ' vào đi chợ', function () { self.setState({ custom: custom, snack: null }); });
+},
+noMenu: function (e) { if (e && e.preventDefault) { e.preventDefault(); } },
+// Moving before the hold fires is a scroll, not a drag.
+dragMove: function (e) {
+var p = local(e);
+if (!self.state.drag) {
+if (self.press && Math.abs(p.y - self.press.y) + Math.abs(p.x - self.press.x) > 8) { self.press = null; if (holdTimer) { clearTimeout(holdTimer); } }
+return;
+}
+var over = Math.hypot(p.x - FAB_X, p.y - FAB_Y) < 56;
+self.setState({ drag: Object.assign({}, self.state.drag, { x: p.x, y: p.y, over: over }) });
+},
+dragUp: function () {
+if (holdTimer) { clearTimeout(holdTimer); }
+self.press = null;
+var d = self.state.drag;
+if (!d) { return; }
+self.suppress = true;
+setTimeout(function () { self.suppress = false; }, 0);
+self.setState({ drag: null });
+if (d.over) { addToShop(d.id); }
+},
+dragCancel: function () { if (holdTimer) { clearTimeout(holdTimer); } self.press = null; self.setState({ drag: null }); },
+dragging: !!dr,
+ghostX: dr ? Math.round(dr.x) : 0,
+ghostY: dr ? Math.round(dr.y) : 0,
+ghostName: dr ? dr.name : '',
+fabStyle: dr ? 'transform: scale(1.15); box-shadow: 0 0 0 ' + (near ? 14 : 8) + 'px var(--chili-soft), 0 6px 16px rgba(20,14,10,.24);' : '',
+badgeStyle: st.bump ? 'transform: scale(1.15);' : '',
+shopCount: shopCount,
+fabLabel: 'Đi chợ, ' + shopCount + ' thứ cần mua',
+showTip: this.props.tip !== false && !st.tipHidden && !st.snack && !dr,
+hideTip: function () { self.setState({ tipHidden: true }); },
+hasSnack: !!st.snack,
+snackText: st.snack ? st.snack.text : '',
+snackUndo: !!(st.snack && st.snack.undo),
+snackSee: !!(st.snack && st.snack.info === 'see'),
+snackIcon: st.snack && st.snack.info ? 'info' : 'check',
+snackIconStyle: st.snack && st.snack.info ? '' : 'color: var(--herb-soft);',
+undo: function () { if (self.state.snack && self.state.snack.undo) { self.state.snack.undo(); } }
 };
-});
-var ready = [];
-var near = [];
-RECIPES.forEach(function (r) {
-var miss = r.needs.filter(function (id) { return !have[id]; });
-if (miss.length === 0) { ready.push({ name: r.name, meta: r.meta }); }
-else if (miss.length <= 2) { near.push({ name: r.name, missing: 'Thiếu: ' + miss.map(function (id) { return NAMES[id]; }).join(', ') }); }
-});
-return { theme: this.props.theme ?? 'system', groups: groups, ready: ready, near: near.slice(0, 3), readyCount: ready.length, noReady: ready.length === 0 };
 }
 }
 </script>

@@ -194,7 +194,7 @@
       "h": 844,
       "is_interactive": true,
       "radius": 24,
-      "title": "Đã lưu (trống)",
+      "title": "Đã lưu · Món ăn / Bữa ăn",
       "w": 390,
       "x": 1410,
       "y": 0
@@ -239,10 +239,28 @@
       "h": 844,
       "is_interactive": true,
       "radius": 24,
-      "title": "Hôm nay ăn gì",
+      "title": "Hôm nay ăn gì · gợi ý theo bữa",
       "w": 390,
       "x": 470,
       "y": 1224
+    },
+    "TodayPrefs.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "title": "Hôm nay ăn gì · chọn nhu cầu",
+      "w": 390,
+      "x": 2820,
+      "y": 1224
+    },
+    "Toasts.dc.html": {
+      "h": 1160,
+      "is_interactive": true,
+      "radius": 16,
+      "title": "Thông báo chung · Snackbar, Mẹo, Hộp thoại",
+      "w": 900,
+      "x": 1880,
+      "y": 0
     }
   },
   "createdOnFiles": {
@@ -280,7 +298,7 @@
     },
     "flows2": {
       "kind": "title1",
-      "maxW": 2740,
+      "maxW": 3210,
       "text": "Luồng — làm quen, gợi ý, tìm, nấu, đi chợ",
       "w": 240,
       "x": 0,
@@ -318,6 +336,7 @@
     "Saved.dc.html",
     "Onboarding.dc.html",
     "Today.dc.html",
+    "TodayPrefs.dc.html",
     "Search.dc.html",
     "Detail.dc.html",
     "Shopping.dc.html",
@@ -337,6 +356,7 @@
     "RateApp.dc.html",
     "ClearData.dc.html",
     "Error.dc.html",
+    "Toasts.dc.html",
     "Logo.dc.html",
     "LogoC.dc.html"
   ],
