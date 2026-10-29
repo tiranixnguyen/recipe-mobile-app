@@ -7,6 +7,7 @@ import 'package:recipe_mobile_app/features/discover/presentation/today/today_scr
 
 const discoverLocation = '/';
 const todayLocation = '/today';
+const todayPrefsLocation = '/today/prefs';
 
 /// Đường dẫn tới màn Tìm kiếm — feature khác dùng hàm này thay vì tự ghép chuỗi.
 ///
@@ -46,6 +47,10 @@ final discoverRoutes = <RouteBase>[
   ),
   GoRoute(
     path: todayLocation,
+    builder: (_, _) => const TodayScreen(),
+  ),
+  GoRoute(
+    path: todayPrefsLocation,
     builder: (_, _) => const TodayScreen(),
   ),
 ];

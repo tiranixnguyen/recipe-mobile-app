@@ -28,6 +28,31 @@ abstract final class DiscoverStrings {
       'Bấm biểu tượng lưu trên món bạn thích. Món đã lưu được ưu tiên khi gợi ý và lên thực đơn.';
   static const savedEmptyAction = 'Tìm món để lưu';
 
+  // Khám phá v2 (DSC-11)
+  static String upcomingTitle(String meal) => 'Sắp tới bữa $meal rồi';
+  static const viewPlan = 'Xem thực đơn';
+  static const cookMeal = 'Nấu bữa này';
+  static const cookDish = 'Nấu món này';
+  static String upcomingEmpty(String meal) =>
+      'Bữa $meal nay chưa có món. Thử mấy món nấu được với đồ bạn có:';
+  static const addDish = '+ Thêm';
+  static String addDishAria(String name, String meal) => 'Thêm $name vào bữa $meal';
+  static const readyToCook = 'Nấu được ngay';
+  static const nearMissing = 'Thiếu 1–2 thứ';
+  static const addToShopping = '+ Đi chợ';
+  static const addedToShopping = '✓ Đã thêm';
+  static String addToShoppingAria(String name) => 'Thêm vào danh sách đi chợ: $name';
+  static String addedToShoppingAria(String name) => 'Đã thêm $name vào danh sách đi chợ';
+  static const shoppingTitle = 'Đi chợ';
+  static const openShoppingList = 'Mở danh sách';
+  static String shoppingNeedBuy(int count) => 'Còn $count thứ cần mua';
+  static const shoppingEmpty = 'Danh sách đi chợ đang trống';
+  static const shoppingEmptySub = 'Lấy đồ còn thiếu từ thực đơn tuần này';
+  static const shoppingEmptyPrompt = 'Bấm để mở danh sách';
+  static String addedToShoppingSnack(String name) => 'Đã thêm $name vào danh sách đi chợ';
+  static String nearMissingPrefix(List<String> missing) => 'Thiếu: ${missing.join(', ')}';
+  static String upcomingMeta(int count, int totalMinutes) => '$count món · ~$totalMinutes phút';
+
   // Hôm nay ăn gì
   static String mealLabel(String meal) => 'Bữa $meal';
   static String todaySubtitle(String meal) => 'Bữa $meal · theo tủ đồ và bếp của bạn';
