@@ -78,7 +78,7 @@ vào việc chung: 8 công thức/người, mời 2 người test, bug bash.
 | F3 Tủ đồ & gợi ý | `availabilityFor(recipe)`, `suggest(meal, count)`, `suggestMeal(prefs)`/`mealSuggesterProvider`, `dislike()`, `pantryItemsProvider`, `addToPantry`, `removeFromPantry` | F1, F2, F4 |
 | F1 Khám phá | `SaveButton`, `savedIdsProvider`, route `/search?…` | F2, F3 |
 | F2 Nấu | route `/recipe/:id`, `ResumeCookingBanner`, `cookHistoryProvider` | tất cả, F1, F3 |
-| F4 Thực đơn | `addToPlan`, `addToShopping`, `plannedMealsProvider`, route `/shopping` | F2, F5 |
+| F4 Thực đơn | `addToPlan`, `addToShopping`, `plannedMealsProvider`, `shoppingItemsProvider`, `shoppingCountProvider`, route `/shopping` | F2, F3, F5 |
 | F5 Hệ thống | `kitchenProfileProvider`, `themeModeProvider`, `NotificationService` | F3, app, F2, F4 |
 
 Mỗi người công bố **stub chạy được trước 24/10** để người khác gọi ngay, rồi làm bản thật sau (như nhánh

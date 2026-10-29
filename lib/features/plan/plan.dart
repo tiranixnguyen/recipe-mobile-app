@@ -7,6 +7,9 @@
 ///   Thêm xong thì chuyển sang tab Thực đơn, mở đúng ngày vừa thêm.
 /// - [shoppingProvider]: món cần đi chợ; thêm bằng `addToShopping(recipeId, servings)` (stub,
 ///   SHP-01 tính danh sách nguyên liệu).
+/// - [shoppingItemsProvider]: đồ tự thêm vào đi chợ (Tủ đồ): `addIngredient(id)`, `addCustom(name)`
+///   trả [AddToShoppingResult]; bỏ bằng `remove(item)`. [shoppingCountProvider] cho badge nút Đi chợ
+///   (stub, SHP-01 đổi thành số dòng chưa tick).
 /// - [planLocation]: tab Thực đơn, có thể mở sẵn một ngày trong tuần: `context.go(planLocation(day: 2))`.
 /// - [goToPlanDay]: như trên nhưng luôn mở ngày đó, kể cả khi người dùng đã chọn ngày khác.
 /// - [shoppingLocation]: màn Đi chợ.
@@ -15,5 +18,12 @@ library;
 export 'data/planned_meals.dart'
     show PlannedMeal, PlannedMealsController, dateOnly, plannedMealsProvider;
 export 'data/shopping.dart' show ShoppingController, ShoppingRequest, shoppingProvider;
+export 'data/shopping_items.dart'
+    show
+        AddToShoppingResult,
+        ShoppingItem,
+        ShoppingItemsController,
+        shoppingCountProvider,
+        shoppingItemsProvider;
 export 'presentation/add_to_plan/add_to_plan_sheet.dart' show showAddToPlanSheet;
 export 'routes.dart' show goToPlanDay, planLocation, planRoutes, planTabRoutes, shoppingLocation;

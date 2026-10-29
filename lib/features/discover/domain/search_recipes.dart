@@ -1,24 +1,6 @@
 import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/core/text/fold.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
-
-/// Dấu tổ hợp (U+0300–U+036F) của chữ dạng NFD, ví dụ chữ dán từ nguồn khác.
-final _combiningMarks = RegExp('[\u0300-\u036f]');
-
-/// Chuẩn hóa tiếng Việt để truy vấn không phân biệt dấu và chữ hoa.
-String normalizeSearch(String value) {
-  const accented = 'àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ';
-  const plain = 'aaaaaaaaaaaaaaaaaeeeeeeeeeeeiiiiiooooooooooooooooouuuuuuuuuuuyyyyyd';
-  final lower = value.toLowerCase();
-  return lower
-      .split('')
-      .map((c) {
-        final index = accented.indexOf(c);
-        return index < 0 ? c : plain[index];
-      })
-      .join()
-      .replaceAll(_combiningMarks, '')
-      .trim();
-}
 
 List<Recipe> searchRecipes(
   List<Recipe> recipes,

@@ -103,6 +103,8 @@ thì ghi vào bảng này.
 | `today_suggest` | Mở màn Hôm nay ăn gì | `meal` (`breakfast`/`lunch`/`dinner`, bữa theo giờ) |
 | `today_dislike` | Chọn lý do sau Không thích ở Hôm nay ăn gì | `reason` (`justAte`/`missingIngredients`/`tooLong`/`notMyTaste`) |
 | `search` | Bấm tìm trên bàn phím ở màn Tìm kiếm | `has_query`, `filtered` (bool; không gửi từ khoá) |
+| `pantry_update` | Bấm chip ở Tủ đồ | `action` (`add`/`remove`/`bought`: bấm chip đang cần mua) |
+| `add_to_shopping_from_pantry` | Thêm được một thứ vào đi chợ từ Tủ đồ | `via` (`drag`: kéo thả, Shift+Enter, action trợ năng; `search`: nút thêm từ khoá) |
 
 ## 5 feature
 
@@ -111,7 +113,7 @@ thì ghi vào bảng này.
 | F1 Khám phá | @tiranixnguyen (Lead) | `features/discover` | Main, Search, TodayPrefs, Today, Saved | `SaveButton`, `savedIdsProvider`, `savedMealsProvider`, route `/search` |
 | F2 Nấu | @tiranixnguyen (Lead) | `features/cook` | Detail, CookPrep, CookStep, CookDone, RateApp | route `/recipe/:id`, `ResumeCookingBanner`, `cookHistoryProvider` |
 | F3 Tủ đồ & gợi ý | @tiranixnguyen (Lead) | `features/pantry` | Pantry | `availabilityFor`, `suggest`, `suggestMeal`/`mealSuggesterProvider`, `dislike`, `pantryItemsProvider`, `addToPantry`, `removeFromPantry` |
-| F4 Thực đơn & đi chợ | @tiranixnguyen (Lead) | `features/plan` | MealPlan, Shopping | `addToPlan`, `addToShopping`, `plannedMealsProvider`, route `/shopping` |
+| F4 Thực đơn & đi chợ | @tiranixnguyen (Lead) | `features/plan` | MealPlan, Shopping | `addToPlan`, `addToShopping`, `plannedMealsProvider`, `shoppingItemsProvider`, `shoppingCountProvider`, route `/shopping` |
 | F5 Hệ thống | @tiranixnguyen (Lead) | `features/system` | Onboarding, Settings, NotifPermission, Feedback, About, Policy, ClearData | `kitchenProfileProvider`, `themeModeProvider`, `NotificationService` |
 
 Lead làm `app/`, `core/` (Splash, Error, theme, dữ liệu), `pubspec.yaml`, `assets/` và review mọi widget trong
