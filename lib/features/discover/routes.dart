@@ -1,11 +1,9 @@
 import 'package:go_router/go_router.dart';
-
 import 'package:recipe_mobile_app/core/models/models.dart';
-import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/search/search_screen.dart';
-import 'package:recipe_mobile_app/features/discover/strings.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/today/today_screen.dart';
 
 const discoverLocation = '/';
 const todayLocation = '/today';
@@ -48,6 +46,6 @@ final discoverRoutes = <RouteBase>[
   ),
   GoRoute(
     path: todayLocation,
-    builder: (_, _) => const ComingSoonScreen(title: DiscoverStrings.today),
+    builder: (_, _) => const TodayScreen(),
   ),
 ];

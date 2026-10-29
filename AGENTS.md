@@ -93,6 +93,8 @@ thì ghi vào bảng này.
 | `start_cooking` | Bấm Bắt đầu nấu (một món hoặc cả bữa) | `servings`, `steps` (tổng số bước), `meal_dishes` (số món) |
 | `finish_cooking` | Xong ở màn Hoàn thành | `used_up` (số đồ tick Hết), `rated`, `meal_dishes` |
 | `rate_recipe` | Mỗi món được chấm khi Xong | `rating` (`good`/`ok`/`bad`) |
+| `today_suggest` | Mở màn Hôm nay ăn gì | `meal` (`breakfast`/`lunch`/`dinner`, bữa theo giờ) |
+| `today_dislike` | Chọn lý do sau Không thích ở Hôm nay ăn gì | `reason` (`justAte`/`missingIngredients`/`tooLong`/`notMyTaste`) |
 | `search` | Bấm tìm trên bàn phím ở màn Tìm kiếm | `has_query`, `filtered` (bool; không gửi từ khoá) |
 
 ## 5 feature

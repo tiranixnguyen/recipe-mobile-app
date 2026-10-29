@@ -25,6 +25,22 @@ abstract final class DiscoverStrings {
       'Bấm biểu tượng lưu trên món bạn thích. Món đã lưu được ưu tiên khi gợi ý và lên thực đơn.';
   static const savedEmptyAction = 'Tìm món để lưu';
 
+  // Hôm nay ăn gì
+  static String mealLabel(String meal) => 'Bữa $meal';
+  static String todaySubtitle(String meal) => 'Bữa $meal · theo tủ đồ và bếp của bạn';
+  static const todayUnder30 = 'Dưới 30 phút';
+  static const todayAnyTime = 'Thoải mái';
+  static const todayEmpty = 'Chưa có món hợp bữa này. Bạn thử chọn thời gian khác.';
+  static const todayDislike = 'Không thích';
+  static const todayShuffle = 'Đổi món';
+  static const todayReasonsPrompt = 'Vì sao không hợp? App sẽ nhớ.';
+  static const todayAlternatives = 'Hoặc thử';
+  static const todayCook = 'Nấu món này';
+  static const todayHasAll = 'Bạn có đủ đồ';
+  static String todayMissing(List<String> missing) => 'Thiếu ${missing.join(', ')}';
+  static String todayReason(String stock, String meal) => '$stock · hợp bữa $meal';
+  static String todayFitsMealOnly(String meal) => 'Hợp bữa $meal';
+  static String minutes(int minutes) => '$minutes phút';
   // Tìm kiếm
   static const clearQuery = 'Xoá từ khoá';
   static String searchHas(String query) => 'có $query';
