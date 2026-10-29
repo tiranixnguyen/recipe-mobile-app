@@ -40,6 +40,10 @@ Trước khi dựng hay sửa UI, đọc [`docs/design/README.md`](docs/design/R
   không mã màu cứng trong widget.
 - Quy tắc component: `docs/design/design-system/components/<Tên>/README.md`.
 - Layout, chữ hiển thị và điều hướng của từng màn: `docs/design/prototype/<Màn>.dc.html`.
+- Thông báo chỉ dùng widget chung theo board `docs/design/prototype/Toasts.dc.html`: `AppSnackbar.show`
+  (kết quả thao tác, Hoàn tác, lỗi thử lại được), `TipBubble` (mẹo thao tác ẩn), `InlineBanner` (trạng
+  thái trong màn), `showConfirmDialog` (thao tác không hoàn tác được). Không tự `SnackBar(...)`,
+  `AlertDialog`.
 - `docs/design/` là bản sao từ artifact trên claude.ai; đừng sửa tay, xem mục *Sync lại* trong README đó.
 
 ## Kiến trúc (MVVM với Riverpod)

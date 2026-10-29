@@ -4,14 +4,18 @@ import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/core/widgets/app_snackbar.dart';
 import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
+import 'package:recipe_mobile_app/core/widgets/confirm_dialog.dart';
 import 'package:recipe_mobile_app/core/widgets/day_strip.dart';
 import 'package:recipe_mobile_app/core/widgets/empty_state.dart';
+import 'package:recipe_mobile_app/core/widgets/inline_banner.dart';
 import 'package:recipe_mobile_app/core/widgets/meal_slot.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_card.dart';
 import 'package:recipe_mobile_app/core/widgets/search_field.dart';
 import 'package:recipe_mobile_app/core/widgets/serving_stepper.dart';
 import 'package:recipe_mobile_app/core/widgets/step_timer.dart';
+import 'package:recipe_mobile_app/core/widgets/tip_bubble.dart';
 
 /// Chỉ có ở bản debug: `fvm flutter run --route /debug/theme` hoặc nút "Xem theme" trên màn tạm.
 const themePreviewLocation = '/debug/theme';
@@ -390,6 +394,87 @@ class _ComponentSamples extends StatelessWidget {
           message: 'Bấm biểu tượng lưu trên món bạn thích.',
           actionLabel: 'Xem gợi ý',
           onAction: () {},
+        ),
+        const _NoticeSamples(),
+      ],
+    );
+  }
+}
+
+/// Thông báo chung (board `Toasts`): bấm để hiện snackbar/hộp thoại theo theme của section.
+class _NoticeSamples extends StatelessWidget {
+  const _NoticeSamples();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: AppSpacing.s3,
+      children: [
+        Wrap(
+          spacing: AppSpacing.s2,
+          runSpacing: AppSpacing.s2,
+          children: [
+            AppButton.secondary(
+              label: 'Snackbar',
+              onPressed: () => AppSnackbar.show(
+                context,
+                'Đã bỏ lưu món',
+                action: SnackAction('Hoàn tác', () {}),
+              ),
+            ),
+            AppButton.secondary(
+              label: 'Đã có',
+              onPressed: () => AppSnackbar.show(
+                context,
+                'Trứng gà đã có trong đi chợ',
+                kind: SnackKind.info,
+                action: SnackAction('Xem', () {}),
+              ),
+            ),
+            AppButton.secondary(
+              label: 'Lỗi',
+              onPressed: () => AppSnackbar.show(
+                context,
+                'Chưa lưu được thực đơn. Kiểm tra bộ nhớ máy.',
+                kind: SnackKind.error,
+                action: SnackAction('Thử lại', () {}),
+              ),
+            ),
+            AppButton.secondary(
+              label: 'Hộp thoại',
+              onPressed: () => showConfirmDialog(
+                context,
+                title: 'Xoá toàn bộ dữ liệu?',
+                message: 'Không có tài khoản nên không khôi phục được.',
+                confirmLabel: 'Xoá hết',
+              ),
+            ),
+          ],
+        ),
+        Row(
+          spacing: 14,
+          children: [
+            const Expanded(
+              child: TipBubble(
+                id: 'debug.preview',
+                text: 'Nhấn giữ một nguyên liệu rồi kéo thả vào giỏ để thêm vào đi chợ.',
+                anchor: TipAnchor.right,
+              ),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(color: context.colors.chili, shape: BoxShape.circle),
+              child: const SizedBox.square(dimension: 56),
+            ),
+          ],
+        ),
+        InlineBanner(
+          text: 'Đã nới thời gian lên 45 phút để có đủ gợi ý.',
+          action: BannerAction('Sửa', () {}),
+        ),
+        const InlineBanner(
+          kind: BannerKind.success,
+          text: 'Sẽ thêm cùng Canh cà chua trứng · bữa này thành 2 món',
         ),
       ],
     );
