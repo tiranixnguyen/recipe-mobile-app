@@ -7,9 +7,11 @@ import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_row.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
+import 'package:recipe_mobile_app/features/discover/domain/today.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today/today_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
@@ -36,6 +38,9 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
     final state = ref.watch(todayViewModelProvider);
     final suggestions = ref.watch(todayRecipesProvider);
     final vm = ref.read(todayViewModelProvider.notifier);
+    // Giữ danh sách cũ khi đổi bữa/thời gian, chỉ hiện vòng xoay lúc chưa có dữ liệu lần nào.
+    final recipes = suggestions.value;
+    final pick = recipes == null ? null : todayPick(recipes, state.index);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -54,7 +59,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                           style: AppTextStyles.title.copyWith(color: colors.ink),
                         ),
                         Text(
-                          'Bữa ${state.meal.label.toLowerCase()} · gợi ý cho bạn',
+                          DiscoverStrings.todaySubtitle(state.meal.label.toLowerCase()),
                           style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
                         ),
                       ],
@@ -74,7 +79,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                       children: [
                         for (final meal in Meal.values)
                           AppChip(
-                            label: 'Bữa ${meal.label.toLowerCase()}',
+                            label: DiscoverStrings.mealLabel(meal.label.toLowerCase()),
                             selected: state.meal == meal,
                             onTap: () => vm.setMeal(meal),
                           ),
@@ -88,9 +93,9 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                       spacing: AppSpacing.s2,
                       children: [
                         for (final (label, minutes) in [
-                          ('Dưới 15 phút', 15),
-                          ('Dưới 30 phút', 30),
-                          ('Thoải mái', null),
+                          (DiscoverStrings.quickUnder15, 15),
+                          (DiscoverStrings.todayUnder30, 30),
+                          (DiscoverStrings.todayAnyTime, null),
                         ])
                           AppChip(
                             label: label,
@@ -101,98 +106,76 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.s4),
-                  ...switch (suggestions) {
-                    AsyncData(value: final List<Recipe> recipes) when recipes.isEmpty => [
+                  if (pick != null) ...[
+                    _MainRecipe(recipe: pick.main, meal: state.meal),
+                    const SizedBox(height: AppSpacing.s3),
+                    Row(
+                      spacing: AppSpacing.s2,
+                      children: [
+                        Expanded(
+                          child: AppButton.ghost(
+                            label: DiscoverStrings.todayDislike,
+                            block: true,
+                            onPressed: vm.toggleReasons,
+                          ),
+                        ),
+                        Expanded(
+                          child: AppButton.secondary(
+                            label: DiscoverStrings.todayShuffle,
+                            icon: AppIcons.shuffle,
+                            block: true,
+                            onPressed: vm.next,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (state.showReasons)
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.s3),
+                        child: _Reasons(
+                          onPick: (reason) => vm.dislike(pick.main.id, reason),
+                        ),
+                      ),
+                    if (pick.alternatives.isNotEmpty) ...[
+                      const SizedBox(height: AppSpacing.s4),
                       Text(
-                        'Chưa có món phù hợp. Bạn thử chọn thời gian khác nhé.',
-                        style: AppTextStyles.body.copyWith(color: colors.inkMuted),
+                        DiscoverStrings.todayAlternatives,
+                        style: AppTextStyles.subtitle.copyWith(color: colors.ink),
                       ),
+                      const SizedBox(height: AppSpacing.s2),
+                      for (final recipe in pick.alternatives)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: AppSpacing.s2),
+                          child: RecipeRow(
+                            title: recipe.name,
+                            imageAsset: recipe.imageAsset,
+                            meta: DiscoverStrings.minutes(recipe.minutes),
+                            onTap: () => context.push(recipeLocation(recipe.id)),
+                          ),
+                        ),
                     ],
-                    AsyncData(value: final List<Recipe> recipes) => [
-                      Builder(
-                        builder: (context) {
-                          final main = recipes[state.index % recipes.length];
-                          final alternatives = recipes.where((r) => r.id != main.id).take(2);
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              _MainRecipe(recipe: main),
-                              const SizedBox(height: AppSpacing.s3),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: TextButton(
-                                      onPressed: vm.toggleReasons,
-                                      child: const Text('Không thích'),
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: OutlinedButton.icon(
-                                      onPressed: vm.next,
-                                      icon: const Icon(AppIcons.shuffle),
-                                      label: const Text('Đổi món'),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (state.showReasons)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.s3),
-                                  child: Wrap(
-                                    spacing: AppSpacing.s2,
-                                    runSpacing: AppSpacing.s2,
-                                    children: [
-                                      for (final reason in DislikeReason.values)
-                                        ActionChip(
-                                          label: Text(reason.label),
-                                          onPressed: () => vm.dislike(main.id, reason),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              const SizedBox(height: AppSpacing.s4),
-                              Text(
-                                'Hoặc thử',
-                                style: AppTextStyles.subtitle.copyWith(color: colors.ink),
-                              ),
-                              const SizedBox(height: AppSpacing.s2),
-                              for (final recipe in alternatives)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: AppSpacing.s2),
-                                  child: RecipeRow(
-                                    title: recipe.name,
-                                    imageAsset: recipe.imageAsset,
-                                    meta: '${recipe.minutes} phút',
-                                    onTap: () => context.push(recipeLocation(recipe.id)),
-                                  ),
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                    ],
-                    AsyncError() => [
-                      Text(
-                        DiscoverStrings.loadError,
-                        style: AppTextStyles.body.copyWith(color: colors.inkMuted),
-                      ),
-                    ],
-                    _ => [const Center(child: CircularProgressIndicator())],
-                  },
+                  ] else if (recipes != null)
+                    Text(
+                      DiscoverStrings.todayEmpty,
+                      style: AppTextStyles.body.copyWith(color: colors.inkMuted),
+                    )
+                  else if (suggestions.hasError)
+                    Text(
+                      DiscoverStrings.loadError,
+                      style: AppTextStyles.body.copyWith(color: colors.inkMuted),
+                    )
+                  else
+                    const Center(child: CircularProgressIndicator()),
                 ],
               ),
             ),
-            if (suggestions case AsyncData(value: final List<Recipe> recipes)
-                when recipes.isNotEmpty)
+            if (pick != null)
               Padding(
                 padding: const EdgeInsets.all(AppSpacing.s4),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: AppButton(
-                    label: 'Nấu món này',
-                    onPressed: () =>
-                        context.push(recipeLocation(recipes[state.index % recipes.length].id)),
-                  ),
+                child: AppButton(
+                  label: DiscoverStrings.todayCook,
+                  block: true,
+                  onPressed: () => context.push(recipeLocation(pick.main.id)),
                 ),
               ),
           ],
@@ -202,14 +185,58 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
   }
 }
 
+class _Reasons extends StatelessWidget {
+  const _Reasons({required this.onPick});
+
+  final ValueChanged<DislikeReason> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.surfaceRaised,
+        borderRadius: AppRadius.mdAll,
+        border: Border.all(color: colors.line),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.s3),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: AppSpacing.s2,
+          children: [
+            Text(
+              DiscoverStrings.todayReasonsPrompt,
+              style: AppTextStyles.caption.copyWith(
+                color: colors.ink,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Wrap(
+              spacing: AppSpacing.s2,
+              runSpacing: AppSpacing.s2,
+              children: [
+                for (final reason in DislikeReason.values)
+                  AppChip(label: reason.label, selected: false, onTap: () => onPick(reason)),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _MainRecipe extends ConsumerWidget {
-  const _MainRecipe({required this.recipe});
+  const _MainRecipe({required this.recipe, required this.meal});
+
   final Recipe recipe;
+  final Meal meal;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
-    final availability = ref.watch(availabilityProvider(recipe));
+    final missing = ref.watch(availabilityProvider(recipe))?.missing;
     return Material(
       color: colors.surfaceRaised,
       shape: RoundedRectangleBorder(
@@ -225,24 +252,39 @@ class _MainRecipe extends ConsumerWidget {
             SizedBox(
               height: 176,
               width: double.infinity,
-              child: RecipeCover(imageAsset: recipe.imageAsset),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  RecipeCover(imageAsset: recipe.imageAsset),
+                  if (missing != null)
+                    Positioned(
+                      left: AppSpacing.s3,
+                      top: AppSpacing.s3,
+                      child: AvailabilityBadge(missing: missing),
+                    ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(AppSpacing.s4),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: AppSpacing.s1,
                 children: [
                   Text(recipe.name, style: AppTextStyles.title.copyWith(color: colors.ink)),
                   Text(
-                    '${recipe.minutes} phút · ${recipe.servings} người',
-                    style: AppTextStyles.body.copyWith(color: colors.inkMuted),
+                    DiscoverStrings.recipeMeta(
+                      recipe.minutes,
+                      recipe.servings,
+                      recipe.tools.firstOrNull?.shortLabel,
+                    ),
+                    style: AppTextStyles.caption.copyWith(
+                      color: colors.inkMuted,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   Text(
-                    availability == null
-                        ? 'Món phù hợp với bữa bạn chọn'
-                        : availability.missing.isEmpty
-                        ? 'Bạn có đủ nguyên liệu cho món này'
-                        : 'Bạn còn thiếu ${availability.missing.length} nguyên liệu',
+                    todayReason(missing, meal),
                     style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
                   ),
                 ],

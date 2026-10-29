@@ -6,7 +6,9 @@ import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/recipe_row.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today/today_screen.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/today/today_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/routes.dart';
 
 const dish = Recipe(
@@ -141,23 +143,48 @@ void main() {
     await tester.pumpAndSettle();
     router.push(todayLocation);
     await tester.pumpAndSettle();
-    expect(find.text('Trứng hấp'), findsOneWidget);
-    expect(find.text('Cơm trứng'), findsOneWidget);
-    expect(find.text('Canh trứng'), findsOneWidget);
+    final container = ProviderScope.containerOf(tester.element(find.byType(TodayScreen)));
+    final names = {for (final d in dishes) d.id: d.name};
+    final order = container.read(todayRecipesProvider).value!.map((r) => r.id).toList();
+    expect(order, hasLength(3));
+    final list = find.byWidgetPredicate(
+      (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+    );
+    Finder alternative(String id) =>
+        find.descendant(of: find.byType(RecipeRow), matching: find.text(names[id]!));
+    Future<void> expectMain(String id) async {
+      await tester.tap(find.text('Nấu món này'));
+      await tester.pumpAndSettle();
+      expect(find.text('Món $id'), findsOneWidget);
+      router.pop();
+      await tester.pumpAndSettle();
+    }
+
+    await expectMain(order[0]);
+    await tester.scrollUntilVisible(alternative(order[2]), 100, scrollable: list);
+    expect(alternative(order[1]), findsOneWidget);
+    expect(find.text('Hoặc thử'), findsOneWidget);
+
+    await tester.scrollUntilVisible(find.text('Bữa trưa'), -100, scrollable: list);
     await tester.tap(find.text('Bữa trưa'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Bữa trưa ·'), findsOneWidget);
+
     await tester.tap(find.text('Đổi món'));
     await tester.pumpAndSettle();
-    expect(find.text('Cơm trứng'), findsWidgets);
+    await expectMain(order[1]);
+
+    // Chê món đang hiện: món kế tiếp theo thứ tự lên thay, không nhảy qua.
     await tester.tap(find.text('Không thích'));
+    await tester.pumpAndSettle();
+    expect(find.text('Vì sao không hợp? App sẽ nhớ.'), findsOneWidget);
+    await tester.ensureVisible(find.text('Vừa ăn rồi'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Vừa ăn rồi'));
     await tester.pumpAndSettle();
-    expect(store.readString('pantry.disliked'), contains('rice'));
+    expect(store.readString('pantry.disliked'), contains(order[1]));
+    expect(find.text('Vì sao không hợp? App sẽ nhớ.'), findsNothing);
     expect(tester.takeException(), isNull);
-    await tester.tap(find.text('Nấu món này'));
-    await tester.pumpAndSettle();
-    expect(find.textContaining('Món '), findsOneWidget);
+    await expectMain(order[2]);
   });
 }
