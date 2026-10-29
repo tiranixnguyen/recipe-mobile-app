@@ -28,26 +28,15 @@ class SearchScreen extends ConsumerStatefulWidget {
 }
 
 class _SearchScreenState extends ConsumerState<SearchScreen> {
-  late final TextEditingController _controller;
+  late final TextEditingController _controller = TextEditingController(text: widget.query ?? '');
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController(text: widget.query ?? '');
-    // Khởi tạo provider sau khi phần tử đã gắn vào cây.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref
-          .read(searchViewModelProvider.notifier)
-          .initialize(
-            query: widget.query,
-            maxMinutes: widget.maxMinutes,
-            tool: widget.tool,
-            diet: widget.diet,
-            meal: widget.meal,
-          );
-    });
-  }
+  SearchFilters get _filters => (
+    query: widget.query,
+    maxMinutes: widget.maxMinutes,
+    tool: widget.tool,
+    diet: widget.diet,
+    meal: widget.meal,
+  );
 
   @override
   void dispose() {
@@ -58,8 +47,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final state = ref.watch(searchViewModelProvider);
-    final results = ref.watch(searchResultsProvider);
+    final state = ref.watch(searchViewModelProvider(_filters));
+    final viewModel = ref.read(searchViewModelProvider(_filters).notifier);
+    final results = ref.watch(searchResultsProvider(_filters));
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -79,16 +69,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       controller: _controller,
                       autofocus: widget.query == null,
                       placeholder: DiscoverStrings.searchPlaceholder,
-                      onChanged: ref.read(searchViewModelProvider.notifier).setQuery,
-                      onSubmitted: (_) => ref.read(searchViewModelProvider.notifier).submit(),
+                      onChanged: viewModel.setQuery,
+                      onSubmitted: (_) => viewModel.submit(),
                     ),
                   ),
                   if (state.query.isNotEmpty)
                     IconButton(
-                      tooltip: 'Xoá từ khoá',
+                      tooltip: DiscoverStrings.clearQuery,
                       onPressed: () {
                         _controller.clear();
-                        ref.read(searchViewModelProvider.notifier).setQuery('');
+                        viewModel.setQuery('');
                       },
                       icon: Icon(AppIcons.close, color: colors.inkMuted),
                     ),
@@ -104,22 +94,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   AppChip(
                     label: DiscoverStrings.quickUnder15,
                     selected: state.maxMinutes == 15,
-                    onTap: () => ref.read(searchViewModelProvider.notifier).toggleMinutes(15),
+                    onTap: () => viewModel.toggleMinutes(15),
                   ),
                   AppChip(
                     label: DiscoverStrings.quickRiceCooker,
                     selected: state.tool == Tool.rice,
-                    onTap: () => ref.read(searchViewModelProvider.notifier).toggleTool(Tool.rice),
+                    onTap: () => viewModel.toggleTool(Tool.rice),
                   ),
                   AppChip(
                     label: DiscoverStrings.quickDinner,
                     selected: state.meal == Meal.dinner,
-                    onTap: () => ref.read(searchViewModelProvider.notifier).toggleMeal(Meal.dinner),
+                    onTap: () => viewModel.toggleMeal(Meal.dinner),
                   ),
                   AppChip(
                     label: DiscoverStrings.quickVeg,
                     selected: state.diet == Diet.veg,
-                    onTap: () => ref.read(searchViewModelProvider.notifier).toggleDiet(Diet.veg),
+                    onTap: () => viewModel.toggleDiet(Diet.veg),
                   ),
                 ],
               ),
@@ -205,7 +195,11 @@ class _SearchResult extends StatelessWidget {
                       style: AppTextStyles.subtitle.copyWith(color: colors.ink),
                     ),
                     Text(
-                      '${recipe.minutes} phút · ${recipe.servings} người',
+                      DiscoverStrings.recipeMeta(
+                        recipe.minutes,
+                        recipe.servings,
+                        recipe.tools.firstOrNull?.shortLabel,
+                      ),
                       style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
                     ),
                     if (availability != null) AvailabilityBadge(missing: availability!),

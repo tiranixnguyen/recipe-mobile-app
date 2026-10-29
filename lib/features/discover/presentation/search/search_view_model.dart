@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:recipe_mobile_app/core/analytics.dart';
@@ -5,14 +6,11 @@ import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/discover/domain/search_recipes.dart';
 
+/// Từ khoá và bộ lọc mở sẵn từ đường dẫn (`searchLocation`).
+typedef SearchFilters = ({String? query, int? maxMinutes, Tool? tool, Diet? diet, Meal? meal});
+
 class SearchState {
-  const SearchState({
-    this.query = '',
-    this.maxMinutes,
-    this.tool,
-    this.diet,
-    this.meal,
-  });
+  const SearchState({this.query = '', this.maxMinutes, this.tool, this.diet, this.meal});
 
   final String query;
   final int? maxMinutes;
@@ -20,71 +18,58 @@ class SearchState {
   final Diet? diet;
   final Meal? meal;
 
-  String summary(int count) {
-    final parts = <String>[
-      if (query.trim().isNotEmpty) 'có ${query.trim()}',
-      if (maxMinutes != null) 'dưới $maxMinutes phút',
-      if (tool != null) 'dùng ${tool!.label.toLowerCase()}',
-      if (meal != null) 'cho bữa ${meal!.label.toLowerCase()}',
-      if (diet != null) 'hợp ${diet!.label.toLowerCase()}',
-    ];
-    return '$count món${parts.isEmpty ? ' phù hợp' : ' ${parts.join(', ')}'}';
-  }
+  /// Trường nullable truyền `() => null` để xoá giá trị.
+  SearchState copyWith({
+    String? query,
+    ValueGetter<int?>? maxMinutes,
+    ValueGetter<Tool?>? tool,
+    ValueGetter<Diet?>? diet,
+    ValueGetter<Meal?>? meal,
+  }) => SearchState(
+    query: query ?? this.query,
+    maxMinutes: maxMinutes == null ? this.maxMinutes : maxMinutes(),
+    tool: tool == null ? this.tool : tool(),
+    diet: diet == null ? this.diet : diet(),
+    meal: meal == null ? this.meal : meal(),
+  );
+
+  String summary(int count) => searchSummary(
+    count,
+    query: query,
+    maxMinutes: maxMinutes,
+    tool: tool,
+    diet: diet,
+    meal: meal,
+  );
 }
 
 class SearchViewModel extends Notifier<SearchState> {
+  SearchViewModel(this.filters);
+
+  final SearchFilters filters;
+
   @override
-  SearchState build() => const SearchState();
-
-  void initialize({String? query, int? maxMinutes, Tool? tool, Diet? diet, Meal? meal}) {
-    state = SearchState(
-      query: query ?? '',
-      maxMinutes: maxMinutes,
-      tool: tool,
-      diet: diet,
-      meal: meal,
-    );
-  }
-
-  void setQuery(String query) => state = SearchState(
-    query: query,
-    maxMinutes: state.maxMinutes,
-    tool: state.tool,
-    diet: state.diet,
-    meal: state.meal,
+  SearchState build() => SearchState(
+    query: filters.query ?? '',
+    maxMinutes: filters.maxMinutes,
+    tool: filters.tool,
+    diet: filters.diet,
+    meal: filters.meal,
   );
 
-  void toggleMinutes(int minutes) => initialize(
-    query: state.query,
-    maxMinutes: state.maxMinutes == minutes ? null : minutes,
-    tool: state.tool,
-    diet: state.diet,
-    meal: state.meal,
-  );
+  void setQuery(String query) => state = state.copyWith(query: query);
 
-  void toggleTool(Tool tool) => initialize(
-    query: state.query,
-    maxMinutes: state.maxMinutes,
-    tool: state.tool == tool ? null : tool,
-    diet: state.diet,
-    meal: state.meal,
-  );
+  void toggleMinutes(int minutes) =>
+      state = state.copyWith(maxMinutes: () => state.maxMinutes == minutes ? null : minutes);
 
-  void toggleDiet(Diet diet) => initialize(
-    query: state.query,
-    maxMinutes: state.maxMinutes,
-    tool: state.tool,
-    diet: state.diet == diet ? null : diet,
-    meal: state.meal,
-  );
+  void toggleTool(Tool tool) =>
+      state = state.copyWith(tool: () => state.tool == tool ? null : tool);
 
-  void toggleMeal(Meal meal) => initialize(
-    query: state.query,
-    maxMinutes: state.maxMinutes,
-    tool: state.tool,
-    diet: state.diet,
-    meal: state.meal == meal ? null : meal,
-  );
+  void toggleDiet(Diet diet) =>
+      state = state.copyWith(diet: () => state.diet == diet ? null : diet);
+
+  void toggleMeal(Meal meal) =>
+      state = state.copyWith(meal: () => state.meal == meal ? null : meal);
 
   void submit() {
     ref.read(analyticsProvider).track('search', {
@@ -98,12 +83,14 @@ class SearchViewModel extends Notifier<SearchState> {
   }
 }
 
-final searchViewModelProvider = NotifierProvider.autoDispose<SearchViewModel, SearchState>(
-  SearchViewModel.new,
-);
+final searchViewModelProvider = NotifierProvider.autoDispose
+    .family<SearchViewModel, SearchState, SearchFilters>(SearchViewModel.new);
 
-final searchResultsProvider = Provider.autoDispose<AsyncValue<List<Recipe>>>((ref) {
-  final state = ref.watch(searchViewModelProvider);
+final searchResultsProvider = Provider.autoDispose.family<AsyncValue<List<Recipe>>, SearchFilters>((
+  ref,
+  filters,
+) {
+  final state = ref.watch(searchViewModelProvider(filters));
   final recipes = ref.watch(recipesProvider);
   final ingredients = ref.watch(ingredientsProvider);
   return switch ((recipes, ingredients)) {
