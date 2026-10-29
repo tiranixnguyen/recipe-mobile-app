@@ -93,6 +93,7 @@ thì ghi vào bảng này.
 | `start_cooking` | Bấm Bắt đầu nấu (một món hoặc cả bữa) | `servings`, `steps` (tổng số bước), `meal_dishes` (số món) |
 | `finish_cooking` | Xong ở màn Hoàn thành | `used_up` (số đồ tick Hết), `rated`, `meal_dishes` |
 | `rate_recipe` | Mỗi món được chấm khi Xong | `rating` (`good`/`ok`/`bad`) |
+| `search` | Bấm tìm trên bàn phím ở màn Tìm kiếm | `has_query`, `filtered` (bool; không gửi từ khoá) |
 
 ## 5 feature
 
