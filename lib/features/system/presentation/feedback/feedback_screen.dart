@@ -25,6 +25,8 @@ class FeedbackScreen extends ConsumerWidget {
     final screenshot = state.screenshot;
 
     Future<void> send() async {
+      // Thử lại từ snackbar sau khi đã rời màn thì bỏ qua, không gửi góp ý người dùng không còn thấy.
+      if (!context.mounted) return;
       final router = GoRouter.of(context);
       final sent = await viewModel.send();
       if (!context.mounted) return;
