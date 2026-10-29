@@ -41,6 +41,17 @@ abstract final class DiscoverStrings {
   static String todayReason(String stock, String meal) => '$stock · hợp bữa $meal';
   static String todayFitsMealOnly(String meal) => 'Hợp bữa $meal';
   static String minutes(int minutes) => '$minutes phút';
+  // Tìm kiếm
+  static const clearQuery = 'Xoá từ khoá';
+  static String searchHas(String query) => 'có $query';
+  static String searchUnder(int minutes) => 'dưới $minutes phút';
+  static String searchUses(String tool) => 'dùng $tool';
+  static String searchForMeal(String meal) => 'cho bữa $meal';
+  static String searchFits(String diet) => 'hợp $diet';
+
+  /// "3 món có trứng, dưới 15 phút"; không có điều kiện thì "3 món phù hợp".
+  static String searchSummary(int count, List<String> parts) =>
+      '$count món ${parts.isEmpty ? 'phù hợp' : parts.join(', ')}';
 
   /// Dòng meta của món: "15 phút · 1 người · Bếp từ".
   static String recipeMeta(int minutes, int servings, String? tool) =>

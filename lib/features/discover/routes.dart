@@ -5,6 +5,7 @@ import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today/today_screen.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/search/search_screen.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 
 const discoverLocation = '/';
@@ -38,7 +39,13 @@ final savedTabRoutes = <RouteBase>[
 final discoverRoutes = <RouteBase>[
   GoRoute(
     path: '/search',
-    builder: (_, _) => const ComingSoonScreen(title: DiscoverStrings.search),
+    builder: (_, state) => SearchScreen(
+      query: state.uri.queryParameters['q'],
+      maxMinutes: int.tryParse(state.uri.queryParameters['maxMinutes'] ?? ''),
+      tool: Tool.tryParse(state.uri.queryParameters['tool'] ?? ''),
+      diet: Diet.tryParse(state.uri.queryParameters['diet'] ?? ''),
+      meal: Meal.tryParse(state.uri.queryParameters['meal'] ?? ''),
+    ),
   ),
   GoRoute(
     path: todayLocation,
