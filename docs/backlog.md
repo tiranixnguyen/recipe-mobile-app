@@ -61,7 +61,7 @@ vào việc chung: 8 công thức/người, mời 2 người test, bug bash.
 
 | Cung cấp | API | Dùng bởi |
 |---|---|---|
-| F3 Tủ đồ & gợi ý | `availabilityFor(recipe)`, `suggest(meal, count)`, `dislike()`, `pantryItemsProvider`, `addToPantry`, `removeFromPantry` | F1, F2, F4 |
+| F3 Tủ đồ & gợi ý | `availabilityFor(recipe)`, `suggest(meal, count)`, `suggestMeal(prefs)`/`mealSuggesterProvider`, `dislike()`, `pantryItemsProvider`, `addToPantry`, `removeFromPantry` | F1, F2, F4 |
 | F1 Khám phá | `SaveButton`, `savedIdsProvider`, route `/search?…` | F2, F3 |
 | F2 Nấu | route `/recipe/:id`, `ResumeCookingBanner`, `cookHistoryProvider` | tất cả, F1, F3 |
 | F4 Thực đơn | `addToPlan`, `addToShopping`, `plannedMealsProvider`, route `/shopping` | F2, F5 |

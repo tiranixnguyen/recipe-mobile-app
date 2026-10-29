@@ -9,6 +9,7 @@ import 'package:recipe_mobile_app/features/pantry/data/pantry_items.dart';
 import 'package:recipe_mobile_app/features/pantry/domain/availability.dart';
 import 'package:recipe_mobile_app/features/pantry/domain/matches.dart';
 import 'package:recipe_mobile_app/features/pantry/domain/suggest.dart';
+import 'package:recipe_mobile_app/features/pantry/domain/suggest_meal.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Danh mục nguyên liệu theo id; null khi chưa tải xong (hoặc lỗi).
@@ -86,17 +87,7 @@ final suggestionsProvider = FutureProvider.family<List<Recipe>, ({Meal meal, int
 ) async {
   final recipes = await ref.watch(recipesProvider.future);
   final ingredients = await ref.watch(ingredientsProvider.future);
-  final now = ref.watch(pantryClockProvider)();
-  final since = now.subtract(demoteAfterBadRating);
-  final recentDislikes = {
-    for (final MapEntry(:key, :value) in ref.watch(dislikedProvider).entries)
-      if (!value.at.isBefore(since) && !value.at.isAfter(now)) key,
-  };
-  final history = ref.watch(cookHistoryProvider);
-  final recentCooking = {
-    for (final record in history)
-      if (!record.cookedAt.isBefore(since) && !record.cookedAt.isAfter(now)) record.recipeId,
-  };
+  final recent = _recent(ref);
   final profile = ref.watch(kitchenProfileProvider);
   return suggest(
     recipes,
@@ -107,9 +98,66 @@ final suggestionsProvider = FutureProvider.family<List<Recipe>, ({Meal meal, int
     pantry: ref.watch(pantryItemsProvider),
     ingredientsById: {for (final ingredient in ingredients) ingredient.id: ingredient},
     saved: ref.watch(savedIdsProvider),
-    disliked: recentDislikes,
+    disliked: recent.disliked,
     demoted: ref.watch(_demotedProvider),
-    recentlyCooked: recentCooking,
+    recentlyCooked: recent.cooked,
+  );
+});
+
+/// Món chê ở Hôm nay ăn gì và món đã nấu trong [demoteAfterBadRating] gần đây.
+({Set<String> disliked, Set<String> cooked}) _recent(Ref ref) {
+  final now = ref.watch(pantryClockProvider)();
+  final since = now.subtract(demoteAfterBadRating);
+  bool recent(DateTime at) => !at.isBefore(since) && !at.isAfter(now);
+  return (
+    disliked: {
+      for (final MapEntry(:key, :value) in ref.watch(dislikedProvider).entries)
+        if (recent(value.at)) key,
+    },
+    cooked: {
+      for (final record in ref.watch(cookHistoryProvider))
+        if (recent(record.cookedAt)) record.recipeId,
+    },
+  );
+}
+
+/// Hàm gợi ý một bữa đã gắn sẵn dữ liệu đóng gói, Tủ đồ, dụng cụ và chế độ ăn, món đã lưu, lịch sử
+/// nấu và món bị chê. Tính lại khi một trong số đó đổi.
+typedef MealSuggester = MealSuggestion? Function(
+  MealPrefs prefs, {
+  Meal? meal,
+  Set<String> exclude,
+});
+
+/// Gợi ý một bữa theo tiêu chí ([suggestMeal]) cho màn Hôm nay ăn gì.
+///
+/// ```dart
+/// final suggester = ref.watch(mealSuggesterProvider).value;
+/// final suggestion = suggester?.call(prefs, meal: Meal.dinner, exclude: skipped);
+/// if (suggestion?.relaxedNote case final note?) InlineBanner(text: note, …)
+/// ```
+final mealSuggesterProvider = FutureProvider<MealSuggester>((ref) async {
+  final recipes = await ref.watch(recipesProvider.future);
+  final ingredients = await ref.watch(ingredientsProvider.future);
+  final ingredientsById = {for (final ingredient in ingredients) ingredient.id: ingredient};
+  final recent = _recent(ref);
+  final profile = ref.watch(kitchenProfileProvider);
+  final pantry = ref.watch(pantryItemsProvider);
+  final saved = ref.watch(savedIdsProvider);
+  final demoted = ref.watch(_demotedProvider);
+  return (prefs, {meal, exclude = const <String>{}}) => suggestMeal(
+    recipes,
+    prefs,
+    pantry: pantry,
+    ingredientsById: ingredientsById,
+    meal: meal,
+    tools: profile.tools,
+    diets: profile.diets,
+    exclude: exclude,
+    disliked: recent.disliked,
+    demoted: demoted,
+    saved: saved,
+    recentlyCooked: recent.cooked,
   );
 });
 

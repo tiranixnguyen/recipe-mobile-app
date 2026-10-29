@@ -1,7 +1,10 @@
 import 'package:flutter/foundation.dart';
 
 import 'package:recipe_mobile_app/core/models/diet.dart';
+import 'package:recipe_mobile_app/core/models/dish_feel.dart';
+import 'package:recipe_mobile_app/core/models/dish_role.dart';
 import 'package:recipe_mobile_app/core/models/meal.dart';
+import 'package:recipe_mobile_app/core/models/recipe_tag.dart';
 import 'package:recipe_mobile_app/core/models/tool.dart';
 
 /// Một nguyên liệu trong công thức, kèm lượng và ghi chú thay thế.
@@ -165,6 +168,9 @@ class Recipe {
     required this.ingredients,
     required this.steps,
     this.notes = const [],
+    this.role = DishRole.main,
+    this.feel,
+    this.tags = const [],
   });
 
   final String id;
@@ -203,7 +209,18 @@ class Recipe {
   /// Màn Nấu hiện ở trang "Lưu ý cách dùng" sau bước cuối.
   final List<String> notes;
 
-  /// Ném [FormatException] kèm id món khi có dụng cụ, chế độ ăn hoặc bữa không thuộc danh sách.
+  /// Vai trong bữa để ghép nhiều món. Bắt buộc trong `recipes.json`; constructor mặc định
+  /// [DishRole.main] để test dựng món không phải ghi.
+  final DishRole role;
+
+  /// Giải nhiệt / Ấm bụng; null = món bình thường.
+  final DishFeel? feel;
+
+  /// Tiêu chí thêm (Tiết kiệm, Healthy…), không trùng; rỗng = không có.
+  final List<RecipeTag> tags;
+
+  /// Ném [FormatException] kèm id món khi có dụng cụ, chế độ ăn, bữa, vai, cảm giác hoặc tag không
+  /// thuộc danh sách, hay thiếu `role`.
   factory Recipe.fromJson(Map<String, dynamic> json) {
     final id = json['id'] as String;
     try {
@@ -233,6 +250,14 @@ class Recipe {
             (e) => e is String ? e : throw FormatException('lưu ý "$e" không phải chuỗi'),
           ),
         ),
+        role: DishRole.fromId(
+          json['role'] as String? ?? (throw const FormatException('thiếu "role"')),
+        ),
+        feel: switch (json['feel'] as String?) {
+          null => null,
+          final id => DishFeel.fromId(id),
+        },
+        tags: _parseEnumList(json['tags'], RecipeTag.fromId),
       );
     } on FormatException catch (e) {
       throw FormatException('Món "$id": ${e.message}');
@@ -253,6 +278,9 @@ class Recipe {
     'ingredients': ingredients.map((e) => e.toJson()).toList(),
     'steps': steps.map((e) => e.toJson()).toList(),
     if (notes.isNotEmpty) 'notes': notes,
+    'role': role.id,
+    if (feel != null) 'feel': feel!.id,
+    if (tags.isNotEmpty) 'tags': tags.map((e) => e.id).toList(),
   };
 
   @override
@@ -270,7 +298,10 @@ class Recipe {
       listEquals(other.meals, meals) &&
       listEquals(other.ingredients, ingredients) &&
       listEquals(other.steps, steps) &&
-      listEquals(other.notes, notes);
+      listEquals(other.notes, notes) &&
+      other.role == role &&
+      other.feel == feel &&
+      listEquals(other.tags, tags);
 
   @override
   int get hashCode => Object.hash(
@@ -287,6 +318,9 @@ class Recipe {
     Object.hashAll(ingredients),
     Object.hashAll(steps),
     Object.hashAll(notes),
+    role,
+    feel,
+    Object.hashAll(tags),
   );
 
   static List<T> _parseEnumList<T>(dynamic value, T Function(String) parser) {

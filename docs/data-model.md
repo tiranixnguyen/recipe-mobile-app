@@ -37,6 +37,36 @@ Công thức và nguyên liệu đóng gói sẵn trong `assets/data/`. App ch�
 | `lunch` | Trưa |
 | `dinner` | Tối |
 
+### `DishRole` (vai trong bữa)
+
+| id | label | Ghép bữa |
+|---|---|---|
+| `main` | Món mặn | Món ăn với cơm: trứng chiên, đậu phụ sốt, thịt băm xào |
+| `soup` | Canh | Canh ăn kèm cơm |
+| `side` | Rau/món thêm | Rau luộc, khoai lang, món nhỏ ăn kèm |
+| `single` | Món một mình | Ăn riêng là đủ bữa: mì, cháo, cơm rang, bánh mì |
+
+"1 món gọn lẹ" lấy món `single`; "Cơm nhà 2 món" là `main` + `soup`/`side`; "Mâm cơm" là `main` + `soup` +
+`side`.
+
+### `DishFeel` (cảm giác)
+
+| id | label |
+|---|---|
+| `cooling` | Giải nhiệt |
+| `warming` | Ấm bụng |
+
+### `RecipeTag` (tiêu chí thêm)
+
+| id | label | Gắn khi |
+|---|---|---|
+| `cheap` | Tiết kiệm | Món rẻ, tận dụng đồ sẵn có (trứng, mì, rau, đậu phụ, cơm nguội). **Là tag, không phải giá.** |
+| `healthy` | Healthy | Ít dầu mỡ, nhiều rau, luộc/hấp/canh |
+| `veg` | Thanh đạm | Món chay; chỉ gắn khi `diets` có `veg` |
+| `mild` | Dịu nhẹ | Mềm, nhạt, không cay, dễ ăn (cháo, canh, trứng hấp) |
+| `snack` | Mồi bén | Ăn chơi, lai rai |
+| `party` | Đãi bạn | Hợp nấu đãi cả phòng, cuối tuần |
+
 ### `IngredientGroup` (nhóm nguyên liệu)
 
 | id | label |
@@ -76,6 +106,8 @@ test chặn nếu nhập sai.
   "tools": ["stove"],
   "diets": ["nospicy", "nopork"],
   "meals": ["breakfast", "lunch"],
+  "role": "main",
+  "tags": ["cheap"],
   "ingredients": [
     { "id": "egg", "amount": 3, "unit": "quả" },
     { "id": "scallion", "amount": 2, "unit": "nhánh" },
@@ -100,6 +132,12 @@ test chặn nếu nhập sai.
   - `noseafood`: không gắn cho món có nước mắm (kể cả tuỳ chọn), gói gia vị mì (thường có tôm).
   - `nopork`: không gắn cho món có gói gia vị mì (có thể có mỡ lợn).
 - `meals`: bữa phù hợp; rỗng = mọi bữa.
+- `role`: `DishRole.id`, **bắt buộc**, để ghép bữa nhiều món (Hôm nay ăn gì, `suggestMeal`). Món ăn riêng là
+  đủ no (mì, cháo, cơm rang) là `single`, không phải `main`.
+- `feel`: `DishFeel.id`, tuỳ chọn; bỏ trống khi món không rõ hợp trời nóng hay lạnh. Canh, món luộc ít dầu
+  mỡ → `cooling`; cháo, món hấp, nước dùng nóng → `warming`. Bữa "Giải nhiệt" không chọn món `warming` và
+  ngược lại.
+- `tags`: danh sách `RecipeTag.id`, tuỳ chọn, không trùng; chỉ ghi khi có. Nghi ngờ thì không gắn.
 - `ingredients[].id`: tham chiếu `Ingredient.id` (phải tồn tại).
 - `ingredients[].amount`: lượng cho `servings` khẩu phần chuẩn.
 - `ingredients[].optional`: nguyên liệu tuỳ chọn.
@@ -133,7 +171,7 @@ test chặn nếu nhập sai.
   bước cuối (nấu cả bữa: chặng Lưu ý gom mọi món); bỏ trống thì hiện "Món ăn không có lưu ý nào."
 - `servings`, `minutes`, `ingredients[].amount` > 0; `ingredients`, `steps` không rỗng.
 
-Mọi id (`tools`, `diets`, `meals`, `group`) phải đúng danh sách trên. Id lạ không bị bỏ qua:
+Mọi id (`tools`, `diets`, `meals`, `role`, `feel`, `tags`, `group`) phải đúng danh sách trên. Id lạ không bị bỏ qua:
 `fromJson` ném `FormatException` chỉ rõ món, ví dụ `Món "x": dụng cụ "stoev" không có`.
 Riêng chỗ đọc `LocalStore` dùng `Tool.tryParse`… để bỏ qua dữ liệu cũ.
 
@@ -175,8 +213,11 @@ cả bữa" dùng chung hàm này.
 
 - Mỗi món phải có người nấu thử hoặc kiểm tra lại.
 - Giọng văn: xưng "bạn", câu ngắn, không emoji.
-- Không ghi giá tiền.
-- Id không trùng; nguyên liệu tham chiếu phải tồn tại; dụng cụ/chế độ ăn/bữa thuộc danh sách cho phép.
+- Không ghi giá tiền. Món rẻ thì gắn tag `cheap` (Tiết kiệm), không ghi số tiền hay mức ngân sách.
+- Mỗi món có `role`; gắn `feel`, `tags` theo bảng ở trên. Test chặn: thiếu `role`, id lạ, tag trùng, tag
+  `veg` mà `diets` không có `veg`, dữ liệu thiếu một trong các vai `main`/`soup`/`single`.
+- Id không trùng; nguyên liệu tham chiếu phải tồn tại; dụng cụ/chế độ ăn/bữa/vai/cảm giác/tag thuộc danh
+  sách cho phép.
 - Bước sơ chế ghi `prep` và `prepMinutes` theo luật ở trên; viết sơ chế thành bước riêng ở đầu món
   (rửa, thái, đánh trứng…), không trộn vào bước nấu. Nguyên liệu nào cần thái/rửa thì ghi rõ ở bước đó.
   Test chặn: `prep[].id` không có trong `ingredients`, `action` rỗng, `amount` ≤ 0, tổng `amount` theo

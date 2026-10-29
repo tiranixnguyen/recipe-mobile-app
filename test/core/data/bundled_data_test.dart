@@ -9,7 +9,8 @@ void main() {
   final rawIngredients = File('assets/data/ingredients.json').readAsStringSync();
   final rawRecipes = File('assets/data/recipes.json').readAsStringSync();
 
-  // Parse ở đây: id lạ (dụng cụ, chế độ ăn, bữa, nhóm) ném FormatException kèm id món.
+  // Parse ở đây: id lạ (dụng cụ, chế độ ăn, bữa, vai, cảm giác, tag, nhóm) hay thiếu role ném
+  // FormatException kèm id món.
   final ingredients = (jsonDecode(rawIngredients) as List)
       .map((e) => Ingredient.fromJson(e as Map<String, dynamic>))
       .toList();
@@ -36,8 +37,20 @@ void main() {
     }
   });
 
+  test('đủ vai để ghép bữa: có món mặn, canh và món một mình', () {
+    final roles = recipes.map((r) => r.role).toSet();
+    expect(roles, containsAll([DishRole.main, DishRole.soup, DishRole.single]));
+  });
+
   for (final r in recipes) {
     group('Món "${r.id}"', () {
+      test('tags không trùng; tag veg thì diets phải có veg', () {
+        expect(_duplicates(r.tags.map((t) => t.id)), isEmpty, reason: 'tag trùng');
+        if (r.tags.contains(RecipeTag.veg)) {
+          expect(r.diets, contains(Diet.veg), reason: 'tag veg nhưng diets không có veg');
+        }
+      });
+
       test('nguyên liệu tham chiếu tồn tại', () {
         for (final ing in r.ingredients) {
           expect(ingredientById.keys, contains(ing.id), reason: 'Nguyên liệu "${ing.id}" không có');

@@ -21,11 +21,8 @@ List<Recipe> suggest(
   if (count <= 0) return const [];
   final candidates = <({Recipe recipe, int position, int missing})>[];
   for (final (position, recipe) in recipes.indexed) {
-    if (disliked.contains(recipe.id)) continue;
-    if (tools.isNotEmpty && !tools.containsAll(recipe.tools)) continue;
-    if (diets.isNotEmpty && !recipe.diets.toSet().containsAll(diets)) continue;
     // Món không gắn bữa vẫn được xét, nhưng xếp sau món ghi rõ bữa phù hợp.
-    if (recipe.meals.isNotEmpty && !recipe.meals.contains(meal)) continue;
+    if (!isEligible(recipe, meal: meal, tools: tools, diets: diets, disliked: disliked)) continue;
     candidates.add((
       recipe: recipe,
       position: position,
@@ -53,6 +50,24 @@ List<Recipe> suggest(
     return a.position.compareTo(b.position);
   });
   return List.unmodifiable(candidates.take(count).map((item) => item.recipe));
+}
+
+/// Lọc cứng dùng chung cho [suggest] và `suggestMeal`: món bị chê, dụng cụ, chế độ ăn, bữa.
+///
+/// Hồ sơ chưa chọn dụng cụ/chế độ ăn (set rỗng) không giới hạn tương ứng. Món không gắn bữa hợp mọi
+/// bữa; [meal] null thì không lọc theo bữa.
+bool isEligible(
+  Recipe recipe, {
+  Meal? meal,
+  Set<Tool> tools = const {},
+  Set<Diet> diets = const {},
+  Set<String> disliked = const {},
+}) {
+  if (disliked.contains(recipe.id)) return false;
+  if (tools.isNotEmpty && !tools.containsAll(recipe.tools)) return false;
+  if (diets.isNotEmpty && !recipe.diets.toSet().containsAll(diets)) return false;
+  if (meal != null && recipe.meals.isNotEmpty && !recipe.meals.contains(meal)) return false;
+  return true;
 }
 
 /// [items] giữ thứ tự, riêng phần tử có id trong [demoted] xuống cuối (cũng giữ thứ tự).

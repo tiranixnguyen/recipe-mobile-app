@@ -29,6 +29,9 @@ void main() {
         'tools': ['stove'],
         'diets': ['veg'],
         'meals': ['breakfast'],
+        'role': 'soup',
+        'feel': 'cooling',
+        'tags': ['cheap', 'veg'],
         'ingredients': [
           {'id': 'egg', 'amount': 2, 'unit': 'quả'},
         ],
@@ -41,6 +44,9 @@ void main() {
       expect(recipe.tools, [Tool.stove]);
       expect(recipe.diets, [Diet.veg]);
       expect(recipe.meals, [Meal.breakfast]);
+      expect(recipe.role, DishRole.soup);
+      expect(recipe.feel, DishFeel.cooling);
+      expect(recipe.tags, [RecipeTag.cheap, RecipeTag.veg]);
       expect(recipe.ingredients.first.amount, 2);
       expect(recipe.steps.first.timerSeconds, 60);
 
@@ -62,6 +68,7 @@ void main() {
         'minutes': 10,
         'servings': 2,
         'tools': ['stove'],
+        'role': 'main',
         'ingredients': <Object>[],
         'steps': <Object>[],
         key: value,
@@ -80,6 +87,22 @@ void main() {
       expect(
         () => Recipe.fromJson(withField('meals', ['brunch'])),
         fails('Món "r1": bữa "brunch" không có'),
+      );
+      expect(
+        () => Recipe.fromJson(withField('tags', ['expensive'])),
+        fails('Món "r1": tag "expensive" không có'),
+      );
+      expect(
+        () => Recipe.fromJson({...withField('meals', []), 'role': 'dessert'}),
+        fails('Món "r1": vai món "dessert" không có'),
+      );
+      expect(
+        () => Recipe.fromJson({...withField('meals', []), 'feel': 'spicy'}),
+        fails('Món "r1": cảm giác "spicy" không có'),
+      );
+      expect(
+        () => Recipe.fromJson({...withField('meals', [])}..remove('role')),
+        fails('Món "r1": thiếu "role"'),
       );
     });
   });
@@ -154,6 +177,41 @@ void main() {
       expect(withPrep.toJson()['prepMinutes'], 5);
       expect(withPrep, isNot(base));
       expect(Recipe.fromJson(withPrep.toJson()), withPrep);
+    });
+  });
+
+  group('Recipe.role/feel/tags', () {
+    test('constructor mặc định món mặn, không feel, không tag; chỉ ghi feel/tags khi có', () {
+      const base = Recipe(
+        id: 'r1',
+        name: 'Món test',
+        description: '',
+        imageAsset: '',
+        minutes: 15,
+        servings: 1,
+        tools: [],
+        diets: [],
+        meals: [],
+        ingredients: [],
+        steps: [],
+      );
+      expect(base.role, DishRole.main);
+      expect(base.feel, isNull);
+      expect(base.tags, isEmpty);
+      expect(base.toJson()['role'], 'main');
+      expect(base.toJson().containsKey('feel'), isFalse);
+      expect(base.toJson().containsKey('tags'), isFalse);
+
+      final tagged = Recipe.fromJson({
+        ...base.toJson(),
+        'role': 'single',
+        'feel': 'warming',
+        'tags': ['mild'],
+      });
+      expect(tagged, isNot(base));
+      expect(Recipe.fromJson(tagged.toJson()), tagged);
+      expect(Recipe.fromJson(tagged.toJson()).hashCode, tagged.hashCode);
+      expect(() => tagged.tags.add(RecipeTag.party), throwsUnsupportedError);
     });
   });
 
@@ -267,6 +325,10 @@ void main() {
     test('tryParse trả null cho id lạ (dữ liệu cũ trong LocalStore)', () {
       expect(Tool.tryParse('stoev'), isNull);
       expect(Diet.tryParse('veg'), Diet.veg);
+      expect(DishRole.tryParse('single'), DishRole.single);
+      expect(DishFeel.tryParse('hot'), isNull);
+      expect(RecipeTag.tryParse('snack'), RecipeTag.snack);
+      expect(DishFeel.cooling.opposite, DishFeel.warming);
     });
   });
 
