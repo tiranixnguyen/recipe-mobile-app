@@ -6,64 +6,196 @@ import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_row.dart';
 
-/// Ô một bữa trong Thực đơn, theo prototype `MealPlan` (design system chưa có component này).
-///
-/// - Có món: [RecipeRow] ảnh 56, tên 15/22 600 và meta `inkMuted`.
-/// - Trống ([MealSlot.empty]): cao 72, viền đứt 1.5px `outline`, "+ Thêm món".
-///
-/// Nhãn bữa ("Sáng", "Trưa"…) phía trên do màn tự đặt.
-class MealSlot extends StatelessWidget {
-  const MealSlot({
-    super.key,
-    required String this.title,
-    this.meta,
-    this.imageAsset,
-    required this.onTap,
-  });
+/// Một món trong [MealSlot].
+@immutable
+class MealSlotDish {
+  const MealSlotDish({required this.title, this.meta, this.imageAsset});
 
-  const MealSlot.empty({super.key, required this.onTap})
-    : title = null,
-      meta = null,
-      imageAsset = null;
-
-  /// Tên món; null là ô trống.
-  final String? title;
+  final String title;
 
   /// Ví dụ "15 phút · Bếp từ".
   final String? meta;
   final String? imageAsset;
+}
+
+/// Một bữa trong Thực đơn, theo prototype `MealPlan` (design system chưa có component này). Một
+/// bữa có thể nhiều món (cơm + canh + mặn).
+///
+/// - [MealSlot]: dòng nhãn "Sáng" hoặc "Sáng · 2 món" (12/16 600 `inkMuted`), có món thì thêm
+///   link "+ Thêm món" `chiliDeep` bên phải; mỗi món một [RecipeRow] ảnh 44. Bữa trống: ô viền
+///   đứt 1.5px `outline` cao 58, "+ Thêm món". [action] đặt trước "+ Thêm món", ví dụ nút "Nấu bữa
+///   này" khi bữa có nhiều món.
+/// - [MealSlot.compact]: ô cao 56 trong lưới Tuần, "Tên món đầu +N"; trống thì ô viền đứt "+".
+class MealSlot extends StatelessWidget {
+  const MealSlot({
+    super.key,
+    required String this.label,
+    required this.dishes,
+    required VoidCallback this.onAdd,
+    this.onDishTap,
+    this.action,
+  }) : titles = const [],
+       onTap = null;
+
+  const MealSlot.compact({super.key, required this.titles, required VoidCallback this.onTap})
+    : label = null,
+      dishes = const [],
+      onAdd = null,
+      onDishTap = null,
+      action = null;
+
+  /// Tên bữa ("Sáng", "Trưa", "Tối"); null ở [MealSlot.compact].
+  final String? label;
+  final List<MealSlotDish> dishes;
+  final VoidCallback? onAdd;
+
+  /// Bấm món thứ i trong [dishes].
+  final ValueChanged<int>? onDishTap;
+
+  /// Widget ở dòng nhãn, trước "+ Thêm món"; chỉ hiện khi bữa có món.
+  final Widget? action;
+
+  /// Tên các món ở [MealSlot.compact].
+  final List<String> titles;
   final VoidCallback? onTap;
 
-  static const emptyLabel = 'Thêm món';
+  static const addLabel = 'Thêm món';
 
   @override
   Widget build(BuildContext context) {
-    final title = this.title;
-    return title == null ? _buildEmpty(context) : _buildFilled(context, title);
+    final label = this.label;
+    return label == null ? _buildCompact(context) : _buildFull(context, label);
   }
 
-  Widget _buildEmpty(BuildContext context) {
+  Widget _buildFull(BuildContext context, String label) {
     final colors = context.colors;
-    return Semantics(
-      button: true,
-      child: CustomPaint(
-        foregroundPainter: _DashedBorderPainter(color: colors.outline),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: AppRadius.mdAll,
+    final onAdd = this.onAdd!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: 6,
+      children: [
+        // Cao 24 như prototype; có link "+ Thêm món" thì 48 cho đủ vùng chạm.
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 24),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  dishes.length > 1 ? '$label · ${dishes.length} món' : label,
+                  style: AppTextStyles.caption.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colors.inkMuted,
+                  ),
+                ),
+              ),
+              if (dishes.isNotEmpty && action != null) ...[
+                action!,
+                const SizedBox(width: AppSpacing.s2),
+              ],
+              if (dishes.isNotEmpty)
+                Semantics(
+                  button: true,
+                  label: '$addLabel bữa ${label.toLowerCase()}',
+                  excludeSemantics: true,
+                  child: InkWell(
+                    onTap: onAdd,
+                    borderRadius: AppRadius.smAll,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s1),
+                        child: Center(
+                          widthFactor: 1,
+                          child: Text(
+                            '+ $addLabel',
+                            style: AppTextStyles.label.copyWith(color: colors.chiliDeep),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+        for (final (i, dish) in dishes.indexed)
+          RecipeRow(
+            title: dish.title,
+            meta: dish.meta,
+            imageAsset: dish.imageAsset,
+            thumbSize: 44,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s2, vertical: 6),
+            onTap: onDishTap == null ? null : () => onDishTap!(i),
+          ),
+        if (dishes.isEmpty)
+          _Dashed(
+            radius: AppRadius.mdAll,
+            onTap: onAdd,
             child: SizedBox(
-              height: 72,
+              height: 58,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 spacing: AppSpacing.s2,
                 children: [
                   Icon(AppIcons.plus, size: 20, color: colors.ink),
-                  Text(
-                    emptyLabel,
-                    style: AppTextStyles.button.copyWith(color: colors.ink),
+                  Text(addLabel, style: AppTextStyles.button.copyWith(color: colors.ink)),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildCompact(BuildContext context) {
+    final colors = context.colors;
+    if (titles.isEmpty) {
+      return _Dashed(
+        radius: AppRadius.smAll,
+        onTap: onTap,
+        semanticLabel: addLabel,
+        child: SizedBox(
+          height: 56,
+          child: Center(
+            child: Text(
+              '+',
+              style: AppTextStyles.body.copyWith(fontSize: 16, color: colors.inkMuted),
+            ),
+          ),
+        ),
+      );
+    }
+    final more = titles.length - 1;
+    return Semantics(
+      button: true,
+      label: titles.join(', '),
+      excludeSemantics: true,
+      child: Material(
+        color: colors.surfaceRaised,
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: colors.line),
+          borderRadius: AppRadius.smAll,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: SizedBox(
+            height: 56,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s2, vertical: 6),
+              // "+N" nằm ngoài phần cắt chữ để luôn thấy món còn lại.
+              child: Row(
+                children: [
+                  Flexible(
+                    child: Text(
+                      titles.first,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.caption.copyWith(color: colors.ink),
+                    ),
                   ),
+                  if (more > 0)
+                    Text(' +$more', style: AppTextStyles.caption.copyWith(color: colors.ink)),
                 ],
               ),
             ),
@@ -72,16 +204,44 @@ class MealSlot extends StatelessWidget {
       ),
     );
   }
-
-  Widget _buildFilled(BuildContext context, String title) =>
-      RecipeRow(title: title, meta: meta, imageAsset: imageAsset, onTap: onTap);
 }
 
-/// Viền đứt bo `radius-md` (Flutter không có `border-style: dashed`).
+/// Ô bấm được viền đứt 1.5px `outline`.
+class _Dashed extends StatelessWidget {
+  const _Dashed({
+    required this.radius,
+    required this.onTap,
+    required this.child,
+    this.semanticLabel,
+  });
+
+  final BorderRadius radius;
+  final VoidCallback? onTap;
+  final Widget child;
+  final String? semanticLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: CustomPaint(
+        foregroundPainter: _DashedBorderPainter(color: context.colors.outline, radius: radius),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(onTap: onTap, borderRadius: radius, child: child),
+        ),
+      ),
+    );
+  }
+}
+
+/// Viền đứt bo góc (Flutter không có `border-style: dashed`).
 class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter({required this.color});
+  const _DashedBorderPainter({required this.color, required this.radius});
 
   final Color color;
+  final BorderRadius radius;
 
   static const strokeWidth = 1.5;
   static const dash = 6.0;
@@ -90,7 +250,7 @@ class _DashedBorderPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final rect = (Offset.zero & size).deflate(strokeWidth / 2);
-    final path = Path()..addRRect(AppRadius.mdAll.toRRect(rect));
+    final path = Path()..addRRect(radius.toRRect(rect));
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
@@ -103,5 +263,6 @@ class _DashedBorderPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_DashedBorderPainter oldDelegate) => oldDelegate.color != color;
+  bool shouldRepaint(_DashedBorderPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.radius != radius;
 }

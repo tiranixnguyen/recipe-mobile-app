@@ -19,13 +19,14 @@ enum StepTimerStatus { idle, running, done }
 /// hiện khi người dùng sang bước khác, và [onDone] để rung, báo.
 ///
 /// Mỗi bước một StepTimer riêng (đặt `key` theo bước); đổi [seconds] khi đang chạy không dời mốc
-/// đã hẹn.
+/// đã hẹn. Mở lại màn khi đồng hồ còn chạy: truyền mốc kết thúc đã lưu vào [endAt].
 class StepTimer extends StatefulWidget {
   const StepTimer({
     super.key,
     required this.seconds,
     this.label = '',
     this.autoStart = false,
+    this.endAt,
     this.onStatusChange,
     this.onDone,
     this.clock = DateTime.now,
@@ -39,6 +40,9 @@ class StepTimer extends StatefulWidget {
 
   /// Bắt đầu đếm ngay khi hiện.
   final bool autoStart;
+
+  /// Mốc kết thúc của lần hẹn trước: còn ở tương lai thì hiện là đang chạy, đếm tới mốc đó.
+  final DateTime? endAt;
   final ValueChanged<StepTimerStatus>? onStatusChange;
   final VoidCallback? onDone;
 
@@ -70,8 +74,14 @@ class _StepTimerState extends State<StepTimer> {
   @override
   void initState() {
     super.initState();
-    if (!widget.autoStart) return;
-    _start(notify: false);
+    final endAt = widget.endAt;
+    if (endAt != null && endAt.isAfter(widget.clock())) {
+      _start(endAt: endAt, notify: false);
+    } else if (widget.autoStart) {
+      _start(notify: false);
+    } else {
+      return;
+    }
     // Báo sau frame đầu: màn cha có thể setState trong onStatusChange, không gọi được lúc đang build.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && _status == StepTimerStatus.running) {
@@ -94,8 +104,8 @@ class _StepTimerState extends State<StepTimer> {
     return ms <= 0 ? 0 : (ms / 1000).ceil();
   }
 
-  void _start({bool notify = true}) {
-    _endAt = widget.clock().add(Duration(seconds: widget.seconds));
+  void _start({DateTime? endAt, bool notify = true}) {
+    _endAt = endAt ?? widget.clock().add(Duration(seconds: widget.seconds));
     _ticker?.cancel();
     _ticker = Timer.periodic(const Duration(milliseconds: 250), (_) => _tick());
     _setStatus(StepTimerStatus.running, notify: notify);
@@ -158,8 +168,11 @@ class _StepTimerState extends State<StepTimer> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Nhãn dài ("<món> · <bước>") cắt "…", không đẩy nút Dừng.
                   Text(
                     done ? 'Hết giờ · ${widget.label}' : widget.label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: AppTextStyles.caption.copyWith(
                       color: foreground.withValues(alpha: 0.85),
                     ),

@@ -354,8 +354,36 @@ class _ComponentSamples extends StatelessWidget {
           ),
         ),
         DayStrip(selected: 0, today: 1, daysWithMeals: const {0, 1, 2}, onSelected: (_) {}),
-        MealSlot(title: 'Trứng chiên hành', meta: '15 phút · Bếp từ', onTap: () {}),
-        MealSlot.empty(onTap: () {}),
+        MealSlot(
+          label: 'Trưa',
+          dishes: const [
+            MealSlotDish(title: 'Đậu phụ sốt cà chua', meta: '20 phút · Bếp từ'),
+            MealSlotDish(title: 'Trứng chiên hành', meta: '15 phút · Bếp từ'),
+          ],
+          onAdd: () {},
+          onDishTap: (_) {},
+        ),
+        MealSlot(label: 'Trưa', dishes: const [], onAdd: () {}),
+        SizedBox(
+          width: 240,
+          child: Row(
+            spacing: 6,
+            children: [
+              Expanded(
+                child: MealSlot.compact(titles: const ['Mì xào rau cải'], onTap: () {}),
+              ),
+              Expanded(
+                child: MealSlot.compact(
+                  titles: const ['Đậu phụ sốt cà chua', 'Trứng chiên hành'],
+                  onTap: () {},
+                ),
+              ),
+              Expanded(
+                child: MealSlot.compact(titles: const [], onTap: () {}),
+              ),
+            ],
+          ),
+        ),
         EmptyState(
           icon: AppIcons.bookmark,
           title: 'Chưa lưu món nào',

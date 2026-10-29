@@ -106,8 +106,14 @@ class AppButton extends StatelessWidget {
         disabledForegroundColor: foreground,
         minimumSize: Size(0, lg ? 56 : 48),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        // Nút [block] đã căn giữa trong chiều rộng được cho, padding nhỏ để nhãn dài khỏi xuống
+        // dòng khi hai nút đứng cạnh nhau (footer Chi tiết món).
         padding: EdgeInsets.symmetric(
-          horizontal: variant == AppButtonVariant.ghost ? AppSpacing.s4 : AppSpacing.s6,
+          horizontal: block
+              ? AppSpacing.s2
+              : variant == AppButtonVariant.ghost
+              ? AppSpacing.s4
+              : AppSpacing.s6,
         ),
         shape: RoundedRectangleBorder(
           borderRadius: AppRadius.mdAll,

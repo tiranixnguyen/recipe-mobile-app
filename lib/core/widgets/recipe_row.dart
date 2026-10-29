@@ -6,7 +6,7 @@ import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
 /// Hàng món gọn: ảnh vuông, tên và một dòng phụ, theo các list trong prototype `Main` ("Nhanh sau
 /// giờ học"), `Pantry` và `MealPlan` (design system chưa có component này).
 ///
-/// Nền `surfaceRaised`, viền `line`, bo `radius-md`, đệm 8. Dòng phụ thường là meta `inkMuted`
+/// Nền `surfaceRaised`, viền `line`, bo `radius-md`, đệm 8 (đổi bằng [padding]). Dòng phụ thường là meta `inkMuted`
 /// ("15 phút · Bếp từ"); [emphasizeMeta] tô `chiliDeep` đậm cho "Thiếu: hành lá".
 class RecipeRow extends StatelessWidget {
   const RecipeRow({
@@ -16,6 +16,7 @@ class RecipeRow extends StatelessWidget {
     this.emphasizeMeta = false,
     this.imageAsset,
     this.thumbSize = 56,
+    this.padding = const EdgeInsets.all(AppSpacing.s2),
     this.onTap,
   });
 
@@ -24,8 +25,11 @@ class RecipeRow extends StatelessWidget {
   final bool emphasizeMeta;
   final String? imageAsset;
 
-  /// 56 ở Khám phá và Thực đơn, 48 ở Tủ đồ.
+  /// 56 ở Khám phá, 48 ở Tủ đồ, 44 trong bữa của Thực đơn.
   final double thumbSize;
+
+  /// Đệm quanh ảnh và chữ; Thực đơn dùng 6/8 cho gọn.
+  final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
 
   @override
@@ -42,7 +46,7 @@ class RecipeRow extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.s2),
+          padding: padding,
           child: Row(
             spacing: AppSpacing.s3,
             children: [

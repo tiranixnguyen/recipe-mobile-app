@@ -89,6 +89,10 @@ thì ghi vào bảng này.
 | `onboarding_done` | Lần đầu qua Onboarding (Xong hoặc Bỏ qua) | `skipped`, `tools`, `diets` (số lượng) |
 | `theme_change` | Đổi Sáng/Tối/Theo hệ thống trong Cài đặt | `mode` (`light`/`dark`/`system`) |
 | `feedback_send` | Gửi góp ý thành công | `kind` (`bug`/`recipe`/`other`), `screenshot`, `from_error` |
+| `view_recipe` | Mở Chi tiết món | `recipe` (id món đóng gói sẵn) |
+| `start_cooking` | Bấm Bắt đầu nấu (một món hoặc cả bữa) | `servings`, `steps` (tổng số bước), `meal_dishes` (số món) |
+| `finish_cooking` | Xong ở màn Hoàn thành | `used_up` (số đồ tick Hết), `rated`, `meal_dishes` |
+| `rate_recipe` | Mỗi món được chấm khi Xong | `rating` (`good`/`ok`/`bad`) |
 
 ## 5 feature
 

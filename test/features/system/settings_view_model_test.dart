@@ -7,7 +7,7 @@ import 'package:recipe_mobile_app/features/system/data/app_info.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
-import 'fake_analytics.dart';
+import '../../core/fake_analytics.dart';
 import 'fake_notification_plugin.dart';
 
 void main() {
