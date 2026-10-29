@@ -41,6 +41,7 @@ void main() {
           'minutes': 5,
           'servings': 1,
           'tools': ['kettle'],
+          'role': 'single',
           'ingredients': [
             {'id': 'noodle', 'amount': 1, 'unit': 'gói'},
           ],

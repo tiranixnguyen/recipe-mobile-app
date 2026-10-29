@@ -81,8 +81,8 @@ assets/data/             # recipes.json, ingredients.json — xem docs/data-mode
   `ChangeNotifier`/package `provider`.
 - Điều hướng: go_router. Đi tới màn của feature khác bằng hàm trong public API của nó
   (ví dụ `context.push(recipeLocation(id))`), không tự ghép chuỗi đường dẫn.
-- Kiểu dùng chung (`Recipe`, `Ingredient`, `Meal`, `Tool`, `Diet`, `IngredientGroup`) nằm trong
-  `lib/core/models/`. Không tự định nghĩa lại bằng `String`.
+- Kiểu dùng chung (`Recipe`, `Ingredient`, `Meal`, `Tool`, `Diet`, `IngredientGroup`, `DishRole`, `DishFeel`,
+  `RecipeTag`) nằm trong `lib/core/models/`. Không tự định nghĩa lại bằng `String`.
 
 ## Analytics
 
@@ -110,7 +110,7 @@ thì ghi vào bảng này.
 |---|---|---|---|---|
 | F1 Khám phá | @hu666-dot | `features/discover` | Main, Search, TodayPrefs, Today, Saved | `SaveButton`, `savedIdsProvider`, `savedMealsProvider`, route `/search` |
 | F2 Nấu | @dtranh2005 | `features/cook` | Detail, CookPrep, CookStep, CookDone, RateApp | route `/recipe/:id`, `ResumeCookingBanner`, `cookHistoryProvider` |
-| F3 Tủ đồ & gợi ý | @tiranixnguyen (Lead) | `features/pantry` | Pantry | `availabilityFor`, `suggest`, `dislike`, `pantryItemsProvider`, `addToPantry`, `removeFromPantry` |
+| F3 Tủ đồ & gợi ý | @tiranixnguyen (Lead) | `features/pantry` | Pantry | `availabilityFor`, `suggest`, `suggestMeal`/`mealSuggesterProvider`, `dislike`, `pantryItemsProvider`, `addToPantry`, `removeFromPantry` |
 | F4 Thực đơn & đi chợ | @SeiGirl | `features/plan` | MealPlan, Shopping | `addToPlan`, `addToShopping`, `plannedMealsProvider`, route `/shopping` |
 | F5 Hệ thống | @huytq160871 | `features/system` | Onboarding, Settings, NotifPermission, Feedback, About, Policy, ClearData | `kitchenProfileProvider`, `themeModeProvider`, `NotificationService` |
 

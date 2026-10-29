@@ -205,6 +205,40 @@ void main() {
     });
   });
 
+  group('mealSuggesterProvider', () {
+    const one = MealPrefs(scale: MealScale.one);
+
+    Future<MealSuggester> suggester() async {
+      container.listen(mealSuggesterProvider, (_, _) {});
+      return container.read(mealSuggesterProvider.future);
+    }
+
+    List<String>? ids(MealSuggestion? meal) => meal?.dishes.map((r) => r.id).toList();
+
+    test('gắn bữa, exclude, món đã lưu và Tủ đồ', () async {
+      expect(ids((await suggester())(one, meal: Meal.dinner)), ['a']);
+      expect(ids((await suggester())(one, meal: Meal.dinner, exclude: {'a'})), ['c']);
+      expect(ids((await suggester())(one, meal: Meal.breakfast, exclude: {'a', 'c'})), ['b']);
+
+      await container.read(savedIdsProvider.notifier).toggle('c');
+      expect(ids((await suggester())(one, meal: Meal.dinner)), ['c']);
+
+      expect((await suggester())(one)!.reasons.first, 'Thiếu 1 thứ');
+      await container.read(pantryItemsProvider.notifier).addToPantry('egg');
+      expect((await suggester())(one)!.reasons.first, 'Đủ đồ');
+    });
+
+    test('món chê gần đây và dụng cụ không có bị loại', () async {
+      await container.read(dislikedProvider.notifier).dislike('a', DislikeReason.justAte);
+      expect(ids((await suggester())(one, meal: Meal.dinner)), ['c']);
+
+      await container
+          .read(kitchenProfileProvider.notifier)
+          .save(const KitchenProfile(tools: {Tool.kettle}));
+      expect((await suggester())(one), isNull);
+    });
+  });
+
   group('món bị chê sau khi nấu', () {
     final now = DateTime(2026, 10, 26, 18);
 
