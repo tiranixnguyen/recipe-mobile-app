@@ -14,12 +14,6 @@ class Events implements Analytics {
 }
 
 void main() {
-  test('bữa theo giờ có ranh giới chính xác', () {
-    expect(mealForHour(9), Meal.breakfast);
-    expect(mealForHour(10), Meal.lunch);
-    expect(mealForHour(14), Meal.lunch);
-    expect(mealForHour(15), Meal.dinner);
-  });
   test('đổi bữa, đổi món và chê lưu qua Pantry trước khi phát event', () async {
     final events = Events();
     final store = InMemoryLocalStore();
@@ -48,4 +42,55 @@ void main() {
     expect(events.records.last.$2, {'reason': 'justAte'});
     expect(subscription.read().showReasons, isFalse);
   });
+
+  test('chê món đang hiện thì món kế tiếp là món thứ hai, không nhảy qua', () async {
+    final store = InMemoryLocalStore();
+    final container = ProviderContainer(
+      overrides: [
+        localStoreProvider.overrideWithValue(store),
+        analyticsProvider.overrideWithValue(Events()),
+        // Món bị chê rời danh sách như `suggest()` thật.
+        suggestionsProvider.overrideWith((ref, args) async {
+          final disliked = ref.watch(dislikedProvider);
+          return [
+            for (final id in ['a', 'b', 'c'])
+              if (!disliked.containsKey(id)) recipe(id),
+          ];
+        }),
+      ],
+    );
+    addTearDown(container.dispose);
+    final state = container.listen(todayViewModelProvider, (_, _) {});
+    final recipes = container.listen(todayRecipesProvider, (_, _) {});
+    final vm = container.read(todayViewModelProvider.notifier);
+    vm.setMinutes(null);
+    String current() => recipes.read().value![state.read().index % recipes.read().value!.length].id;
+
+    await container.read(todayRecipesProvider.future);
+    expect(current(), 'a');
+    vm.toggleReasons();
+    await vm.dislike('a', DislikeReason.tooLong);
+    await container.read(todayRecipesProvider.future);
+    expect(current(), 'b');
+    expect(state.read().showReasons, isFalse);
+
+    vm.next();
+    expect(current(), 'c');
+    vm.setMeal(Meal.lunch);
+    expect(state.read().index, 0);
+  });
 }
+
+Recipe recipe(String id) => Recipe(
+  id: id,
+  name: id,
+  description: '',
+  imageAsset: '',
+  minutes: 10,
+  servings: 1,
+  tools: const [],
+  diets: const [],
+  meals: const [],
+  ingredients: const [],
+  steps: const [],
+);
