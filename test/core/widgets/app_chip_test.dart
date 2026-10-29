@@ -60,4 +60,26 @@ void main() {
       });
     });
   }
+
+  testWidgets('nhãn dài trong chỗ hẹp thì cắt, không tràn', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.light,
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 120,
+              child: Wrap(
+                children: [
+                  AppChip(label: 'Không hợp khẩu vị lắm đâu', selected: false, onTap: () {}),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(AppChip)).width, lessThanOrEqualTo(120));
+  });
 }

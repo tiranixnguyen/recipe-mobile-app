@@ -45,7 +45,15 @@ class AppChip extends StatelessWidget {
                 spacing: AppSpacing.s1,
                 children: [
                   if (icon != null) Icon(icon, size: 16, color: foreground),
-                  Text(label, style: AppTextStyles.label.copyWith(color: foreground)),
+                  // Chỗ hẹp (Wrap, chữ phóng to) thì cắt nhãn thay vì tràn.
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.label.copyWith(color: foreground),
+                    ),
+                  ),
                 ],
               ),
             ),
