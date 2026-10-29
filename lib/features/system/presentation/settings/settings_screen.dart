@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/core/widgets/app_snackbar.dart';
 import 'package:recipe_mobile_app/core/widgets/settings_row.dart';
 import 'package:recipe_mobile_app/features/system/data/notification_prefs.dart';
 import 'package:recipe_mobile_app/features/system/presentation/settings/settings_view_model.dart';
@@ -136,9 +137,8 @@ class SettingsScreen extends ConsumerWidget {
 
 /// Bật công tắc thông báo mà bị chặn quyền thì báo cho người dùng.
 Future<void> _toggle(BuildContext context, Future<bool> change) async {
-  final messenger = ScaffoldMessenger.of(context);
-  if (!await change) {
-    messenger.showSnackBar(const SnackBar(content: Text(SystemStrings.notifBlocked)));
+  if (!await change && context.mounted) {
+    AppSnackbar.show(context, SystemStrings.notifBlocked, kind: SnackKind.info);
   }
 }
 

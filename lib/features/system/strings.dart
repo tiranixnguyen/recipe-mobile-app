@@ -73,7 +73,7 @@ abstract final class SystemStrings {
   static const aboutContact = 'Liên hệ';
   static const aboutLicenses = 'Giấy phép mã nguồn mở';
   static const aboutFooter = 'Làm ở Hoà Lạc, cho bếp ký túc xá.';
-  static const aboutEmailCopied = 'Đã chép địa chỉ email.';
+  static const aboutEmailCopied = 'Đã chép địa chỉ email';
 
   // TODO(REL): điền tên nhóm và email liên hệ thật trước khi phát hành.
   static const teamName = '[TÊN NHÓM]';
@@ -166,7 +166,8 @@ abstract final class SystemStrings {
   static const feedbackEmailInvalid = 'Email chưa đúng dạng, ví dụ ban@vidu.com.';
   static const feedbackDevice = 'Gửi kèm thông tin máy (phiên bản app, Android) để dễ sửa lỗi';
   static const feedbackSend = 'Gửi góp ý';
-  static const feedbackSent = 'Đã gửi. Cảm ơn bạn đã góp ý.';
-  static const feedbackFailed = 'Chưa gửi được. Kiểm tra mạng rồi thử lại, nội dung vẫn còn đây.';
+  static const feedbackSent = 'Đã gửi góp ý. Cảm ơn bạn.';
+  static const feedbackFailed = 'Chưa gửi được góp ý. Kiểm tra mạng, nội dung vẫn còn đây.';
+  static const retry = 'Thử lại';
   static String feedbackErrorCode(String code) => 'Mã lỗi: $code';
 }

@@ -6,6 +6,7 @@ import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/core/widgets/app_snackbar.dart';
 import 'package:recipe_mobile_app/features/system/presentation/feedback/feedback_view_model.dart';
 import 'package:recipe_mobile_app/features/system/strings.dart';
 
@@ -24,13 +25,20 @@ class FeedbackScreen extends ConsumerWidget {
     final screenshot = state.screenshot;
 
     Future<void> send() async {
-      final messenger = ScaffoldMessenger.of(context);
       final router = GoRouter.of(context);
       final sent = await viewModel.send();
-      messenger.showSnackBar(
-        SnackBar(content: Text(sent ? SystemStrings.feedbackSent : SystemStrings.feedbackFailed)),
-      );
-      if (sent) router.pop();
+      if (!context.mounted) return;
+      if (sent) {
+        AppSnackbar.show(context, SystemStrings.feedbackSent);
+        router.pop();
+      } else {
+        AppSnackbar.show(
+          context,
+          SystemStrings.feedbackFailed,
+          kind: SnackKind.error,
+          action: SnackAction(SystemStrings.retry, send),
+        );
+      }
     }
 
     Widget label(String text, {String? optional}) => Text.rich(

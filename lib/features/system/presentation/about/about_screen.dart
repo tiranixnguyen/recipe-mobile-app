@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/core/widgets/app_logo.dart';
+import 'package:recipe_mobile_app/core/widgets/app_snackbar.dart';
 import 'package:recipe_mobile_app/core/widgets/settings_row.dart';
 import 'package:recipe_mobile_app/features/system/presentation/about/about_view_model.dart';
 import 'package:recipe_mobile_app/features/system/routes.dart';
@@ -118,9 +119,8 @@ class AboutScreen extends ConsumerWidget {
 
   // App không có thư viện mở mail, chép địa chỉ để người dùng dán vào app mail.
   static Future<void> _copyEmail(BuildContext context) async {
-    final messenger = ScaffoldMessenger.of(context);
     await Clipboard.setData(const ClipboardData(text: SystemStrings.contactEmail));
-    messenger.showSnackBar(const SnackBar(content: Text(SystemStrings.aboutEmailCopied)));
+    if (context.mounted) AppSnackbar.show(context, SystemStrings.aboutEmailCopied);
   }
 }
 
