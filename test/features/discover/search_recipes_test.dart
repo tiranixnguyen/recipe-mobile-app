@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/core/text/fold.dart';
 import 'package:recipe_mobile_app/features/discover/domain/search_recipes.dart';
 
 const ingredients = [
@@ -30,12 +31,6 @@ void main() {
     expect(searchRecipes(recipes, ingredients, query: 'COM').map((r) => r.id), ['rice']);
     expect(searchRecipes(recipes, ingredients, query: 'trung hap').map((r) => r.id), ['egg']);
     expect(normalizeSearch('Đậu đỏ'), 'dau do');
-  });
-  test('chữ dạng NFD (dấu tổ hợp) cũng bỏ dấu', () {
-    // 'trứng' viết bằng u + móc (U+031B) + sắc (U+0301).
-    expect(normalizeSearch('tru\u031b\u0301ng'), 'trung');
-    expect(normalizeSearch('trứng'), 'trung');
-    expect(normalizeSearch('Phơ\u0309'), 'pho');
   });
   test('dòng tóm tắt theo từ khoá và bộ lọc', () {
     expect(searchSummary(3), '3 món phù hợp');

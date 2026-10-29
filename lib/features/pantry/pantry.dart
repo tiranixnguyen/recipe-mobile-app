@@ -4,7 +4,7 @@
 ///   của notifier.
 /// - [availabilityProvider]: món đủ đồ hay thiếu gì, đưa vào `AvailabilityBadge`. Hàm thuần
 ///   [availabilityFor] cho chỗ đã có sẵn dữ liệu.
-/// - [pantryMatchesProvider]: món nấu được ngay và món thiếu 1–2 thứ (Khám phá, Tủ đồ).
+/// - [pantryMatchesProvider]: món nấu được ngay và món thiếu 1–2 thứ (Khám phá).
 /// - [pantryLocation]: tab Tủ đồ, `context.go(pantryLocation)`.
 /// - [suggestionsProvider]: món gợi ý cho một bữa; [suggestionReasonProvider] nêu lý do có căn cứ.
 /// - [dislikedProvider]: chê món kèm [DislikeReason] (màn Hôm nay ăn gì).
