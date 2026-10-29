@@ -43,7 +43,9 @@ Thứ tự: #112, #113, #114 (Lead) → #120, #119, #118 → #116, #117, #48, #4
 
 Từ 30/10 Lead nhận lại toàn bộ issue đang mở (các thành viên bận). Mọi issue assign cho Lead, label cho biết
 ai làm: `agent:claude` (Lead + Claude Code: việc sâu, chặn issue khác), `agent:cline` (Cline chạy model free:
-#24, #27, #35, #45, #50, #59, spec rõ, phạm vi nhỏ, PR để Lead review). #60, #61, #83 Lead tự làm.
+#24, #27, #35, #45, #50, #59, #126, #127, #128, spec rõ, phạm vi nhỏ, PR để Lead review). #60, #61, #83 Lead tự làm.
+Issue lớn tách phần độc lập cho Cline: #119 → #126 (hàm tìm/lọc Tủ đồ), #117 → #127 (màn Gợi ý cho mình),
+#116 → #128 (banner carousel).
 
 Luật mới ở v2: thời tiết là ngoại lệ duy nhất của luật offline, chỉ chạy khi người dùng bật (#115); vẫn không có
 giá tiền ("Tiết kiệm" là tag món, không phải ngân sách).
@@ -119,7 +121,7 @@ W4 cố ý nhẹ để làm buffer. Nếu trễ, cắt P1 trước (polish, Cras
 
 ## AI workflow: GitHub ↔ Slack ↔ IDE
 
-Đã chạy thử trọn vòng trên nhánh `demo` — xem `docs/demo-flow.md` ở nhánh đó.
+Đã chạy thử trọn vòng trên nhánh `demo` (đã xoá 30/10, lưu ở tag `archive/demo`) — xem `docs/demo-flow.md` trong tag đó.
 
 ```
 Issue (spec cho agent, label feature:<f> → đúng chủ)

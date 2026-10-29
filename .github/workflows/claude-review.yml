@@ -1,5 +1,5 @@
 # Claude tự review PR khi mở (không chạy lại mỗi lần push — muốn review lại thì comment "@claude review lại").
-# File này phải giống hệt nhau trên main và demo: action chỉ chạy khi workflow khớp với nhánh mặc định.
+# Action chỉ chạy khi workflow khớp với bản trên nhánh mặc định (main).
 name: Claude review
 
 on:
