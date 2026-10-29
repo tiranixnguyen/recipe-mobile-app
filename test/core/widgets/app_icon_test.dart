@@ -16,8 +16,11 @@ void main() {
       theme.group(3)!,
     };
 
+    // Icon prototype vẽ SVG riêng, README Icon chưa có: giỏ của nút nổi Đi chợ (Pantry, MealPlan).
+    const prototypeOnly = {'basket'};
+
     expect(names, hasLength(33));
-    expect(AppIcons.byName.keys.toSet(), names);
+    expect(AppIcons.byName.keys.toSet(), {...names, ...prototypeOnly});
   });
 
   test('mỗi tên một icon riêng', () {
