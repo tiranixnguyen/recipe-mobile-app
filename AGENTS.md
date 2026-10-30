@@ -105,6 +105,8 @@ thì ghi vào bảng này.
 | `search` | Bấm tìm trên bàn phím ở màn Tìm kiếm | `has_query`, `filtered` (bool; không gửi từ khoá) |
 | `pantry_update` | Bấm chip ở Tủ đồ | `action` (`add`/`remove`/`bought`: bấm chip đang cần mua) |
 | `add_to_shopping_from_pantry` | Thêm được một thứ vào đi chợ từ Tủ đồ | `via` (`drag`: kéo thả, Shift+Enter, action trợ năng; `search`: nút thêm từ khoá) |
+| `save_meal` | Lưu cả bữa (Hôm nay ăn gì → Lưu lại) | `dishes` (số món), `tags` (số tiêu chí) |
+| `unsave` | Bỏ lưu món hoặc bữa từ Đã lưu | `kind` (`recipe`/`meal`), `undo` (bool) |
 
 ## 5 feature
 
