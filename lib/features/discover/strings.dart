@@ -28,6 +28,27 @@ abstract final class DiscoverStrings {
       'Bấm biểu tượng lưu trên món bạn thích. Món đã lưu được ưu tiên khi gợi ý và lên thực đơn.';
   static const savedEmptyAction = 'Tìm món để lưu';
 
+  // Đã lưu v2 (DSC-13)
+  static String savedTabRecipes(int n) => 'Món ăn ($n)';
+  static String savedTabMeals(int n) => 'Bữa ăn ($n)';
+  static const savedSearchPlaceholder = 'Tìm trong đã lưu';
+  static const savedSearchLabel = 'Tìm trong đã lưu';
+  static const savedTabWord = 'món';
+  static const savedMealTabWord = 'bữa';
+  static const savedTrashHint = 'Kéo vào đây để bỏ lưu';
+  static const savedTrashDanger = 'Thả để bỏ lưu';
+  static String savedUnsaved(String name) => 'Đã bỏ lưu $name';
+  static const savedUndo = 'Hoàn tác';
+  static const savedRecipeUnsaveAction = 'Bỏ lưu';
+  static const savedMealUnsaveAction = 'Bỏ lưu bữa';
+  static String savedNoMatch(String q, String tabWord) => 'Không thấy "$q" trong $tabWord đã lưu.';
+  static String savedDragTipText(String tabWord) =>
+      'Nhấn giữ một $tabWord rồi kéo vào thùng rác để bỏ lưu.';
+  static const savedEmptyMealsTitle = 'Chưa lưu bữa nào';
+  static const savedEmptyMealsBody = 'Ở Hôm nay ăn gì, bấm Lưu lại để giữ cả bữa và nấu lại sau.';
+  static const savedEmptyMealsAction = 'Gợi ý cho mình';
+  static const savedEmptyRecipesAction = 'Khám phá món';
+
   // Khám phá v2 (DSC-11)
   static String upcomingTitle(String meal) => 'Sắp tới bữa $meal rồi';
   static const viewPlan = 'Xem thực đơn';
