@@ -17,69 +17,131 @@ Recipe _recipe(String id, String name) => Recipe(
   steps: const [],
 );
 
+/// Thứ Ba 27/10/2026.
+final _today = DateTime(2026, 10, 27);
+
 void main() {
-  group('nextMeals', () {
-    // Thứ Ba = 1.
-    DateTime at(int hour) => DateTime(2026, 10, 20, hour);
+  group('focusMealFor', () {
+    DateTime at(int hour, [int minute = 0]) => DateTime(2026, 10, 27, hour, minute);
+    const empty = <Meal, List<Object>>{};
 
-    test('theo giờ hiện tại, bữa đã qua thì bỏ', () {
-      expect(nextMeals(at(7)), [(1, Meal.breakfast), (1, Meal.lunch), (1, Meal.dinner)]);
-      expect(nextMeals(at(10)), [(1, Meal.lunch), (1, Meal.dinner), (2, Meal.breakfast)]);
-      expect(nextMeals(at(17)), [(1, Meal.dinner), (2, Meal.breakfast), (2, Meal.lunch)]);
-      expect(nextMeals(at(21)), [(2, Meal.breakfast), (2, Meal.lunch), (2, Meal.dinner)]);
-    });
-
-    test('Chủ nhật sang tuần sau thì chỉ số quá 6', () {
-      expect(nextMeals(DateTime(2026, 10, 25, 17)), [
-        (6, Meal.dinner),
-        (7, Meal.breakfast),
-        (7, Meal.lunch),
-      ]);
-    });
-  });
-
-  group('whenLabel', () {
-    test('nay, mai, rồi tên ngày', () {
-      expect(whenLabel(Meal.dinner, 1, 1), 'Tối nay');
-      expect(whenLabel(Meal.lunch, 2, 1), 'Trưa mai');
-      expect(whenLabel(Meal.breakfast, 3, 1), 'Sáng thứ Năm');
-      expect(whenLabel(Meal.dinner, 6, 1), 'Tối Chủ nhật');
-      expect(whenLabel(Meal.lunch, 0, 1), 'Trưa thứ Hai');
-    });
-  });
-
-  group('joinText', () {
-    final a = _recipe('a', 'Cơm rang dưa cải');
-    final b = _recipe('b', 'Canh rau');
-
-    test('bữa trống thì null', () {
-      expect(joinText(const [], 'x'), isNull);
-    });
-
-    test('kể món đang có và tổng món sau khi thêm', () {
-      expect(joinText([a], 'x'), 'Sẽ thêm cùng Cơm rang dưa cải · bữa này thành 2 món');
+    test('hôm nay là bữa tới theo giờ', () {
+      expect(focusMealFor(_today, at(7, 30), empty), Meal.breakfast);
+      expect(focusMealFor(_today, at(11, 30), empty), Meal.lunch);
+      expect(focusMealFor(_today, at(18, 30), empty), Meal.dinner);
+      expect(focusMealFor(_today, at(22), empty), Meal.dinner);
+      // Bữa tới theo giờ dù bữa khác đã có món.
       expect(
-        joinText([a, b], 'x'),
-        'Sẽ thêm cùng Cơm rang dưa cải, Canh rau · bữa này thành 3 món',
+        focusMealFor(_today, at(7, 30), {
+          Meal.dinner: ['a'],
+        }),
+        Meal.breakfast,
       );
     });
 
-    test('không tính chính món đang thêm nếu nó đã có', () {
-      expect(joinText([a, b], 'a'), 'Sẽ thêm cùng Canh rau · bữa này thành 2 món');
-      expect(joinText([a], 'a'), isNull);
+    test('ngày khác là bữa đầu tiên có món, không có thì Sáng', () {
+      final tomorrow = DateTime(2026, 10, 28);
+      expect(focusMealFor(tomorrow, at(18, 30), empty), Meal.breakfast);
+      expect(
+        focusMealFor(tomorrow, at(18, 30), {
+          Meal.breakfast: const [],
+          Meal.lunch: ['a'],
+          Meal.dinner: ['b'],
+        }),
+        Meal.lunch,
+      );
+    });
+  });
+
+  test('dishSummary: tối đa 2 tên rồi "+N món"', () {
+    expect(dishSummary(['A']), 'A');
+    expect(dishSummary(['A', 'B']), 'A, B');
+    expect(dishSummary(['A', 'B', 'C', 'D']), 'A, B +2 món');
+  });
+
+  test('mealSummary và mealMeta', () {
+    expect(mealSummary(['A', 'B', 'C'], 40), '3 món · 40 phút · A, B +1 món');
+    expect(mealSummary([], 0), 'Chưa có món');
+    expect(mealMeta(2, 40), '2 món · ~40 phút');
+    expect(mealMeta(0, 0), 'Còn trống');
+  });
+
+  test('dayTitle, weekTitle, dayWord', () {
+    expect(dayTitle(_today, DateTime(2026, 10, 27, 18)), 'Thứ Ba, 27/10 · Hôm nay');
+    expect(dayTitle(DateTime(2026, 11, 1), _today), 'Chủ nhật, 1/11');
+    expect(weekTitle(DateTime(2026, 10, 29)), 'Tuần 26/10 – 1/11');
+    expect(dayWord(_today, _today), 'nay');
+    expect(dayWord(DateTime(2026, 10, 28), _today), 'thứ tư');
+  });
+
+  test('whenLabel và dayOptionLabel: nay, mai, tên ngày, tuần sau', () {
+    expect(whenLabel(Meal.dinner, _today, _today), 'Tối nay');
+    expect(whenLabel(Meal.lunch, DateTime(2026, 10, 28), _today), 'Trưa mai');
+    expect(whenLabel(Meal.breakfast, DateTime(2026, 10, 29), _today), 'Sáng thứ Năm');
+    expect(whenLabel(Meal.dinner, DateTime(2026, 11, 1), _today), 'Tối Chủ nhật');
+    expect(whenLabel(Meal.breakfast, DateTime(2026, 11, 2), _today), 'Sáng thứ Hai tuần sau');
+
+    expect(dayOptionLabel(_today, _today), 'Thứ Ba, hôm nay');
+    expect(dayOptionLabel(DateTime(2026, 10, 28), _today), 'Thứ Tư, ngày mai');
+    expect(dayOptionLabel(DateTime(2026, 10, 30), _today), 'Thứ Sáu');
+    expect(dayOptionLabel(DateTime(2026, 11, 2), _today), 'Thứ Hai tuần sau');
+  });
+
+  group('joinText', () {
+    final dauPhu = _recipe('dau-phu', 'Đậu phụ sốt cà chua');
+    final canh = _recipe('canh', 'Canh cà chua trứng');
+    final rau = _recipe('rau', 'Rau muống xào');
+
+    test('bữa trống hoặc chỉ có chính món đang thêm thì null', () {
+      expect(joinText([], ['trung']), isNull);
+      expect(joinText([_recipe('trung', 'Trứng')], ['trung']), isNull);
+    });
+
+    test('một món thêm vào bữa có sẵn', () {
+      expect(
+        joinText([dauPhu], ['trung']),
+        'Sẽ thêm cùng Đậu phụ sốt cà chua · bữa này thành 2 món',
+      );
+    });
+
+    test('cả bữa nhiều món, bỏ món trùng, tóm tắt tên dài', () {
+      expect(
+        joinText([dauPhu, canh, rau], ['trung', 'canh']),
+        'Sẽ thêm cùng Đậu phụ sốt cà chua, Rau muống xào · bữa này thành 4 món',
+      );
+      expect(
+        joinText([dauPhu, canh, rau], ['trung', 'com']),
+        'Sẽ thêm cùng Đậu phụ sốt cà chua, Canh cà chua trứng +1 món · bữa này thành 5 món',
+      );
     });
   });
 
   group('week', () {
-    test('tuần bắt đầu Thứ Hai, qua tháng vẫn đúng', () {
-      // Thứ Bảy 31/10/2026.
-      final sat = DateTime(2026, 10, 31, 20);
-      expect(weekdayIndex(sat), 5);
-      final start = weekStartOf(sat);
-      expect(start, DateTime(2026, 10, 26));
-      expect(dayOfWeek(start, 6), DateTime(2026, 11, 1));
-      expect(indexInWeek(start, DateTime(2026, 11, 1)), 6);
-      expect(indexInWeek(start, DateTime(2026, 11, 2)), isNull);
+    test('monthGrid: bắt đầu Thứ Hai, 5 hàng khi đủ', () {
+      // Tháng 10/2026: ngày 1 là Thứ Năm, 31 ngày → 35 ô.
+      final grid = monthGrid(2026, 10);
+      expect(grid.length, 35);
+      expect(grid.first, DateTime(2026, 9, 28));
+      expect(grid.first.weekday, DateTime.monday);
+      expect(grid.last, DateTime(2026, 11, 1));
+    });
+
+    test('monthGrid: 6 hàng khi tháng cần, vừa khít thì ít hàng hơn', () {
+      // Tháng 8/2026: ngày 1 là Thứ Bảy, 31 ngày → 42 ô.
+      final grid = monthGrid(2026, 8);
+      expect(grid.length, 42);
+      expect(grid.first, DateTime(2026, 7, 27));
+      expect(grid.last, DateTime(2026, 9, 6));
+      // Tháng 2/2027: ngày 1 là Thứ Hai, 28 ngày → đúng 4 hàng.
+      expect(monthGrid(2027, 2).length, 28);
+    });
+
+    test('upcomingDays: 7 ngày cuốn từ hôm nay, qua tháng', () {
+      expect(upcomingDays(DateTime(2026, 10, 27, 18, 30)), [
+        for (var d = 27; d <= 31; d++) DateTime(2026, 10, d),
+        DateTime(2026, 11, 1),
+        DateTime(2026, 11, 2),
+      ]);
     });
   });
 }

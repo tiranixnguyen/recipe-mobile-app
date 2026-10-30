@@ -141,6 +141,33 @@ class PlannedMealsController extends Notifier<List<PlannedMeal>> {
     ]);
   }
 
+  /// Đặt lại [entry] vào vị trí [index] (Hoàn tác bỏ món): giữ thứ tự, khẩu phần và đã nấu như
+  /// trước khi bỏ. Món đã có lại trong bữa đó thì không thêm trùng.
+  Future<void> restore(PlannedMeal entry, int index) async {
+    final exists = state.any(
+      (p) => p.day == entry.day && p.meal == entry.meal && p.recipeId == entry.recipeId,
+    );
+    if (exists) return;
+    await _save([...state]..insert(index.clamp(0, state.length), entry));
+  }
+
+  /// Đổi món [oldId] trong bữa [meal] ngày [day] thành [newId], giữ vị trí và khẩu phần. [newId]
+  /// đã có trong bữa thì chỉ bỏ [oldId]; [oldId] không có thì không làm gì.
+  Future<void> replaceInPlan(DateTime day, Meal meal, String oldId, String newId) async {
+    final date = dateOnly(day);
+    bool inSlot(PlannedMeal p, String id) => p.day == date && p.meal == meal && p.recipeId == id;
+    final index = state.indexWhere((p) => inSlot(p, oldId));
+    if (index < 0 || oldId == newId) return;
+    if (state.any((p) => inSlot(p, newId))) {
+      return removeFromPlan(day, meal, recipeId: oldId);
+    }
+    final old = state[index];
+    await _save(
+      [...state]
+        ..[index] = PlannedMeal(day: date, meal: meal, recipeId: newId, servings: old.servings),
+    );
+  }
+
   /// Bỏ món [recipeId] khỏi bữa [meal] ngày [day]; [recipeId] null thì bỏ cả bữa.
   Future<void> removeFromPlan(DateTime day, Meal meal, {String? recipeId}) {
     final date = dateOnly(day);

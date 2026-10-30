@@ -28,7 +28,7 @@ Future<ProviderContainer> _pump(
   final router = GoRouter(
     initialLocation: cookDoneLocation('trung'),
     routes: [
-      GoRoute(path: discoverLocation, builder: (_, _) => const Text('at discover')),
+      GoRoute(path: '/plan', builder: (_, _) => const Text('at plan')),
       ...cookRoutes,
     ],
   );
@@ -88,7 +88,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(container.read(pantryItemsProvider), {'egg'});
     expect(container.read(cookHistoryProvider).single.rating, CookRating.bad);
-    expect(find.text('at discover'), findsOneWidget);
+    expect(find.text('at plan'), findsOneWidget);
   });
 
   for (final (name, theme) in [('sáng', AppTheme.light), ('tối', AppTheme.dark)]) {

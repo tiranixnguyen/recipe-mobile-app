@@ -12,7 +12,7 @@ import 'package:recipe_mobile_app/features/cook/presentation/meal_prep/meal_prep
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_done_widgets.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_layout.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
-import 'package:recipe_mobile_app/features/discover/discover.dart';
+import 'package:recipe_mobile_app/features/plan/plan.dart';
 
 /// Nấu xong cả bữa (prototype `MealCookDone`): chấm từng món, cập nhật Tủ đồ cả bữa; xong thì về
 /// Khám phá.
@@ -43,7 +43,7 @@ class _MealDone extends ConsumerWidget {
     Future<void> finish() async {
       final router = GoRouter.of(context);
       await viewModel.finish();
-      router.go(discoverLocation);
+      router.go(planLocation(date: state.slot.day, meal: state.slot.meal));
     }
 
     // "Đã dùng 2 bìa · Đậu phụ sốt cà chua", "… · 2 món".

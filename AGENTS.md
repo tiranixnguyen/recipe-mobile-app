@@ -103,6 +103,8 @@ thì ghi vào bảng này.
 | `today_suggest` | Mở màn Hôm nay ăn gì | `meal` (`breakfast`/`lunch`/`dinner`, bữa theo giờ) |
 | `today_dislike` | Chọn lý do sau Không thích ở Hôm nay ăn gì | `reason` (`justAte`/`missingIngredients`/`tooLong`/`notMyTaste`) |
 | `search` | Bấm tìm trên bàn phím ở màn Tìm kiếm | `has_query`, `filtered` (bool; không gửi từ khoá) |
+| `plan_add` | Thêm món vào Thực đơn (sheet Thêm, Thêm món, Gợi ý món, Gợi ý cho ngày này) | `dishes` (số món vừa thêm) |
+| `plan_remove` | Bỏ món khỏi bữa ở Thực đơn | — |
 | `pantry_update` | Bấm chip ở Tủ đồ | `action` (`add`/`remove`/`bought`: bấm chip đang cần mua) |
 | `add_to_shopping_from_pantry` | Thêm được một thứ vào đi chợ từ Tủ đồ | `via` (`drag`: kéo thả, Shift+Enter, action trợ năng; `search`: nút thêm từ khoá) |
 
