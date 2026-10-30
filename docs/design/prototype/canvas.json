@@ -33,7 +33,7 @@
       "h": 844,
       "is_interactive": true,
       "radius": 24,
-      "title": "Nấu · Hoàn thành",
+      "title": "Nấu · Xong, chấm và ghi chú",
       "w": 390,
       "x": 940,
       "y": 2448
@@ -113,7 +113,7 @@
       "h": 844,
       "is_interactive": true,
       "radius": 24,
-      "title": "Nấu cả bữa · Xong, chấm từng món",
+      "title": "Nấu cả bữa · Xong, chấm và ghi chú",
       "w": 390,
       "x": 940,
       "y": 3712
@@ -235,6 +235,15 @@
       "x": 0,
       "y": 4976
     },
+    "Toasts.dc.html": {
+      "h": 1959,
+      "is_interactive": true,
+      "radius": 16,
+      "title": "Thông báo chung · Snackbar, Mẹo, Hộp thoại",
+      "w": 900,
+      "x": -980,
+      "y": 0
+    },
     "Today.dc.html": {
       "h": 844,
       "is_interactive": true,
@@ -253,14 +262,32 @@
       "x": 2820,
       "y": 1224
     },
-    "Toasts.dc.html": {
-      "h": 1160,
+    "History.dc.html": {
+      "h": 844,
       "is_interactive": true,
-      "radius": 16,
-      "title": "Thông báo chung · Snackbar, Mẹo, Hộp thoại",
-      "w": 900,
+      "radius": 24,
+      "w": 390,
+      "title": "Lịch sử nấu · tab mới",
       "x": 1880,
       "y": 0
+    },
+    "HistoryEntry.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "w": 390,
+      "title": "Lịch sử · chi tiết một lần nấu",
+      "x": 2350,
+      "y": 0
+    },
+    "PantryUpdate.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 24,
+      "w": 390,
+      "title": "Xong · Nguyên liệu chưa dùng tới (cập nhật tủ)",
+      "x": 1410,
+      "y": 3712
     }
   },
   "createdOnFiles": {
@@ -290,8 +317,8 @@
     },
     "flow": {
       "kind": "title1",
-      "maxW": 1800,
-      "text": "Tab chính — Khám phá · Tủ đồ · Thực đơn · Đã lưu",
+      "maxW": 2740,
+      "text": "Tab chính — Khám phá · Tủ đồ · Thực đơn · Lịch sử · Đã lưu",
       "w": 240,
       "x": 0,
       "y": -300
@@ -333,7 +360,9 @@
     "Main.dc.html",
     "Pantry.dc.html",
     "MealPlan.dc.html",
+    "History.dc.html",
     "Saved.dc.html",
+    "HistoryEntry.dc.html",
     "Onboarding.dc.html",
     "Today.dc.html",
     "TodayPrefs.dc.html",
@@ -347,6 +376,7 @@
     "MealCookPrep.dc.html",
     "MealCookStep.dc.html",
     "MealCookDone.dc.html",
+    "PantryUpdate.dc.html",
     "Splash.dc.html",
     "NotifPermission.dc.html",
     "Settings.dc.html",
