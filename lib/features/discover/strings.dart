@@ -10,7 +10,10 @@ abstract final class DiscoverStrings {
   static const heroTitle = 'Hôm nay ăn gì?';
   static const heroBody = 'Gợi ý theo đồ trong tủ, bếp của bạn và bữa sắp tới.';
   static const heroAction = 'Gợi ý cho mình';
-  static const searchPlaceholder = 'Tìm món hoặc nguyên liệu';
+  static const suggestionBannerAria = 'Gợi ý hôm nay';
+  static const viewDish = 'Xem món';
+  static String cardSemanticLabel(int current, int total) => 'Thẻ $current trên $total';
+  static const searchPlaceholder = 'Tìm món';
   static const quickUnder15 = 'Dưới 15 phút';
   static const quickRiceCooker = 'Nồi cơm điện';
   static const quickVeg = 'Chay';
@@ -24,6 +27,24 @@ abstract final class DiscoverStrings {
   static const savedEmptyBody =
       'Bấm biểu tượng lưu trên món bạn thích. Món đã lưu được ưu tiên khi gợi ý và lên thực đơn.';
   static const savedEmptyAction = 'Tìm món để lưu';
+
+  // Khám phá v2 (DSC-11)
+  static String upcomingTitle(String meal) => 'Sắp tới bữa $meal rồi';
+  static const viewPlan = 'Xem thực đơn';
+  static const cookMeal = 'Nấu bữa này';
+  static const cookDish = 'Nấu món này';
+  static String upcomingEmpty(String meal) =>
+      'Bữa $meal nay chưa có món. Thử mấy món nấu được với đồ bạn có:';
+  static const addDish = '+ Thêm';
+  static String addDishAria(String name, String meal) => 'Thêm $name vào bữa $meal';
+  static const readyToCook = 'Nấu được ngay';
+  static const shoppingTitle = 'Đi chợ';
+  static const openShoppingList = 'Mở danh sách';
+  static String shoppingNeedBuy(int count) => 'Còn $count thứ cần mua';
+  static const shoppingEmpty = 'Danh sách đi chợ đang trống';
+  static const shoppingEmptySub = 'Lấy đồ còn thiếu từ thực đơn tuần này';
+  static const shoppingEmptyPrompt = 'Bấm để mở danh sách';
+  static String upcomingMeta(int count, int totalMinutes) => '$count món · ~$totalMinutes phút';
 
   // Hôm nay ăn gì
   static String mealLabel(String meal) => 'Bữa $meal';
