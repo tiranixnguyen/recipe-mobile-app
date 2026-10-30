@@ -164,4 +164,47 @@ abstract final class CookStrings {
   static String resumeStep(String name, int step, int total) => '$name · bước $step/$total';
   static String resumeNotes(String name) => '$name · lưu ý';
   static const resumeAction = 'Nấu tiếp';
+
+  // Màn Xong (ghi chú cá nhân).
+  static const doneNote = 'Ghi chú';
+  static const doneNoteHint = 'Thêm ghi chú cho lần nấu này…';
+  static const doneNoteToPantry = 'Nguyên liệu chưa dùng tới';
+
+  // PantryUpdate.
+  static const pantryUpdateTitle = 'Nguyên liệu chưa dùng tới';
+  static const pantryUpdateHint = 'Bỏ tick thứ đã dùng hết — app sẽ xoá khỏi tủ.';
+  static const pantryStillHave = 'Còn';
+  static String pantryWillRemove(String names) => 'Sẽ xoá khỏi tủ: $names';
+  static const pantryUpdateFinish = 'Cập nhật tủ và xong';
+
+  // Lịch sử nấu.
+  static const historyTitle = 'Lịch sử nấu';
+  static String historyMonthCount(int count) => 'Đã nấu $count lần tháng này';
+  static const historySearch = 'Tìm trong lịch sử…';
+  static const historyFilterAll = 'Tất cả';
+  static const historyFilterGood = 'Có món ngon';
+  static const historyFilterNote = 'Có ghi chú';
+  static const historyEmptyTitle = 'Chưa nấu bữa nào';
+  static const historyEmptyBody = 'Nấu xong một món rồi xem lại ở đây.';
+  static const historyEmptyAction = 'Gợi ý cho mình';
+  static const historyJustCooked = 'Vừa nấu';
+  static const historySaved = 'Đã lưu vào lịch sử nấu';
+
+  // Chi tiết lần nấu.
+  static const historyEntrySingleTitle = 'Chi tiết lần nấu';
+  static String historyEntryMealTitle(String meal) => 'Bữa $meal';
+  static const historyEntryNotFound = 'Không tìm thấy lần nấu này';
+  static const historyMealNote = 'Ghi chú bữa';
+  static const historyMealNoteHint = 'Ghi lại điều muốn nhớ về bữa này…';
+  static const historyDishNote = 'Ghi chú món';
+  static const historyDishNoteHint = 'Ghi chú cá nhân cho món này…';
+  static const historyReCook = 'Nấu lại';
+  static const historyDeleteAction = 'Xoá khỏi lịch sử';
+  static const historyDeleted = 'Đã xoá khỏi lịch sử';
+  static const undo = 'Hoàn tác';
+
+  // Meal done ghi chú.
+  static const mealDoneNote = 'Ghi chú bữa ăn';
+  static const mealDoneNoteHint = 'Thêm ghi chú cho bữa…';
+  static const mealDishNoteHint = 'Ghi chú cho món này…';
 }

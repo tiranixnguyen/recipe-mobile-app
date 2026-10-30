@@ -4,14 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
-import 'package:recipe_mobile_app/features/cook/data/app_review.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_history.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
+import 'package:recipe_mobile_app/features/cook/data/pending_cook.dart';
 import 'package:recipe_mobile_app/features/cook/domain/cook_done.dart';
 import 'package:recipe_mobile_app/features/cook/domain/meal_cook.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_prep/meal_prep_view_model.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
-import 'package:recipe_mobile_app/features/plan/plan.dart';
 
 @immutable
 class MealDoneState {
@@ -19,20 +18,16 @@ class MealDoneState {
     required this.slot,
     required this.dishes,
     required this.ratings,
-    required this.used,
-    required this.usedUp,
+    required this.dishNotes,
+    required this.mealNote,
     this.finishing = false,
   });
 
   final PlannedSlot slot;
   final List<MealDish> dishes;
-
-  /// Đánh giá theo chỉ số món; món chưa chấm thì không có.
   final Map<int, CookRating> ratings;
-
-  /// Đồ trong tủ cả bữa vừa dùng.
-  final List<UsedItem> used;
-  final Set<String> usedUp;
+  final Map<int, String> dishNotes;
+  final String mealNote;
   final bool finishing;
 
   int get servings => dishes.first.servings;
@@ -42,13 +37,12 @@ class MealDoneState {
       dishes.where((d) => d.recipe.id == recipeId).firstOrNull?.recipe.name ?? recipeId;
 }
 
-/// Nấu xong cả bữa (prototype `MealCookDone`): chấm từng món, cập nhật Tủ đồ một lần, đánh dấu
-/// bữa đã nấu trong Thực đơn.
+/// Nấu xong cả bữa: chấm từng món, ghi chú, rồi qua PantryUpdate.
 class MealDoneViewModel extends Notifier<AsyncValue<MealDoneState>> {
-  // Đọc phiên một lần: xong thì phiên bị xoá, màn vẫn giữ bữa vừa nấu.
   CookSession? _session;
   Map<int, CookRating> _ratings = const {};
-  Set<String> _usedUp = const {};
+  Map<int, String> _dishNotes = const {};
+  String _mealNote = '';
   bool _finishing = false;
 
   @override
@@ -83,16 +77,13 @@ class MealDoneViewModel extends Notifier<AsyncValue<MealDoneState>> {
         slot: slot,
         dishes: List.unmodifiable(dishes),
         ratings: _ratings,
-        used: usedPantryItems(dishes, ref.watch(pantryItemsProvider), {
-          for (final i in ingredients) i.id: i,
-        }),
-        usedUp: _usedUp,
+        dishNotes: _dishNotes,
+        mealNote: _mealNote,
         finishing: _finishing,
       ),
     );
   }
 
-  /// Chấm món thứ [dish]; chọn lại cái đang chọn thì bỏ.
   void rate(int dish, CookRating rating) {
     final next = {..._ratings};
     if (next[dish] == rating) {
@@ -104,46 +95,55 @@ class MealDoneViewModel extends Notifier<AsyncValue<MealDoneState>> {
     ref.invalidateSelf();
   }
 
-  void toggleUsedUp(String ingredientId) {
-    final next = {..._usedUp};
-    if (!next.remove(ingredientId)) next.add(ingredientId);
-    _usedUp = Set.unmodifiable(next);
+  void setDishNote(int dish, String note) {
+    final trimmed = note.length > 300 ? note.substring(0, 300) : note;
+    _dishNotes = Map.unmodifiable({..._dishNotes, dish: trimmed});
     ref.invalidateSelf();
   }
 
-  /// "Cập nhật tủ và xong": bỏ đồ đã tick khỏi tủ, ghi lịch sử từng món kèm đánh giá, đánh dấu
-  /// bữa đã nấu, kết thúc phiên; có món "Ngon" thì có thể hỏi đánh giá app.
+  void setMealNote(String note) {
+    _mealNote = note.length > 300 ? note.substring(0, 300) : note;
+    ref.invalidateSelf();
+  }
+
+  /// Chuẩn bị dữ liệu, lưu vào pendingCookProvider; PantryUpdate xử lý phần còn lại.
   Future<void> finish() async {
     final value = state.value;
     if (value == null || _finishing) return;
     _finishing = true;
     ref.invalidateSelf();
     try {
-      final pantry = ref.read(pantryItemsProvider.notifier);
-      for (final item in value.used.where((i) => value.usedUp.contains(i.ingredientId))) {
-        await pantry.removeFromPantry(item.ingredientId);
-      }
-      final history = ref.read(cookHistoryProvider.notifier);
-      final now = ref.read(cookClockProvider)();
-      for (final (i, d) in value.dishes.indexed) {
-        await history.record(d.recipe.id, rating: value.ratings[i], at: now);
-      }
-      await ref.read(plannedMealsProvider.notifier).markCooked(value.slot.day, value.slot.meal, [
-        for (final d in value.dishes) d.recipe.id,
-      ]);
-      await ref.read(cookSessionProvider.notifier).clear();
-      final analytics = ref.read(analyticsProvider);
-      analytics.track('finish_cooking', {
-        'used_up': value.usedUp.length,
-        'rated': value.ratings.isNotEmpty,
-        'meal_dishes': value.dishes.length,
+      final ingredients = await ref.read(ingredientsProvider.future);
+      final dishes = value.dishes;
+      final used = usedPantryItems(dishes, ref.read(pantryItemsProvider), {
+        for (final i in ingredients) i.id: i,
       });
-      for (final rating in value.ratings.values) {
-        analytics.track('rate_recipe', {'rating': rating.id});
-      }
-      if (value.ratings.containsValue(CookRating.good)) {
-        await ref.read(reviewPromptProvider).maybeAsk();
-      }
+      ref
+          .read(pendingCookProvider.notifier)
+          .set(
+            PendingCookData(
+              dishes: [
+                for (final (i, d) in dishes.indexed)
+                  CookSessionDish(
+                    recipeId: d.recipe.id,
+                    rating: value.ratings[i],
+                    note: value.dishNotes[i] ?? '',
+                  ),
+              ],
+              servings: value.servings,
+              isMeal: true,
+              meal: value.slot.meal,
+              minutes: value.minutes,
+              mealNote: _mealNote,
+              planned: value.slot,
+              usedItems: used,
+            ),
+          );
+      await ref.read(cookSessionProvider.notifier).clear();
+      ref.read(analyticsProvider).track('cook_note', {
+        'dish_notes': value.dishNotes.values.where((n) => n.isNotEmpty).length,
+        'meal_note': _mealNote.isNotEmpty,
+      });
     } finally {
       _finishing = false;
       if (ref.mounted) ref.invalidateSelf();

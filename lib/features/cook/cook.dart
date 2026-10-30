@@ -5,11 +5,32 @@
 /// - [cookStepLocation]: nấu từng bước, mở ở bước đang dở.
 /// - [mealCookLocation]: nấu cả bữa của Thực đơn ("Nấu bữa này").
 /// - [ResumeCookingBanner]: thanh "Đang nấu dở · Nấu tiếp" cho màn Khám phá; không nấu dở thì ẩn.
-/// - [cookHistoryProvider]: món đã nấu kèm đánh giá [CookRating].
+/// - [cookHistoryProvider]: lịch sử nấu kèm đánh giá.
+/// - [historyTabRoutes]: routes cho tab Lịch sử, dùng trong [appTabs].
+/// - [pantryUpdateLocation]: màn cập nhật tủ sau khi nấu xong.
 library;
 
 export 'data/cook_history.dart'
-    show CookHistoryController, CookRating, CookRecord, cookHistoryProvider;
+    show
+        CookHistoryController,
+        CookHistoryEntry,
+        CookRating,
+        CookRecord,
+        CookSessionDish,
+        cookHistoryProvider;
+export 'data/pending_cook.dart' show PendingCookData, pendingCookProvider;
+export 'presentation/history/history_screen.dart' show HistoryScreen;
+export 'presentation/history_entry/history_entry_screen.dart' show HistoryEntryScreen;
+export 'presentation/pantry_update/pantry_update_screen.dart' show PantryUpdateScreen;
 export 'presentation/resume_cooking_banner.dart' show ResumeCookingBanner;
 export 'routes.dart'
-    show cookPrepLocation, cookRoutes, cookStepLocation, mealCookLocation, recipeLocation;
+    show
+        cookPrepLocation,
+        cookRoutes,
+        cookStepLocation,
+        historyEntryLocation,
+        historyLocation,
+        historyTabRoutes,
+        mealCookLocation,
+        pantryUpdateLocation,
+        recipeLocation;

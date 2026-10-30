@@ -3,9 +3,12 @@ import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/done/done_screen.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/history/history_screen.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/history_entry/history_entry_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_done/meal_done_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_prep/meal_prep_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_step/meal_step_screen.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/pantry_update/pantry_update_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/prep/prep_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/step/step_screen.dart';
 
@@ -39,6 +42,29 @@ const mealCookStepLocation = '$_mealCookPath/step';
 
 /// Nấu xong cả bữa (`MealCookDone`).
 const mealCookDoneLocation = '$_mealCookPath/done';
+
+/// Tab Lịch sử nấu.
+const historyLocation = '/history';
+
+/// Chi tiết một lần nấu.
+String historyEntryLocation(String id) => '/history/$id';
+
+/// Màn cập nhật tủ sau khi nấu xong (full-screen, ngoài shell).
+const pantryUpdateLocation = '/pantry-update';
+
+/// Routes cho tab Lịch sử (StatefulShellBranch).
+final historyTabRoutes = <RouteBase>[
+  GoRoute(
+    path: historyLocation,
+    builder: (_, state) => HistoryScreen(highlightId: state.uri.queryParameters['highlight']),
+    routes: [
+      GoRoute(
+        path: ':id',
+        builder: (_, state) => HistoryEntryScreen(entryId: state.pathParameters['id']!),
+      ),
+    ],
+  ),
+];
 
 /// Chi tiết món (`Detail`) và chế độ nấu một món: `CookPrep` → `CookStep` → `CookDone`.
 final cookRoutes = <RouteBase>[
@@ -74,4 +100,5 @@ final cookRoutes = <RouteBase>[
       GoRoute(path: 'done', builder: (_, _) => const MealDoneScreen()),
     ],
   ),
+  GoRoute(path: pantryUpdateLocation, builder: (_, _) => const PantryUpdateScreen()),
 ];

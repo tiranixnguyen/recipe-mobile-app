@@ -109,6 +109,10 @@ thì ghi vào bảng này.
 | `add_to_shopping_from_pantry` | Thêm được một thứ vào đi chợ từ Tủ đồ | `via` (`drag`: kéo thả, Shift+Enter, action trợ năng; `search`: nút thêm từ khoá) |
 | `save_meal` | Lưu cả bữa (Hôm nay ăn gì → Lưu lại) | `dishes` (số món), `tags` (số tiêu chí) |
 | `unsave` | Bỏ lưu món hoặc bữa từ Đã lưu | `kind` (`recipe`/`meal`), `undo` (bool) |
+| `cook_note` | Xong ở màn Done/MealDone (trước PantryUpdate) | `dish_notes` (số món có ghi chú), `meal_note` (bool) |
+| `view_history` | Mở màn Lịch sử | — |
+| `history_filter` | Đổi bộ lọc ở Lịch sử | `filter` (`all`/`good`/`note`) |
+| `history_delete` | Xoá một bản ghi trong Lịch sử | — |
 
 ## 5 feature
 
