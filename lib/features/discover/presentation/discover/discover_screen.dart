@@ -9,7 +9,6 @@ import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/core/widgets/app_logo.dart';
-import 'package:recipe_mobile_app/core/widgets/app_snackbar.dart';
 import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
 import 'package:recipe_mobile_app/core/widgets/search_field.dart';
@@ -25,7 +24,7 @@ import 'package:recipe_mobile_app/features/system/system.dart';
 /// Khám phá v2 (prototype `Main.dc.html`): nơi trả lời "bữa tới ăn gì":
 /// - Banner gợi ý theo ngữ cảnh (carousel)
 /// - "Sắp tới bữa … rồi" từ thực đơn
-/// - "Nấu được ngay" và "Thiếu 1–2 thứ" từ tủ đồ
+/// - "Nấu được ngay" từ tủ đồ
 /// - Lối vào "Đi chợ"
 class DiscoverScreen extends ConsumerWidget {
   const DiscoverScreen({super.key});
@@ -113,20 +112,6 @@ class DiscoverScreen extends ConsumerWidget {
                       _UpcomingSection(state: value),
                       gap,
                       _ReadyToCookSection(ready: value.readyDishes),
-                      if (value.nearDishes.isNotEmpty) ...[
-                        gap,
-                        _NearSection(
-                          near: value.nearDishes,
-                          addedIds: value.addedShoppingIds,
-                          onAddToShopping: (recipe) {
-                            viewModel.addToShopping(recipe);
-                            AppSnackbar.show(
-                              context,
-                              DiscoverStrings.addedToShoppingSnack(recipe.name),
-                            );
-                          },
-                        ),
-                      ],
                       gap,
                       _ShoppingSection(state: value),
                     ],
@@ -712,158 +697,6 @@ class _ReadyCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _NearSection extends StatelessWidget {
-  const _NearSection({
-    required this.near,
-    required this.addedIds,
-    required this.onAddToShopping,
-  });
-
-  final List<NearMatch> near;
-  final Set<String> addedIds;
-  final ValueChanged<Recipe> onAddToShopping;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Semantics(
-            header: true,
-            child: Text(
-              DiscoverStrings.nearMissing,
-              style: AppTextStyles.subtitle.copyWith(color: colors.ink),
-            ),
-          ),
-          const SizedBox(height: 8),
-          for (final item in near) ...[
-            _NearDishTile(
-              match: item,
-              isAdded: addedIds.contains(item.recipe.id),
-              onTap: () => context.push(recipeLocation(item.recipe.id)),
-              onAdd: () => onAddToShopping(item.recipe),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _NearDishTile extends StatelessWidget {
-  const _NearDishTile({
-    required this.match,
-    required this.isAdded,
-    required this.onTap,
-    required this.onAdd,
-  });
-
-  final NearMatch match;
-  final bool isAdded;
-  final VoidCallback onTap;
-  final VoidCallback onAdd;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final recipe = match.recipe;
-    final missing = match.availability.missing;
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.s2),
-      decoration: BoxDecoration(
-        color: colors.surfaceRaised,
-        border: Border.all(color: colors.line),
-        borderRadius: AppRadius.mdAll,
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: InkWell(
-              onTap: onTap,
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: AppRadius.smAll,
-                    child: SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: RecipeCover(imageAsset: recipe.imageAsset, aspectRatio: 1),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.s3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          recipe.name,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.body.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colors.ink,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          DiscoverStrings.nearMissingPrefix(missing),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: AppFonts.sans,
-                            fontSize: 12,
-                            height: 16 / 12,
-                            fontWeight: FontWeight.w600,
-                            color: colors.chiliDeep,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Semantics(
-            button: true,
-            label: isAdded
-                ? DiscoverStrings.addedToShoppingAria(recipe.name)
-                : DiscoverStrings.addToShoppingAria(recipe.name),
-            child: InkWell(
-              onTap: onAdd,
-              borderRadius: AppRadius.pillAll,
-              child: Container(
-                height: 36,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: isAdded ? colors.herbSoft : colors.surfaceRaised,
-                  border: Border.all(
-                    color: isAdded ? colors.herb : colors.outline,
-                  ),
-                  borderRadius: AppRadius.pillAll,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  isAdded ? DiscoverStrings.addedToShopping : DiscoverStrings.addToShopping,
-                  style: AppTextStyles.meta.copyWith(
-                    color: isAdded ? colors.herbInk : colors.ink,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

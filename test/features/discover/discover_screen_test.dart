@@ -172,19 +172,6 @@ void main() {
     await _tapAndExpect(tester, find.text(DiscoverStrings.openPantry), '/pantry');
   });
 
-  testWidgets('Thiếu 1-2 thứ: bấm + Đi chợ cập nhật thành ✓ Đã thêm', (tester) async {
-    await _pump(tester);
-
-    expect(find.text(DiscoverStrings.nearMissing), findsOneWidget);
-    final addBtn = find.text(DiscoverStrings.addToShopping);
-    expect(addBtn, findsOneWidget);
-
-    await tester.tap(addBtn);
-    await tester.pumpAndSettle();
-
-    expect(find.text(DiscoverStrings.addedToShopping), findsOneWidget);
-  });
-
   testWidgets('Đi chợ: bấm vào mở màn Shopping', (tester) async {
     await _pump(tester);
 
