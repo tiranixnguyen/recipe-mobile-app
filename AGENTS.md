@@ -113,7 +113,7 @@ thì ghi vào bảng này.
 | Feature | Chủ | Thư mục | Màn (prototype) | Public API (`<f>.dart`) |
 |---|---|---|---|---|
 | F1 Khám phá | @tiranixnguyen (Lead) | `features/discover` | Main, Search, TodayPrefs, Today, Saved | `SaveButton`, `savedIdsProvider`, `savedMealsProvider`, route `/search` |
-| F2 Nấu | @tiranixnguyen (Lead) | `features/cook` | Detail, CookPrep, CookStep, CookDone, RateApp | route `/recipe/:id`, `ResumeCookingBanner`, `cookHistoryProvider` |
+| F2 Nấu | @tiranixnguyen (Lead) | `features/cook` | Detail, CookPrep, CookStep, CookDone, PantryUpdate, History, HistoryEntry, RateApp | route `/recipe/:id`, route `/history` (tab thứ 5), `ResumeCookingBanner`, `cookHistoryProvider` |
 | F3 Tủ đồ & gợi ý | @tiranixnguyen (Lead) | `features/pantry` | Pantry | `availabilityFor`, `suggest`, `suggestMeal`/`mealSuggesterProvider`, `dislike`, `pantryItemsProvider`, `addToPantry`, `removeFromPantry` |
 | F4 Thực đơn & đi chợ | @tiranixnguyen (Lead) | `features/plan` | MealPlan, Shopping | `addToPlan`, `addToShopping`, `plannedMealsProvider`, `shoppingItemsProvider`, `shoppingCountProvider`, route `/shopping` |
 | F5 Hệ thống | @tiranixnguyen (Lead) | `features/system` | Onboarding, Settings, NotifPermission, Feedback, About, Policy, ClearData | `kitchenProfileProvider`, `themeModeProvider`, `NotificationService` |

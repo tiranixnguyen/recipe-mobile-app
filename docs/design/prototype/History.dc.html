@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Lịch sử nấu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
+.flt{height:32px;padding:0 12px;border-radius:999px;font:600 13px/18px 'Be Vietnam Pro',sans-serif;cursor:pointer}
+.flt:focus-visible,.entry:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.entry{display:flex;gap:12px;padding:12px;border-radius:12px;color:inherit;text-decoration:none}
+.rt{width:16px;height:16px;flex-shrink:0}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="position: relative; width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 8px 16px">
+    <div style="display: flex; flex-direction: column">
+      <h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Lịch sử nấu</h1>
+      <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px">{{headMeta}}</span>
+    </div>
+    <sc-if value="{{hasAny}}" hint-placeholder-val="{{true}}">
+      <label class="bh-search" style="min-height: 44px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+        <input type="search" value="{{q}}" onChange="{{setQ}}" placeholder="Tìm món hoặc ghi chú" aria-label="Tìm món hoặc ghi chú" autocomplete="off">
+      </label>
+      <div role="group" aria-label="Lọc lịch sử" style="display: flex; gap: 8px">
+        <sc-for list="{{filters}}" as="fl" hint-placeholder-count="3">
+          <button class="flt" aria-pressed="{{fl.on}}" onClick="{{fl.pick}}" style="{{fl.style}}">{{fl.label}}</button>
+        </sc-for>
+      </div>
+    </sc-if>
+  </header>
+
+  <!-- Flutter (F2): entries from cookHistoryProvider (LocalStore 'cook.history'), newest first. Each entry: date, meal
+       (breakfast/lunch/dinner), dishes with a rating each, a note per dish and one for the meal, servings, minutes.
+       Search folds case and Vietnamese marks over dish names and notes. -->
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; padding: 8px 16px 16px 16px">
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+      <section style="display: flex; flex-direction: column; gap: 8px" aria-label="{{g.label}}">
+        <h2 style="margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{g.label}}</h2>
+        <sc-for list="{{g.entries}}" as="e" hint-placeholder-count="2">
+          <a href="HistoryEntry.dc.html" class="entry" aria-label="{{e.aria}}" style="{{e.cardStyle}}">
+            <div aria-hidden="true" style="position: relative; width: 72px; height: 72px; flex-shrink: 0; border-radius: 8px; overflow: hidden; background: var(--surface-raised)">
+              <sc-for list="{{e.tiles}}" as="t" hint-placeholder-count="2">
+                <span style="position: absolute; padding: 1px; {{t.style}}">
+                  <span style="position: relative; display: block; width: 100%; height: 100%; background: var(--line)">
+                    <sc-if value="{{t.more}}" hint-placeholder-val="{{false}}"><span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(20, 14, 10, 0.55); color: #FFFFFF; font-size: 12px; line-height: 16px; font-weight: 700">{{t.moreLabel}}</span></sc-if>
+                  </span>
+                </span>
+              </sc-for>
+            </div>
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+              <span style="display: flex; align-items: center; gap: 6px">
+                <span class="c1" style="flex: 1; font-size: 15px; line-height: 22px; font-weight: 600">{{e.title}}</span>
+                <sc-if value="{{e.isNew}}" hint-placeholder-val="{{false}}"><span style="flex-shrink: 0; padding: 2px 8px; border-radius: 999px; background: var(--chili); color: #FFFFFF; font-size: 12px; line-height: 16px; font-weight: 600">Vừa nấu</span></sc-if>
+              </span>
+              <span class="c1" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{e.meta}}</span>
+              <span style="display: flex; flex-direction: column; gap: 2px">
+                <sc-for list="{{e.dishes}}" as="d" hint-placeholder-count="2">
+                  <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; line-height: 18px">
+                    <svg class="rt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-label="{{d.rateLabel}}" role="img" style="{{d.rateStyle}}"><path d="{{d.ratePath}}"></path></svg>
+                    <span class="c1" style="flex: 1">{{d.name}}</span>
+                  </span>
+                </sc-for>
+                <sc-if value="{{e.hasMore}}" hint-placeholder-val="{{false}}"><span style="padding-left: 22px; color: var(--ink-muted); font-size: 12px; line-height: 16px">{{e.moreText}}</span></sc-if>
+              </span>
+              <sc-if value="{{e.hasNote}}" hint-placeholder-val="{{true}}">
+                <span class="c2" style="margin-top: 2px; padding-left: 8px; border-left: 2px solid var(--line); color: var(--ink-muted); font-size: 13px; line-height: 18px; font-style: italic">{{e.note}}</span>
+              </sc-if>
+            </span>
+          </a>
+        </sc-for>
+      </section>
+    </sc-for>
+
+    <sc-if value="{{noMatch}}" hint-placeholder-val="{{false}}">
+      <p style="margin: 24px 0 0 0; color: var(--ink-muted); font-size: 15px; line-height: 22px; text-align: center">{{noMatchText}}</p>
+    </sc-if>
+
+    <sc-if value="{{empty}}" hint-placeholder-val="{{false}}">
+      <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 0 16px 48px 16px; text-align: center">
+        <div style="width: 96px; height: 96px; border-radius: 999px; background: var(--chili-soft); color: var(--chili-deep); display: flex; align-items: center; justify-content: center">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"></path><path d="M3 4.5V9h4.5"></path><path d="M12 8v4l3 2"></path></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <h2 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Chưa nấu bữa nào</h2>
+          <p style="margin: 0; color: var(--ink-muted); font-size: 15px; line-height: 22px">Nấu xong một món hay cả bữa, app ghi lại ở đây cùng cảm nhận và ghi chú của bạn.</p>
+        </div>
+        <a href="TodayPrefs.dc.html" class="bh-btn bh-btn-primary" style="text-decoration: none">Gợi ý cho mình</a>
+      </div>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{hasSnack}}" hint-placeholder-val="{{false}}">
+    <div role="status" aria-live="polite" style="position: absolute; left: 16px; right: 16px; bottom: 96px; z-index: 5; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--ink); color: var(--surface); font-size: 13px; line-height: 18px; box-shadow: 0 6px 16px rgba(20,14,10,.2)">
+      <span style="display: flex; color: var(--herb-soft)"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span>
+      <span style="flex: 1; padding: 7px 0">{{snack}}</span>
+    </div>
+  </sc-if>
+
+  <nav aria-label="Điều hướng chính" style="height: 80px; flex-shrink: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); background: var(--surface-raised); border-top: 1px solid var(--line)">
+    <a href="Main.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
+      <span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5l-2 5-5 2 2-5z"></path></svg>
+      </span>
+      Khám phá
+    </a>
+    <a href="Pantry.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
+      <span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="2"></rect><path d="M6 10h12M9 6v2M9 13v3"></path></svg>
+      </span>
+      Tủ đồ
+    </a>
+    <a href="MealPlan.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
+      <span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M8 3v4M16 3v4"></path></svg>
+      </span>
+      Thực đơn
+    </a>
+    <a href="History.dc.html" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink); text-decoration: none; font-size: 12px; line-height: 16px; font-weight: 600">
+      <span style="width: 56px; height: 32px; border-radius: 999px; background: var(--chili-soft); display: flex; align-items: center; justify-content: center; color: var(--chili-deep)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"></path><path d="M3 4.5V9h4.5"></path><path d="M12 8v4l3 2"></path></svg>
+      </span>
+      Lịch sử
+    </a>
+    <a href="Saved.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-muted); text-decoration: none; font-size: 12px; line-height: 16px">
+      <span style="width: 56px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--ink)">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"></path></svg>
+      </span>
+      Đã lưu
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"data":{"editor":"enum","options":["có dữ liệu","trống"],"default":"có dữ liệu"},"justDone":{"editor":"boolean","default":true},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"$preview":{"width":390,"height":844}}'>
+// Newest first. kind 'bữa' = cooked as a whole meal; 'món' = one dish.
+var ENTRIES = [
+{ id: 'e1', when: 'Hôm nay', meal: 'Bữa tối', day: 'Thứ Ba 28/10', kind: 'bữa', serv: 1, min: 35, dishes: [['Đậu phụ sốt cà chua', 'good'], ['Trứng chiên hành', 'ok']], note: 'Lần sau bớt muối phần đậu, trứng chiên lửa nhỏ hơn cho mềm.' },
+{ id: 'e2', when: 'Hôm qua', meal: 'Bữa trưa', day: 'Thứ Hai 27/10', kind: 'món', serv: 1, min: 15, dishes: [['Mì xào rau cải', 'good']], note: '' },
+{ id: 'e3', when: 'Tuần này', meal: 'Bữa tối', day: 'Chủ nhật 26/10', kind: 'bữa', serv: 3, min: 60, dishes: [['Thịt kho tiêu', 'good'], ['Canh bí đỏ', 'good'], ['Rau muống xào tỏi', 'ok']], note: 'Nấu cùng bạn cùng phòng, 3 người ăn vừa đủ.' },
+{ id: 'e4', when: 'Tuần này', meal: 'Bữa sáng', day: 'Thứ Bảy 25/10', kind: 'món', serv: 1, min: 25, dishes: [['Trứng hấp thịt băm', 'bad']], note: 'Hấp lâu quá bị rỗ, lần sau chỉ 12 phút.' },
+{ id: 'e5', when: 'Trước đó', meal: 'Bữa tối', day: 'Thứ Năm 16/10', kind: 'bữa', serv: 2, min: 40, dishes: [['Canh cà chua trứng', 'good'], ['Cơm rang dưa cải', 'ok']], note: '' }
+];
+var STRESS_ENTRY = { id: 'e0', when: 'Hôm nay', meal: 'Bữa trưa', day: 'Thứ Ba 28/10', kind: 'bữa', serv: 4, min: 75, dishes: [['Cá rô phi kho tộ với riềng và nước dừa', 'good'], ['Canh bí đỏ nấu tôm khô với rau ngót', 'good'], ['Rau muống xào tỏi', 'ok'], ['Đậu phụ non sốt cà chua nấm hương kiểu nhà làm', 'good'], ['Dưa chuột chẻ chấm muối vừng', 'ok']], note: 'Đãi cả phòng bên cạnh. Cá kho hơi ngọt, lần sau bớt nước dừa và kho lâu hơn cho thấm, canh bí nên cho tôm khô vào sớm.' };
+var LONG = {
+'Đậu phụ sốt cà chua': 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm',
+'Trứng chiên hành': 'Trứng chiên hành lá với thịt băm và mộc nhĩ',
+'Mì xào rau cải': 'Mì tôm xào rau cải ngọt với trứng và xúc xích'
+};
+var GROUPS = ['Hôm nay', 'Hôm qua', 'Tuần này', 'Trước đó'];
+var RATE = {
+good: ['Ngon', 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM9 9.5v.5M15 9.5v.5M8.5 14a4 4 0 0 0 7 0', 'color: var(--herb-ink);'],
+ok: ['Tạm', 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM9 9.5v.5M15 9.5v.5M8.5 15h7', 'color: var(--ink-muted);'],
+bad: ['Chê', 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18zM9 9.5v.5M15 9.5v.5M8.5 16.5a4 4 0 0 1 7 0', 'color: var(--danger-ink);']
+};
+var STRESS = false;
+function L(n) { return STRESS && LONG[n] ? LONG[n] : n; }
+function fold(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd'); }
+function mosaic(n) {
+var boxes = n <= 1 ? [[0, 0, 100, 100]] : n === 2 ? [[0, 0, 50, 100], [50, 0, 50, 100]] : n === 3 ? [[0, 0, 60, 100], [60, 0, 40, 50], [60, 50, 40, 50]] : [[0, 0, 50, 50], [50, 0, 50, 50], [0, 50, 50, 50], [50, 50, 50, 50]];
+return boxes.map(function (b, i) {
+var more = n > 4 && i === 3 ? n - 3 : 0;
+return { style: 'left: ' + b[0] + '%; top: ' + b[1] + '%; width: ' + b[2] + '%; height: ' + b[3] + '%;', more: more > 0, moreLabel: '+' + more };
+});
+}
+var snackTimer = null;
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { q: '', filter: 'all', snackGone: false };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var p = this.props;
+STRESS = p.sample === 'tên dài, nhiều món';
+var justDone = p.justDone !== false;
+var all = p.data === 'trống' ? [] : (STRESS ? [STRESS_ENTRY].concat(ENTRIES) : ENTRIES);
+var q = fold(st.q.trim());
+var shown = all.filter(function (e) {
+if (st.filter === 'good' && !e.dishes.some(function (d) { return d[1] === 'good'; })) { return false; }
+if (st.filter === 'note' && !e.note) { return false; }
+return !q || fold(e.note).indexOf(q) >= 0 || e.dishes.some(function (d) { return fold(L(d[0])).indexOf(q) >= 0; });
+});
+if (justDone && !st.snackGone && !snackTimer && all.length) {
+snackTimer = setTimeout(function () { self.setState({ snackGone: true }); }, 4000);
+}
+return {
+theme: p.theme ?? 'system',
+headMeta: all.length ? 'Đã nấu ' + all.length + ' lần trong tháng 10' : 'Món và bữa bạn đã nấu',
+hasAny: all.length > 0,
+q: st.q,
+setQ: function (e) { self.setState({ q: e && e.target ? e.target.value : '' }); },
+filters: [['all', 'Tất cả'], ['good', 'Có món ngon'], ['note', 'Có ghi chú']].map(function (f) {
+var on = st.filter === f[0];
+return { label: f[1], on: on, style: on ? 'border: 1px solid var(--chili-deep); background: var(--chili-soft); color: var(--chili-deep);' : 'border: 1px solid var(--outline); background: transparent; color: var(--ink);', pick: function () { self.setState({ filter: f[0] }); } };
+}),
+groups: GROUPS.map(function (g) {
+return {
+label: g,
+entries: shown.filter(function (e) { return e.when === g; }).map(function (e) {
+var names = e.dishes.map(function (d) { return L(d[0]); });
+var isNew = justDone && e === all[0];
+var one = e.kind === 'món';
+return {
+title: one ? names[0] : e.meal + ' · ' + e.day,
+meta: one ? e.meal + ' · ' + e.day + ' · ' + e.serv + ' người' : names.length + ' món · ' + e.serv + ' người · ~' + e.min + ' phút',
+isNew: isNew,
+cardStyle: isNew ? 'border: 1px solid var(--chili); background: var(--chili-soft);' : 'border: 1px solid var(--line); background: var(--surface-raised);',
+tiles: mosaic(names.length),
+dishes: (one ? [] : e.dishes.slice(0, 3)).map(function (d) {
+var r = RATE[d[1]];
+return { name: L(d[0]), rateLabel: r[0], ratePath: r[1], rateStyle: r[2] };
+}).concat(one ? [{ name: 'Bạn chấm: ' + RATE[e.dishes[0][1]][0], rateLabel: RATE[e.dishes[0][1]][0], ratePath: RATE[e.dishes[0][1]][1], rateStyle: RATE[e.dishes[0][1]][2] }] : []),
+hasMore: !one && e.dishes.length > 3,
+moreText: '+' + (e.dishes.length - 3) + ' món',
+hasNote: !!e.note,
+note: e.note,
+aria: (one ? names[0] + ', ' + e.meal + ' ' + e.day : e.meal + ' ' + e.day + ': ' + names.join(', ')) + (e.note ? '. Ghi chú: ' + e.note : '')
+};
+})
+};
+}).filter(function (g) { return g.entries.length > 0; }),
+noMatch: all.length > 0 && shown.length === 0,
+noMatchText: st.q.trim() ? 'Không thấy "' + st.q.trim() + '" trong lịch sử.' : 'Chưa có lần nấu nào ở mục này.',
+empty: all.length === 0,
+hasSnack: justDone && !st.snackGone && all.length > 0,
+snack: 'Đã lưu vào lịch sử nấu'
+};
+}
+}
+</script>
+</body>
+</html>

@@ -5,9 +5,9 @@ Bản sao trong repo của hai artifact thiết kế trên claude.ai, để cả
 | Phần | Thư mục | Bản gốc (cần quyền xem trên claude.ai) |
 |---|---|---|
 | Design system | [`design-system/`](design-system/) | https://claude.ai/artifact/KMviZS2qvYfCv3YdyvCYsn |
-| Prototype Android (29 màn) | [`prototype/`](prototype/) | https://claude.ai/artifact/8Bxj3zhHYamZgfue2wXUii |
+| Prototype Android (32 màn) | [`prototype/`](prototype/) | https://claude.ai/artifact/8Bxj3zhHYamZgfue2wXUii |
 
-> **Nguồn sự thật là artifact.** Thư mục này là ảnh chụp tại thời điểm sync (2026-10-29, bản v2). Sửa thiết kế trên artifact rồi sync lại; đừng sửa tay ở đây.
+> **Nguồn sự thật là artifact.** Thư mục này là ảnh chụp tại thời điểm sync (2026-10-30, bản v2 + Lịch sử nấu). Sửa thiết kế trên artifact rồi sync lại; đừng sửa tay ở đây.
 
 ## Đọc theo thứ tự nào
 
@@ -39,10 +39,11 @@ Khung điện thoại 390×844 (riêng hai bảng logo rộng 1440, bảng `Toas
 
 | Nhóm | File → tên màn |
 |---|---|
-| Tab chính | `Main` Khám phá · `Pantry` Tủ đồ · `MealPlan` Thực đơn · `Saved` Đã lưu (tab Món ăn / Bữa ăn, nhấn giữ kéo vào thùng rác để bỏ lưu) |
+| Tab chính (5 tab) | `Main` Khám phá · `Pantry` Tủ đồ · `MealPlan` Thực đơn · `History` Lịch sử nấu (tìm, lọc, nhóm theo ngày) · `Saved` Đã lưu (tab Món ăn / Bữa ăn, nhấn giữ kéo vào thùng rác để bỏ lưu) |
 | Luồng | `Onboarding` Làm quen lần đầu · `TodayPrefs` Hôm nay ăn gì, chọn nhu cầu · `Today` Hôm nay ăn gì (gợi ý theo bữa) · `Search` Tìm kiếm · `Detail` Chi tiết món · `Shopping` Danh sách đi chợ · `AddToPlan` Thêm vào thực đơn (chọn ngày, bữa; một bữa nhiều món) |
-| Nấu | `CookPrep` Chuẩn bị · `CookStep` Từng bước · `CookDone` Hoàn thành |
-| Nấu cả bữa | `MealCookPrep` Chuẩn bị cả bữa, thứ tự món · `MealCookStep` Từng bước, chuyển món · `MealCookDone` Xong, chấm từng món. Mở từ Thực đơn ("Nấu bữa này") và mục "Sắp tới bữa … rồi" ở Khám phá. Hôm nay ăn gì không nấu thẳng: Lưu lại hoặc Thêm vào thực đơn |
+| Nấu | `CookPrep` Chuẩn bị · `CookStep` Từng bước · `CookDone` Xong, chấm và ghi chú · `PantryUpdate` Nguyên liệu chưa dùng tới (cập nhật tủ, dùng chung với nấu cả bữa) → Lịch sử |
+| Lịch sử | `HistoryEntry` Chi tiết một lần nấu: sửa điểm, ghi chú món và bữa, Nấu lại, Thêm vào thực đơn |
+| Nấu cả bữa | `MealCookPrep` Chuẩn bị cả bữa, thứ tự món · `MealCookStep` Từng bước, chuyển món · `MealCookDone` Xong, chấm và ghi chú từng món → `PantryUpdate`. Mở từ Thực đơn ("Nấu bữa này") và mục "Sắp tới bữa … rồi" ở Khám phá. Hôm nay ăn gì không nấu thẳng: Lưu lại hoặc Thêm vào thực đơn |
 | Hệ thống | `Splash` Khởi động · `NotifPermission` Xin quyền thông báo · `Settings` Cài đặt (Sáng/Tối/Hệ thống) · `About` Giới thiệu · `Policy` Chính sách quyền riêng tư · `Feedback` Góp ý & báo lỗi · `RateApp` Đánh giá trên Google Play · `ClearData` Xoá dữ liệu (gõ `CONFIRM DELETE`) · `Error` Lỗi (biến thể `crash`/`notfound`/`storage`) |
 | Dùng chung | `Toasts` Thông báo chung: snackbar, mẹo, banner trong màn, hộp thoại xác nhận (khung 900 rộng) |
 | Logo | `Logo` 4 hướng (đã chọn C) · `LogoC` Bát & đũa — bộ nhận diện |

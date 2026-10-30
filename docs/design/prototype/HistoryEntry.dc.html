@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Chi tiết lần nấu</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+a.bh-btn-secondary,a.bh-btn-secondary:hover{color:var(--ink)}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main{scrollbar-width:none}
+.rate{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:10px;cursor:pointer;padding:0}
+.rate .bh-icon{width:22px;height:22px}
+.rate:focus-visible,.iconbtn:focus-visible,.addnote:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.iconbtn{width:48px;height:48px;display:flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:transparent;color:var(--ink);cursor:pointer;padding:0}
+.note{width:100%;resize:none;border:1px solid var(--outline);border-radius:12px;background:var(--surface-raised);color:var(--ink);padding:10px 12px;font:400 15px/22px 'Be Vietnam Pro',sans-serif}
+.note:focus{outline:2px solid var(--chili);outline-offset:1px}
+.addnote{align-self:flex-start;min-height:36px;padding:0;border:0;background:transparent;color:var(--chili-deep);cursor:pointer;font:600 13px/18px 'Be Vietnam Pro',sans-serif}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="position: relative; width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="position: relative; display: flex; align-items: center; gap: 4px; padding: 8px 4px 0 4px; height: 64px; flex-shrink: 0">
+    <a href="History.dc.html" class="iconbtn" aria-label="Quay lại lịch sử nấu">
+      <x-import component-from-global-scope="BepHoaLac.Icon" name="back"></x-import>
+    </a>
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <h1 class="c1" style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">{{title}}</h1>
+      <span class="c1" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{sub}}</span>
+    </div>
+    <button class="iconbtn" onClick="{{toggleMenu}}" aria-label="Tuỳ chọn" aria-haspopup="menu" aria-expanded="{{menuOpen}}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle></svg>
+    </button>
+    <sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}">
+      <div role="menu" style="position: absolute; right: 12px; top: 60px; z-index: 6; min-width: 200px; padding: 6px; border-radius: 12px; background: var(--surface-raised); border: 1px solid var(--line); box-shadow: 0 8px 20px rgba(20,14,10,.18)">
+        <button role="menuitem" onClick="{{remove}}" style="width: 100%; min-height: 44px; padding: 0 12px; display: flex; align-items: center; gap: 10px; border: 0; border-radius: 8px; background: transparent; color: var(--danger-ink); cursor: pointer; font: 600 15px/22px 'Be Vietnam Pro', sans-serif">
+          <x-import component-from-global-scope="BepHoaLac.Icon" name="trash"></x-import>
+          Xoá khỏi lịch sử
+        </button>
+      </div>
+    </sc-if>
+  </header>
+
+  <!-- Flutter (F2): one entry of cookHistoryProvider; edits save on change (debounced), no Save button.
+       Removing an entry uses AppSnackbar with Hoàn tác (#112), not a confirm dialog. -->
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 8px 16px 16px 16px; {{mainStyle}}">
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <div aria-hidden="true" style="position: relative; height: 168px; border-radius: 12px; overflow: hidden; background: var(--surface-raised)">
+        <sc-for list="{{tiles}}" as="t" hint-placeholder-count="2">
+          <span style="position: absolute; padding: 1px; {{t.style}}">
+            <span class="c2" style="position: relative; width: 100%; height: 100%; background: var(--line); color: var(--ink-muted); font-size: 12px; line-height: 16px; text-align: center; padding: 8px; display: flex; align-items: center; justify-content: center">[Ảnh {{t.lower}}]
+              <sc-if value="{{t.more}}" hint-placeholder-val="{{false}}"><span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(20, 14, 10, 0.55); color: #FFFFFF; font-size: 17px; line-height: 24px; font-weight: 700">{{t.moreLabel}}</span></sc-if>
+            </span>
+          </span>
+        </sc-for>
+      </div>
+      <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{meta}}</span>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">{{dishTitle}}</h2>
+      <ul style="margin: 0; padding: 0 12px; list-style: none; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
+        <sc-for list="{{dishes}}" as="dh" hint-placeholder-count="2">
+          <li style="padding: 10px 0; display: flex; flex-direction: column; gap: 6px; {{dh.rowStyle}}">
+            <div style="display: flex; align-items: center; gap: 8px">
+              <a href="Detail.dc.html" class="c2" style="flex: 1; min-width: 0; color: var(--ink); font-size: 15px; line-height: 22px; font-weight: 600; text-decoration: none">{{dh.name}}</a>
+              <span role="group" aria-label="{{dh.groupLabel}}" style="display: flex; gap: 4px">
+                <sc-for list="{{dh.ratings}}" as="r" hint-placeholder-count="3">
+                  <button class="rate" onClick="{{r.pick}}" aria-pressed="{{r.on}}" aria-label="{{r.label}}" title="{{r.label}}" style="{{r.style}}">
+                    <x-import component-from-global-scope="BepHoaLac.Icon" name="{{r.icon}}"></x-import>
+                  </button>
+                </sc-for>
+              </span>
+            </div>
+            <sc-if value="{{dh.showNote}}" hint-placeholder-val="{{false}}">
+              <textarea class="note" rows="2" maxlength="300" value="{{dh.note}}" onChange="{{dh.setNote}}" placeholder="Ghi chú cho món này" aria-label="{{dh.noteLabel}}" style="font-size: 13px; line-height: 18px; padding: 8px 10px"></textarea>
+            </sc-if>
+            <sc-if value="{{dh.canAdd}}" hint-placeholder-val="{{true}}">
+              <button class="addnote" onClick="{{dh.openNote}}">+ Ghi chú cho món này</button>
+            </sc-if>
+          </li>
+        </sc-for>
+      </ul>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <label for="meal-note" style="font-size: 17px; line-height: 24px; font-weight: 600">{{noteTitle}}</label>
+        <span style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{count}}/300</span>
+      </div>
+      <textarea id="meal-note" class="note" rows="4" maxlength="300" value="{{note}}" onChange="{{setNote}}" placeholder="Ví dụ: lần sau bớt muối, thêm ớt"></textarea>
+      <span aria-live="polite" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{savedHint}}</span>
+    </section>
+  </main>
+
+  <sc-if value="{{hasSnack}}" hint-placeholder-val="{{false}}">
+    <div role="status" aria-live="polite" style="position: absolute; left: 16px; right: 16px; bottom: 104px; z-index: 5; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--ink); color: var(--surface); font-size: 13px; line-height: 18px; box-shadow: 0 6px 16px rgba(20,14,10,.2)">
+      <span style="display: flex; color: var(--herb-soft)"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span>
+      <span style="flex: 1; padding: 7px 0">Đã xoá khỏi lịch sử</span>
+      <button onClick="{{undo}}" style="min-height: 40px; padding: 0 10px; border: 0; background: transparent; color: var(--chili-soft); cursor: pointer; font: 700 13px/18px 'Be Vietnam Pro', sans-serif">Hoàn tác</button>
+    </div>
+  </sc-if>
+
+  <footer style="flex-shrink: 0; display: flex; gap: 12px; padding: 12px 16px 24px 16px; border-top: 1px solid var(--line); background: var(--surface-raised)">
+    <a href="AddToPlan.dc.html" class="bh-btn bh-btn-secondary" style="flex: 1; padding: 0 12px; text-decoration: none">Thêm vào thực đơn</a>
+    <a href="{{cookHref}}" class="bh-btn bh-btn-primary" style="flex: 1; padding: 0 12px; text-decoration: none">{{cookText}}</a>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"kind":{"editor":"enum","options":["bữa","món"],"default":"bữa"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"$preview":{"width":390,"height":844}}'>
+var RATINGS = [['good', 'Ngon', 'smile'], ['ok', 'Tạm', 'meh'], ['bad', 'Chê', 'frown']];
+var MEAL = { title: 'Bữa tối · Thứ Ba 28/10', sub: 'Nấu cả bữa lúc 19:10', serv: 1, min: 35, dishes: [['Đậu phụ sốt cà chua', 'good', 'Đậu non nên chiên sơ trước khi sốt.'], ['Trứng chiên hành', 'ok', '']], note: 'Lần sau bớt muối phần đậu, trứng chiên lửa nhỏ hơn cho mềm.' };
+var ONE = { title: 'Mì xào rau cải', sub: 'Bữa trưa · Thứ Hai 27/10, 12:05', serv: 1, min: 15, dishes: [['Mì xào rau cải', 'good', '']], note: 'Cho rau vào sau cùng, xào lửa to 1 phút là giòn.' };
+var STRESS_MEAL = { title: 'Bữa trưa · Thứ Ba 28/10', sub: 'Nấu cả bữa lúc 11:20', serv: 4, min: 75, dishes: [['Cá rô phi kho tộ với riềng và nước dừa', 'good', 'Hơi ngọt, bớt nước dừa.'], ['Canh bí đỏ nấu tôm khô với rau ngót', 'good', ''], ['Rau muống xào tỏi', 'ok', ''], ['Đậu phụ non sốt cà chua nấm hương kiểu nhà làm', 'good', ''], ['Dưa chuột chẻ chấm muối vừng', 'ok', '']], note: 'Đãi cả phòng bên cạnh. Cá kho hơi ngọt, lần sau bớt nước dừa và kho lâu hơn cho thấm, canh bí nên cho tôm khô vào sớm.' };
+function mosaic(names) {
+var n = names.length;
+var boxes = n <= 1 ? [[0, 0, 100, 100]] : n === 2 ? [[0, 0, 50, 100], [50, 0, 50, 100]] : n === 3 ? [[0, 0, 60, 100], [60, 0, 40, 50], [60, 50, 40, 50]] : [[0, 0, 50, 50], [50, 0, 50, 50], [0, 50, 50, 50], [50, 50, 50, 50]];
+return boxes.map(function (b, i) {
+var more = n > 4 && i === 3 ? n - 3 : 0;
+return { style: 'left: ' + b[0] + '%; top: ' + b[1] + '%; width: ' + b[2] + '%; height: ' + b[3] + '%;', lower: (names[i] || '').toLowerCase(), more: more > 0, moreLabel: '+' + more + ' món' };
+});
+}
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { rating: {}, notes: {}, open: {}, note: null, menuOpen: false, removed: false, edited: false };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var p = this.props;
+var one = p.kind === 'món';
+var src = one ? ONE : (p.sample === 'tên dài, nhiều món' ? STRESS_MEAL : MEAL);
+var names = src.dishes.map(function (d) { return d[0]; });
+var note = st.note === null ? src.note : st.note;
+return {
+theme: p.theme ?? 'system',
+title: src.title,
+sub: src.sub,
+meta: (one ? '' : names.length + ' món · ') + src.serv + ' người · nấu khoảng ' + src.min + ' phút',
+tiles: mosaic(names),
+dishTitle: one ? 'Món này thế nào?' : 'Từng món thế nào?',
+dishes: src.dishes.map(function (d, i) {
+var cur = st.rating[i] || d[1];
+var dn = st.notes[i] === undefined ? d[2] : st.notes[i];
+var show = !one && (!!dn || !!st.open[i]);
+return {
+name: d[0],
+groupLabel: 'Đánh giá ' + d[0],
+rowStyle: i < src.dishes.length - 1 ? 'border-bottom: 1px solid var(--line);' : '',
+ratings: RATINGS.map(function (r) {
+var on = cur === r[0];
+return {
+label: r[1] + ' · ' + d[0], icon: r[2], on: on,
+style: on ? 'border: 1px solid var(--chili-soft); background: var(--chili-soft); color: var(--chili-deep);' : 'border: 1px solid var(--outline); background: var(--surface-raised); color: var(--ink);',
+pick: function () { var next = Object.assign({}, self.state.rating); next[i] = r[0]; self.setState({ rating: next, edited: true }); }
+};
+}),
+showNote: show,
+canAdd: !one && !show,
+note: dn,
+noteLabel: 'Ghi chú cho ' + d[0],
+openNote: function () { var o = Object.assign({}, self.state.open); o[i] = true; self.setState({ open: o }); },
+setNote: function (e) { var nx = Object.assign({}, self.state.notes); nx[i] = e && e.target ? e.target.value : ''; self.setState({ notes: nx, edited: true }); }
+};
+}),
+noteTitle: one ? 'Ghi chú' : 'Ghi chú cho bữa',
+note: note,
+count: note.length,
+setNote: function (e) { self.setState({ note: e && e.target ? e.target.value : '', edited: true }); },
+savedHint: st.edited ? 'Đã lưu thay đổi' : 'Sửa thoải mái, app tự lưu.',
+cookHref: one ? 'CookPrep.dc.html' : 'MealCookPrep.dc.html',
+cookText: one ? 'Nấu lại món này' : 'Nấu lại bữa này',
+menuOpen: st.menuOpen,
+toggleMenu: function () { self.setState({ menuOpen: !self.state.menuOpen }); },
+mainStyle: st.removed ? 'opacity: .4; pointer-events: none;' : '',
+remove: function () {
+// Flutter: remove, pop back to Lịch sử and show the snackbar there; the prototype dims this screen instead.
+self.setState({ removed: true, menuOpen: false });
+},
+hasSnack: st.removed,
+undo: function () { self.setState({ removed: false }); }
+};
+}
+}
+</script>
+</body>
+</html>
