@@ -12,7 +12,7 @@ import 'package:recipe_mobile_app/features/cook/presentation/done/done_view_mode
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_done_widgets.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_layout.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
-import 'package:recipe_mobile_app/features/discover/discover.dart';
+import 'package:recipe_mobile_app/features/plan/plan.dart';
 
 /// Nấu xong (prototype `CookDone`): cập nhật Tủ đồ, đánh giá Ngon / Tạm / Chê, lưu món; xong thì
 /// về Khám phá.
@@ -33,7 +33,7 @@ class DoneScreen extends ConsumerWidget {
             title: CookStrings.notFoundTitle,
             message: CookStrings.notFoundBody,
             actionLabel: CookStrings.notFoundAction,
-            onAction: () => context.go(discoverLocation),
+            onAction: () => context.go(planLocation()),
           ),
         ),
       ),
@@ -66,7 +66,7 @@ class _Done extends ConsumerWidget {
     Future<void> finish() async {
       final router = GoRouter.of(context);
       await viewModel.finish();
-      router.go(discoverLocation);
+      router.go(planLocation());
     }
 
     return Scaffold(

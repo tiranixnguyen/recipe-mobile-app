@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:recipe_mobile_app/core/format.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
-import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
-import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
-import 'package:recipe_mobile_app/core/widgets/day_strip.dart';
+import 'package:recipe_mobile_app/core/widgets/inline_banner.dart';
 import 'package:recipe_mobile_app/core/widgets/serving_stepper.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/add_to_plan/add_to_plan_view_model.dart';
 import 'package:recipe_mobile_app/features/plan/routes.dart';
@@ -15,42 +12,42 @@ import 'package:recipe_mobile_app/features/plan/strings.dart';
 
 /// Mở sheet "Thêm vào thực đơn" cho [recipe] (prototype `AddToPlan`, từ Chi tiết món).
 ///
-/// Thêm xong thì chuyển sang tab Thực đơn, mở ngày vừa thêm, và trả true; trả false khi người
-/// dùng huỷ hoặc đóng sheet. [context] phải nằm dưới `GoRouter`.
-Future<bool> showAddToPlanSheet(BuildContext context, Recipe recipe) async {
-  final day = await showModalBottomSheet<int>(
+/// Thêm xong thì chuyển sang tab Thực đơn, mở ngày và bữa vừa thêm, và trả true; trả false khi
+/// người dùng huỷ hoặc đóng sheet. [context] phải nằm dưới `GoRouter`.
+Future<bool> showAddToPlanSheet(BuildContext context, Recipe recipe) =>
+    showAddMealToPlanSheet(context, [recipe]);
+
+/// Như [showAddToPlanSheet] nhưng thêm cả bữa [recipes] vào một bữa (Hôm nay ăn gì, Đã lưu).
+Future<bool> showAddMealToPlanSheet(BuildContext context, List<Recipe> recipes) async {
+  assert(recipes.isNotEmpty, 'Cần ít nhất một món');
+  final added = await showModalBottomSheet<({DateTime date, Meal meal})>(
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
     useSafeArea: true,
     showDragHandle: true,
-    builder: (_) => AddToPlanSheet(recipeId: recipe.id),
+    builder: (_) => AddToPlanSheet(recipeIds: [for (final r in recipes) r.id]),
   );
-  if (day == null) return false;
-  if (context.mounted) goToPlanDay(context, day);
+  if (added == null) return false;
+  if (context.mounted) goToPlanDay(context, added.date, meal: added.meal);
   return true;
 }
 
 class AddToPlanSheet extends ConsumerWidget {
-  const AddToPlanSheet({super.key, required this.recipeId});
+  const AddToPlanSheet({super.key, required this.recipeIds});
 
-  final String recipeId;
+  final List<String> recipeIds;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
-    final provider = addToPlanViewModelProvider(recipeId);
+    final provider = addToPlanViewModelProvider(addToPlanKey(recipeIds));
     final state = ref.watch(provider);
 
     return switch (state) {
       AsyncData(:final value) => _Content(state: value, viewModel: ref.read(provider.notifier)),
       AsyncError() => Padding(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.s4,
-          0,
-          AppSpacing.s4,
-          AppSpacing.s6,
-        ),
+        padding: const EdgeInsets.fromLTRB(AppSpacing.s4, 0, AppSpacing.s4, AppSpacing.s6),
         child: Text(
           PlanStrings.addNotFound,
           style: AppTextStyles.body.copyWith(color: colors.inkMuted),
@@ -96,44 +93,24 @@ class _Content extends StatelessWidget {
                 ),
               ),
               Text(
-                '${state.recipe.name} · ${recipeMeta(state.recipe)}',
+                state.subline,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: AppTextStyles.meta.copyWith(color: colors.inkMuted),
               ),
             ],
-          ),
-          Semantics(
-            container: true,
-            label: PlanStrings.addQuickGroup,
-            child: Wrap(
-              spacing: AppSpacing.s2,
-              runSpacing: AppSpacing.s2,
-              children: [
-                for (final pick in state.quickPicks)
-                  AppChip(
-                    label: pick.label,
-                    selected: pick.selected,
-                    onTap: () => viewModel.pickQuick(pick),
-                  ),
-              ],
-            ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: AppSpacing.s2,
             children: [
-              sectionLabel(PlanStrings.addDay),
+              sectionLabel(PlanStrings.addDays),
               Row(
                 spacing: AppSpacing.s1,
                 children: [
-                  for (var i = 0; i < 7; i++)
+                  for (final day in state.days)
                     Expanded(
-                      child: _DayRadio(
-                        index: i,
-                        selected: i == state.day,
-                        isToday: i == state.today,
-                        hasMeals: state.daysWithMeals.contains(i),
-                        onTap: () => viewModel.pickDay(i),
-                      ),
+                      child: _DayRadio(day: day, onTap: () => viewModel.pickDay(day.date)),
                     ),
                 ],
               ),
@@ -154,33 +131,7 @@ class _Content extends StatelessWidget {
               if (joinText != null)
                 Semantics(
                   liveRegion: true,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colors.herbSoft,
-                      borderRadius: AppRadius.mdAll,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.s3,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        spacing: AppSpacing.s2,
-                        children: [
-                          Icon(AppIcons.plus, size: 18, color: colors.herbInk),
-                          Expanded(
-                            child: Text(
-                              joinText,
-                              style: AppTextStyles.label.copyWith(
-                                fontWeight: FontWeight.w400,
-                                color: colors.ink,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                  child: InlineBanner(text: joinText, kind: BannerKind.success),
                 ),
             ],
           ),
@@ -218,9 +169,9 @@ class _Content extends StatelessWidget {
                     label: state.confirmLabel,
                     block: true,
                     onPressed: () async {
-                      await viewModel.confirm();
-                      // Trả ngày vừa thêm để mở đúng ngày đó trên Thực đơn.
-                      if (context.mounted) Navigator.of(context).pop(state.day);
+                      final added = await viewModel.confirm();
+                      // Trả ngày và bữa vừa thêm để mở đúng chỗ đó trên Thực đơn.
+                      if (context.mounted) Navigator.of(context).pop(added);
                     },
                   ),
                 ),
@@ -233,33 +184,22 @@ class _Content extends StatelessWidget {
   }
 }
 
-/// Ô ngày cao 56: đang chọn nền `chili` chữ trắng; hôm nay có chữ "Nay"; ngày khác đã có món có
-/// chấm `herb`.
+/// Ô ngày cao 56: đang chọn nền `chili` chữ trắng.
 class _DayRadio extends StatelessWidget {
-  const _DayRadio({
-    required this.index,
-    required this.selected,
-    required this.isToday,
-    required this.hasMeals,
-    required this.onTap,
-  });
+  const _DayRadio({required this.day, required this.onTap});
 
-  final int index;
-  final bool selected;
-  final bool isToday;
-  final bool hasMeals;
+  final DayOption day;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    // Chữ và chấm trắng trên nền `chili` như prototype.
-    final foreground = selected ? Colors.white : colors.ink;
+    final selected = day.selected;
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: selected,
       button: true,
-      label: [DayStrip.fullNames[index], if (isToday) PlanStrings.today].join(', '),
+      label: day.label,
       excludeSemantics: true,
       child: Material(
         color: selected ? colors.chili : colors.surface,
@@ -272,38 +212,12 @@ class _DayRadio extends StatelessWidget {
           onTap: onTap,
           child: SizedBox(
             height: 56,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              spacing: 2,
-              children: [
-                Text(
-                  DayStrip.shortNames[index],
-                  style: AppTextStyles.label.copyWith(color: foreground),
-                ),
-                SizedBox(
-                  height: 12,
-                  child: isToday
-                      ? Text(
-                          PlanStrings.addTodayShort,
-                          style: AppTextStyles.label.copyWith(
-                            fontSize: 10,
-                            height: 12 / 10,
-                            color: foreground,
-                          ),
-                        )
-                      : hasMeals
-                      ? Center(
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: selected ? Colors.white : colors.herb,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const SizedBox.square(dimension: 6),
-                          ),
-                        )
-                      : null,
-                ),
-              ],
+            child: Center(
+              child: Text(
+                day.short,
+                // Chữ trắng trên nền `chili` như prototype.
+                style: AppTextStyles.label.copyWith(color: selected ? Colors.white : colors.ink),
+              ),
             ),
           ),
         ),

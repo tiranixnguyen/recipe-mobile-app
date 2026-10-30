@@ -109,8 +109,7 @@ void main() {
     await tester.tap(find.text(CookStrings.addToPlan));
     await tester.pumpAndSettle();
     expect(find.text('Trứng chiên hành · 15 phút · Bếp từ'), findsOneWidget);
-    // Không cố định ngày (giờ thật): chọn Trưa của hôm nay, ô ngày có chữ "Nay".
-    await tester.tap(find.text('Nay'));
+    // Không cố định ngày (giờ thật): sheet mặc định hôm nay, chọn Trưa.
     await tester.tap(find.text(Meal.lunch.label));
     await tester.pump();
     await tester.tap(find.textContaining('Thêm vào Trưa'));
@@ -121,7 +120,10 @@ void main() {
       (added.recipeId, added.meal, added.day),
       ('trung', Meal.lunch, dateOnly(DateTime.now())),
     );
-    expect(find.text('at /plan?day=${DateTime.now().weekday - 1}'), findsOneWidget);
+    expect(
+      find.text('at ${planLocation(date: DateTime.now(), meal: Meal.lunch)}'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('Bắt đầu nấu mở Chuẩn bị nấu', (tester) async {

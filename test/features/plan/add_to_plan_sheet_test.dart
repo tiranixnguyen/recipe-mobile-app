@@ -38,9 +38,25 @@ const _other = Recipe(
   steps: [],
 );
 
+const _canh = Recipe(
+  id: 'canh',
+  name: 'Canh chua cà chua',
+  description: '',
+  imageAsset: '',
+  minutes: 15,
+  servings: 1,
+  tools: [Tool.stove],
+  diets: [],
+  meals: [],
+  ingredients: [],
+  steps: [],
+);
+
 /// Mở sheet bằng nút "Mở"; trả container và kết quả `showAddToPlanSheet` (null khi chưa đóng).
+/// [meal] thì mở `showAddMealToPlanSheet` cho các món đó.
 Future<(ProviderContainer, bool? Function())> _open(
   WidgetTester tester, {
+  List<Recipe>? meal,
   ThemeData? theme,
   Size size = const Size(390, 844),
   double textScale = 1,
@@ -51,9 +67,9 @@ Future<(ProviderContainer, bool? Function())> _open(
   final container = ProviderContainer(
     overrides: [
       localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
-      // 17h Thứ Ba: chip Tối nay, Sáng mai, Trưa mai.
+      // 17h Thứ Ba: mặc định Tối nay.
       nowProvider.overrideWithValue(DateTime(2026, 10, 20, 17)),
-      recipesProvider.overrideWith((ref) async => const [_recipe, _other]),
+      recipesProvider.overrideWith((ref) async => const [_recipe, _other, _canh]),
     ],
   );
   addTearDown(container.dispose);
@@ -67,7 +83,9 @@ Future<(ProviderContainer, bool? Function())> _open(
         path: '/',
         builder: (context, _) => Scaffold(
           body: TextButton(
-            onPressed: () async => result = await showAddToPlanSheet(context, _recipe),
+            onPressed: () async => result = meal == null
+                ? await showAddToPlanSheet(context, _recipe)
+                : await showAddMealToPlanSheet(context, meal),
             child: const Text('Mở'),
           ),
         ),
@@ -102,7 +120,8 @@ void main() {
 
     expect(find.text(PlanStrings.addTitle), findsOneWidget);
     expect(find.text('Trứng chiên hành · 15 phút · Bếp từ'), findsOneWidget);
-    expect(find.text('Nay'), findsOneWidget);
+    expect(find.text(PlanStrings.addDays), findsOneWidget);
+    expect(find.bySemanticsLabel('Thứ Ba, hôm nay'), findsOneWidget);
     expect(find.text('Đậu phụ sốt cà chua'), findsOneWidget);
     expect(find.text('Sẽ thêm cùng Đậu phụ sốt cà chua · bữa này thành 2 món'), findsOneWidget);
 
@@ -114,17 +133,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(PlanStrings.addTitle), findsNothing);
     expect(result(), isTrue);
-    expect(find.text('at /plan?day=1'), findsOneWidget);
+    expect(find.text('at /plan?date=2026-10-20&meal=dinner'), findsOneWidget);
     expect(container.read(plannedMealsProvider).map((p) => (p.recipeId, p.servings)), [
       ('dau-phu', 1),
       ('trung', 2),
     ]);
   });
 
-  testWidgets('chọn chip Trưa mai đổi nút; Huỷ không thêm gì và trả false', (tester) async {
+  testWidgets('chọn ngày và bữa đổi nút; Huỷ không thêm gì và trả false', (tester) async {
     final (container, result) = await _open(tester);
 
-    await tester.tap(find.text('Trưa mai'));
+    await tester.tap(find.text('T4'));
+    await tester.tap(find.text('Trưa'));
     await tester.pump();
     expect(find.text('Thêm vào Trưa mai'), findsOneWidget);
     expect(find.textContaining('Sẽ thêm cùng'), findsNothing);
@@ -139,6 +159,23 @@ void main() {
     expect(result(), isFalse);
     expect(find.text('Mở'), findsOneWidget);
     expect(container.read(plannedMealsProvider).single.recipeId, 'dau-phu');
+  });
+
+  testWidgets('cả bữa: dòng phụ nhiều món, thêm tất cả rồi mở đúng bữa', (tester) async {
+    final (container, result) = await _open(tester, meal: const [_recipe, _canh]);
+
+    expect(find.text('Trứng chiên hành + Canh chua cà chua · 2 món'), findsOneWidget);
+    expect(find.text('Sẽ thêm cùng Đậu phụ sốt cà chua · bữa này thành 3 món'), findsOneWidget);
+
+    await tester.tap(find.text('Thêm vào Tối nay'));
+    await tester.pumpAndSettle();
+    expect(result(), isTrue);
+    expect(find.text('at /plan?date=2026-10-20&meal=dinner'), findsOneWidget);
+    expect(container.read(plannedMealsProvider).map((p) => p.recipeId), [
+      'dau-phu',
+      'trung',
+      'canh',
+    ]);
   });
 
   for (final (name, theme) in [('sáng', AppTheme.light), ('tối', AppTheme.dark)]) {
