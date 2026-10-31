@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/core/widgets/app_snackbar.dart';
 import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_row.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
+import 'package:recipe_mobile_app/features/discover/data/saved_meals.dart';
+import 'package:recipe_mobile_app/features/discover/data/saved_recipes.dart';
 import 'package:recipe_mobile_app/features/discover/domain/today.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today/today_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
@@ -65,6 +69,74 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                       ],
                     ),
                   ),
+                  if (pick != null)
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final savedMeals = ref.watch(savedMealsProvider);
+                        final savedIds = ref.watch(savedIdsProvider);
+                        final isMulti = pick.alternatives.isNotEmpty;
+                        final mealRecipeIds = [pick.main.id, ...pick.alternatives.map((r) => r.id)];
+                        final isSaved = isMulti
+                            ? savedMeals.any(
+                                (m) =>
+                                    m.recipeIds.length == mealRecipeIds.length &&
+                                    m.recipeIds.every(mealRecipeIds.contains),
+                              )
+                            : savedIds.contains(pick.main.id);
+
+                        return IconButton(
+                          key: const Key('today-save-btn'),
+                          tooltip: isSaved ? 'Đã lưu' : 'Lưu lại',
+                          onPressed: () async {
+                            if (isMulti) {
+                              final meal = SavedMeal(
+                                recipeIds: mealRecipeIds,
+                                servings: pick.main.servings,
+                              );
+                              if (isSaved) {
+                                final removed = await ref
+                                    .read(savedMealsProvider.notifier)
+                                    .unsaveMeal(meal);
+                                if (removed) {
+                                  ref.read(analyticsProvider).track(
+                                    'unsave',
+                                    {'kind': 'meal', 'undo': false},
+                                  );
+                                  if (context.mounted) {
+                                    AppSnackbar.show(context, 'Đã bỏ lưu');
+                                  }
+                                }
+                              } else {
+                                final added = await ref
+                                    .read(savedMealsProvider.notifier)
+                                    .saveMeal(meal);
+                                if (added) {
+                                  ref.read(analyticsProvider).track('save_meal', {
+                                    'dishes': mealRecipeIds.length,
+                                    'tags': 0,
+                                  });
+                                  if (context.mounted) {
+                                    AppSnackbar.show(context, 'Đã lưu bữa vào Đã lưu');
+                                  }
+                                }
+                              }
+                            } else {
+                              await ref.read(savedIdsProvider.notifier).toggle(pick.main.id);
+                              if (context.mounted) {
+                                AppSnackbar.show(
+                                  context,
+                                  isSaved ? 'Đã bỏ lưu' : 'Đã lưu món vào Đã lưu',
+                                );
+                              }
+                            }
+                          },
+                          icon: Icon(
+                            isSaved ? Icons.bookmark : AppIcons.bookmark,
+                            color: isSaved ? colors.chili : colors.ink,
+                          ),
+                        );
+                      },
+                    ),
                 ],
               ),
             ),
