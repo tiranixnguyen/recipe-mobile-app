@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
@@ -42,6 +42,7 @@ class HistoryScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -123,6 +124,7 @@ class HistoryScreen extends ConsumerWidget {
                               child: _HistoryEntryCard(
                                 entry: entry,
                                 nameOf: state.nameOf,
+                                recipes: state.recipes,
                                 isHighlight: entry.id == state.highlightId,
                                 onTap: () => context.push(historyEntryLocation(entry.id)),
                               ),
@@ -188,12 +190,14 @@ class _HistoryEntryCard extends StatelessWidget {
   const _HistoryEntryCard({
     required this.entry,
     required this.nameOf,
+    required this.recipes,
     required this.isHighlight,
     required this.onTap,
   });
 
   final CookHistoryEntry entry;
   final String Function(String) nameOf;
+  final Map<String, Recipe> recipes;
   final bool isHighlight;
   final VoidCallback onTap;
 
@@ -201,16 +205,12 @@ class _HistoryEntryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final dishes = entry.dishes;
-    final one = dishes.length == 1;
-    final title = one
-        ? nameOf(dishes.first.recipeId)
-        : '${entry.meal.label} · ${_shortDate(entry.cookedAt)}';
-    final meta = one
-        ? '${entry.meal.label} · ${_shortDate(entry.cookedAt)} · ${dishes.first.servings} người'
-        : '${dishes.length} món · ${entry.servings} người'
-              '${entry.minutes > 0 ? ' · ~${entry.minutes} phút' : ''}';
+    final title = '${entry.meal.label} (${_dayDate(entry.cookedAt)})';
+    final meta =
+        '${dishes.length} món · ${entry.servings} người'
+        '${entry.minutes > 0 ? ' · ~${entry.minutes} phút' : ''}';
 
-    return Material(
+    final card = Material(
       color: isHighlight ? colors.chiliSoft : colors.surfaceRaised,
       shape: RoundedRectangleBorder(
         borderRadius: AppRadius.mdAll,
@@ -226,9 +226,12 @@ class _HistoryEntryCard extends StatelessWidget {
             spacing: AppSpacing.s3,
             children: [
               MealMosaic(
-                size: 72,
+                size: 120,
                 radius: AppRadius.smAll,
-                dishes: [for (final d in dishes) MosaicDish(nameOf(d.recipeId))],
+                dishes: [
+                  for (final d in dishes)
+                    MosaicDish(nameOf(d.recipeId), recipes[d.recipeId]?.imageAsset),
+                ],
               ),
               Expanded(
                 child: Column(
@@ -248,31 +251,33 @@ class _HistoryEntryCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (isHighlight)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: colors.chili,
-                              borderRadius: AppRadius.pillAll,
-                            ),
-                            child: Text(
-                              CookStrings.historyJustCooked,
-                              style: AppTextStyles.caption.copyWith(color: colors.surfaceRaised),
-                            ),
-                          ),
                       ],
                     ),
                     Text(meta, style: AppTextStyles.caption.copyWith(color: colors.inkMuted)),
-                    if (!one)
-                      for (final dish in dishes.take(3))
-                        Row(
+
+                    // Dùng vòng lặp for duyệt qua dữ liệu đã được xử lý
+                    for (final item in _getDisplayDishes(dishes))
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.s1),
+                        child: Row(
                           spacing: AppSpacing.s1,
                           children: [
-                            if (dish.rating case final r?)
-                              Icon(ratingIcon(r), size: 16, color: colors.inkMuted),
+                            if (item.dish.rating != null)
+                              Icon(
+                                ratingIcon(item.dish.rating!),
+                                size: 16,
+                                color: switch (item.dish.rating!) {
+                                  CookRating.good => colors.herb,
+                                  CookRating.ok => colors.inkMuted,
+                                  CookRating.bad => colors.danger,
+                                },
+                              ),
                             Flexible(
                               child: Text(
-                                nameOf(dish.recipeId),
+                                item.dish.rating == null
+                                    // Tên món + (nếu có extraCount thì thêm ", +X")
+                                    ? '${nameOf(item.dish.recipeId)}: ${CookStrings.historyDishNotRated}${item.extraCount > 0 ? ', +${item.extraCount}' : ''}'
+                                    : '${nameOf(item.dish.recipeId)}${item.extraCount > 0 ? ', +${item.extraCount}' : ''}',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
@@ -280,17 +285,17 @@ class _HistoryEntryCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                    if (!one && dishes.length > 3)
-                      Text(
-                        '+${dishes.length - 3} món',
-                        style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
                       ),
                     if (entry.mealNote.isNotEmpty)
                       Padding(
-                        padding: const EdgeInsets.only(top: 2),
+                        padding: const EdgeInsets.only(top: AppSpacing.s1),
                         child: Text(
-                          entry.mealNote,
-                          maxLines: 2,
+                          '${dishes.length == 1 ? 'Ghi chú' : 'Nhận xét chung'}: ${entry.mealNote}',
+                          maxLines: switch (dishes.length) {
+                            <= 1 => 3, // 1 món (hoặc 0) -> max 3 dòng
+                            2 => 2, // 2 món -> max 2 dòng
+                            _ => 1, // 3 món trở lên -> max 1 dòng
+                          },
                           overflow: TextOverflow.ellipsis,
                           style: AppTextStyles.caption.copyWith(
                             color: colors.inkMuted,
@@ -306,7 +311,52 @@ class _HistoryEntryCard extends StatelessWidget {
         ),
       ),
     );
+
+    if (isHighlight) {
+      return ClipRect(
+        child: Banner(
+          message: CookStrings.historyJustCooked,
+          location: BannerLocation.topEnd,
+          color: colors.chili,
+          textStyle: AppTextStyles.caption.copyWith(
+            color: colors.surfaceRaised,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+          child: card,
+        ),
+      );
+    }
+    return card;
+  }
+
+  Iterable<({CookedDish dish, int extraCount})> _getDisplayDishes(List<CookedDish> dishes) {
+    // 1. Dưới 4 món: Trả về từng món, extraCount = 0
+    if (dishes.length < 4) {
+      return dishes.map((d) => (dish: d, extraCount: 0));
+    }
+
+    // 2. Từ 4 món trở lên: Gom nhóm theo rating
+    final grouped = <CookRating?, List<CookedDish>>{};
+    for (final d in dishes) {
+      grouped.putIfAbsent(d.rating, () => []).add(d);
+    }
+
+    // Trả về món đầu tiên của nhóm và số lượng phần bù
+    return grouped.values.map((list) => (dish: list.first, extraCount: list.length - 1));
   }
 }
 
-String _shortDate(DateTime dt) => '${dt.day}/${dt.month}';
+/// "Chủ nhật 26/10" — dùng cho tiêu đề card Lịch sử nấu.
+String _dayDate(DateTime dt) {
+  const weekdays = {
+    DateTime.monday: 'Thứ hai',
+    DateTime.tuesday: 'Thứ ba',
+    DateTime.wednesday: 'Thứ tư',
+    DateTime.thursday: 'Thứ năm',
+    DateTime.friday: 'Thứ sáu',
+    DateTime.saturday: 'Thứ bảy',
+    DateTime.sunday: 'Chủ nhật',
+  };
+  return '${weekdays[dt.weekday]} ${dt.day}/${dt.month}';
+}

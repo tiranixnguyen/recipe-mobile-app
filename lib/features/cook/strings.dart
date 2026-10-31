@@ -177,7 +177,7 @@ abstract final class CookStrings {
   static const historyTitle = 'Lịch sử nấu';
   static const historyEmptyHeadMeta = 'Món và bữa bạn đã nấu';
   static String historyMonthCount(int count) => 'Đã nấu $count lần trong tháng này';
-  static const historySearch = 'Tìm món hoặc ghi chú';
+  static const historySearch = 'Tìm món hoặc ghi chú/nhận xét';
   static const historyFilterAll = 'Tất cả';
   static const historyFilterGood = 'Có món ngon';
   static const historyFilterNote = 'Có ghi chú';
@@ -198,7 +198,7 @@ abstract final class CookStrings {
   static const historyEntryNotFound = 'Không tìm thấy lần nấu này';
   static const historyDishTitleOne = 'Món này thế nào?';
   static const historyDishTitleMany = 'Từng món thế nào?';
-  static const historyMealNote = 'Ghi chú cho bữa';
+  static const historyMealNote = 'Nhận xét chung cho bữa';
   static const historyNote = 'Ghi chú';
   static const historyNoteHint = 'Ví dụ: lần sau bớt muối, thêm ớt';
   static const historyAddDishNote = '+ Ghi chú cho món này';
@@ -210,6 +210,7 @@ abstract final class CookStrings {
   static const historyDeleteAction = 'Xoá khỏi lịch sử';
   static const historyDeleted = 'Đã xoá khỏi lịch sử';
   static const undo = 'Hoàn tác';
+  static const historyDishNotRated = 'chưa đánh giá';
   static String historyMetaOne(int servings, int minutes) =>
       '$servings người · nấu khoảng $minutes phút';
   static String historyMetaMeal(int dishes, int servings, int minutes) =>
