@@ -105,6 +105,16 @@ void main() {
     expect(env.container.read(cookHistoryProvider), hasLength(1));
   });
 
+  test('ghi chú Xong lưu vào entry và không thay đổi cookHistoryProvider', () async {
+    final env = _Env();
+    await env.open();
+    env.viewModel.setNote('Lần sau ít muối');
+    expect(env.state.note, 'Lần sau ít muối');
+    await env.viewModel.finish();
+    expect(env.container.read(cookHistoryEntriesProvider).single.note, 'Lần sau ít muối');
+    expect(env.container.read(cookHistoryProvider), hasLength(1));
+  });
+
   test('chọn lại đánh giá đang chọn thì bỏ; không đánh giá vẫn ghi lịch sử', () async {
     final env = _Env();
     await env.open();
