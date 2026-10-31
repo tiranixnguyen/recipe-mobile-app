@@ -1,7 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:recipe_mobile_app/app/strings.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/features/cook/cook.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
@@ -14,11 +16,12 @@ class AppTab {
   final List<RouteBase> routes;
 }
 
-/// Bốn tab theo component `BottomNav`; thứ tự ở đây là thứ tự trên thanh điều hướng.
+/// Năm tab theo component `BottomNav`; thứ tự ở đây là thứ tự trên thanh điều hướng.
 /// Router dựng branch và shell dựng nút đều từ list này.
 final appTabs = [
   AppTab(label: AppStrings.tabDiscover, icon: AppIcons.compass, routes: discoverTabRoutes),
   AppTab(label: AppStrings.tabPantry, icon: AppIcons.fridge, routes: pantryTabRoutes),
   AppTab(label: AppStrings.tabPlan, icon: AppIcons.calendar, routes: planTabRoutes),
+  AppTab(label: AppStrings.tabHistory, icon: Symbols.history_rounded, routes: historyTabRoutes),
   AppTab(label: AppStrings.tabSaved, icon: AppIcons.bookmark, routes: savedTabRoutes),
 ];

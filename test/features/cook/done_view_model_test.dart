@@ -6,6 +6,7 @@ import 'package:recipe_mobile_app/features/cook/cook.dart';
 import 'package:recipe_mobile_app/features/cook/data/app_review.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/done/done_view_model.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/pantry_update/pantry_update_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 
@@ -45,39 +46,54 @@ class _Env {
       await container.read(pantryItemsProvider.notifier).addToPantry(id);
     }
   }
+
+  /// Chạy PantryUpdate.finish() sau khi Done.finish().
+  Future<void> finishPantryUpdate() async {
+    container.listen(pantryUpdateViewModelProvider, (_, _) {});
+    await container.read(pantryUpdateViewModelProvider.notifier).finish();
+  }
 }
 
 void main() {
-  test('khẩu phần theo phiên nấu, đồ đã dùng theo khẩu phần, mặc định không tick', () async {
+  test('khẩu phần theo phiên nấu, state có note rỗng, không có used/usedUp', () async {
     final env = _Env();
     await env.addToPantry(['egg', 'scallion']);
     await env.container.read(cookSessionProvider.notifier).startRecipe('trung', 2);
     await env.open();
 
     expect(env.state.servings, 2);
-    expect(env.state.used.map((u) => u.note), ['Đã dùng 4 quả', 'Đã dùng 2 nắm']);
-    expect(env.state.usedUp, isEmpty);
+    expect(env.state.note, isEmpty);
     expect(env.state.rating, isNull);
   });
 
-  test('Cập nhật tủ và xong: bỏ đồ đã tick, ghi lịch sử kèm đánh giá, xoá phiên', () async {
+  test('setNote giới hạn 300 ký tự', () async {
+    final env = _Env();
+    await env.open();
+    env.viewModel.setNote('x' * 400);
+    expect(env.state.note.length, 300);
+  });
+
+  test('finish() lưu PendingCookData với rating và note; ghi lịch sử sau PantryUpdate', () async {
     final env = _Env();
     await env.addToPantry(['egg', 'scallion']);
     await env.container.read(cookSessionProvider.notifier).startRecipe('trung', 1);
     await env.open();
 
-    env.viewModel.toggleUsedUp('scallion');
-    env.viewModel.toggleUsedUp('egg');
-    env.viewModel.toggleUsedUp('egg');
     env.viewModel.rate(CookRating.bad);
+    env.viewModel.setNote('ghi chú test');
     await env.viewModel.finish();
 
-    expect(env.container.read(pantryItemsProvider), {'egg'});
-    expect(env.container.read(cookHistoryProvider), [
-      CookRecord(recipeId: 'trung', cookedAt: env.now, rating: CookRating.bad),
-    ]);
+    // pending được set
+    final pending = env.container.read(pendingCookProvider);
+    expect(pending, isNotNull);
+    expect(pending!.dishes.first.rating, CookRating.bad);
+    expect(pending.mealNote, 'ghi chú test');
+
+    // Chạy PantryUpdate.finish() để ghi lịch sử
+    await env.finishPantryUpdate();
+    expect(env.container.read(cookHistoryProvider).single.rating, CookRating.bad);
     expect(env.container.read(cookSessionProvider), isNull);
-    expect(env.review.requests, 0);
+    expect(env.review.requests, 0); // bad không trigger review
   });
 
   test('bấm xong hai lần liền chỉ ghi một lần nấu', () async {
@@ -85,7 +101,18 @@ void main() {
     await env.open();
     env.viewModel.rate(CookRating.good);
     await Future.wait([env.viewModel.finish(), env.viewModel.finish()]);
+    await env.finishPantryUpdate();
     expect(env.container.read(cookHistoryProvider), hasLength(1));
+  });
+
+  test('ghi chú Xong lưu vào pendingCookProvider, chưa ghi lịch sử', () async {
+    final env = _Env();
+    await env.open();
+    env.viewModel.setNote('Lần sau ít muối');
+    expect(env.state.note, 'Lần sau ít muối');
+    await env.viewModel.finish();
+    expect(env.container.read(pendingCookProvider)!.mealNote, 'Lần sau ít muối');
+    expect(env.container.read(cookHistoryProvider), isEmpty);
   });
 
   test('chọn lại đánh giá đang chọn thì bỏ; không đánh giá vẫn ghi lịch sử', () async {
@@ -96,6 +123,7 @@ void main() {
     expect(env.state.rating, isNull);
 
     await env.viewModel.finish();
+    await env.finishPantryUpdate();
     expect(env.container.read(cookHistoryProvider).single.rating, isNull);
   });
 
@@ -114,9 +142,13 @@ void main() {
     await env.open();
 
     Future<void> cookGood() async {
-      // Màn giữ đánh giá đã chọn; bấm lại cái đang chọn là bỏ chọn.
       if (env.state.rating != CookRating.good) env.viewModel.rate(CookRating.good);
       await env.viewModel.finish();
+      env.container.listen(pantryUpdateViewModelProvider, (_, _) {});
+      await env.container.read(pantryUpdateViewModelProvider.notifier).finish();
+      // Re-open done view for next cook
+      await env.container.read(cookSessionProvider.notifier).startRecipe('trung', 1);
+      env.container.listen(env.provider, (_, _) {});
     }
 
     await cookGood();

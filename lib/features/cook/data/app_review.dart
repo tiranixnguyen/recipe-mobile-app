@@ -45,7 +45,11 @@ class ReviewPrompt {
   /// Gọi sau khi ghi đánh giá vào [cookHistoryProvider]: đủ [goodRatings] lần "Ngon" và chưa hỏi
   /// trong [askAgainAfter] thì xin hiện hộp đánh giá, ghi lại lúc hỏi.
   Future<void> maybeAsk() async {
-    final good = _ref.read(cookHistoryProvider).where((r) => r.rating == CookRating.good).length;
+    final good = _ref
+        .read(cookHistoryProvider)
+        .expand((e) => e.dishes)
+        .where((d) => d.rating == CookRating.good)
+        .length;
     if (good < goodRatings) return;
     final store = _ref.read(localStoreProvider);
     final now = _ref.read(cookClockProvider)();

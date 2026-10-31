@@ -11,11 +11,11 @@ import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_view_
 import 'package:recipe_mobile_app/features/cook/presentation/done/done_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_done_widgets.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_layout.dart';
+import 'package:recipe_mobile_app/features/cook/routes.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
 
-/// Nấu xong (prototype `CookDone`): cập nhật Tủ đồ, đánh giá Ngon / Tạm / Chê, lưu món; xong thì
-/// về Khám phá.
+/// Nấu xong (prototype `CookDone`): đánh giá, ghi chú, rồi sang PantryUpdate.
 class DoneScreen extends ConsumerWidget {
   const DoneScreen({super.key, required this.recipeId});
 
@@ -52,21 +52,40 @@ class DoneScreen extends ConsumerWidget {
   }
 }
 
-class _Done extends ConsumerWidget {
+class _Done extends ConsumerStatefulWidget {
   const _Done({required this.state});
 
   final DoneState state;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_Done> createState() => _DoneState();
+}
+
+class _DoneState extends ConsumerState<_Done> {
+  late final TextEditingController _noteController;
+
+  @override
+  void initState() {
+    super.initState();
+    _noteController = TextEditingController(text: widget.state.note);
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.colors;
+    final state = ref.watch(doneViewModelProvider(widget.state.recipe.id)).value ?? widget.state;
     final recipe = state.recipe;
     final viewModel = ref.read(doneViewModelProvider(recipe.id).notifier);
 
-    Future<void> finish() async {
-      final router = GoRouter.of(context);
+    Future<void> goToPantryUpdate() async {
       await viewModel.finish();
-      router.go(planLocation());
+      if (context.mounted) context.push(pantryUpdateLocation);
     }
 
     return Scaffold(
@@ -87,18 +106,33 @@ class _Done extends ConsumerWidget {
                   DoneHero(
                     meta: CookStrings.doneMeta(recipe.name, state.servings, recipe.steps.length),
                   ),
-                  if (state.used.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.s6),
-                    UpdatePantrySection(
-                      items: state.used,
-                      usedUp: state.usedUp,
-                      onToggle: viewModel.toggleUsedUp,
-                    ),
-                  ],
                   const SizedBox(height: AppSpacing.s6),
                   const SectionHeader(title: CookStrings.howWasIt),
                   const SizedBox(height: AppSpacing.s2),
                   RatingGrid(selected: state.rating, onSelect: viewModel.rate),
+                  const SizedBox(height: AppSpacing.s4),
+                  const SectionHeader(title: CookStrings.doneNote),
+                  const SizedBox(height: AppSpacing.s2),
+                  TextField(
+                    controller: _noteController,
+                    minLines: 2,
+                    maxLines: 3,
+                    maxLength: 300,
+                    onChanged: viewModel.setNote,
+                    decoration: InputDecoration(
+                      hintText: CookStrings.doneNoteHint,
+                      hintStyle: AppTextStyles.body.copyWith(color: colors.inkMuted),
+                      counterStyle: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+                    ),
+                  ),
+                  if (state.rating == CookRating.bad) ...[
+                    const SizedBox(height: AppSpacing.s2),
+                    Text(
+                      CookStrings.demotedNote,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.caption.copyWith(color: context.colors.inkMuted),
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.s2),
                   Align(
                     alignment: AlignmentDirectional.centerStart,
@@ -122,23 +156,11 @@ class _Done extends ConsumerWidget {
               ),
             ),
             CookFooter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: AppSpacing.s2,
-                children: [
-                  if (state.rating == CookRating.bad)
-                    Text(
-                      CookStrings.demotedNote,
-                      textAlign: TextAlign.center,
-                      style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
-                    ),
-                  AppButton(
-                    label: state.used.isEmpty ? CookStrings.finish : CookStrings.finishAndUpdate,
-                    size: AppButtonSize.lg,
-                    block: true,
-                    onPressed: state.finishing ? null : finish,
-                  ),
-                ],
+              child: AppButton(
+                label: CookStrings.doneNoteToPantry,
+                size: AppButtonSize.lg,
+                block: true,
+                onPressed: state.finishing ? null : goToPantryUpdate,
               ),
             ),
           ],

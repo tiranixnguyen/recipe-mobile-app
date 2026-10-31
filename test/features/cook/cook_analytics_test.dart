@@ -12,6 +12,7 @@ import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_view_
 import 'package:recipe_mobile_app/features/cook/presentation/done/done_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_done/meal_done_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_prep/meal_prep_view_model.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/pantry_update/pantry_update_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/prep/prep_view_model.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
@@ -108,18 +109,35 @@ void main() {
     ]);
   });
 
-  test('finish_cooking và rate_recipe khi xong một món', () async {
+  test('cook_note khi xong Done, finish_cooking và rate_recipe khi PantryUpdate xong', () async {
     final env = _Env();
     await env.container.read(pantryItemsProvider.notifier).addToPantry('egg');
     await env.container.read(cookSessionProvider.notifier).startRecipe('trung', 1);
-    final provider = doneViewModelProvider('trung');
-    await env.load(provider);
-    final viewModel = env.container.read(provider.notifier);
-    viewModel.toggleUsedUp('egg');
-    viewModel.rate(CookRating.bad);
-    await viewModel.finish();
+    final doneProvider = doneViewModelProvider('trung');
+    await env.load(doneProvider);
+    final doneVM = env.container.read(doneProvider.notifier);
+    doneVM.rate(CookRating.bad);
+    await doneVM.finish();
+
+    // Sau Done: cook_note
+    expect(env.events, [
+      [
+        'cook_note',
+        {'dish_notes': 0, 'meal_note': false},
+      ],
+    ]);
+
+    // PantryUpdate: bỏ tick egg (hết), xong
+    final pantryProvider = pantryUpdateViewModelProvider;
+    env.container.listen(pantryProvider, (_, _) {});
+    env.container.read(pantryProvider.notifier).toggleKeep('egg');
+    await env.container.read(pantryProvider.notifier).finish();
 
     expect(env.events, [
+      [
+        'cook_note',
+        {'dish_notes': 0, 'meal_note': false},
+      ],
       [
         'finish_cooking',
         {'used_up': 1, 'rated': true, 'meal_dishes': 1},
@@ -134,19 +152,24 @@ void main() {
   test('không chấm thì không có rate_recipe', () async {
     final env = _Env();
     await env.container.read(cookSessionProvider.notifier).startRecipe('trung', 1);
-    final provider = doneViewModelProvider('trung');
-    await env.load(provider);
-    await env.container.read(provider.notifier).finish();
+    final doneProvider = doneViewModelProvider('trung');
+    await env.load(doneProvider);
+    await env.container.read(doneProvider.notifier).finish();
 
-    expect(env.events, [
+    env.container.listen(pantryUpdateViewModelProvider, (_, _) {});
+    await env.container.read(pantryUpdateViewModelProvider.notifier).finish();
+
+    final finishEvent = env.events.where((e) => e.first == 'finish_cooking').toList();
+    expect(finishEvent, [
       [
         'finish_cooking',
         {'used_up': 0, 'rated': false, 'meal_dishes': 1},
       ],
     ]);
+    expect(env.events.where((e) => e.first == 'rate_recipe'), isEmpty);
   });
 
-  test('xong cả bữa: một finish_cooking, mỗi món đã chấm một rate_recipe', () async {
+  test('xong cả bữa: cook_note, rồi finish_cooking + rate_recipe sau PantryUpdate', () async {
     final env = _Env();
     final plan = env.container.read(plannedMealsProvider.notifier);
     await plan.addToPlan('trung', _day, Meal.dinner);
@@ -160,11 +183,18 @@ void main() {
     viewModel.rate(0, CookRating.good);
     await viewModel.finish();
 
-    expect(env.events, [
+    // PantryUpdate xong
+    env.container.listen(pantryUpdateViewModelProvider, (_, _) {});
+    await env.container.read(pantryUpdateViewModelProvider.notifier).finish();
+
+    final finishEvent = env.events.where((e) => e.first == 'finish_cooking').toList();
+    expect(finishEvent, [
       [
         'finish_cooking',
         {'used_up': 0, 'rated': true, 'meal_dishes': 2},
       ],
+    ]);
+    expect(env.events.where((e) => e.first == 'rate_recipe').toList(), [
       [
         'rate_recipe',
         {'rating': 'good'},
