@@ -1,49 +1,56 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:recipe_mobile_app/core/analytics.dart';
+import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_history.dart';
 
-class _NotFound implements Exception {
-  const _NotFound();
-  @override
-  String toString() => 'HistoryEntry not found';
+@immutable
+class HistoryEntryState {
+  const HistoryEntryState({required this.entry, required this.recipes});
+
+  /// Null khi đã bị xoá hoặc id không có (link cũ).
+  final CookHistoryEntry? entry;
+  final Map<String, Recipe> recipes;
+
+  String nameOf(String recipeId) => recipes[recipeId]?.name ?? recipeId;
 }
 
-/// ViewModel cho màn Chi tiết lần nấu.
-class HistoryEntryViewModel extends Notifier<AsyncValue<CookHistoryEntry>> {
-  HistoryEntryViewModel(this._entryId);
+/// ViewModel cho màn Chi tiết lần nấu: sửa điểm/ghi chú tự lưu, xoá kèm Hoàn tác.
+class HistoryEntryViewModel extends Notifier<HistoryEntryState> {
+  HistoryEntryViewModel(this.entryId);
 
-  final String _entryId;
+  final String entryId;
 
   @override
-  AsyncValue<CookHistoryEntry> build() {
-    final all = ref.watch(cookHistoryProvider);
-    final entry = all.where((e) => e.id == _entryId).firstOrNull;
-    if (entry == null) return const AsyncError(_NotFound(), StackTrace.empty);
-    return AsyncData(entry);
+  HistoryEntryState build() {
+    final entry = ref.watch(cookHistoryProvider).where((e) => e.id == entryId).firstOrNull;
+    final recipes = ref.watch(recipesProvider).value ?? const <Recipe>[];
+    return HistoryEntryState(entry: entry, recipes: {for (final r in recipes) r.id: r});
   }
 
-  Future<void> setDishRating(int dishIdx, CookRating? rating) =>
-      ref.read(cookHistoryProvider.notifier).updateDishRating(_entryId, dishIdx, rating);
+  Future<void> setDishRating(int index, CookRating? rating) =>
+      ref.read(cookHistoryProvider.notifier).updateDishRating(entryId, index, rating);
 
-  Future<void> setDishNote(int dishIdx, String note) =>
-      ref.read(cookHistoryProvider.notifier).updateDishNote(_entryId, dishIdx, note);
+  Future<void> setDishNote(int index, String note) =>
+      ref.read(cookHistoryProvider.notifier).updateDishNote(entryId, index, note);
 
   Future<void> setMealNote(String note) =>
-      ref.read(cookHistoryProvider.notifier).updateMealNote(_entryId, note);
+      ref.read(cookHistoryProvider.notifier).updateMealNote(entryId, note);
 
-  Future<CookHistoryEntry?> deleteEntry() async {
-    ref.read(analyticsProvider).track('history_delete', {'undo': false});
-    return ref.read(cookHistoryProvider.notifier).delete(_entryId);
+  /// Xoá lần nấu; trả về mục đã xoá để Hoàn tác, null khi không có (đã xoá từ nơi khác).
+  Future<CookHistoryEntry?> delete() async {
+    final removed = await ref.read(cookHistoryProvider.notifier).delete(entryId);
+    if (removed != null) ref.read(analyticsProvider).track('history_delete', {'undo': false});
+    return removed;
   }
 
   Future<void> restore(CookHistoryEntry entry) async {
-    ref.read(analyticsProvider).track('history_delete', {'undo': true});
     await ref.read(cookHistoryProvider.notifier).restore(entry);
+    ref.read(analyticsProvider).track('history_delete', {'undo': true});
   }
 }
 
 final historyEntryViewModelProvider = NotifierProvider.autoDispose
-    .family<HistoryEntryViewModel, AsyncValue<CookHistoryEntry>, String>(
-      HistoryEntryViewModel.new,
-    );
+    .family<HistoryEntryViewModel, HistoryEntryState, String>(HistoryEntryViewModel.new);

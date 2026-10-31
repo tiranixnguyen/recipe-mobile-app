@@ -11,13 +11,7 @@
 library;
 
 export 'data/cook_history.dart'
-    show
-        CookHistoryController,
-        CookHistoryEntry,
-        CookRating,
-        CookRecord,
-        CookSessionDish,
-        cookHistoryProvider;
+    show CookedDish, CookHistoryController, CookHistoryEntry, CookRating, cookHistoryProvider;
 export 'data/pending_cook.dart' show PendingCookData, pendingCookProvider;
 export 'presentation/history/history_screen.dart' show HistoryScreen;
 export 'presentation/history_entry/history_entry_screen.dart' show HistoryEntryScreen;

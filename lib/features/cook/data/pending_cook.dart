@@ -11,20 +11,18 @@ import 'package:recipe_mobile_app/features/cook/domain/cook_done.dart';
 class PendingCookData {
   const PendingCookData({
     required this.dishes,
-    required this.servings,
     required this.isMeal,
-    this.meal,
-    this.minutes,
+    required this.meal,
+    this.minutes = 0,
     this.mealNote = '',
     this.planned,
     required this.usedItems,
   });
 
-  final List<CookSessionDish> dishes;
-  final int servings;
+  final List<CookedDish> dishes;
   final bool isMeal;
-  final Meal? meal;
-  final int? minutes;
+  final Meal meal;
+  final int minutes;
   final String mealNote;
 
   /// Bữa trong thực đơn khi nấu cả bữa (để đánh dấu đã nấu sau PantryUpdate).

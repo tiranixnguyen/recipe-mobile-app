@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
+import 'package:recipe_mobile_app/features/cook/domain/history.dart';
 
 const _historyKey = 'cook.history';
 
@@ -20,7 +21,7 @@ enum CookRating {
   final String id;
   final String label;
 
-  static CookRating? tryParse(String? value) {
+  static CookRating? tryParse(Object? value) {
     for (final rating in values) {
       if (rating.id == value) return rating;
     }
@@ -28,278 +29,297 @@ enum CookRating {
   }
 }
 
-/// Một món trong lần nấu.
+/// Một món trong một lần nấu.
 @immutable
-class CookSessionDish {
-  const CookSessionDish({required this.recipeId, this.rating, this.note = ''});
+class CookedDish {
+  CookedDish({required this.recipeId, this.servings = 1, this.rating, String note = ''})
+    : note = trimCookNote(note);
 
   final String recipeId;
+  final int servings;
+
+  /// Null khi bỏ qua bước chấm.
   final CookRating? rating;
 
-  /// Ghi chú cá nhân, tối đa 300 ký tự.
+  /// Ghi chú riêng cho món, tối đa [maxCookNote] ký tự.
   final String note;
 
-  Map<String, dynamic> toJson() => {
-    'recipeId': recipeId,
-    if (rating != null) 'rating': rating!.id,
-    'note': note,
-  };
-
-  static CookSessionDish? tryParse(Object? json) {
-    if (json case {'recipeId': String recipeId}) {
-      final rating = json['rating'];
-      final note = json['note'];
-      return CookSessionDish(
-        recipeId: recipeId,
-        rating: rating is String ? CookRating.tryParse(rating) : null,
-        note: note is String ? note : '',
-      );
-    }
-    return null;
-  }
-
-  CookSessionDish copyWith({CookRating? Function()? rating, String? note}) => CookSessionDish(
+  /// [rating] null bỏ qua; truyền hàm trả null để xoá đánh giá (bấm lại nút đang chọn).
+  CookedDish copyWith({CookRating? Function()? rating, String? note}) => CookedDish(
     recipeId: recipeId,
+    servings: servings,
     rating: rating != null ? rating() : this.rating,
     note: note ?? this.note,
   );
 
-  @override
-  bool operator ==(Object other) =>
-      other is CookSessionDish &&
-      other.recipeId == recipeId &&
-      other.rating == rating &&
-      other.note == note;
-
-  @override
-  int get hashCode => Object.hash(recipeId, rating, note);
-}
-
-/// Một lần nấu (một món hoặc cả bữa), lưu vào lịch sử.
-@immutable
-class CookHistoryEntry {
-  const CookHistoryEntry({
-    required this.id,
-    required this.cookedAt,
-    this.meal,
-    required this.isMeal,
-    required this.servings,
-    this.minutes,
-    required this.dishes,
-    this.mealNote = '',
-  });
-
-  final String id;
-  final DateTime cookedAt;
-
-  /// Bữa khi nấu cả bữa; null khi nấu một món.
-  final Meal? meal;
-  final bool isMeal;
-  final int servings;
-  final int? minutes;
-  final List<CookSessionDish> dishes;
-  final String mealNote;
-
-  /// Đánh giá món đầu tiên — dùng cho app_review.dart (backward compat với CookRecord cũ).
-  CookRating? get rating => dishes.firstOrNull?.rating;
-
-  /// recipeId món đầu tiên — backward compat.
-  String get recipeId => dishes.first.recipeId;
-
-  Map<String, dynamic> toJson() => {
-    'version': 2,
-    'id': id,
-    'cookedAt': cookedAt.toIso8601String(),
-    if (meal != null) 'meal': meal!.id,
-    'isMeal': isMeal,
+  Map<String, Object?> toJson() => {
+    'recipeId': recipeId,
     'servings': servings,
-    if (minutes != null) 'minutes': minutes,
-    'dishes': [for (final d in dishes) d.toJson()],
-    'mealNote': mealNote,
+    if (rating case final r?) 'rating': r.id,
+    if (note.isNotEmpty) 'note': note,
   };
 
-  static CookHistoryEntry? tryParse(Object? json) {
-    if (json is! Map) return null;
-    // Format cũ v1: CookRecord có recipeId ở root, không có version.
-    if (!json.containsKey('version')) {
-      if (json case {'recipeId': String recipeId, 'cookedAt': String cookedAt}) {
-        final at = DateTime.tryParse(cookedAt);
-        if (at == null) return null;
-        final ratingVal = json['rating'];
-        return CookHistoryEntry(
-          id: '${recipeId}_$cookedAt',
-          cookedAt: at,
-          isMeal: false,
-          servings: 1,
-          dishes: List.unmodifiable([
-            CookSessionDish(
-              recipeId: recipeId,
-              rating: ratingVal is String ? CookRating.tryParse(ratingVal) : null,
-            ),
-          ]),
-        );
-      }
-      return null;
-    }
-    // Format v2.
-    if (json case {
-      'version': 2,
-      'id': String id,
-      'cookedAt': String cookedAt,
-      'isMeal': bool isMeal,
-      'servings': int servings,
-      'dishes': List<dynamic> dishList,
-    }) {
-      final at = DateTime.tryParse(cookedAt);
-      if (at == null) return null;
-      final dishes = dishList.map(CookSessionDish.tryParse).nonNulls.toList();
-      if (dishes.isEmpty) return null;
-      final mealStr = json['meal'];
-      final mealNote = json['mealNote'];
-      return CookHistoryEntry(
-        id: id,
-        cookedAt: at,
-        meal: mealStr is String ? Meal.tryParse(mealStr) : null,
-        isMeal: isMeal,
-        servings: servings,
-        minutes: json['minutes'] is int ? json['minutes'] as int : null,
-        dishes: List.unmodifiable(dishes),
-        mealNote: mealNote is String ? mealNote : '',
+  static CookedDish? tryParse(Object? json) {
+    if (json case {'recipeId': String recipeId} when recipeId.isNotEmpty) {
+      return CookedDish(
+        recipeId: recipeId,
+        servings: switch (json['servings']) {
+          final int s when s > 0 => s,
+          _ => 1,
+        },
+        rating: CookRating.tryParse(json['rating']),
+        note: switch (json['note']) {
+          final String note => note,
+          _ => '',
+        },
       );
     }
     return null;
   }
 
-  CookHistoryEntry copyWith({
-    List<CookSessionDish>? dishes,
-    String? mealNote,
-  }) => CookHistoryEntry(
+  @override
+  bool operator ==(Object other) =>
+      other is CookedDish &&
+      other.recipeId == recipeId &&
+      other.servings == servings &&
+      other.rating == rating &&
+      other.note == note;
+
+  @override
+  int get hashCode => Object.hash(recipeId, servings, rating, note);
+
+  @override
+  String toString() => 'CookedDish($recipeId, ${rating?.id}, note: ${note.length})';
+}
+
+/// Một lần nấu đã xong: một món (từ Chi tiết) hoặc cả bữa (từ Thực đơn).
+@immutable
+class CookHistoryEntry {
+  CookHistoryEntry({
+    required this.id,
+    required this.cookedAt,
+    required this.meal,
+    required this.isMeal,
+    required List<CookedDish> dishes,
+    this.minutes = 0,
+    String mealNote = '',
+  }) : assert(dishes.isNotEmpty),
+       dishes = List.unmodifiable(dishes),
+       mealNote = trimCookNote(mealNote);
+
+  final String id;
+  final DateTime cookedAt;
+
+  /// Bữa trong Thực đơn khi nấu cả bữa; nấu một món thì là bữa theo giờ nấu xong.
+  final Meal meal;
+
+  /// Nấu cả bữa ("Nấu lại bữa này") thay vì một món.
+  final bool isMeal;
+  final List<CookedDish> dishes;
+
+  /// Tổng thời gian ước tính của các món; 0 khi không rõ (dữ liệu cũ).
+  final int minutes;
+
+  /// Ghi chú cho cả lần nấu ("Ghi chú cho bữa", một món thì là "Ghi chú").
+  final String mealNote;
+
+  int get servings => dishes.first.servings;
+
+  /// Món đầu — tiện cho lần nấu một món; cả bữa thì duyệt [dishes].
+  String get recipeId => dishes.first.recipeId;
+  CookRating? get rating => dishes.first.rating;
+
+  bool get hasNote => mealNote.isNotEmpty || dishes.any((d) => d.note.isNotEmpty);
+
+  CookHistoryEntry copyWith({List<CookedDish>? dishes, String? mealNote}) => CookHistoryEntry(
     id: id,
     cookedAt: cookedAt,
     meal: meal,
     isMeal: isMeal,
-    servings: servings,
-    minutes: minutes,
     dishes: dishes ?? this.dishes,
+    minutes: minutes,
     mealNote: mealNote ?? this.mealNote,
   );
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'cookedAt': cookedAt.toIso8601String(),
+    'meal': meal.id,
+    'isMeal': isMeal,
+    'dishes': [for (final d in dishes) d.toJson()],
+    if (minutes > 0) 'minutes': minutes,
+    if (mealNote.isNotEmpty) 'mealNote': mealNote,
+  };
+
+  /// Đọc một mục của `cook.history`; null khi hỏng. Mục kiểu cũ (`{recipeId, cookedAt, rating}`,
+  /// mỗi món một mục) thành một lần nấu một món, id [legacyId].
+  static CookHistoryEntry? tryParse(Object? json, {required String legacyId}) {
+    if (json case {'recipeId': String recipeId, 'cookedAt': String rawAt}
+        when !json.containsKey('dishes')) {
+      final at = DateTime.tryParse(rawAt);
+      final dish = CookedDish.tryParse({'recipeId': recipeId, 'rating': json['rating']});
+      if (at == null || dish == null) return null;
+      return CookHistoryEntry(
+        id: legacyId,
+        cookedAt: at,
+        meal: mealAt(at),
+        isMeal: false,
+        dishes: [dish],
+      );
+    }
+    if (json case {'id': String id, 'cookedAt': String rawAt, 'dishes': List<dynamic> rawDishes}
+        when id.isNotEmpty) {
+      final at = DateTime.tryParse(rawAt);
+      final dishes = rawDishes.map(CookedDish.tryParse).nonNulls.toList();
+      if (at == null || dishes.isEmpty || dishes.length != rawDishes.length) return null;
+      return CookHistoryEntry(
+        id: id,
+        cookedAt: at,
+        meal: switch (json['meal']) {
+          final String m => Meal.tryParse(m) ?? mealAt(at),
+          _ => mealAt(at),
+        },
+        isMeal: json['isMeal'] == true,
+        dishes: dishes,
+        minutes: switch (json['minutes']) {
+          final int m when m > 0 => m,
+          _ => 0,
+        },
+        mealNote: switch (json['mealNote']) {
+          final String note => note,
+          _ => '',
+        },
+      );
+    }
+    return null;
+  }
 
   @override
   bool operator ==(Object other) =>
       other is CookHistoryEntry &&
       other.id == id &&
       other.cookedAt == cookedAt &&
-      other.isMeal == isMeal;
+      other.meal == meal &&
+      other.isMeal == isMeal &&
+      listEquals(other.dishes, dishes) &&
+      other.minutes == minutes &&
+      other.mealNote == mealNote;
 
   @override
-  int get hashCode => Object.hash(id, cookedAt, isMeal);
+  int get hashCode =>
+      Object.hash(id, cookedAt, meal, isMeal, Object.hashAll(dishes), minutes, mealNote);
 
   @override
-  String toString() => 'CookHistoryEntry($id, $cookedAt, dishes: ${dishes.length})';
+  String toString() => 'CookHistoryEntry($id, $cookedAt, ${meal.id}, $dishes)';
 }
 
-/// Alias backward compat: app_review.dart dùng CookRecord, giờ trỏ tới CookHistoryEntry.
-typedef CookRecord = CookHistoryEntry;
-
-/// Lịch sử nấu, cũ trước mới sau.
+/// Lịch sử nấu (LocalStore `cook.history`), cũ trước mới sau.
 class CookHistoryController extends Notifier<List<CookHistoryEntry>> {
   @override
   List<CookHistoryEntry> build() {
     final raw = ref.watch(localStoreProvider).readString(_historyKey);
     if (raw == null) return const [];
     try {
-      final list = jsonDecode(raw) as List<dynamic>;
-      return List.unmodifiable(list.map(CookHistoryEntry.tryParse).nonNulls);
+      final list = jsonDecode(raw);
+      if (list is! List) return const [];
+      // Mục hỏng thì bỏ riêng mục đó; lần ghi sau sẽ không còn nó.
+      return List.unmodifiable([
+        for (final (i, item) in list.indexed)
+          ?CookHistoryEntry.tryParse(item, legacyId: 'legacy-$i'),
+      ]);
     } on Object {
       return const [];
     }
   }
 
-  Future<void> _save() async {
-    await ref
-        .read(localStoreProvider)
-        .writeString(_historyKey, jsonEncode([for (final e in state) e.toJson()]));
-  }
-
-  /// Ghi một lần nấu mới vào cuối danh sách.
+  /// Ghi lần nấu mới (một món hoặc cả bữa); id đã có thì bỏ qua.
   Future<void> recordEntry(CookHistoryEntry entry) async {
-    state = List.unmodifiable([...state, entry]);
-    await _save();
+    if (state.any((e) => e.id == entry.id)) return;
+    await _save([...state, entry]);
   }
 
-  /// Backward compat: ghi một món đơn.
-  Future<void> record(String recipeId, {CookRating? rating, DateTime? at}) async {
+  /// Ghi nhanh một món đơn, không ghi chú; [recordEntry] cho lần nấu đầy đủ (PantryUpdate).
+  Future<void> record(String recipeId, {CookRating? rating, DateTime? at}) {
     final now = at ?? ref.read(cookClockProvider)();
-    await recordEntry(
+    return recordEntry(
       CookHistoryEntry(
-        id: '${recipeId}_${now.millisecondsSinceEpoch}',
+        id: uniqueHistoryId(recipeId, now, state.map((e) => e.id)),
         cookedAt: now,
+        meal: mealAt(now),
         isMeal: false,
-        servings: 1,
-        dishes: List.unmodifiable([CookSessionDish(recipeId: recipeId, rating: rating)]),
+        dishes: [CookedDish(recipeId: recipeId, rating: rating)],
       ),
     );
   }
 
-  Future<void> updateDishRating(String entryId, int dishIdx, CookRating? rating) async {
-    state = List.unmodifiable([
-      for (final e in state)
-        if (e.id == entryId && dishIdx < e.dishes.length)
-          e.copyWith(
-            dishes: List.unmodifiable([
-              for (final (i, d) in e.dishes.indexed)
-                if (i == dishIdx) d.copyWith(rating: () => rating) else d,
-            ]),
-          )
-        else
-          e,
-    ]);
-    await _save();
-  }
+  /// Sửa đánh giá món thứ [index] của lần nấu [entryId]; null xoá đánh giá.
+  Future<void> updateDishRating(String entryId, int index, CookRating? rating) => _update(entryId, (
+    e,
+  ) {
+    if (index < 0 || index >= e.dishes.length) return e;
+    return e.copyWith(
+      dishes: [
+        for (final (i, d) in e.dishes.indexed) i == index ? d.copyWith(rating: () => rating) : d,
+      ],
+    );
+  });
 
-  Future<void> updateDishNote(String entryId, int dishIdx, String note) async {
-    final trimmed = note.length > 300 ? note.substring(0, 300) : note;
-    state = List.unmodifiable([
-      for (final e in state)
-        if (e.id == entryId && dishIdx < e.dishes.length)
-          e.copyWith(
-            dishes: List.unmodifiable([
-              for (final (i, d) in e.dishes.indexed)
-                if (i == dishIdx) d.copyWith(note: trimmed) else d,
-            ]),
-          )
-        else
-          e,
-    ]);
-    await _save();
-  }
+  /// Sửa ghi chú món thứ [index] của lần nấu [entryId].
+  Future<void> updateDishNote(String entryId, int index, String note) => _update(entryId, (e) {
+    if (index < 0 || index >= e.dishes.length) return e;
+    return e.copyWith(
+      dishes: [
+        for (final (i, d) in e.dishes.indexed) i == index ? d.copyWith(note: note) : d,
+      ],
+    );
+  });
 
-  Future<void> updateMealNote(String entryId, String note) async {
-    final trimmed = note.length > 300 ? note.substring(0, 300) : note;
-    state = List.unmodifiable([
-      for (final e in state)
-        if (e.id == entryId) e.copyWith(mealNote: trimmed) else e,
-    ]);
-    await _save();
-  }
+  Future<void> updateMealNote(String entryId, String note) =>
+      _update(entryId, (e) => e.copyWith(mealNote: note));
 
-  /// Xoá lần nấu [entryId]; trả về entry đã xoá để hoàn tác, null nếu không tìm thấy.
+  /// Xoá lần nấu [entryId]; trả về mục đã xoá để Hoàn tác, null khi không có.
   Future<CookHistoryEntry?> delete(String entryId) async {
     final entry = state.where((e) => e.id == entryId).firstOrNull;
     if (entry == null) return null;
-    state = List.unmodifiable(state.where((e) => e.id != entryId));
-    await _save();
+    await _save([
+      for (final e in state)
+        if (e.id != entryId) e,
+    ]);
     return entry;
   }
 
-  /// Khôi phục entry đã xoá; chèn đúng vị trí theo [cookedAt].
+  /// Hoàn tác [delete]: chèn lại đúng chỗ theo giờ nấu.
   Future<void> restore(CookHistoryEntry entry) async {
-    final list = [...state, entry]..sort((a, b) => a.cookedAt.compareTo(b.cookedAt));
-    state = List.unmodifiable(list);
-    await _save();
+    if (state.any((e) => e.id == entry.id)) return;
+    await _save([...state, entry]..sort((a, b) => a.cookedAt.compareTo(b.cookedAt)));
+  }
+
+  Future<void> _update(String entryId, CookHistoryEntry Function(CookHistoryEntry) change) async {
+    var changed = false;
+    final next = [
+      for (final e in state)
+        if (e.id == entryId)
+          () {
+            final updated = change(e);
+            changed = updated != e;
+            return updated;
+          }()
+        else
+          e,
+    ];
+    if (changed) await _save(next);
+  }
+
+  Future<void> _save(List<CookHistoryEntry> entries) async {
+    state = List.unmodifiable(entries);
+    await ref
+        .read(localStoreProvider)
+        .writeString(_historyKey, jsonEncode([for (final e in state) e.toJson()]));
   }
 }
 
+/// Đọc: `ref.watch(cookHistoryProvider)`; mỗi mục một lần nấu, duyệt `entry.dishes` để có từng
+/// món kèm đánh giá.
 final cookHistoryProvider = NotifierProvider<CookHistoryController, List<CookHistoryEntry>>(
   CookHistoryController.new,
 );

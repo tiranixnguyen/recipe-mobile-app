@@ -361,7 +361,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(container.read(pantryItemsProvider), {'scallion'});
-    expect(container.read(cookHistoryProvider).single.recipeId, 'trung');
+    expect(container.read(cookHistoryProvider).single.dishes.single.recipeId, 'trung');
     expect(container.read(cookSessionProvider), isNull);
   });
 }

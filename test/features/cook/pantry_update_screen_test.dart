@@ -2,39 +2,57 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
 import 'package:recipe_mobile_app/features/cook/data/app_review.dart';
-import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
-import 'package:recipe_mobile_app/features/cook/routes.dart';
+import 'package:recipe_mobile_app/features/cook/domain/cook_done.dart';
+import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 
 import 'fakes.dart';
-import 'fixtures.dart';
 
 void main() {
-  testWidgets('PantryUpdateScreen món đơn: bỏ tick thì xoá khỏi tủ và hoàn thành', (
+  testWidgets('PantryUpdateScreen: bỏ tick thì xoá khỏi tủ, ghi lịch sử và mở Lịch sử', (
     tester,
   ) async {
     final container = ProviderContainer(
       overrides: [
         localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
-        recipesProvider.overrideWith((ref) async => const [cookRecipeFixture]),
-        ingredientsProvider.overrideWith((ref) async => cookIngredientsFixture),
         appReviewProvider.overrideWithValue(FakeAppReview()),
       ],
     );
+    addTearDown(container.dispose);
     for (final id in ['egg', 'scallion']) {
       await container.read(pantryItemsProvider.notifier).addToPantry(id);
     }
-    await container.read(cookSessionProvider.notifier).startRecipe('trung', 2);
+    container
+        .read(pendingCookProvider.notifier)
+        .set(
+          PendingCookData(
+            dishes: [CookedDish(recipeId: 'trung', servings: 2, rating: CookRating.good)],
+            isMeal: false,
+            meal: Meal.lunch,
+            minutes: 10,
+            usedItems: const [
+              UsedItem(ingredientId: 'egg', name: 'Trứng gà', note: 'Đã dùng 2 quả'),
+              UsedItem(ingredientId: 'scallion', name: 'Hành lá', note: 'Đã dùng 1 nắm'),
+            ],
+          ),
+        );
 
+    String? lastLocation;
     final router = GoRouter(
-      initialLocation: pantryUpdateLocation('trung'),
+      initialLocation: pantryUpdateLocation,
       routes: [
-        GoRoute(path: '/plan', builder: (_, _) => const Text('at plan')),
+        GoRoute(
+          path: historyLocation,
+          builder: (_, state) {
+            lastLocation = state.uri.toString();
+            return const Scaffold(body: Text('at history'));
+          },
+        ),
         ...cookRoutes,
       ],
     );
@@ -42,28 +60,28 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp.router(
-          theme: AppTheme.light,
-          routerConfig: router,
-        ),
+        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Nguyên liệu chưa dùng tới'), findsOneWidget);
-    expect(find.text('Tick thứ vẫn còn trong tủ. Bỏ tick thì app xoá khỏi tủ.'), findsOneWidget);
+    expect(find.text(CookStrings.pantryUpdateTitle), findsOneWidget);
+    expect(find.text(CookStrings.pantryUpdateHint), findsOneWidget);
+    expect(find.text(CookStrings.pantryWillRemoveNothing), findsOneWidget);
 
-    // Bỏ tick một nguyên liệu
-    await tester.tap(find.widgetWithText(CheckboxListTile, 'Hành lá'));
+    // Bỏ tick "Hành lá": vẫn còn trong tủ → sẽ bị xoá.
+    await tester.tap(find.text('Hành lá'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Sẽ xoá khỏi tủ: hành lá'), findsOneWidget);
+    expect(find.textContaining('hành lá'), findsOneWidget);
 
-    await tester.tap(find.text('Cập nhật tủ và xong'));
+    await tester.tap(find.text(CookStrings.pantryUpdateFinish));
     await tester.pumpAndSettle();
 
     expect(container.read(pantryItemsProvider), {'egg'});
     expect(container.read(cookHistoryProvider), hasLength(1));
-    expect(find.text('at plan'), findsOneWidget);
+    expect(container.read(cookHistoryProvider).single.dishes.single.recipeId, 'trung');
+    expect(find.text('at history'), findsOneWidget);
+    expect(lastLocation, startsWith('$historyLocation?highlight='));
   });
 }

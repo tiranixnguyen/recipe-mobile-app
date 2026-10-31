@@ -124,13 +124,13 @@ class MealDoneViewModel extends Notifier<AsyncValue<MealDoneState>> {
             PendingCookData(
               dishes: [
                 for (final (i, d) in dishes.indexed)
-                  CookSessionDish(
+                  CookedDish(
                     recipeId: d.recipe.id,
+                    servings: d.servings,
                     rating: value.ratings[i],
                     note: value.dishNotes[i] ?? '',
                   ),
               ],
-              servings: value.servings,
               isMeal: true,
               meal: value.slot.meal,
               minutes: value.minutes,

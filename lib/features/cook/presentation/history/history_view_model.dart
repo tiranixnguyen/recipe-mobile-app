@@ -2,143 +2,121 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:recipe_mobile_app/core/analytics.dart';
+import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_history.dart';
+import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
+import 'package:recipe_mobile_app/features/cook/domain/history.dart';
 
 enum HistoryFilter { all, good, note }
 
 @immutable
 class HistoryState {
   const HistoryState({
-    required this.sessions,
-    required this.query,
-    required this.filter,
+    required this.entries,
+    required this.recipes,
+    this.query = '',
+    this.filter = HistoryFilter.all,
     this.highlightId,
-    this.snackShown = false,
   });
 
-  final List<CookHistoryEntry> sessions;
+  /// Mới nhất trước.
+  final List<CookHistoryEntry> entries;
+  final Map<String, Recipe> recipes;
   final String query;
   final HistoryFilter filter;
+
+  /// Lần nấu vừa ghi (từ PantryUpdate); hiện nhãn "Vừa nấu" và snackbar một lần.
   final String? highlightId;
-  final bool snackShown;
 
-  List<CookHistoryEntry> get filtered {
-    var list = sessions;
-    if (filter == HistoryFilter.good) {
-      list = list.where((e) => e.dishes.any((d) => d.rating == CookRating.good)).toList();
-    } else if (filter == HistoryFilter.note) {
-      list = list
-          .where((e) => e.mealNote.isNotEmpty || e.dishes.any((d) => d.note.isNotEmpty))
-          .toList();
-    }
-    if (query.isNotEmpty) {
-      final q = _normalize(query);
-      list = list.where((e) {
-        if (e.dishes.any((d) => _normalize(d.recipeId).contains(q))) return true;
-        if (_normalize(e.mealNote).contains(q)) return true;
-        if (e.dishes.any((d) => _normalize(d.note).contains(q))) return true;
-        return false;
-      }).toList();
-    }
-    return list;
-  }
+  String nameOf(String recipeId) => recipes[recipeId]?.name ?? recipeId;
 
-  /// Nhóm: Hôm nay / Hôm qua / Tuần này / Trước đó.
-  List<(String, List<CookHistoryEntry>)> grouped(DateTime now) {
-    final today = _dateOnly(now);
-    final yesterday = today.subtract(const Duration(days: 1));
-    final weekStart = today.subtract(Duration(days: today.weekday - 1));
-
-    final Map<String, List<CookHistoryEntry>> groups = {};
-    for (final e in filtered) {
-      final d = _dateOnly(e.cookedAt);
-      final String label;
-      if (d == today) {
-        label = 'Hôm nay';
-      } else if (d == yesterday) {
-        label = 'Hôm qua';
-      } else if (!d.isBefore(weekStart)) {
-        label = 'Tuần này';
-      } else {
-        label = 'Trước đó';
-      }
-      groups.putIfAbsent(label, () => []).add(e);
-    }
-
-    const order = ['Hôm nay', 'Hôm qua', 'Tuần này', 'Trước đó'];
+  List<CookHistoryEntry> get visible {
+    final needle = foldVietnamese(query.trim());
     return [
-      for (final label in order)
-        if (groups[label] case final list?) (label, list),
+      for (final e in entries)
+        if (_matchesFilter(e) && (needle.isEmpty || _matchesQuery(e, needle))) e,
     ];
   }
 
-  int thisMonthCount(DateTime now) {
-    return sessions
-        .where((e) => e.cookedAt.year == now.year && e.cookedAt.month == now.month)
-        .length;
+  bool _matchesFilter(CookHistoryEntry e) => switch (filter) {
+    HistoryFilter.all => true,
+    HistoryFilter.good => e.dishes.any((d) => d.rating == CookRating.good),
+    HistoryFilter.note => e.hasNote,
+  };
+
+  bool _matchesQuery(CookHistoryEntry e, String needle) {
+    if (foldVietnamese(e.mealNote).contains(needle)) return true;
+    return e.dishes.any(
+      (d) => foldVietnamese('${nameOf(d.recipeId)} ${d.note}').contains(needle),
+    );
   }
+
+  /// Nhóm Hôm nay / Hôm qua / Tuần này / Trước đó, theo thứ tự hiển thị; nhóm rỗng bị bỏ.
+  List<(HistoryGroup, List<CookHistoryEntry>)> groups(DateTime now) {
+    final byGroup = <HistoryGroup, List<CookHistoryEntry>>{};
+    for (final e in visible) {
+      byGroup.putIfAbsent(historyGroupOf(e.cookedAt, now), () => []).add(e);
+    }
+    return [
+      for (final g in HistoryGroup.values)
+        if (byGroup[g] case final list?) (g, list),
+    ];
+  }
+
+  int monthCount(DateTime now) =>
+      entries.where((e) => e.cookedAt.year == now.year && e.cookedAt.month == now.month).length;
 }
 
-String _normalize(String s) => s.toLowerCase();
-DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
-
 class HistoryViewModel extends Notifier<HistoryState> {
-  HistoryViewModel(this._initialHighlightId);
+  HistoryViewModel(this._highlightId);
 
-  final String? _initialHighlightId;
+  final String? _highlightId;
+  bool _trackedOpen = false;
+  bool _snackShown = false;
+
+  bool get snackShown => _snackShown;
 
   @override
   HistoryState build() {
-    final all = ref.watch(cookHistoryProvider);
-    final sorted = [...all]..sort((a, b) => b.cookedAt.compareTo(a.cookedAt));
-    ref.read(analyticsProvider).track('view_history', {});
+    final entries = [...ref.watch(cookHistoryProvider)]
+      ..sort((a, b) => b.cookedAt.compareTo(a.cookedAt));
+    final recipes = ref.watch(recipesProvider).value ?? const <Recipe>[];
+    if (!_trackedOpen) {
+      _trackedOpen = true;
+      ref.read(analyticsProvider).track('view_history', {});
+    }
     return HistoryState(
-      sessions: List.unmodifiable(sorted),
-      query: '',
-      filter: HistoryFilter.all,
-      highlightId: _initialHighlightId,
+      entries: List.unmodifiable(entries),
+      recipes: {for (final r in recipes) r.id: r},
+      highlightId: _highlightId,
     );
   }
 
-  void search(String q) {
+  void search(String query) {
     state = HistoryState(
-      sessions: state.sessions,
-      query: q,
+      entries: state.entries,
+      recipes: state.recipes,
+      query: query,
       filter: state.filter,
       highlightId: state.highlightId,
-      snackShown: state.snackShown,
     );
   }
 
-  void setFilter(HistoryFilter f) {
-    ref.read(analyticsProvider).track('history_filter', {'filter': f.name});
+  void setFilter(HistoryFilter filter) {
+    ref.read(analyticsProvider).track('history_filter', {'filter': filter.name});
     state = HistoryState(
-      sessions: state.sessions,
+      entries: state.entries,
+      recipes: state.recipes,
       query: state.query,
-      filter: f,
+      filter: filter,
       highlightId: state.highlightId,
-      snackShown: state.snackShown,
     );
   }
 
-  void markSnackShown() {
-    state = HistoryState(
-      sessions: state.sessions,
-      query: state.query,
-      filter: state.filter,
-      highlightId: state.highlightId,
-      snackShown: true,
-    );
-  }
+  DateTime now() => ref.read(cookClockProvider)();
 
-  void clearHighlight() {
-    state = HistoryState(
-      sessions: state.sessions,
-      query: state.query,
-      filter: state.filter,
-      snackShown: state.snackShown,
-    );
-  }
+  void markSnackShown() => _snackShown = true;
 }
 
 final historyViewModelProvider = NotifierProvider.autoDispose

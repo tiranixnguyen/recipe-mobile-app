@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
-import 'package:recipe_mobile_app/features/cook/presentation/history_entry/history_entry_screen.dart';
 
 import 'fixtures.dart';
 
@@ -20,23 +20,20 @@ void main() {
         recipesProvider.overrideWith((ref) async => const [cookRecipeFixture]),
       ],
     );
+    addTearDown(container.dispose);
 
     final entry = CookHistoryEntry(
       id: 'entry-1',
       cookedAt: DateTime(2026, 10, 25, 12),
-      dishes: const [
-        HistoryDish(
-          recipeId: 'trung',
-          servings: 2,
-          rating: CookRating.good,
-          note: 'Lần đầu nấu',
-        ),
+      meal: Meal.lunch,
+      isMeal: false,
+      dishes: [
+        CookedDish(recipeId: 'trung', servings: 2, rating: CookRating.good, note: 'Lần đầu nấu'),
       ],
       minutes: 20,
-      note: 'Rất vừa miệng',
+      mealNote: 'Rất vừa miệng',
     );
-
-    await container.read(cookHistoryEntriesProvider.notifier).add(entry);
+    await container.read(cookHistoryProvider.notifier).recordEntry(entry);
 
     String? pushedRoute;
     final router = GoRouter(
@@ -48,7 +45,7 @@ void main() {
           routes: [
             GoRoute(
               path: ':id',
-              builder: (_, state) => HistoryEntryScreen(id: state.pathParameters['id']!),
+              builder: (_, state) => HistoryEntryScreen(entryId: state.pathParameters['id']!),
             ),
           ],
         ),
@@ -71,10 +68,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp.router(
-          theme: AppTheme.light,
-          routerConfig: router,
-        ),
+        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
@@ -83,14 +77,14 @@ void main() {
     expect(find.text('Nấu lại món này'), findsOneWidget);
     expect(find.text('Thêm vào thực đơn'), findsOneWidget);
 
-    // Chấm lại thành Tạm
-    await tester.tap(find.text('Tạm'));
+    // Chấm lại thành Tạm.
+    await tester.tap(find.byTooltip('Tạm · Trứng chiên hành'));
     await tester.pumpAndSettle();
 
-    final updated = container.read(cookHistoryEntriesProvider).single;
+    final updated = container.read(cookHistoryProvider).single;
     expect(updated.dishes.first.rating, CookRating.ok);
 
-    // Bấm Nấu lại món này
+    // Bấm Nấu lại món này.
     await tester.tap(find.text('Nấu lại món này'));
     await tester.pumpAndSettle();
 
@@ -104,15 +98,16 @@ void main() {
         recipesProvider.overrideWith((ref) async => const [cookRecipeFixture]),
       ],
     );
+    addTearDown(container.dispose);
 
     final entry = CookHistoryEntry(
       id: 'entry-del',
       cookedAt: DateTime(2026, 10, 25, 12),
-      dishes: const [
-        HistoryDish(recipeId: 'trung', servings: 2),
-      ],
+      meal: Meal.lunch,
+      isMeal: false,
+      dishes: [CookedDish(recipeId: 'trung', servings: 2)],
     );
-    await container.read(cookHistoryEntriesProvider.notifier).add(entry);
+    await container.read(cookHistoryProvider.notifier).recordEntry(entry);
 
     final router = GoRouter(
       initialLocation: historyEntryLocation('entry-del'),
@@ -123,7 +118,7 @@ void main() {
           routes: [
             GoRoute(
               path: ':id',
-              builder: (_, state) => HistoryEntryScreen(id: state.pathParameters['id']!),
+              builder: (_, state) => HistoryEntryScreen(entryId: state.pathParameters['id']!),
             ),
           ],
         ),
@@ -133,15 +128,12 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp.router(
-          theme: AppTheme.light,
-          routerConfig: router,
-        ),
+        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pumpAndSettle();
 
-    // Mở popup menu và bấm Xoá
+    // Mở popup menu và bấm Xoá.
     await tester.tap(find.byTooltip('Tuỳ chọn'));
     await tester.pumpAndSettle();
 
@@ -149,14 +141,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('at history'), findsOneWidget);
-    expect(container.read(cookHistoryEntriesProvider), isEmpty);
+    expect(container.read(cookHistoryProvider), isEmpty);
 
-    // Bấm Hoàn tác trên SnackBar
+    // Bấm Hoàn tác trên snackbar.
     expect(find.text('Hoàn tác'), findsOneWidget);
     await tester.tap(find.text('Hoàn tác'));
     await tester.pumpAndSettle();
 
-    expect(container.read(cookHistoryEntriesProvider), hasLength(1));
-    expect(container.read(cookHistoryEntriesProvider).first.id, 'entry-del');
+    expect(container.read(cookHistoryProvider), hasLength(1));
+    expect(container.read(cookHistoryProvider).first.id, 'entry-del');
   });
 }

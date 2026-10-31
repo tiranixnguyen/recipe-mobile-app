@@ -1,9 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_history.dart';
-import 'package:recipe_mobile_app/features/cook/data/history_entries.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/history/history_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/history_entry/history_entry_view_model.dart';
 
@@ -13,55 +13,62 @@ void main() {
     container = ProviderContainer(
       overrides: [
         localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
-        recipesProvider.overrideWith((ref) async => []),
+        recipesProvider.overrideWith((ref) async => const []),
       ],
     );
   });
   tearDown(() => container.dispose());
 
-  test('filter and accent-insensitive search by note', () async {
-    final entries = container.read(cookHistoryEntriesProvider.notifier);
-    await entries.add(
+  test('lọc và tìm bỏ dấu theo ghi chú', () async {
+    final history = container.read(cookHistoryProvider.notifier);
+    await history.recordEntry(
       CookHistoryEntry(
         id: 'one',
         cookedAt: DateTime(2026, 10, 23),
-        dishes: const [
-          HistoryDish(recipeId: 'trung', servings: 1, rating: CookRating.good, note: 'Bớt muối'),
-        ],
+        meal: Meal.lunch,
+        isMeal: false,
+        dishes: [CookedDish(recipeId: 'trung', rating: CookRating.good, note: 'Bớt muối')],
       ),
     );
-    await entries.add(
+    await history.recordEntry(
       CookHistoryEntry(
         id: 'two',
         cookedAt: DateTime(2026, 10, 24),
-        dishes: const [HistoryDish(recipeId: 'mi', servings: 2)],
+        meal: Meal.lunch,
+        isMeal: false,
+        dishes: [CookedDish(recipeId: 'mi', servings: 2)],
       ),
     );
-    final vm = container.read(historyViewModelProvider.notifier);
-    expect(container.read(historyViewModelProvider).visible, hasLength(2));
+    final vm = container.read(historyViewModelProvider(null).notifier);
+    expect(container.read(historyViewModelProvider(null)).visible, hasLength(2));
+
     vm.search('bot muoi');
-    expect(container.read(historyViewModelProvider).visible.map((e) => e.id), ['one']);
+    expect(container.read(historyViewModelProvider(null)).visible.map((e) => e.id), ['one']);
+
     vm.search('');
-    vm.filter('good');
-    expect(container.read(historyViewModelProvider).visible.map((e) => e.id), ['one']);
-    vm.filter('note');
-    expect(container.read(historyViewModelProvider).visible.map((e) => e.id), ['one']);
+    vm.setFilter(HistoryFilter.good);
+    expect(container.read(historyViewModelProvider(null)).visible.map((e) => e.id), ['one']);
+
+    vm.setFilter(HistoryFilter.note);
+    expect(container.read(historyViewModelProvider(null)).visible.map((e) => e.id), ['one']);
   });
 
-  test('entry view model updates rating and notes then deletes and undoes', () async {
+  test('HistoryEntryViewModel sửa điểm, ghi chú, xoá rồi hoàn tác', () async {
     await container
-        .read(cookHistoryEntriesProvider.notifier)
-        .add(
+        .read(cookHistoryProvider.notifier)
+        .recordEntry(
           CookHistoryEntry(
             id: 'meal',
             cookedAt: DateTime(2026, 10, 23),
-            dishes: const [HistoryDish(recipeId: 'trung', servings: 2)],
+            meal: Meal.lunch,
+            isMeal: false,
+            dishes: [CookedDish(recipeId: 'trung', servings: 2)],
           ),
         );
     final vm = container.read(historyEntryViewModelProvider('meal').notifier);
-    await vm.rate(0, CookRating.good);
-    await vm.noteDish(0, 'Ít muối');
-    await vm.noteMeal('Nấu nhanh');
+    await vm.setDishRating(0, CookRating.good);
+    await vm.setDishNote(0, 'Ít muối');
+    await vm.setMealNote('Nấu nhanh');
     expect(
       container.read(historyEntryViewModelProvider('meal')).entry!.dishes.single.note,
       'Ít muối',
@@ -70,9 +77,11 @@ void main() {
       container.read(historyEntryViewModelProvider('meal')).entry!.dishes.single.rating,
       CookRating.good,
     );
+
     final removed = await vm.delete();
-    expect(container.read(cookHistoryEntriesProvider), isEmpty);
-    await container.read(cookHistoryEntriesProvider.notifier).undo(removed!);
-    expect(container.read(cookHistoryEntriesProvider).single.note, 'Nấu nhanh');
+    expect(container.read(cookHistoryProvider), isEmpty);
+
+    await vm.restore(removed!);
+    expect(container.read(cookHistoryProvider).single.mealNote, 'Nấu nhanh');
   });
 }

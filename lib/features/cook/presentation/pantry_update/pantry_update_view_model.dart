@@ -7,6 +7,7 @@ import 'package:recipe_mobile_app/features/cook/data/cook_history.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
 import 'package:recipe_mobile_app/features/cook/data/pending_cook.dart';
 import 'package:recipe_mobile_app/features/cook/domain/cook_done.dart';
+import 'package:recipe_mobile_app/features/cook/domain/history.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
 
@@ -71,15 +72,18 @@ class PantryUpdateViewModel extends Notifier<PantryUpdateState?> {
 
       // 2. Tạo entry lịch sử.
       final now = ref.read(cookClockProvider)();
-      final entryId = '${pending.dishes.first.recipeId}_${now.millisecondsSinceEpoch}';
+      final entryId = uniqueHistoryId(
+        pending.dishes.first.recipeId,
+        now,
+        ref.read(cookHistoryProvider).map((e) => e.id),
+      );
       final entry = CookHistoryEntry(
         id: entryId,
         cookedAt: now,
         meal: pending.meal,
         isMeal: pending.isMeal,
-        servings: pending.servings,
         minutes: pending.minutes,
-        dishes: List.unmodifiable(pending.dishes),
+        dishes: pending.dishes,
         mealNote: pending.mealNote,
       );
       await ref.read(cookHistoryProvider.notifier).recordEntry(entry);

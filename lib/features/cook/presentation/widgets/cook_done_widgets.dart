@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_history.dart';
-import 'package:recipe_mobile_app/features/cook/domain/cook_done.dart';
-import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_layout.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 
 /// Đầu màn Hoàn thành: vòng tròn 88 `chiliSoft` có icon bát, "Xong rồi! Ăn ngon nhé", dòng meta.
@@ -42,121 +40,6 @@ class DoneHero extends StatelessWidget {
           style: AppTextStyles.meta.copyWith(color: colors.inkMuted),
         ),
       ],
-    );
-  }
-}
-
-/// "Cập nhật Tủ đồ": mỗi đồ vừa dùng một dòng, tick "Hết" thì bỏ khỏi tủ.
-class UpdatePantrySection extends StatelessWidget {
-  const UpdatePantrySection({
-    super.key,
-    required this.items,
-    required this.usedUp,
-    required this.onToggle,
-    this.title = CookStrings.updatePantry,
-    this.hint = CookStrings.updatePantryHint,
-  });
-
-  final String title;
-  final String hint;
-  final List<UsedItem> items;
-  final Set<String> usedUp;
-  final ValueChanged<String> onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: AppSpacing.s2,
-      children: [
-        SectionHeader(title: title),
-        Text(
-          hint,
-          style: AppTextStyles.meta.copyWith(fontWeight: FontWeight.w400, color: colors.inkMuted),
-        ),
-        RowsBox(
-          rows: [
-            for (final item in items)
-              _UsedUpRow(
-                item: item,
-                checked: usedUp.contains(item.ingredientId),
-                onChanged: () => onToggle(item.ingredientId),
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _UsedUpRow extends StatelessWidget {
-  const _UsedUpRow({required this.item, required this.checked, required this.onChanged});
-
-  final UsedItem item;
-  final bool checked;
-  final VoidCallback onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Semantics(
-      label: CookStrings.usedUpLabel(item.name),
-      child: InkWell(
-        onTap: onChanged,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: 60),
-          child: Row(
-            spacing: AppSpacing.s3,
-            children: [
-              Expanded(
-                child: ExcludeSemantics(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.s2),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          item.name,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.body.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colors.ink,
-                          ),
-                        ),
-                        Text(
-                          item.note,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              ExcludeSemantics(
-                child: Text(
-                  CookStrings.usedUp,
-                  style: AppTextStyles.label.copyWith(color: colors.ink),
-                ),
-              ),
-              SizedBox.square(
-                dimension: 24,
-                child: Checkbox(
-                  value: checked,
-                  onChanged: (_) => onChanged(),
-                  activeColor: colors.herb,
-                  side: BorderSide(color: colors.outline, width: 2),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

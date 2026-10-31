@@ -8,6 +8,7 @@ import 'package:recipe_mobile_app/features/cook/data/cook_history.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
 import 'package:recipe_mobile_app/features/cook/data/pending_cook.dart';
 import 'package:recipe_mobile_app/features/cook/domain/cook_done.dart';
+import 'package:recipe_mobile_app/features/cook/domain/history.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
@@ -102,13 +103,18 @@ class DoneViewModel extends Notifier<AsyncValue<DoneState>> {
         {for (final i in ingredients) i.id: i},
       );
       final session = ref.read(cookSessionProvider);
+      final now = ref.read(cookClockProvider)();
       ref
           .read(pendingCookProvider.notifier)
           .set(
             PendingCookData(
-              dishes: [CookSessionDish(recipeId: recipeId, rating: _rating, note: _note)],
-              servings: value.servings,
+              dishes: [CookedDish(recipeId: recipeId, servings: value.servings, rating: _rating)],
               isMeal: false,
+              meal: mealAt(now),
+              minutes: value.recipe.minutes,
+              // Một món chỉ có một ô "Ghi chú" (không chia theo món); lưu vào mealNote để
+              // HistoryEntry đọc/sửa đúng chỗ.
+              mealNote: _note,
               planned: session?.planned,
               usedItems: used,
             ),

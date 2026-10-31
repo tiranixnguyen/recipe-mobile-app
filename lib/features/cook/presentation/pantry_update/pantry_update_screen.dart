@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
-import 'package:recipe_mobile_app/core/widgets/inline_banner.dart';
 import 'package:recipe_mobile_app/features/cook/domain/cook_done.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/pantry_update/pantry_update_view_model.dart';
+import 'package:recipe_mobile_app/features/cook/routes.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 
 /// Màn cập nhật tủ đồ sau khi nấu xong: tick nguyên liệu còn dư, xoá những thứ đã hết.
@@ -40,9 +40,7 @@ class _PantryUpdate extends ConsumerWidget {
     Future<void> finish() async {
       final router = GoRouter.of(context);
       final entryId = await viewModel.finish();
-      if (entryId != null) {
-        router.go('/history?highlight=$entryId');
-      }
+      if (entryId != null) router.go(historyHighlightLocation(entryId));
     }
 
     return Scaffold(
@@ -75,14 +73,18 @@ class _PantryUpdate extends ConsumerWidget {
                       kept: state.kept.contains(item.ingredientId),
                       onToggle: () => viewModel.toggleKeep(item.ingredientId),
                     ),
-                  if (toRemove.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.s3),
-                    InlineBanner(
-                      text: CookStrings.pantryWillRemove(
-                        toRemove.map((i) => i.name).join(', '),
-                      ),
+                  const SizedBox(height: AppSpacing.s3),
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      toRemove.isEmpty
+                          ? CookStrings.pantryWillRemoveNothing
+                          : CookStrings.pantryWillRemove(
+                              toRemove.map((i) => i.name.toLowerCase()).join(', '),
+                            ),
+                      style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
                     ),
-                  ],
+                  ),
                 ],
               ),
             ),
@@ -122,7 +124,8 @@ class _IngredientRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Semantics(
-      label: CookStrings.usedUpLabel(item.name),
+      label: CookStrings.pantryStillHaveLabel(item.name),
+      toggled: kept,
       child: InkWell(
         onTap: onToggle,
         borderRadius: AppRadius.mdAll,
@@ -131,21 +134,25 @@ class _IngredientRow extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.name, style: AppTextStyles.body.copyWith(color: colors.ink)),
-                    Text(
-                      item.note,
-                      style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
-                    ),
-                  ],
+                child: ExcludeSemantics(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(item.name, style: AppTextStyles.body.copyWith(color: colors.ink)),
+                      Text(
+                        item.note,
+                        style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(width: AppSpacing.s2),
-              Text(
-                CookStrings.pantryStillHave,
-                style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+              ExcludeSemantics(
+                child: Text(
+                  CookStrings.pantryStillHave,
+                  style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+                ),
               ),
               ExcludeSemantics(
                 child: Checkbox(

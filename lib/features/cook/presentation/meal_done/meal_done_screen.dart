@@ -118,7 +118,9 @@ class _MealDone extends ConsumerWidget {
   }
 }
 
-class _DishRow extends StatelessWidget {
+/// Tên món + 3 nút chấm nhỏ trên cùng hàng; ghi chú gấp lại, mở bằng "+ Ghi chú cho món này"
+/// (đã có ghi chú thì mở sẵn) — theo prototype `MealCookDone`.
+class _DishRow extends StatefulWidget {
   const _DishRow({
     required this.name,
     required this.selected,
@@ -134,53 +136,66 @@ class _DishRow extends StatelessWidget {
   final ValueChanged<String> onNoteChanged;
 
   @override
+  State<_DishRow> createState() => _DishRowState();
+}
+
+class _DishRowState extends State<_DishRow> {
+  late final TextEditingController _controller = TextEditingController(text: widget.note);
+  late bool _open = widget.note.isNotEmpty;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final selected = this.selected;
+    final selected = widget.selected;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.s2),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: AppSpacing.s2,
         children: [
           ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 68),
+            constraints: const BoxConstraints(minHeight: 48),
             child: Row(
               spacing: AppSpacing.s2,
               children: [
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.s2),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.body.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colors.ink,
-                          ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.name,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyles.body.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colors.ink,
                         ),
-                        Text(
-                          selected == null
-                              ? CookStrings.notRated
-                              : CookStrings.ratedAs(selected.label),
-                          style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
-                        ),
-                      ],
-                    ),
+                      ),
+                      Text(
+                        selected == null
+                            ? CookStrings.notRated
+                            : CookStrings.ratedAs(selected.label),
+                        style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+                      ),
+                    ],
                   ),
                 ),
                 for (final rating in CookRating.values)
                   IconButton(
-                    onPressed: () => onSelect(rating),
-                    tooltip: CookStrings.rateDish(rating.label, name),
+                    onPressed: () => widget.onSelect(rating),
+                    tooltip: CookStrings.rateDish(rating.label, widget.name),
                     isSelected: rating == selected,
                     icon: Icon(ratingIcon(rating)),
                     style: IconButton.styleFrom(
-                      fixedSize: const Size.square(44),
-                      minimumSize: const Size.square(44),
+                      fixedSize: const Size.square(40),
+                      minimumSize: const Size.square(40),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       shape: const RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
                       backgroundColor: rating == selected ? colors.chiliSoft : colors.surfaceRaised,
@@ -193,18 +208,35 @@ class _DishRow extends StatelessWidget {
               ],
             ),
           ),
-          TextField(
-            controller: TextEditingController(text: note),
-            maxLines: 2,
-            maxLength: 300,
-            onChanged: onNoteChanged,
-            decoration: InputDecoration(
-              hintText: CookStrings.mealDishNoteHint,
-              hintStyle: AppTextStyles.body.copyWith(color: colors.inkMuted),
-              counterStyle: AppTextStyles.caption.copyWith(color: colors.inkMuted),
-              isDense: true,
+          if (_open)
+            TextField(
+              controller: _controller,
+              minLines: 1,
+              maxLines: 2,
+              maxLength: 300,
+              onChanged: widget.onNoteChanged,
+              decoration: InputDecoration(
+                hintText: CookStrings.mealDishNoteHint,
+                hintStyle: AppTextStyles.body.copyWith(color: colors.inkMuted),
+                counterStyle: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+                isDense: true,
+              ),
+            )
+          else
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton(
+                onPressed: () => setState(() => _open = true),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  foregroundColor: colors.chiliDeep,
+                  textStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.w600),
+                ),
+                child: Text(CookStrings.historyAddDishNote),
+              ),
             ),
-          ),
         ],
       ),
     );

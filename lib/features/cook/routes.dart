@@ -49,20 +49,19 @@ const historyLocation = '/history';
 /// Chi tiết một lần nấu.
 String historyEntryLocation(String id) => '/history/$id';
 
+/// Tab Lịch sử, mở sẵn với lần nấu [id] đánh dấu "Vừa nấu" (sau khi xong ở PantryUpdate).
+String historyHighlightLocation(String id) =>
+    Uri(path: historyLocation, queryParameters: {'highlight': id}).toString();
+
 /// Màn cập nhật tủ sau khi nấu xong (full-screen, ngoài shell).
 const pantryUpdateLocation = '/pantry-update';
 
-/// Routes cho tab Lịch sử (StatefulShellBranch).
+/// Routes cho tab Lịch sử (StatefulShellBranch). Chi tiết một lần nấu (`:id`) không lồng ở đây —
+/// nó là route full-screen trong [cookRoutes], ẩn thanh 5 tab, như `/recipe/:id`.
 final historyTabRoutes = <RouteBase>[
   GoRoute(
     path: historyLocation,
     builder: (_, state) => HistoryScreen(highlightId: state.uri.queryParameters['highlight']),
-    routes: [
-      GoRoute(
-        path: ':id',
-        builder: (_, state) => HistoryEntryScreen(entryId: state.pathParameters['id']!),
-      ),
-    ],
   ),
 ];
 
@@ -101,4 +100,8 @@ final cookRoutes = <RouteBase>[
     ],
   ),
   GoRoute(path: pantryUpdateLocation, builder: (_, _) => const PantryUpdateScreen()),
+  GoRoute(
+    path: '$historyLocation/:id',
+    builder: (_, state) => HistoryEntryScreen(entryId: state.pathParameters['id']!),
+  ),
 ];

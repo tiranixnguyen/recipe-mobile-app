@@ -53,10 +53,6 @@ abstract final class CookStrings {
   static const doneTitle = 'Xong rồi! Ăn ngon nhé';
   static String doneMeta(String name, int servings, int steps) =>
       '$name · $servings người · $steps bước';
-  static const updatePantry = 'Cập nhật Tủ đồ';
-  static const updatePantryHint = 'Tick thứ đã dùng hết, app sẽ bỏ khỏi tủ. Còn dư thì bỏ tick.';
-  static const usedUp = 'Hết';
-  static String usedUpLabel(String name) => '$name: đã dùng hết';
   static const howWasIt = 'Món này thế nào?';
   static const rateGroup = 'Đánh giá món';
   static const saveForLater = 'Lưu món để nấu lại';
@@ -150,8 +146,6 @@ abstract final class CookStrings {
   static String ratedAs(String label) => 'Bạn chấm: $label';
   static const notRated = 'Chưa chấm';
   static String rateDish(String label, String name) => '$label · $name';
-  static const mealUpdatePantry = 'Cập nhật Tủ đồ · cả bữa';
-  static const mealUpdatePantryHint = 'Tick thứ đã dùng hết, app bỏ khỏi tủ một lần cho cả bữa.';
   static String mealMarked(Meal meal, String dayName) =>
       'Bữa ${meal.label.toLowerCase()} ${dayName.toLowerCase()} được đánh dấu đã nấu trong Thực đơn.';
   static const noMealTitle = 'Không có bữa đang nấu';
@@ -172,36 +166,54 @@ abstract final class CookStrings {
 
   // PantryUpdate.
   static const pantryUpdateTitle = 'Nguyên liệu chưa dùng tới';
-  static const pantryUpdateHint = 'Bỏ tick thứ đã dùng hết — app sẽ xoá khỏi tủ.';
+  static const pantryUpdateHint = 'Tick thứ vẫn còn trong tủ. Bỏ tick thì app xoá khỏi tủ.';
   static const pantryStillHave = 'Còn';
-  static String pantryWillRemove(String names) => 'Sẽ xoá khỏi tủ: $names';
+  static String pantryStillHaveLabel(String name) => '$name: vẫn còn trong tủ';
+  static String pantryWillRemove(String names) => 'Sẽ xoá khỏi tủ: $names.';
+  static const pantryWillRemoveNothing = 'Tủ giữ nguyên, không xoá gì.';
   static const pantryUpdateFinish = 'Cập nhật tủ và xong';
 
   // Lịch sử nấu.
   static const historyTitle = 'Lịch sử nấu';
-  static String historyMonthCount(int count) => 'Đã nấu $count lần tháng này';
-  static const historySearch = 'Tìm trong lịch sử…';
+  static const historyEmptyHeadMeta = 'Món và bữa bạn đã nấu';
+  static String historyMonthCount(int count) => 'Đã nấu $count lần trong tháng này';
+  static const historySearch = 'Tìm món hoặc ghi chú';
   static const historyFilterAll = 'Tất cả';
   static const historyFilterGood = 'Có món ngon';
   static const historyFilterNote = 'Có ghi chú';
+  static const historyGroupToday = 'Hôm nay';
+  static const historyGroupYesterday = 'Hôm qua';
+  static const historyGroupThisWeek = 'Tuần này';
+  static const historyGroupEarlier = 'Trước đó';
   static const historyEmptyTitle = 'Chưa nấu bữa nào';
-  static const historyEmptyBody = 'Nấu xong một món rồi xem lại ở đây.';
+  static const historyEmptyBody =
+      'Nấu xong một món hay cả bữa, app ghi lại ở đây cùng cảm nhận và ghi chú của bạn.';
   static const historyEmptyAction = 'Gợi ý cho mình';
   static const historyJustCooked = 'Vừa nấu';
   static const historySaved = 'Đã lưu vào lịch sử nấu';
+  static String historyNoMatch(String query) => 'Không thấy "$query" trong lịch sử.';
+  static const historyNoMatchFilter = 'Chưa có lần nấu nào ở mục này.';
 
   // Chi tiết lần nấu.
-  static const historyEntrySingleTitle = 'Chi tiết lần nấu';
-  static String historyEntryMealTitle(String meal) => 'Bữa $meal';
   static const historyEntryNotFound = 'Không tìm thấy lần nấu này';
-  static const historyMealNote = 'Ghi chú bữa';
-  static const historyMealNoteHint = 'Ghi lại điều muốn nhớ về bữa này…';
-  static const historyDishNote = 'Ghi chú món';
-  static const historyDishNoteHint = 'Ghi chú cá nhân cho món này…';
-  static const historyReCook = 'Nấu lại';
+  static const historyDishTitleOne = 'Món này thế nào?';
+  static const historyDishTitleMany = 'Từng món thế nào?';
+  static const historyMealNote = 'Ghi chú cho bữa';
+  static const historyNote = 'Ghi chú';
+  static const historyNoteHint = 'Ví dụ: lần sau bớt muối, thêm ớt';
+  static const historyAddDishNote = '+ Ghi chú cho món này';
+  static const historyDishNoteHint = 'Ghi chú cho món này';
+  static const historySavedHint = 'Sửa thoải mái, app tự lưu.';
+  static const historySavedEdited = 'Đã lưu thay đổi.';
+  static const historyRecookOne = 'Nấu lại món này';
+  static const historyRecookMeal = 'Nấu lại bữa này';
   static const historyDeleteAction = 'Xoá khỏi lịch sử';
   static const historyDeleted = 'Đã xoá khỏi lịch sử';
   static const undo = 'Hoàn tác';
+  static String historyMetaOne(int servings, int minutes) =>
+      '$servings người · nấu khoảng $minutes phút';
+  static String historyMetaMeal(int dishes, int servings, int minutes) =>
+      '$dishes món · $servings người · nấu khoảng $minutes phút';
 
   // Meal done ghi chú.
   static const mealDoneNote = 'Ghi chú bữa ăn';
