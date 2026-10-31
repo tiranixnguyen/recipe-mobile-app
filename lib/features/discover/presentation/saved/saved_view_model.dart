@@ -96,7 +96,7 @@ class SavedViewModel extends Notifier<AsyncValue<SavedState>> {
 
   /// Bỏ lưu món; trả [UnsaveOutcome] để View báo snackbar và Hoàn tác.
   Future<UnsaveOutcome> unsaveRecipe(Recipe recipe) async {
-    await ref.read(savedIdsProvider.notifier).toggle(recipe.id);
+    await ref.read(savedIdsProvider.notifier).unsave(recipe.id);
     ref.read(analyticsProvider).track('unsave', {'kind': 'recipe', 'undo': false});
     return (kind: UnsaveKind.recipe, name: recipe.name, item: recipe);
   }
@@ -113,7 +113,7 @@ class SavedViewModel extends Notifier<AsyncValue<SavedState>> {
   Future<void> undo(UnsaveOutcome outcome) async {
     if (outcome.kind == UnsaveKind.recipe && outcome.item is Recipe) {
       final recipe = outcome.item as Recipe;
-      await ref.read(savedIdsProvider.notifier).toggle(recipe.id);
+      await ref.read(savedIdsProvider.notifier).save(recipe.id);
       ref.read(analyticsProvider).track('unsave', {'kind': 'recipe', 'undo': true});
     } else if (outcome.kind == UnsaveKind.meal && outcome.item is SavedMeal) {
       final meal = outcome.item as SavedMeal;

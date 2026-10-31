@@ -90,7 +90,7 @@ class SavedMealsController extends Notifier<List<SavedMeal>> {
   Future<bool> unsaveMeal(SavedMeal meal) async {
     final next = [
       for (final m in state)
-        if (m != meal) m,
+        if (!listEquals(m.recipeIds, meal.recipeIds)) m,
     ];
     if (next.length == state.length) return false;
     await _save(next);

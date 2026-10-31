@@ -16,6 +16,22 @@ class SavedRecipesController extends Notifier<Set<String>> {
     state = Set.unmodifiable(next);
     await ref.read(localStoreProvider).writeList(_savedKey, next.toList());
   }
+
+  /// Lưu một món nếu chưa lưu.
+  Future<void> save(String recipeId) async {
+    if (state.contains(recipeId)) return;
+    final next = {...state, recipeId};
+    state = Set.unmodifiable(next);
+    await ref.read(localStoreProvider).writeList(_savedKey, next.toList());
+  }
+
+  /// Bỏ lưu một món nếu đang lưu.
+  Future<void> unsave(String recipeId) async {
+    if (!state.contains(recipeId)) return;
+    final next = {...state}..remove(recipeId);
+    state = Set.unmodifiable(next);
+    await ref.read(localStoreProvider).writeList(_savedKey, next.toList());
+  }
 }
 
 /// Đọc: `ref.watch(savedIdsProvider).contains(id)`. Đổi:

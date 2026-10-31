@@ -32,6 +32,17 @@ void main() {
       expect(container.read(savedIdsProvider).toList(), ['a', 'c']);
     });
 
+    test('save và unsave rõ ràng không bị đảo trạng thái nhầm', () async {
+      final saved = container.read(savedIdsProvider.notifier);
+      await saved.save('x');
+      await saved.save('x'); // Gọi lại không đổi
+      expect(container.read(savedIdsProvider), {'x'});
+
+      await saved.unsave('x');
+      await saved.unsave('x'); // Gọi lại không lỗi
+      expect(container.read(savedIdsProvider), isEmpty);
+    });
+
     test('xoá dữ liệu đưa về rỗng', () async {
       await container.read(savedIdsProvider.notifier).toggle('a');
       await container.read(clearLocalDataProvider)();
