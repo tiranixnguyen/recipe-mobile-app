@@ -46,8 +46,8 @@ enum AddToShoppingResult { added, alreadyThere }
 
 /// Đồ người dùng tự thêm vào đi chợ, theo thứ tự thêm.
 ///
-/// Stub cho SHP-01 (#49): chỉ lưu danh sách, chưa gộp với nguyên liệu của món trong thực đơn và chưa
-/// có trạng thái đã mua. #49 làm màn Đi chợ và logic gộp, giữ nguyên chữ ký các method.
+/// Màn Đi chợ gộp danh sách này với nguyên liệu của thực đơn (`shoppingSheetProvider`); trạng thái
+/// đã mua nằm ở `shoppingDoneProvider`.
 class ShoppingItemsController extends Notifier<List<ShoppingItem>> {
   @override
   List<ShoppingItem> build() {
@@ -103,6 +103,3 @@ class ShoppingItemsController extends Notifier<List<ShoppingItem>> {
 final shoppingItemsProvider = NotifierProvider<ShoppingItemsController, List<ShoppingItem>>(
   ShoppingItemsController.new,
 );
-
-/// Số trên badge nút Đi chợ. Tạm thời là số đồ tự thêm; #49 đổi thành số dòng chưa tick.
-final shoppingCountProvider = Provider<int>((ref) => ref.watch(shoppingItemsProvider).length);

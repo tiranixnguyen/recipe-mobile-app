@@ -1,182 +1,94 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
-import 'package:recipe_mobile_app/core/storage/local_store.dart';
+import 'package:recipe_mobile_app/core/text/fold.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
-import 'package:recipe_mobile_app/features/plan/data/shopping.dart';
 import 'package:recipe_mobile_app/features/plan/data/shopping_items.dart';
+import 'package:recipe_mobile_app/features/plan/data/shopping_sheet.dart';
 import 'package:recipe_mobile_app/features/plan/domain/shopping_list.dart';
 
-const _doneKey = 'plan.shoppingDone';
-
-class ShoppingGroup {
-  const ShoppingGroup({required this.label, required this.items});
-
-  final String label;
-  final List<ShoppingEntry> items;
-}
-
-class ShoppingEntry {
-  const ShoppingEntry({
-    required this.id,
-    required this.name,
-    required this.subtitle,
-    this.ingredientId,
-  });
-
-  final String id;
-  final String name;
-  final String subtitle;
-  final String? ingredientId;
-}
-
+@immutable
 class ShoppingState {
-  const ShoppingState({required this.groups, required this.doneIds, required this.total});
+  const ShoppingState({required this.groups, required this.done, required this.inPantry});
 
-  final List<ShoppingGroup> groups;
-  final Set<String> doneIds;
-  final int total;
+  final List<({IngredientGroup group, List<ShoppingRow> rows})> groups;
 
-  int get doneCount => doneIds.length;
+  /// Id dòng đã tick (chỉ dòng còn trong danh sách).
+  final Set<String> done;
+
+  /// Tên thứ đã có trong Tủ đồ nên bỏ khỏi danh sách.
+  final List<String> inPantry;
+
+  List<ShoppingRow> get rows => [for (final g in groups) ...g.rows];
+  int get total => rows.length;
+  int get doneCount => done.length;
   bool get isEmpty => total == 0;
-
-  ShoppingState copyWith({List<ShoppingGroup>? groups, Set<String>? doneIds, int? total}) =>
-      ShoppingState(
-        groups: groups ?? this.groups,
-        doneIds: doneIds ?? this.doneIds,
-        total: total ?? this.total,
-      );
 }
 
-final shoppingViewModelProvider = NotifierProvider<ShoppingViewModel, AsyncValue<ShoppingState>>(
-  ShoppingViewModel.new,
-);
-
+/// Danh sách đi chợ (prototype `Shopping`): tick đã mua, "Xong, cất vào tủ".
 class ShoppingViewModel extends Notifier<AsyncValue<ShoppingState>> {
   @override
   AsyncValue<ShoppingState> build() {
-    final list = ref.watch(shoppingListProvider);
-    final ingredients = ref.watch(ingredientsProvider);
-    final recipes = ref.watch(recipesProvider);
-    final customItems = ref.watch(shoppingItemsProvider);
-    final pantry = ref.watch(pantryItemsProvider);
-    final doneIds = _readDone();
-    if (list.isLoading || ingredients.isLoading || recipes.isLoading) return const AsyncLoading();
-    if (list.hasError) return AsyncError(list.error!, list.stackTrace!);
-    if (ingredients.hasError) return AsyncError(ingredients.error!, ingredients.stackTrace!);
-    if (recipes.hasError) return AsyncError(recipes.error!, recipes.stackTrace!);
-    return AsyncData(
-      _makeState(
-        list.value ?? const [],
-        ingredients.value ?? const [],
-        recipes.value ?? const [],
-        customItems,
-        pantry,
-        doneIds,
-      ),
-    );
-  }
-
-  Set<String> _readDone() {
-    final values = ref.watch(localStoreProvider).readList(_doneKey);
-    return values.whereType<String>().toSet();
-  }
-
-  ShoppingState _makeState(
-    List<ShoppingLine> lines,
-    List<Ingredient> ingredients,
-    List<Recipe> recipes,
-    List<ShoppingItem> customItems,
-    Set<String> pantry,
-    Set<String> doneIds,
-  ) {
-    final byId = {for (final i in ingredients) i.id: i};
-    final recipesById = {for (final recipe in recipes) recipe.id: recipe};
-    final groups = <String, List<ShoppingEntry>>{};
-    for (final line in lines) {
-      final ingredient = byId[line.ingredientId];
-      if (ingredient == null || ingredient.isBasicSpice || pantry.contains(ingredient.id)) continue;
-      final id = _lineId(line);
-      final amount = _formatAmount(line.amount);
-      final entry = ShoppingEntry(
-        id: id,
-        ingredientId: ingredient.id,
-        name: '${ingredient.name} · $amount ${line.unit}',
-        subtitle: _recipeNames(line.recipeIds, recipesById),
+    final done = ref.watch(shoppingDoneProvider);
+    return ref.watch(shoppingSheetProvider).whenData((sheet) {
+      final ids = {
+        for (final g in sheet.groups)
+          for (final r in g.rows) r.id,
+      };
+      return ShoppingState(
+        groups: sheet.groups,
+        done: Set.unmodifiable(done.intersection(ids)),
+        inPantry: sheet.inPantry,
       );
-      groups.putIfAbsent(ingredient.group.label, () => []).add(entry);
-    }
-    for (final item in customItems) {
-      final name = item.name ?? byId[item.ingredientId]?.name;
-      if (name == null) continue;
-      final ingredient = item.ingredientId == null ? null : byId[item.ingredientId];
-      groups
-          .putIfAbsent(ingredient?.group.label ?? 'Khác', () => [])
-          .add(
-            ShoppingEntry(
-              id: _itemId(item),
-              name: name,
-              subtitle: 'Tự thêm',
-              ingredientId: item.ingredientId,
-            ),
-          );
-    }
-    final ordered = [
-      for (final label in ['Rau củ', 'Đạm', 'Tinh bột', 'Gia vị', 'Khác'])
-        if (groups[label]?.isNotEmpty ?? false) ShoppingGroup(label: label, items: groups[label]!),
-      for (final entry in groups.entries)
-        if (!['Rau củ', 'Đạm', 'Tinh bột', 'Gia vị', 'Khác'].contains(entry.key))
-          ShoppingGroup(label: entry.key, items: entry.value),
+    });
+  }
+
+  Future<void> toggle(String id) => ref.read(shoppingDoneProvider.notifier).toggle(id);
+
+  /// "Xong, cất vào tủ": thứ đã tick có trong danh mục vào Tủ đồ, đồ tự thêm tương ứng ra khỏi đi
+  /// chợ, bỏ hết dấu tick. Trả số thứ đã cất, cho snackbar.
+  Future<int> complete() async {
+    final current = state.value;
+    if (current == null || current.doneCount == 0) return 0;
+    final done = [
+      for (final r in current.rows)
+        if (current.done.contains(r.id)) r,
     ];
-    final allIds = {
-      for (final group in ordered)
-        for (final item in group.items) item.id,
+    final ingredientIds = {for (final r in done) ?r.ingredientId};
+    final ingredientNames = {
+      for (final i in ref.read(ingredientsProvider).value ?? const <Ingredient>[])
+        if (ingredientIds.contains(i.id)) normalizeSearch(i.name),
     };
-    return ShoppingState(
-      groups: ordered,
-      doneIds: doneIds.intersection(allIds),
-      total: allIds.length,
-    );
-  }
-
-  String _recipeNames(List<String> ids, Map<String, Recipe> recipesById) => [
-    for (final id in ids)
-      if (recipesById[id] case final recipe?) recipe.name,
-  ].join(', ');
-
-  String _lineId(ShoppingLine line) => 'line:${line.ingredientId}:${line.unit}';
-  String _itemId(ShoppingItem item) => 'item:${item.ingredientId ?? item.name}';
-
-  String _formatAmount(double amount) => amount == amount.roundToDouble()
-      ? amount.toInt().toString()
-      : amount.toStringAsFixed(1).replaceFirst(RegExp(r'\.0$'), '');
-
-  Future<void> toggle(String id) async {
-    final current = state is AsyncData<ShoppingState>
-        ? (state as AsyncData<ShoppingState>).value
-        : null;
-    if (current == null) return;
-    final done = <String>{...current.doneIds};
-    if (!done.add(id)) done.remove(id);
-    await ref.read(localStoreProvider).writeList(_doneKey, done.toList());
-    state = AsyncData(current.copyWith(doneIds: done));
-  }
-
-  Future<void> complete() async {
-    final current = state is AsyncData<ShoppingState>
-        ? (state as AsyncData<ShoppingState>).value
-        : null;
-    if (current == null) return;
+    final customNames = {
+      for (final r in done)
+        if (r.ingredientId == null) normalizeSearch(r.name),
+    };
+    final analytics = ref.read(analyticsProvider);
     final pantry = ref.read(pantryItemsProvider.notifier);
-    final custom = ref.read(shoppingItemsProvider);
-    for (final group in current.groups) {
-      for (final item in group.items.where((item) => current.doneIds.contains(item.id))) {
-        if (item.ingredientId != null) await pantry.addToPantry(item.ingredientId!);
-        final customItem = custom.where((candidate) => _itemId(candidate) == item.id).firstOrNull;
-        if (customItem != null) await ref.read(shoppingItemsProvider.notifier).remove(customItem);
-      }
+    final shopping = ref.read(shoppingItemsProvider.notifier);
+    for (final id in ingredientIds) {
+      await pantry.addToPantry(id);
     }
-    await ref.read(localStoreProvider).writeList(_doneKey, const []);
+    for (final item in ref.read(shoppingItemsProvider)) {
+      final bought = switch (item) {
+        ShoppingItem(ingredientId: final id?) => ingredientIds.contains(id),
+        ShoppingItem(name: final name?) =>
+          customNames.contains(normalizeSearch(name)) ||
+              ingredientNames.contains(normalizeSearch(name)),
+        _ => false,
+      };
+      if (bought) await shopping.remove(item);
+    }
+    await ref.read(shoppingDoneProvider.notifier).clear();
+    analytics.track('shopping_done', {'items': done.length});
+    return done.length;
   }
 }
+
+final shoppingViewModelProvider =
+    NotifierProvider.autoDispose<ShoppingViewModel, AsyncValue<ShoppingState>>(
+      ShoppingViewModel.new,
+    );

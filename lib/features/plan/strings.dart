@@ -3,6 +3,22 @@ import 'package:recipe_mobile_app/core/models/models.dart';
 abstract final class PlanStrings {
   static const title = 'Thực đơn';
   static const shopping = 'Đi chợ';
+
+  // Danh sách đi chợ (`Shopping`)
+  static const shoppingTitle = 'Danh sách đi chợ';
+  static String shoppingProgress(int done, int total) =>
+      'Cho thực đơn tuần này · $done/$total đã mua';
+  static const backToPlan = 'Quay lại thực đơn';
+  static String shoppingInPantry(List<String> names) =>
+      'Đã bỏ ${names.length} thứ có sẵn trong Tủ đồ: ${names.join(', ')}.';
+  static const shoppingSelfAdded = 'Tự thêm';
+  static const shoppingEmptyTitle = 'Danh sách đi chợ đang trống';
+  static const shoppingEmptyBody = 'Thêm món vào thực đơn hoặc thêm nguyên liệu từ Tủ đồ.';
+  static const shoppingLoadError = 'Không đọc được danh sách đi chợ';
+  static const shoppingLoadErrorBody = 'Thử mở lại màn này.';
+  static const shoppingFooterHint = 'Thứ đã tick sẽ được cất vào Tủ đồ.';
+  static const shoppingFinish = 'Xong, cất vào tủ';
+  static String shoppingStored(int count) => 'Đã cất $count thứ vào Tủ đồ';
   static const loadError = 'Không đọc được danh sách món. Thử mở lại app.';
 
   static const modeGroup = 'Chế độ xem';

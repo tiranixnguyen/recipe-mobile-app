@@ -2,100 +2,126 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/app_button.dart';
+import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/data/shopping.dart';
 import 'package:recipe_mobile_app/features/plan/domain/shopping_list.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/shopping/shopping_screen.dart';
+import 'package:recipe_mobile_app/features/plan/strings.dart';
 
-Ingredient _ingredient(String id, String name, IngredientGroup group) =>
-    Ingredient(id: id, name: name, group: group);
+const _ingredients = [
+  Ingredient(id: 'egg', name: 'Trứng gà', group: IngredientGroup.protein),
+  Ingredient(id: 'scallion', name: 'Hành lá', group: IngredientGroup.vegetable),
+  Ingredient(id: 'rice', name: 'Gạo', group: IngredientGroup.starch),
+];
 
-Recipe _recipe(String id, String name) => Recipe(
-  id: id,
-  name: name,
+const _fried = Recipe(
+  id: 'fried',
+  name: 'Trứng chiên',
   description: '',
   imageAsset: '',
   minutes: 10,
   servings: 1,
-  tools: const [],
-  diets: const [],
-  meals: const [],
-  ingredients: const [],
-  steps: const [],
+  tools: [],
+  diets: [],
+  meals: [],
+  ingredients: [],
+  steps: [],
 );
 
-void main() {
-  testWidgets('hiển thị danh sách, tiến độ và tick dòng mua', (tester) async {
-    final store = InMemoryLocalStore();
-    final container = ProviderContainer(
-      overrides: [
-        localStoreProvider.overrideWith((ref) => store),
-        ingredientsProvider.overrideWith(
-          (ref) async => [_ingredient('egg', 'Trứng', IngredientGroup.protein)],
-        ),
-        recipesProvider.overrideWith(
-          (ref) async => [_recipe('fried-egg', 'Trứng chiên')],
-        ),
-        shoppingListProvider.overrideWith(
-          (ref) => const AsyncData([
-            ShoppingLine(ingredientId: 'egg', unit: 'quả', amount: 2, recipeIds: ['fried-egg']),
-          ]),
-        ),
-      ],
-    );
-    addTearDown(container.dispose);
-    final router = GoRouter(
-      initialLocation: shoppingLocation,
-      routes: [
-        GoRoute(path: shoppingLocation, builder: (_, _) => const ShoppingScreen()),
-        GoRoute(path: '/plan', builder: (_, _) => const Text('plan')),
-      ],
-    );
-    addTearDown(router.dispose);
-
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
+Future<ProviderContainer> _pump(
+  WidgetTester tester, {
+  List<ShoppingLine> lines = const [
+    ShoppingLine(ingredientId: 'egg', unit: 'quả', amount: 2, recipeIds: ['fried']),
+    ShoppingLine(ingredientId: 'scallion', unit: 'nắm', amount: 1.5, recipeIds: ['fried']),
+  ],
+  ThemeData? theme,
+}) async {
+  final container = ProviderContainer(
+    overrides: [
+      localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
+      ingredientsProvider.overrideWith((ref) async => _ingredients),
+      recipesProvider.overrideWith((ref) async => [_fried]),
+      shoppingListProvider.overrideWith((ref) => AsyncData(lines)),
+    ],
+  );
+  addTearDown(container.dispose);
+  final router = GoRouter(
+    initialLocation: '/plan',
+    routes: [
+      GoRoute(path: '/plan', builder: (_, _) => const Text('plan')),
+      GoRoute(
+        path: '/pantry',
+        builder: (_, _) => const Scaffold(body: Text('pantry')),
       ),
-    );
-    await tester.pumpAndSettle();
+      GoRoute(path: shoppingLocation, builder: (_, _) => const ShoppingScreen()),
+    ],
+  );
+  addTearDown(router.dispose);
+  await tester.pumpWidget(
+    UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp.router(theme: theme ?? AppTheme.light, routerConfig: router),
+    ),
+  );
+  await tester.pumpAndSettle();
+  router.push(shoppingLocation);
+  await tester.pumpAndSettle();
+  return container;
+}
 
-    expect(find.text('Đi chợ'), findsOneWidget);
-    expect(find.text('0/1 đã mua'), findsOneWidget);
-    expect(find.text('Trứng · 2 quả'), findsOneWidget);
-    await tester.tap(find.byType(Checkbox));
+void main() {
+  for (final (name, theme) in [('sáng', AppTheme.light), ('tối', AppTheme.dark)]) {
+    testWidgets('hiển thị nhóm, món dùng, số lẻ kiểu Việt và tiến độ ($name)', (tester) async {
+      await _pump(tester, theme: theme);
+
+      expect(find.text(PlanStrings.shoppingTitle), findsOneWidget);
+      expect(find.text(PlanStrings.shoppingProgress(0, 2)), findsOneWidget);
+      expect(find.text('Hành lá · 1,5 nắm'), findsOneWidget);
+      expect(find.text('Trứng gà · 2 quả'), findsOneWidget);
+      expect(find.text('Trứng chiên'), findsNWidgets(2));
+      // Rau củ trước Đạm.
+      expect(
+        tester.getTopLeft(find.text('Rau củ')).dy,
+        lessThan(tester.getTopLeft(find.text('Đạm')).dy),
+      );
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.byType(Checkbox).first);
+      await tester.pumpAndSettle();
+      expect(find.text(PlanStrings.shoppingProgress(1, 2)), findsOneWidget);
+    });
+  }
+
+  testWidgets('báo đã bỏ thứ có sẵn trong Tủ đồ', (tester) async {
+    final container = await _pump(tester);
+    await container.read(pantryItemsProvider.notifier).addToPantry('egg');
     await tester.pumpAndSettle();
-    expect(find.text('1/1 đã mua'), findsOneWidget);
+    expect(find.text(PlanStrings.shoppingInPantry(['trứng gà'])), findsOneWidget);
+    expect(find.text('Trứng gà · 2 quả'), findsNothing);
   });
 
-  testWidgets('trạng thái rỗng không hiển thị footer', (tester) async {
-    final container = ProviderContainer(
-      overrides: [
-        localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
-        ingredientsProvider.overrideWith((ref) async => const <Ingredient>[]),
-        shoppingListProvider.overrideWith((ref) => const AsyncData(<ShoppingLine>[])),
-      ],
-    );
-    addTearDown(container.dispose);
-    final router = GoRouter(
-      initialLocation: shoppingLocation,
-      routes: [GoRoute(path: shoppingLocation, builder: (_, _) => const ShoppingScreen())],
-    );
-    addTearDown(router.dispose);
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
-      ),
-    );
+  testWidgets('Xong, cất vào tủ: thứ đã tick vào Tủ đồ, báo snackbar, sang Tủ đồ', (tester) async {
+    final container = await _pump(tester);
+    expect(tester.widget<AppButton>(find.byType(AppButton)).onPressed, isNull);
+    await tester.tap(find.byType(Checkbox).first);
     await tester.pumpAndSettle();
-    expect(find.text('Danh sách đi chợ đang trống'), findsOneWidget);
-    expect(find.text('Xong, cất vào tủ'), findsNothing);
+    await tester.tap(find.text(PlanStrings.shoppingFinish));
+    await tester.pumpAndSettle();
+
+    expect(container.read(pantryItemsProvider), {'scallion'});
+    expect(find.text(PlanStrings.shoppingStored(1)), findsOneWidget);
+    expect(find.text('pantry'), findsOneWidget);
+  });
+
+  testWidgets('trống: EmptyState, không có footer', (tester) async {
+    await _pump(tester, lines: const []);
+    expect(find.text(PlanStrings.shoppingEmptyTitle), findsOneWidget);
+    expect(find.text(PlanStrings.shoppingFinish), findsNothing);
   });
 }

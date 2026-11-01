@@ -6,7 +6,7 @@ import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/data/planned_meals.dart';
-import 'package:recipe_mobile_app/features/plan/data/shopping_items.dart';
+import 'package:recipe_mobile_app/features/plan/data/shopping_sheet.dart';
 import 'package:recipe_mobile_app/features/plan/domain/plan_labels.dart';
 import 'package:recipe_mobile_app/features/plan/domain/week.dart';
 
