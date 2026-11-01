@@ -17,9 +17,20 @@ import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_vie
 import 'package:recipe_mobile_app/features/discover/routes.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 
+/// Tab của màn Đã lưu, đọc từ `?tab=` trong đường dẫn ([savedLocation]).
+enum SavedTab {
+  recipes,
+  meals;
+
+  static SavedTab tryParse(String? value) =>
+      values.where((tab) => tab.name == value).firstOrNull ?? recipes;
+}
+
 /// Đã lưu v2 — tab Món ăn / Bữa ăn, nhấn giữ kéo vào thùng rác để bỏ lưu.
 class SavedScreen extends ConsumerStatefulWidget {
-  const SavedScreen({super.key});
+  const SavedScreen({super.key, this.initialTab = SavedTab.recipes});
+
+  final SavedTab initialTab;
 
   @override
   ConsumerState<SavedScreen> createState() => _SavedScreenState();
@@ -32,7 +43,7 @@ class _SavedScreenState extends ConsumerState<SavedScreen> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 2, vsync: this);
+    _tabs = TabController(length: 2, vsync: this, initialIndex: widget.initialTab.index);
     _tabs.addListener(() {
       if (!_tabs.indexIsChanging) setState(() {});
     });

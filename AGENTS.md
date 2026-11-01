@@ -100,14 +100,15 @@ thì ghi vào bảng này.
 | `start_cooking` | Bấm Bắt đầu nấu (một món hoặc cả bữa) | `servings`, `steps` (tổng số bước), `meal_dishes` (số món) |
 | `finish_cooking` | Xong ở màn Hoàn thành | `used_up` (số đồ tick Hết), `rated`, `meal_dishes` |
 | `rate_recipe` | Mỗi món được chấm khi Xong | `rating` (`good`/`ok`/`bad`) |
-| `today_suggest` | Mở màn Hôm nay ăn gì | `meal` (`breakfast`/`lunch`/`dinner`, bữa theo giờ) |
-| `today_dislike` | Chọn lý do sau Không thích ở Hôm nay ăn gì | `reason` (`justAte`/`missingIngredients`/`tooLong`/`notMyTaste`) |
+| `today_suggest` | Bữa đầu tiên hiện ở Hôm nay ăn gì | `scale` (`one`/`two`/`tray`, quy mô thật của bữa), `dishes` (số món) |
+| `today_dislike` | Chọn lý do sau Không hợp ở Hôm nay ăn gì (chê mọi món của bữa) | `reason` (`justAte`/`missingIngredients`/`tooLong`/`notMyTaste`) |
 | `search` | Bấm tìm trên bàn phím ở màn Tìm kiếm | `has_query`, `filtered` (bool; không gửi từ khoá) |
 | `plan_add` | Thêm món vào Thực đơn (sheet Thêm, Thêm món, Gợi ý món, Gợi ý cho ngày này) | `dishes` (số món vừa thêm) |
 | `plan_remove` | Bỏ món khỏi bữa ở Thực đơn | — |
 | `pantry_update` | Bấm chip ở Tủ đồ | `action` (`add`/`remove`/`bought`: bấm chip đang cần mua) |
 | `add_to_shopping_from_pantry` | Thêm được một thứ vào đi chợ từ Tủ đồ | `via` (`drag`: kéo thả, Shift+Enter, action trợ năng; `search`: nút thêm từ khoá) |
 | `save_meal` | Lưu cả bữa (Hôm nay ăn gì → Lưu lại) | `dishes` (số món), `tags` (số tiêu chí) |
+| `add_meal_to_plan` | Thêm cả bữa vào Thực đơn từ Hôm nay ăn gì | `dishes` (số món) |
 | `unsave` | Bỏ lưu món hoặc bữa từ Đã lưu | `kind` (`recipe`/`meal`), `undo` (bool) |
 | `cook_note` | Xong ở màn Done/MealDone (trước PantryUpdate) | `dish_notes` (số món có ghi chú), `meal_note` (bool) |
 | `view_history` | Mở màn Lịch sử | — |
