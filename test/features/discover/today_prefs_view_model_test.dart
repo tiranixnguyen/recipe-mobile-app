@@ -19,7 +19,9 @@ void main() {
       final state = c.read(todayPrefsViewModelProvider);
       expect(state.prefs.meal.scale, MealScale.two);
       expect(state.prefs.meal.maxMinutes, 30);
-      expect(state.prefs.byWeather, isTrue);
+      // Thời tiết mặc định tắt: Tuỳ bạn.
+      expect(state.prefs.byWeather, isFalse);
+      expect(state.prefs.meal.feel, isNull);
       expect(state.prefs.meal.fridge, isTrue);
       expect(state.prefs.meal.tags, isEmpty);
       expect(state.moreOpen, isFalse);
@@ -53,14 +55,41 @@ void main() {
   });
 
   group('pickWeather / pickFeel', () {
-    test('pickWeather → byWeather true', () {
+    test('thời tiết chưa bật: pickWeather không đổi gì', () {
       final c = _makeContainer();
       addTearDown(c.dispose);
       final vm = c.read(todayPrefsViewModelProvider.notifier);
-      vm.pickFeel(DishFeel.cooling); // chọn cố định trước
+      vm.pickFeel(DishFeel.cooling);
       vm.pickWeather();
       final state = c.read(todayPrefsViewModelProvider);
-      expect(state.prefs.byWeather, isTrue);
+      expect(state.prefs.byWeather, isFalse);
+      expect(state.prefs.meal.feel, DishFeel.cooling);
+    });
+
+    test('đã lưu Theo thời tiết mà thời tiết chưa bật thì mở ra là Tuỳ bạn', () async {
+      final store = InMemoryLocalStore();
+      final first = _makeContainer(store: store);
+      await first
+          .read(todayPrefsProvider.notifier)
+          .save(const TodayPrefs(byWeather: true, meal: MealPrefs(scale: MealScale.tray)));
+      first.dispose();
+      final c = _makeContainer(store: store);
+      addTearDown(c.dispose);
+      final prefs = c.read(todayPrefsViewModelProvider).prefs;
+      expect(prefs.byWeather, isFalse);
+      expect(prefs.meal.feel, isNull);
+      expect(prefs.meal.scale, MealScale.tray);
+    });
+
+    test('pickAnyFeel (Tuỳ bạn) bỏ cảm giác đã chọn', () {
+      final c = _makeContainer();
+      addTearDown(c.dispose);
+      final vm = c.read(todayPrefsViewModelProvider.notifier);
+      vm.pickFeel(DishFeel.warming);
+      vm.pickAnyFeel();
+      final state = c.read(todayPrefsViewModelProvider);
+      expect(state.prefs.byWeather, isFalse);
+      expect(state.prefs.meal.feel, isNull);
     });
 
     test('pickFeel cooling → byWeather false, feel cooling', () {

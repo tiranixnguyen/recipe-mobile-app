@@ -6,10 +6,12 @@ import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_chip.dart';
+import 'package:recipe_mobile_app/core/widgets/inline_banner.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today_prefs/today_prefs_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/routes.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 class TodayPrefsScreen extends ConsumerWidget {
   const TodayPrefsScreen({super.key});
@@ -110,9 +112,20 @@ class TodayPrefsScreen extends ConsumerWidget {
                     label: DiscoverStrings.prefsFeelWeather,
                     hint: DiscoverStrings.prefsFeelWeatherHint,
                     selected: state.prefs.byWeather,
-                    onTap: vm.pickWeather,
+                    // Chưa bật thì không chọn được, mời bật ở Cài đặt; không tự xin quyền.
+                    onTap: state.weatherEnabled ? vm.pickWeather : null,
                     badge: state.weatherEnabled ? null : DiscoverStrings.prefsFeelWeatherDisabled,
                   ),
+                  if (!state.weatherEnabled) ...[
+                    const SizedBox(height: AppSpacing.s2),
+                    InlineBanner(
+                      text: DiscoverStrings.prefsWeatherInvite,
+                      action: BannerAction(
+                        DiscoverStrings.prefsWeatherInviteAction,
+                        () => context.push(settingsLocation),
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: AppSpacing.s2),
                   _OptionTile(
                     label: DiscoverStrings.prefsFeelCooling,
@@ -126,6 +139,13 @@ class TodayPrefsScreen extends ConsumerWidget {
                     hint: DiscoverStrings.prefsFeelWarmingHint,
                     selected: !state.prefs.byWeather && state.prefs.meal.feel == DishFeel.warming,
                     onTap: () => vm.pickFeel(DishFeel.warming),
+                  ),
+                  const SizedBox(height: AppSpacing.s2),
+                  _OptionTile(
+                    label: DiscoverStrings.prefsFeelAny,
+                    hint: DiscoverStrings.prefsFeelAnyHint,
+                    selected: !state.prefs.byWeather && state.prefs.meal.feel == null,
+                    onTap: vm.pickAnyFeel,
                   ),
                   const SizedBox(height: AppSpacing.s6),
                   // Dọn tủ lạnh
@@ -180,7 +200,9 @@ class _OptionTile extends StatelessWidget {
   final String label;
   final String hint;
   final bool selected;
-  final VoidCallback onTap;
+
+  /// null thì lựa chọn mờ đi, không bấm được.
+  final VoidCallback? onTap;
 
   /// Nhãn badge nhỏ bên phải nhãn (ví dụ "Chưa bật").
   final String? badge;
@@ -191,10 +213,11 @@ class _OptionTile extends StatelessWidget {
     final borderColor = selected ? colors.chili : colors.outline;
     final bgColor = selected ? colors.chiliSoft : colors.surfaceRaised;
 
-    return Semantics(
+    final tile = Semantics(
       inMutuallyExclusiveGroup: true,
       checked: selected,
       button: true,
+      enabled: onTap != null,
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
@@ -251,9 +274,11 @@ class _OptionTile extends StatelessWidget {
         ),
       ),
     );
+    return onTap == null ? Opacity(opacity: AppButton.disabledOpacity, child: tile) : tile;
   }
 }
 
+/// Vòng `outline`, đã chọn thì vòng `chili` và chấm `chili` 10px như prototype.
 class _RadioDot extends StatelessWidget {
   const _RadioDot({required this.selected});
 
@@ -262,28 +287,19 @@ class _RadioDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return SizedBox(
-      width: 20,
-      height: 20,
+    return SizedBox.square(
+      dimension: 20,
       child: DecoratedBox(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: selected ? colors.chili : Colors.transparent,
-          border: Border.all(
-            color: selected ? colors.chili : colors.outline,
-            width: 2,
-          ),
+          border: Border.all(color: selected ? colors.chili : colors.outline, width: 2),
         ),
         child: selected
             ? Center(
-                child: SizedBox(
-                  width: 8,
-                  height: 8,
+                child: SizedBox.square(
+                  dimension: 10,
                   child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: colors.chili),
                   ),
                 ),
               )
@@ -362,7 +378,7 @@ class _FridgeRow extends StatelessWidget {
             value: enabled,
             onChanged: (_) => onToggle(),
             activeTrackColor: colors.herb,
-            activeThumbColor: Colors.white,
+            activeThumbColor: colors.surfaceRaised,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
         ],

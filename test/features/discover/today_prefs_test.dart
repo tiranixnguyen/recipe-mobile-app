@@ -74,6 +74,18 @@ void main() {
       expect(parsed, prefs);
     });
 
+    test('Thong thả (maxMinutes null) lưu rồi đọc lại vẫn là null', () {
+      const prefs = TodayPrefs(meal: MealPrefs(maxMinutes: null));
+      final json = jsonDecode(jsonEncode(prefs.toJson())) as Object?;
+      final parsed = TodayPrefs.tryParse(json);
+      expect(parsed.meal.maxMinutes, isNull);
+      expect(parsed, prefs);
+    });
+
+    test('thiếu khoá maxMinutes thì về mặc định 30', () {
+      expect(TodayPrefs.tryParse(<String, dynamic>{'scale': 'two'}).meal.maxMinutes, 30);
+    });
+
     test('round-trip mặc định', () {
       const prefs = TodayPrefs();
       final json = jsonDecode(jsonEncode(prefs.toJson())) as Object?;

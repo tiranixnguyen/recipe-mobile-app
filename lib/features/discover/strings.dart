@@ -132,6 +132,11 @@ abstract final class DiscoverStrings {
   static const prefsFeelCoolingHint = 'Món mát, thanh nhẹ, ít dầu mỡ';
   static const prefsFeelWarming = 'Mưa lạnh · Ấm bụng';
   static const prefsFeelWarmingHint = 'Cháo, canh nóng, đậm đà';
+  static const prefsFeelAny = 'Tuỳ bạn';
+  static const prefsFeelAnyHint = 'Không lọc theo cảm giác';
+  static const prefsWeatherInvite =
+      'Gợi ý theo thời tiết đang tắt. Bật trong Cài đặt để app chọn món hợp trời hôm nay.';
+  static const prefsWeatherInviteAction = 'Mở Cài đặt';
 
   // Tags
   static const prefsTagsSectionCheap = 'Tiết kiệm';

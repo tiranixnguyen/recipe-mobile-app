@@ -16,13 +16,14 @@ const _todayPrefsKey = 'discover.todayPrefs';
 class TodayPrefs {
   const TodayPrefs({
     this.meal = const MealPrefs(),
-    this.byWeather = true,
+    this.byWeather = false,
   });
 
   /// Tiêu chí bữa ăn (quy mô, thời gian, cảm giác, tag).
   final MealPrefs meal;
 
-  /// true = Theo thời tiết (feel phụ thuộc thời tiết thực tế, #115).
+  /// true = Theo thời tiết (feel phụ thuộc thời tiết thực tế, #115). Mặc định tắt: thời tiết chỉ
+  /// chạy khi người dùng tự bật.  false và `meal.feel == null` là "Tuỳ bạn".
   final bool byWeather;
 
   /// Trả [MealPrefs] đã quy "Theo thời tiết" ra feel.
@@ -56,8 +57,10 @@ class TodayPrefs {
         (s) => s.name == json['scale'],
         orElse: () => MealScale.two,
       );
+      // null là "Thong thả" (đã lưu); chỉ khi thiếu khoá hoặc sai kiểu mới về mặc định 30.
       final maxMinutes = switch (json['maxMinutes']) {
         final int v => v,
+        null when json.containsKey('maxMinutes') => null,
         _ => 30,
       };
       final feel = json['feel'] is String ? DishFeel.tryParse(json['feel'] as String) : null;

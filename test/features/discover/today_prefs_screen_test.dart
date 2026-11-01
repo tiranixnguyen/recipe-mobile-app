@@ -4,9 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/app_theme.dart';
+import 'package:recipe_mobile_app/features/discover/data/today_prefs.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today_prefs/today_prefs_screen.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/today_prefs/today_prefs_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/routes.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 Widget _wrapScreen({bool dark = false}) {
   final router = GoRouter(
@@ -22,6 +25,10 @@ Widget _wrapScreen({bool dark = false}) {
       GoRoute(
         path: todayLocation,
         builder: (_, _) => const Scaffold(body: Text('Today')),
+      ),
+      GoRoute(
+        path: settingsLocation,
+        builder: (_, _) => const Scaffold(body: Text('Settings')),
       ),
     ],
     initialLocation: todayPrefsLocation,
@@ -67,9 +74,62 @@ void main() {
     expect(find.text(DiscoverStrings.prefsFeelWeatherDisabled), findsOneWidget);
   });
 
+  testWidgets('Thời tiết chưa bật: mời bật ở Cài đặt, mặc định Tuỳ bạn, bỏ chọn cảm giác được', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 4800);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_wrapScreen());
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(tester.element(find.byType(TodayPrefsScreen)));
+
+    bool anyFeel() {
+      final prefs = container.read(todayPrefsViewModelProvider).prefs;
+      return !prefs.byWeather && prefs.meal.feel == null;
+    }
+
+    expect(anyFeel(), isTrue);
+    expect(find.text(DiscoverStrings.prefsWeatherInvite), findsOneWidget);
+
+    // Bấm Theo thời tiết khi chưa bật: không chọn được.
+    await tester.tap(find.text(DiscoverStrings.prefsFeelWeather));
+    await tester.pumpAndSettle();
+    expect(anyFeel(), isTrue);
+
+    await tester.tap(find.text(DiscoverStrings.prefsFeelCooling));
+    await tester.pumpAndSettle();
+    expect(anyFeel(), isFalse);
+    await tester.tap(find.text(DiscoverStrings.prefsFeelAny));
+    await tester.pumpAndSettle();
+    expect(anyFeel(), isTrue);
+
+    // Thong thả lưu rồi vẫn là Thong thả.
+    await tester.tap(find.text(DiscoverStrings.prefsTimeNull));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(DiscoverStrings.prefsCta('cơm nhà 2 món')));
+    await tester.pumpAndSettle();
+    final saved = container.read(todayPrefsProvider);
+    expect(saved.meal.maxMinutes, isNull);
+    expect(saved.meal.feel, isNull);
+    expect(saved.byWeather, isFalse);
+    expect(find.text('Today'), findsOneWidget);
+  });
+
+  testWidgets('Mở Cài đặt từ lời mời bật thời tiết', (tester) async {
+    tester.view.physicalSize = const Size(1080, 4800);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(_wrapScreen());
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(DiscoverStrings.prefsWeatherInviteAction));
+    await tester.pumpAndSettle();
+    expect(find.text('Settings'), findsOneWidget);
+  });
+
   testWidgets('mở Thêm tiêu chí thì hiện chip tag', (tester) async {
     // Dùng màn cao hơn để ít phải cuộn
-    tester.view.physicalSize = const Size(1080, 4800);
+    tester.view.physicalSize = const Size(1080, 6000);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
 

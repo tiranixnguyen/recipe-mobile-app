@@ -50,11 +50,13 @@ class TodayPrefsState {
 class TodayPrefsViewModel extends Notifier<TodayPrefsState> {
   @override
   TodayPrefsState build() {
+    const weatherEnabled = false; // TODO(#115): đọc công tắc thời tiết trong Cài đặt
     final prefs = ref.read(todayPrefsProvider);
     return TodayPrefsState(
-      prefs: prefs,
+      // Thời tiết chưa bật thì không giữ "Theo thời tiết": về Tuỳ bạn.
+      prefs: prefs.byWeather && !weatherEnabled ? TodayPrefs(meal: prefs.meal) : prefs,
       moreOpen: false,
-      weatherEnabled: false, // TODO(#115): bật khi thời tiết được triển khai
+      weatherEnabled: weatherEnabled,
     );
   }
 
@@ -88,7 +90,9 @@ class TodayPrefsViewModel extends Notifier<TodayPrefsState> {
     );
   }
 
+  /// Chỉ chọn được khi thời tiết đã bật; chưa bật thì màn hiện lời mời bật trong Cài đặt.
   void pickWeather() {
+    if (!state.weatherEnabled) return;
     state = state.copyWith(
       prefs: TodayPrefs(
         meal: MealPrefs(
@@ -114,6 +118,20 @@ class TodayPrefsViewModel extends Notifier<TodayPrefsState> {
           tags: state.prefs.meal.tags,
         ),
         byWeather: false,
+      ),
+    );
+  }
+
+  /// "Tuỳ bạn": không lọc theo cảm giác.
+  void pickAnyFeel() {
+    state = state.copyWith(
+      prefs: TodayPrefs(
+        meal: MealPrefs(
+          scale: state.prefs.meal.scale,
+          maxMinutes: state.prefs.meal.maxMinutes,
+          fridge: state.prefs.meal.fridge,
+          tags: state.prefs.meal.tags,
+        ),
       ),
     );
   }
