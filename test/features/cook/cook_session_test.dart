@@ -53,7 +53,7 @@ void main() {
   test('nấu cả bữa: lưu bữa, bước từng món, món đang nấu', () async {
     await controller().startMeal(
       [(recipeId: 'dau', servings: 2), (recipeId: 'canh', servings: 2)],
-      (day: DateTime(2026, 10, 27, 9), meal: Meal.dinner),
+      planned: (day: DateTime(2026, 10, 27, 9), meal: Meal.dinner),
     );
     await controller().goTo(0, 1);
     await controller().goTo(1, 3);
@@ -74,10 +74,29 @@ void main() {
     expect(session.isDone, isFalse);
   });
 
+  test(
+    'nấu cả bữa ngoài Thực đơn: meal lưu qua JSON, phiên cũ không có meal vẫn đọc được',
+    () async {
+      await controller().startMeal([
+        (recipeId: 'dau', servings: 2),
+        (recipeId: 'canh', servings: 2),
+      ], meal: Meal.lunch);
+      container.invalidate(cookSessionProvider);
+      final session = container.read(cookSessionProvider)!;
+      expect((session.planned, session.meal, session.mealLabel), (null, Meal.lunch, Meal.lunch));
+      expect(session.isMeal, isTrue);
+      expect(session.toJson()['meal'], 'lunch');
+
+      final old = Map<String, dynamic>.of(session.toJson())..remove('meal');
+      final parsed = CookSession.tryParse(old)!;
+      expect((parsed.meal, parsed.mealLabel), (null, null));
+    },
+  );
+
   test('chặng Sơ chế: bắt đầu ở Sơ chế, tick lưu lại, sang bước thì rời Sơ chế', () async {
     await controller().startMeal(
       [(recipeId: 'dau', servings: 2), (recipeId: 'canh', servings: 2)],
-      (day: DateTime(2026, 10, 27), meal: Meal.dinner),
+      planned: (day: DateTime(2026, 10, 27), meal: Meal.dinner),
       prep: true,
     );
     expect(container.read(cookSessionProvider)!.inPrep, isTrue);
@@ -101,7 +120,7 @@ void main() {
   test('trang Lưu ý: lưu qua JSON; sang bước hoặc về Sơ chế thì rời Lưu ý', () async {
     await controller().startMeal(
       [(recipeId: 'dau', servings: 2), (recipeId: 'canh', servings: 2)],
-      (day: DateTime(2026, 10, 27), meal: Meal.dinner),
+      planned: (day: DateTime(2026, 10, 27), meal: Meal.dinner),
       prep: true,
     );
     await controller().showNotes();

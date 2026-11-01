@@ -12,7 +12,7 @@ import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 import 'package:recipe_mobile_app/core/widgets/inline_banner.dart';
 import 'package:recipe_mobile_app/core/widgets/meal_mosaic.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
-import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
+import 'package:recipe_mobile_app/features/discover/data/saved_meals.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today/today_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/routes.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
@@ -38,16 +38,16 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
     );
   }
 
-  Future<void> _toggleSave(int dishes) async {
+  Future<void> _toggleSave(List<String> ids) async {
     final saved = await ref.read(todayViewModelProvider.notifier).toggleSave();
     if (saved == null || !mounted) return;
     if (saved) {
       AppSnackbar.show(
         context,
-        dishes > 1 ? DiscoverStrings.todaySavedMeal : DiscoverStrings.todaySavedDish,
+        ids.length > 1 ? DiscoverStrings.todaySavedMeal : DiscoverStrings.todaySavedDish,
         action: SnackAction(
           DiscoverStrings.todayView,
-          () => context.go(savedLocation(tab: SavedTab.meals)),
+          () => context.go(savedLocation(highlightMeal: SavedMeal.keyOf(ids))),
         ),
       );
     } else {
@@ -147,7 +147,7 @@ class _TodayScreenState extends ConsumerState<TodayScreen> {
                     children: [
                       _SaveButton(
                         saved: meals.value!.isSaved,
-                        onPressed: () => _toggleSave(main.dishes.length),
+                        onPressed: () => _toggleSave(main.ids),
                       ),
                       Expanded(
                         child: AppButton(

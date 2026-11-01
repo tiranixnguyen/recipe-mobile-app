@@ -8,7 +8,12 @@ abstract final class CookStrings {
   static String steps(int count) => 'Cách làm · $count bước';
   static const inPantry = 'Có trong tủ';
   static const missing = 'Thiếu';
+  static const inShopping = 'Trong đi chợ';
   static const optional = 'Tuỳ chọn';
+  static String addMissing(int count) => 'Thêm $count thứ còn thiếu vào đi chợ';
+  static const addedMissing = 'Đã thêm vào đi chợ';
+  static String addedToShopping(int count) => 'Đã thêm $count thứ vào đi chợ';
+  static const seeShopping = 'Xem';
   static const basicSpices = 'Gia vị cơ bản';
   static const addToPlan = 'Thêm vào thực đơn';
   static const startCooking = 'Bắt đầu nấu';

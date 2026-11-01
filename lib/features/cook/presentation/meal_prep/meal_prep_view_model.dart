@@ -6,12 +6,13 @@ import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
 import 'package:recipe_mobile_app/features/cook/domain/cook_prep.dart';
+import 'package:recipe_mobile_app/features/cook/domain/history.dart';
 import 'package:recipe_mobile_app/features/cook/domain/meal_cook.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
-/// Bữa không có món nào trong Thực đơn (link cũ, món đã bị bỏ).
+/// Bữa không có món nào trong Thực đơn, hay món trong đường dẫn không còn (link cũ, món đã bị bỏ).
 class MealNotFound implements Exception {
   const MealNotFound();
 }
@@ -19,7 +20,9 @@ class MealNotFound implements Exception {
 @immutable
 class MealPrepState {
   const MealPrepState({
-    required this.slot,
+    required this.source,
+    required this.meal,
+    required this.day,
     required this.dishes,
     required this.suggested,
     required this.servings,
@@ -30,7 +33,16 @@ class MealPrepState {
     required this.hasPrep,
   });
 
-  final PlannedSlot slot;
+  final MealCookSource source;
+
+  /// Bữa đang nấu: theo Thực đơn, hoặc theo giờ hiện tại khi nấu ngoài Thực đơn.
+  final Meal meal;
+
+  /// Ngày của bữa (hôm nay khi nấu ngoài Thực đơn).
+  final DateTime day;
+
+  /// Mở từ Thực đơn: nấu xong thì đánh dấu bữa đã nấu.
+  bool get fromPlan => source is PlannedMealSource;
 
   /// Món theo thứ tự nấu đang chọn, khẩu phần là [servings].
   final List<MealDish> dishes;
@@ -87,9 +99,9 @@ class MealPrepState {
 /// Chuẩn bị nấu cả bữa (prototype `MealCookPrep`): thứ tự nấu kéo thả được, khẩu phần cả bữa,
 /// đồ cần lấy ra cho mọi món.
 class MealPrepViewModel extends Notifier<AsyncValue<MealPrepState>> {
-  MealPrepViewModel(this.slot);
+  MealPrepViewModel(this.source);
 
-  final PlannedSlot slot;
+  final MealCookSource source;
 
   static const spicesKey = '_spices';
 
@@ -115,12 +127,26 @@ class MealPrepViewModel extends Notifier<AsyncValue<MealPrepState>> {
 
   AsyncValue<MealPrepState> _prep(List<Recipe> recipes, List<Ingredient> ingredients) {
     final byId = {for (final r in recipes) r.id: r};
-    final day = dateOnly(slot.day);
-    final planned = [
-      for (final p in ref.watch(plannedMealsProvider))
-        if (p.day == day && p.meal == slot.meal)
-          if (byId[p.recipeId] case final recipe?) (recipe: recipe, servings: p.servings),
-    ];
+    final now = ref.read(cookClockProvider)();
+    final (meal, day, planned) = switch (source) {
+      PlannedMealSource(:final slot) => (
+        slot.meal,
+        dateOnly(slot.day),
+        [
+          for (final p in ref.watch(plannedMealsProvider))
+            if (p.day == dateOnly(slot.day) && p.meal == slot.meal)
+              if (byId[p.recipeId] case final recipe?) (recipe: recipe, servings: p.servings),
+        ],
+      ),
+      DishesMealSource(:final recipeIds, :final servings) => (
+        mealAt(now),
+        dateOnly(now),
+        [
+          for (final id in recipeIds)
+            if (byId[id] case final recipe?) (recipe: recipe, servings: servings),
+        ],
+      ),
+    };
     if (planned.isEmpty) return AsyncError(const MealNotFound(), StackTrace.current);
 
     final servings = _servings ??= planned
@@ -142,7 +168,9 @@ class MealPrepViewModel extends Notifier<AsyncValue<MealPrepState>> {
     );
     return AsyncData(
       MealPrepState(
-        slot: slot,
+        source: source,
+        meal: meal,
+        day: day,
         dishes: List.unmodifiable(dishes),
         suggested: List.unmodifiable(suggested),
         servings: servings,
@@ -209,7 +237,11 @@ class MealPrepViewModel extends Notifier<AsyncValue<MealPrepState>> {
         .read(cookSessionProvider.notifier)
         .startMeal(
           [for (final d in value.dishes) (recipeId: d.recipe.id, servings: d.servings)],
-          slot,
+          planned: switch (source) {
+            PlannedMealSource(:final slot) => slot,
+            DishesMealSource() => null,
+          },
+          meal: value.fromPlan ? null : value.meal,
           prep: value.hasPrep,
         );
     ref.read(analyticsProvider).track('start_cooking', {
@@ -221,4 +253,4 @@ class MealPrepViewModel extends Notifier<AsyncValue<MealPrepState>> {
 }
 
 final mealPrepViewModelProvider = NotifierProvider.autoDispose
-    .family<MealPrepViewModel, AsyncValue<MealPrepState>, PlannedSlot>(MealPrepViewModel.new);
+    .family<MealPrepViewModel, AsyncValue<MealPrepState>, MealCookSource>(MealPrepViewModel.new);

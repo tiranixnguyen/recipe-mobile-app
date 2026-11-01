@@ -66,7 +66,7 @@ class _Env {
 
 void main() {
   group('Chuẩn bị cả bữa', () {
-    final provider = mealPrepViewModelProvider(_slot);
+    final provider = mealPrepViewModelProvider(PlannedMealSource(_slot));
 
     test('thứ tự gợi ý món lâu trước, khẩu phần lớn nhất, đồ trong tủ cộng cả bữa', () async {
       final env = _Env();
@@ -130,6 +130,52 @@ void main() {
       await env.load(provider);
       expect(env.container.read(provider).error, isA<MealNotFound>());
     });
+
+    group('từ danh sách món (ngoài Thực đơn)', () {
+      final dishes = DishesMealSource(['trung', 'canh'], 3);
+      final dishesProvider = mealPrepViewModelProvider(dishes);
+
+      test('món, khẩu phần và bữa theo giờ; Bắt đầu mở phiên có meal, không có planned', () async {
+        final env = _Env();
+        await env.load(dishesProvider);
+        final state = env.container.read(dishesProvider).requireValue;
+        expect(state.dishes.map((d) => (d.recipe.id, d.servings)), [('canh', 3), ('trung', 3)]);
+        expect((state.fromPlan, state.meal, state.day), (false, Meal.dinner, _day));
+
+        await env.container.read(dishesProvider.notifier).start();
+        final session = env.container.read(cookSessionProvider)!;
+        expect(
+          (session.planned, session.meal, session.mealLabel),
+          (null, Meal.dinner, Meal.dinner),
+        );
+        expect(session.isMeal, isTrue);
+        expect(session.inPrep, isTrue);
+      });
+
+      test('id món không còn thì lỗi MealNotFound', () async {
+        final env = _Env();
+        final missing = mealPrepViewModelProvider(DishesMealSource(['khong-co'], 2));
+        await env.load(missing);
+        expect(env.container.read(missing).error, isA<MealNotFound>());
+      });
+
+      test('nấu xong ghi Lịch sử đúng bữa, không đánh dấu ô Thực đơn', () async {
+        final env = _Env();
+        await env.plan();
+        env.now = DateTime(2026, 10, 27, 8);
+        await env.load(dishesProvider);
+        await env.container.read(dishesProvider.notifier).start();
+        await env.load(mealDoneViewModelProvider);
+        await env.container.read(mealDoneViewModelProvider.notifier).finish();
+
+        env.container.listen(pantryUpdateViewModelProvider, (_, _) {});
+        await env.container.read(pantryUpdateViewModelProvider.notifier).finish();
+
+        final entry = env.container.read(cookHistoryProvider).single;
+        expect((entry.isMeal, entry.meal), (true, Meal.breakfast));
+        expect(env.container.read(plannedMealsProvider).any((p) => p.cooked), isFalse);
+      });
+    });
   });
 
   group('Từng bước cả bữa', () {
@@ -137,7 +183,11 @@ void main() {
       final env = _Env();
       await env.container
           .read(cookSessionProvider.notifier)
-          .startMeal([for (final id in dishes) (recipeId: id, servings: 2)], _slot, prep: prep);
+          .startMeal(
+            [for (final id in dishes) (recipeId: id, servings: 2)],
+            planned: _slot,
+            prep: prep,
+          );
       await env.load(mealStepViewModelProvider);
       return env;
     }
@@ -452,7 +502,7 @@ void main() {
       await env.container.read(cookSessionProvider.notifier).startMeal([
         (recipeId: 'canh', servings: 2),
         (recipeId: 'trung', servings: 2),
-      ], _slot);
+      ], planned: _slot);
       await env.load(mealDoneViewModelProvider);
       final viewModel = env.container.read(mealDoneViewModelProvider.notifier);
       var state = env.container.read(mealDoneViewModelProvider).requireValue;

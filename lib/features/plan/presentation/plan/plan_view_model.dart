@@ -6,7 +6,6 @@ import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/data/planned_meals.dart';
-import 'package:recipe_mobile_app/features/plan/data/shopping_sheet.dart';
 import 'package:recipe_mobile_app/features/plan/domain/plan_labels.dart';
 import 'package:recipe_mobile_app/features/plan/domain/week.dart';
 
@@ -46,7 +45,6 @@ class PlanState {
     required this.dayWord,
     required this.summaries,
     required this.metas,
-    required this.shoppingCount,
   });
 
   /// Ngày đang xem (0h), bất kỳ ngày nào.
@@ -79,9 +77,6 @@ class PlanState {
   /// Dòng phụ bữa đang mở ("2 món · ~40 phút").
   final Map<Meal, String> metas;
 
-  /// Số trên badge nút Đi chợ.
-  final int shoppingCount;
-
   bool get dayEmpty => meals.values.every((dishes) => dishes.isEmpty);
 }
 
@@ -93,7 +88,6 @@ class PlanViewModel extends Notifier<AsyncValue<PlanState>> {
     final selection = ref.watch(_selectionProvider);
     final date = selection.date ?? today;
     final planned = ref.watch(plannedMealsProvider);
-    final shoppingCount = ref.watch(shoppingCountProvider);
 
     return ref.watch(recipesProvider).whenData((recipes) {
       final byId = {for (final r in recipes) r.id: r};
@@ -129,7 +123,6 @@ class PlanViewModel extends Notifier<AsyncValue<PlanState>> {
         metas: {
           for (final meal in Meal.values) meal: mealMeta(meals[meal]!.length, minutesOf(meal)),
         },
-        shoppingCount: shoppingCount,
       );
     });
   }

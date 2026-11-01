@@ -1,8 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/saved_meal/saved_meal_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/search/search_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today/today_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today_prefs/today_prefs_screen.dart';
@@ -14,9 +14,16 @@ const todayPrefsLocation = '/today/prefs';
 /// Gợi ý cho mình mở từ dải tiêu chí của Hôm nay ăn gì: xong thì quay lại màn đó.
 const todayPrefsEditLocation = '$todayPrefsLocation?from=today';
 
-/// Đường dẫn tab Đã lưu, có thể mở sẵn tab Bữa ăn: `context.go(savedLocation(tab: SavedTab.meals))`.
-String savedLocation({SavedTab tab = SavedTab.recipes}) =>
-    tab == SavedTab.recipes ? '/saved' : '/saved?tab=${tab.name}';
+const _savedPath = '/saved';
+
+/// Đường dẫn tab Đã lưu; [highlightMeal] là `SavedMeal.key` của bữa vừa lưu, thẻ đó hiện "Mới thêm".
+String savedLocation({String? highlightMeal}) => Uri(
+  path: _savedPath,
+  queryParameters: highlightMeal == null ? null : {'new': highlightMeal},
+).toString();
+
+/// Chi tiết một bữa đã lưu, [key] là `SavedMeal.key`.
+String savedMealLocation(String key) => '$_savedPath/meal/${Uri.encodeComponent(key)}';
 
 /// Đường dẫn tới màn Tìm kiếm — feature khác dùng hàm này thay vì tự ghép chuỗi.
 ///
@@ -40,17 +47,18 @@ final discoverTabRoutes = <RouteBase>[
 /// Tab Đã lưu (prototype `Saved`).
 final savedTabRoutes = <RouteBase>[
   GoRoute(
-    path: '/saved',
-    builder: (_, state) => SavedScreen(
-      // Đổi tab qua đường dẫn thì dựng lại màn để mở đúng tab.
-      key: ValueKey(state.uri.queryParameters['tab']),
-      initialTab: SavedTab.tryParse(state.uri.queryParameters['tab']),
-    ),
+    path: _savedPath,
+    builder: (_, state) => SavedScreen(highlightMeal: state.uri.queryParameters['new']),
   ),
 ];
 
-/// Màn toàn màn hình: Tìm kiếm (`Search`), Hôm nay ăn gì (`Today`).
+/// Màn toàn màn hình: Tìm kiếm (`Search`), Hôm nay ăn gì (`Today`), Chi tiết bữa (`MealDetail`).
 final discoverRoutes = <RouteBase>[
+  // Có footer riêng nên ẩn thanh tab, như Chi tiết món.
+  GoRoute(
+    path: '$_savedPath/meal/:key',
+    builder: (_, state) => SavedMealScreen(mealKey: state.pathParameters['key']!),
+  ),
   GoRoute(
     path: '/search',
     builder: (_, state) => SearchScreen(

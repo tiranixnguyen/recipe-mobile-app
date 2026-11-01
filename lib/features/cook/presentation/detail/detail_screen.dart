@@ -7,9 +7,11 @@ import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/core/widgets/app_snackbar.dart';
 import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 import 'package:recipe_mobile_app/core/widgets/empty_state.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
+import 'package:recipe_mobile_app/core/widgets/shopping_fab.dart';
 import 'package:recipe_mobile_app/features/cook/domain/recipe_detail.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/routes.dart';
@@ -28,7 +30,7 @@ class DetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     return switch (ref.watch(detailViewModelProvider(recipeId))) {
-      AsyncData(:final value) => Scaffold(body: _Detail(state: value)),
+      AsyncData(:final value) => _Detail(state: value),
       // Tạm: SET-18 thay bằng màn lỗi `notfound`.
       AsyncError(error: RecipeNotFound()) => Scaffold(
         appBar: AppBar(),
@@ -56,39 +58,71 @@ class DetailScreen extends ConsumerWidget {
   }
 }
 
-class _Detail extends StatelessWidget {
+class _Detail extends ConsumerWidget {
   const _Detail({required this.state});
 
   final DetailState state;
 
+  /// Chừa đáy để nút nổi Đi chợ không che bước cuối.
+  static const _bottomInset = 88.0;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final recipe = state.recipe;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Expanded(
-          child: ListView(
+
+    Future<void> addMissing() async {
+      final added = await ref
+          .read(detailViewModelProvider(recipe.id).notifier)
+          .addMissingToShopping();
+      if (!context.mounted || added == 0) return;
+      AppSnackbar.show(
+        context,
+        CookStrings.addedToShopping(added),
+        action: SnackAction(CookStrings.seeShopping, () => context.push(shoppingLocation)),
+        besideFab: true,
+      );
+    }
+
+    return Scaffold(
+      bottomNavigationBar: _Footer(recipe: recipe),
+      body: Stack(
+        children: [
+          ListView(
             padding: EdgeInsets.zero,
             children: [
               _Cover(recipe: recipe),
               Padding(
-                padding: const EdgeInsets.all(AppSpacing.s4),
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.s4,
+                  AppSpacing.s4,
+                  AppSpacing.s4,
+                  _bottomInset,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   spacing: AppSpacing.s5,
                   children: [
                     _Summary(state: state),
-                    _Ingredients(state: state),
+                    _Ingredients(state: state, onAddMissing: addMissing),
                     _Steps(steps: state.steps),
                   ],
                 ),
               ),
             ],
           ),
-        ),
-        _Footer(recipe: recipe),
-      ],
+          // Nút Đi chợ nằm trong body thay vì `floatingActionButton`: màn này là Scaffold gốc, có FAB
+          // thì snackbar bị đẩy lên trên nút. Đặt thế này snackbar nằm sát footer, `besideFab` chừa
+          // chỗ bên phải cho nút như ở Tủ đồ.
+          Positioned(
+            right: AppSpacing.s4,
+            bottom: AppSpacing.s4,
+            child: ShoppingFab<Object>(
+              count: state.shoppingCount,
+              onPressed: () => context.push(shoppingLocation),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -227,9 +261,10 @@ class _SectionTitle extends StatelessWidget {
 /// Khung `surfaceRaised` viền `line`: mỗi nguyên liệu một dòng kèm trạng thái, gia vị cơ bản gom
 /// dòng cuối.
 class _Ingredients extends StatelessWidget {
-  const _Ingredients({required this.state});
+  const _Ingredients({required this.state, required this.onAddMissing});
 
   final DetailState state;
+  final VoidCallback onAddMissing;
 
   @override
   Widget build(BuildContext context) {
@@ -242,11 +277,12 @@ class _Ingredients extends StatelessWidget {
           status: switch (item.status) {
             IngredientStatus.inPantry => CookStrings.inPantry,
             IngredientStatus.missing => CookStrings.missing,
+            IngredientStatus.inShopping => CookStrings.inShopping,
             IngredientStatus.optional => CookStrings.optional,
           },
           textColor: colors.ink,
           statusColor: switch (item.status) {
-            IngredientStatus.inPantry => colors.herbInk,
+            IngredientStatus.inPantry || IngredientStatus.inShopping => colors.herbInk,
             IngredientStatus.missing => colors.chiliDeep,
             IngredientStatus.optional => colors.inkMuted,
           },
@@ -283,6 +319,15 @@ class _Ingredients extends StatelessWidget {
             ),
           ),
         ),
+        if (state.hasMissing)
+          AppButton.secondary(
+            label: state.allMissingInShopping
+                ? CookStrings.addedMissing
+                : CookStrings.addMissing(state.missingIds.length),
+            icon: AppIcons.basket,
+            block: true,
+            onPressed: state.allMissingInShopping ? null : onAddMissing,
+          ),
       ],
     );
   }

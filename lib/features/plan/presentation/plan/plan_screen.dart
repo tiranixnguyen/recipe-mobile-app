@@ -275,7 +275,7 @@ class _BodyState extends ConsumerState<_Body> {
 }
 
 void _showSuggestNone(BuildContext context) =>
-    AppSnackbar.show(context, PlanStrings.suggestNone, kind: SnackKind.info, besideFab: true);
+    AppSnackbar.show(context, PlanStrings.suggestNone, kind: SnackKind.info);
 
 /// Bữa thu gọn: một hàng tên bữa, tóm tắt, tối đa 3 ảnh nhỏ, "+N", mũi tên xuống.
 class _CollapsedMeal extends StatelessWidget {

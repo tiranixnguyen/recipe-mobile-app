@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Chi tiết bữa ăn</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/bep-hoa-lac/components/bundle.css">
+<script src="ds/bep-hoa-lac/components/bundle.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&amp;display=swap">
+<style>
+:root,[data-theme="light"]{--font-sans:"Be Vietnam Pro",system-ui,sans-serif;--surface:#FFF8F1;--surface-raised:#FFFFFF;--ink:#2A1E16;--ink-muted:#6E5D50;--line:#EADFD3;--outline:#958170;--chili:#C2410C;--chili-soft:#FFE3CC;--chili-deep:#9A3412;--herb:#2F7A3E;--herb-ink:#2F7A3E;--herb-soft:#DDF0DF;--danger:#B42318;--danger-ink:#B42318;--space-1:4px;--space-2:8px;--space-4:16px;--space-6:24px;--radius-sm:8px;--radius-md:12px;--radius-pill:999px;color-scheme:light}
+[data-theme="dark"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}
+@media (prefers-color-scheme: dark){[data-theme="system"]{--surface:#1A1410;--surface-raised:#26201A;--ink:#F5EDE6;--ink-muted:#BFAE9F;--line:#3A3029;--outline:#8C7A6B;--chili-soft:#4A2513;--chili-deep:#FFB38A;--herb-ink:#7FCB8F;--herb-soft:#1F3A25;--danger-ink:#FF8A80;color-scheme:dark}}
+body{margin:0}
+*{box-sizing:border-box}
+a.bh-btn-primary,a.bh-btn-primary:hover{color:#FFFFFF}
+.c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+main,.sheet-list{scrollbar-width:none}
+.iconbtn{width:48px;height:48px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:transparent;color:var(--ink);cursor:pointer;padding:0}
+.iconbtn:focus-visible,.dlink:focus-visible,.addmiss:focus-visible,.swap:focus-visible,.rm:focus-visible,.adddish:focus-visible,.pick:focus-visible,.flt:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
+.chip{flex-shrink:0;display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:8px;font-size:12px;line-height:16px;font-weight:600;white-space:nowrap}
+.dlink{flex:1;min-width:0;display:flex;align-items:center;gap:12px;color:var(--ink);text-decoration:none}
+.swap{min-height:36px;padding:0 12px;flex-shrink:0;border:1px solid var(--outline);border-radius:999px;background:transparent;color:var(--ink);cursor:pointer;font:600 13px/18px 'Be Vietnam Pro',sans-serif}
+.rm{width:40px;height:40px;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:transparent;color:var(--ink-muted);cursor:pointer;padding:0}
+.adddish{min-height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed var(--outline);border-radius:12px;background:transparent;color:var(--chili-deep);cursor:pointer;font:600 15px/22px 'Be Vietnam Pro',sans-serif}
+.addmiss{min-height:44px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--outline);border-radius:12px;background:var(--surface-raised);color:var(--ink);cursor:pointer;font:600 15px/22px 'Be Vietnam Pro',sans-serif}
+.addmiss[disabled]{cursor:default;opacity:.55}
+.flt{height:32px;padding:0 12px;flex-shrink:0;border-radius:999px;font:600 13px/18px 'Be Vietnam Pro',sans-serif;cursor:pointer}
+.pick{width:100%;min-height:60px;padding:8px 0;display:flex;align-items:center;gap:12px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;text-align:left;font-family:'Be Vietnam Pro',sans-serif}
+.pick[disabled]{cursor:default;opacity:.45}
+.fab{position:absolute;right:16px;bottom:96px;z-index:3;width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--chili);color:#FFFFFF;text-decoration:none;box-shadow:0 6px 16px rgba(20,14,10,.24)}
+.fab:hover{color:#FFFFFF}
+.fab:focus-visible{outline:2px solid var(--chili-deep);outline-offset:3px}
+.fab b{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;border:2px solid var(--chili);background:var(--surface-raised);color:var(--chili-deep);font-size:12px;line-height:16px;font-weight:700;text-align:center;box-sizing:content-box;transition:transform .2s}
+</style>
+</helmet>
+<div data-theme="{{theme}}" style="position: relative; width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+
+  <header style="display: flex; align-items: center; gap: 4px; padding: 8px 8px 0 4px; height: 64px; flex-shrink: 0">
+    <a href="Saved.dc.html" class="iconbtn" aria-label="Quay lại Đã lưu">
+      <x-import component-from-global-scope="BepHoaLac.Icon" name="back"></x-import>
+    </a>
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <h1 class="c1" style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Bữa của bạn</h1>
+      <span class="c1" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{meta}}</span>
+    </div>
+    <button class="iconbtn" onClick="{{toggleSave}}" aria-label="{{saveLabel}}" aria-pressed="{{saved}}" style="color: var(--chili)">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="{{saveFill}}" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12v16l-6-4-6 4z"></path></svg>
+    </button>
+  </header>
+
+  <!-- Flutter (F1): MealDetail is the many-dish version of Chi tiết món. It takes a meal (dish ids + servings), opened
+       from Đã lưu. The ViewModel keeps the dish list being edited with add / remove / replace / undo, and writes the
+       change back to savedMealsProvider when the meal is saved. No suggestions anywhere on this screen.
+       Merged ingredients: pure function in domain/; availability from availabilityFor (F3); "Thêm … vào đi chợ" calls
+       addToShopping (F4), which reports added vs already on the list. Notices use AppSnackbar (#112). -->
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 8px 16px 96px 16px">
+    <div style="display: flex; flex-direction: column; gap: 10px">
+      <div aria-hidden="true" style="position: relative; height: 168px; border-radius: 12px; overflow: hidden; background: var(--surface-raised)">
+        <sc-for list="{{tiles}}" as="t" hint-placeholder-count="2">
+          <span style="position: absolute; padding: 1px; {{t.style}}">
+            <span class="c2" style="position: relative; width: 100%; height: 100%; background: var(--line); color: var(--ink-muted); font-size: 12px; line-height: 16px; text-align: center; padding: 8px; display: flex; align-items: center; justify-content: center">[Ảnh {{t.lower}}]
+              <sc-if value="{{t.more}}" hint-placeholder-val="{{false}}"><span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(20, 14, 10, 0.55); color: #FFFFFF; font-size: 17px; line-height: 24px; font-weight: 700">{{t.moreLabel}}</span></sc-if>
+            </span>
+          </span>
+        </sc-for>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px">
+        <span class="chip" style="{{statusStyle}}">{{status}}</span>
+        <span class="c1" style="flex: 1; color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">1 người · Bếp từ</span>
+      </div>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">{{dishTitle}}</h2>
+      <div style="padding: 0 12px; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
+        <sc-for list="{{dishes}}" as="d" hint-placeholder-count="2">
+          <div style="display: flex; align-items: center; gap: 8px; padding: 10px 0; {{d.rowStyle}}">
+            <a href="Detail.dc.html" class="dlink" aria-label="{{d.aria}}">
+              <span aria-hidden="true" style="width: 56px; height: 56px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></span>
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+                <span class="c2" style="font-size: 15px; line-height: 22px; font-weight: 600">{{d.name}}</span>
+                <span class="c1" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{d.meta}}</span>
+                <span class="chip c1" style="align-self: flex-start; max-width: 100%; {{d.haveStyle}}">{{d.have}}</span>
+              </span>
+            </a>
+            <button class="swap" onClick="{{d.swap}}" aria-label="{{d.swapLabel}}">Đổi</button>
+            <sc-if value="{{d.canRemove}}" hint-placeholder-val="{{true}}">
+              <button class="rm" onClick="{{d.remove}}" aria-label="{{d.removeLabel}}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+              </button>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <button class="adddish" onClick="{{openAdd}}">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+        Thêm món
+      </button>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: baseline; justify-content: space-between">
+        <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Nguyên liệu cả bữa</h2>
+        <span style="color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">1 người</span>
+      </div>
+      <sc-if value="{{hasMissing}}" hint-placeholder-val="{{true}}">
+        <span style="color: var(--chili-deep); font-size: 13px; line-height: 18px; font-weight: 600">{{missingTitle}}</span>
+        <ul style="margin: 0; padding: 0 12px; list-style: none; background: var(--surface-raised); border: 1px solid var(--chili-soft); border-radius: 12px">
+          <sc-for list="{{missing}}" as="m" hint-placeholder-count="3">
+            <li style="padding: 10px 0; display: flex; align-items: center; gap: 12px; {{m.rowStyle}}">
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                <span style="font-size: 15px; line-height: 22px">{{m.name}} · {{m.qty}}</span>
+                <span class="c1" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{m.uses}}</span>
+              </span>
+              <span class="chip" style="{{m.tagStyle}}">{{m.tag}}</span>
+            </li>
+          </sc-for>
+        </ul>
+        <button class="addmiss" onClick="{{addMissing}}" disabled="{{allAdded}}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.6 9.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8z"></path><path d="M8.5 9l2-5M15.5 9l-2-5"></path></svg>
+          {{addLabel}}
+        </button>
+      </sc-if>
+      <span style="color: var(--herb-ink); font-size: 13px; line-height: 18px; font-weight: 600">Có trong tủ</span>
+      <ul style="margin: 0; padding: 0 12px; list-style: none; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
+        <sc-for list="{{have}}" as="h" hint-placeholder-count="4">
+          <li style="padding: 10px 0; display: flex; flex-direction: column; border-bottom: 1px solid var(--line)">
+            <span style="font-size: 15px; line-height: 22px">{{h.name}} · {{h.qty}}</span>
+            <span class="c1" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{h.uses}}</span>
+          </li>
+        </sc-for>
+        <li style="padding: 10px 0; display: flex; justify-content: space-between; gap: 12px; color: var(--ink-muted); font-size: 15px; line-height: 22px"><span>Dầu ăn, nước mắm, muối, tiêu</span><span style="flex-shrink: 0">Gia vị cơ bản</span></li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- Flutter: ShoppingFab (core/widgets, #113) with the shopping count badge, same as Tủ đồ. -->
+  <a href="Shopping.dc.html" class="fab" aria-label="{{fabLabel}}">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.6 9.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8z"></path><path d="M8.5 9l2-5M15.5 9l-2-5"></path></svg>
+    <b aria-hidden="true" style="{{badgeStyle}}">{{shopCount}}</b>
+  </a>
+
+  <sc-if value="{{hasSnack}}" hint-placeholder-val="{{false}}">
+    <div role="status" aria-live="polite" style="position: absolute; left: 16px; right: 88px; bottom: 96px; z-index: 5; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--ink); color: var(--surface); font-size: 13px; line-height: 18px; box-shadow: 0 6px 16px rgba(20,14,10,.2)">
+      <span style="display: flex; color: var(--herb-soft)"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span>
+      <span class="c2" style="flex: 1; padding: 7px 0">{{snack}}</span>
+      <sc-if value="{{snackUndo}}" hint-placeholder-val="{{false}}"><button onClick="{{undo}}" style="min-height: 40px; padding: 0 10px; border: 0; background: transparent; color: var(--chili-soft); cursor: pointer; font: 700 13px/18px 'Be Vietnam Pro', sans-serif">Hoàn tác</button></sc-if>
+      <sc-if value="{{snackSee}}" hint-placeholder-val="{{false}}"><a href="Shopping.dc.html" style="min-height: 40px; padding: 0 10px; display: flex; align-items: center; color: var(--chili-soft); font-weight: 700; text-decoration: none">Xem</a></sc-if>
+    </div>
+  </sc-if>
+
+  <footer style="flex-shrink: 0; display: flex; gap: 12px; padding: 12px 16px 16px 16px; background: var(--surface-raised); border-top: 1px solid var(--line)">
+    <a href="AddToPlan.dc.html" style="flex: 1.2; height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--outline); border-radius: 12px; color: var(--ink); text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M8 3v4M16 3v4"></path></svg>
+      Thêm vào thực đơn
+    </a>
+    <a href="MealCookPrep.dc.html" style="flex: 1; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: var(--chili); color: #FFFFFF; text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">Bắt đầu nấu</a>
+  </footer>
+
+  <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 8; display: flex; flex-direction: column; justify-content: flex-end; background: rgba(20, 14, 10, 0.55)">
+      <div role="dialog" aria-labelledby="pick-title" style="height: 78%; display: flex; flex-direction: column; gap: 12px; padding: 8px 16px 16px 16px; border-radius: 20px 20px 0 0; background: var(--surface-raised)">
+        <span aria-hidden="true" style="align-self: center; width: 40px; height: 4px; border-radius: 999px; background: var(--line)"></span>
+        <div style="display: flex; align-items: center; gap: 8px">
+          <h2 id="pick-title" class="c1" style="flex: 1; margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">{{sheetTitle}}</h2>
+          <button class="iconbtn" onClick="{{closeSheet}}" aria-label="Đóng" style="margin-right: -8px">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
+        </div>
+        <label class="bh-search" style="min-height: 44px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+          <input type="search" value="{{q}}" onChange="{{setQ}}" placeholder="Tìm món" aria-label="Tìm món" autocomplete="off">
+        </label>
+        <div role="group" aria-label="Lọc theo loại món" style="display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none">
+          <sc-for list="{{filters}}" as="f" hint-placeholder-count="4">
+            <button class="flt" aria-pressed="{{f.on}}" onClick="{{f.pick}}" style="{{f.style}}">{{f.label}}</button>
+          </sc-for>
+        </div>
+        <div class="sheet-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px">
+          <sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+            <span style="padding-top: 4px; color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">{{g.label}}</span>
+            <sc-for list="{{g.items}}" as="it" hint-placeholder-count="3">
+              <button class="pick" onClick="{{it.pick}}" disabled="{{it.inMeal}}" aria-label="{{it.aria}}">
+                <span aria-hidden="true" style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 8px; background: var(--line)"></span>
+                <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+                  <span style="display: flex; align-items: center; gap: 6px; min-width: 0">
+                    <sc-if value="{{it.saved}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; color: var(--chili)"><path d="M6 4h12v16l-6-4-6 4z"></path></svg></sc-if>
+                    <span class="c1" style="font-size: 15px; line-height: 22px; font-weight: 600">{{it.name}}</span>
+                  </span>
+                  <span class="c1" style="color: var(--ink-muted); font-size: 12px; line-height: 16px">{{it.meta}}</span>
+                </span>
+                <span class="chip" style="{{it.tagStyle}}">{{it.tag}}</span>
+              </button>
+            </sc-for>
+          </sc-for>
+          <sc-if value="{{noPick}}" hint-placeholder-val="{{false}}">
+            <p style="margin: 16px 0 0 0; color: var(--ink-muted); font-size: 15px; line-height: 22px; text-align: center">Không thấy món nào khớp.</p>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"have":{"editor":"enum","options":["thiếu đồ","đủ đồ"],"default":"thiếu đồ"},"sheet":{"editor":"enum","options":["đóng","đang thêm","đang đổi"],"default":"đóng"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"$preview":{"width":390,"height":844}}'>
+// Dish catalogue: role, minutes, ingredients [name, qty, in pantry]. 'have' = 'đủ đồ' puts every ingredient in the pantry.
+var ROLE = { main: 'Món chính', soup: 'Canh', side: 'Rau, món phụ' };
+var DISHES = {
+tofu: { name: 'Đậu phụ sốt cà chua', role: 'main', min: 25, ings: [['Đậu phụ', '2 bìa', false], ['Cà chua', '2 quả', true], ['Hành lá', '1 nắm', true]] },
+egg: { name: 'Trứng chiên hành', role: 'main', min: 15, ings: [['Trứng gà', '2 quả', true], ['Hành lá', '1 nắm', true]] },
+pork: { name: 'Thịt kho tiêu', role: 'main', min: 45, ings: [['Thịt ba chỉ', '200 g', false], ['Hành khô', '2 củ', true]] },
+fish: { name: 'Cá rô phi kho tộ với riềng và nước dừa', role: 'main', min: 40, ings: [['Cá rô phi', '1 con', false], ['Riềng', '1 nhánh', false], ['Hành khô', '2 củ', true]] },
+tofu2: { name: 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm', role: 'main', min: 25, ings: [['Đậu phụ', '2 bìa', false], ['Nấm hương', '5 tai', false], ['Cà chua', '2 quả', true]] },
+cabbage: { name: 'Canh cải thịt băm', role: 'soup', min: 15, ings: [['Rau cải', '1 bó', false], ['Thịt băm', '100 g', false], ['Hành lá', '1 nắm', true]] },
+tomsoup: { name: 'Canh cà chua trứng', role: 'soup', min: 15, ings: [['Cà chua', '2 quả', true], ['Trứng gà', '1 quả', true]] },
+pumpkin: { name: 'Canh bí đỏ nấu tôm khô với rau ngót', role: 'soup', min: 20, ings: [['Bí đỏ', '300 g', true], ['Tôm khô', '1 nắm', false]] },
+spinach: { name: 'Rau muống xào tỏi', role: 'side', min: 10, ings: [['Rau muống', '1 bó', true], ['Tỏi', '3 tép', true]] },
+cucumber: { name: 'Dưa chuột chẻ chấm muối vừng', role: 'side', min: 5, ings: [['Dưa chuột', '2 quả', true]] },
+greens: { name: 'Cải ngọt luộc chấm trứng', role: 'side', min: 10, ings: [['Cải ngọt', '1 bó', true], ['Trứng gà', '1 quả', true]] }
+};
+// Saved dishes come first in the picker (savedIdsProvider), then all dishes by name.
+var SAVED_IDS = ['egg', 'tomsoup', 'spinach'];
+var START = ['tofu', 'cabbage'];
+var STRESS_START = ['fish', 'pumpkin', 'spinach', 'tofu2', 'cucumber'];
+// Already on the shopping list before this screen.
+var IN_SHOP = ['Thịt băm'];
+var SHOP_BASE = 3;
+function fold(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd'); }
+function mosaic(names) {
+var n = names.length;
+var boxes = n <= 1 ? [[0, 0, 100, 100]] : n === 2 ? [[0, 0, 50, 100], [50, 0, 50, 100]] : n === 3 ? [[0, 0, 60, 100], [60, 0, 40, 50], [60, 50, 40, 50]] : [[0, 0, 50, 50], [50, 0, 50, 50], [0, 50, 50, 50], [50, 50, 50, 50]];
+return boxes.map(function (b, i) {
+var more = n > 4 && i === 3 ? n - 3 : 0;
+return { style: 'left: ' + b[0] + '%; top: ' + b[1] + '%; width: ' + b[2] + '%; height: ' + b[3] + '%;', lower: (names[i] || '').toLowerCase(), more: more > 0, moreLabel: '+' + more + ' món' };
+});
+}
+// Merge ingredients of the meal by name; Flutter: pure function in domain/.
+function merge(ids, full) {
+var map = {}; var order = [];
+ids.forEach(function (id) {
+var d = DISHES[id];
+d.ings.forEach(function (g) {
+if (!map[g[0]]) { map[g[0]] = { name: g[0], qty: g[1], have: full || g[2], uses: [] }; order.push(g[0]); }
+map[g[0]].uses.push(d.name);
+});
+});
+return order.map(function (k) { var m = map[k]; return { name: m.name, qty: m.qty, have: m.have, uses: m.uses.length > 1 ? 'Cả ' + m.uses.length + ' món' : m.uses[0] }; });
+}
+function missingOf(id, full) { return full ? [] : DISHES[id].ings.filter(function (g) { return !g[2]; }).map(function (g) { return g[0].toLowerCase(); }); }
+var HAVE_ON = 'background: var(--herb); color: #FFFFFF;';
+var MISS_ON = 'background: var(--chili-soft); color: var(--chili-deep);';
+var snackTimer = null;
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { ids: null, prev: null, saved: true, added: [], snack: null, bump: false, sheet: undefined, q: '', role: null };
+}
+renderVals() {
+var self = this;
+var st = this.state;
+var p = this.props;
+var full = p.have === 'đủ đồ';
+var ids = st.ids || (p.sample === 'tên dài, nhiều món' ? STRESS_START : START);
+// Tweak 'sheet' shows the picker on the canvas; Play opens it from Đổi / Thêm món.
+var sheet = st.sheet !== undefined ? st.sheet : (p.sheet === 'đang thêm' ? { mode: 'add' } : p.sheet === 'đang đổi' ? { mode: 'swap', id: ids[0] } : null);
+function toast(text, undo, see) {
+if (snackTimer) { clearTimeout(snackTimer); }
+self.setState({ snack: { text: text, undo: !!undo, see: !!see } });
+snackTimer = setTimeout(function () { self.setState({ snack: null }); }, undo || see ? 6000 : 4000);
+}
+function change(next, text) {
+self.setState({ prev: ids, ids: next, sheet: null, q: '', role: null });
+toast(text, true);
+}
+var ings = merge(ids, full);
+var missing = ings.filter(function (g) { return !g.have; });
+var newOnes = missing.filter(function (g) { return IN_SHOP.indexOf(g.name) < 0 && st.added.indexOf(g.name) < 0; });
+var total = ids.reduce(function (t, id) { return t + DISHES[id].min; }, 0);
+var shopCount = SHOP_BASE + st.added.length;
+// Picker
+var role = st.role !== null ? st.role : (sheet && sheet.mode === 'swap' ? DISHES[sheet.id].role : 'all');
+var q = fold(st.q.trim());
+var pool = Object.keys(DISHES).filter(function (id) { return (role === 'all' || DISHES[id].role === role) && (!q || fold(DISHES[id].name).indexOf(q) >= 0); });
+function item(id) {
+var d = DISHES[id];
+var inMeal = ids.indexOf(id) >= 0;
+var miss = missingOf(id, full);
+return {
+name: d.name, saved: SAVED_IDS.indexOf(id) >= 0, inMeal: inMeal,
+meta: ROLE[d.role] + ' · ' + d.min + ' phút' + (inMeal ? ' · Đã có trong bữa' : ''),
+tag: miss.length ? 'Thiếu ' + miss.length : 'Đủ đồ',
+tagStyle: miss.length ? MISS_ON : HAVE_ON,
+aria: d.name + (inMeal ? ', đã có trong bữa' : miss.length ? ', thiếu ' + miss.join(', ') : ', đủ đồ'),
+pick: function () {
+if (inMeal) { return; }
+if (sheet.mode === 'swap') {
+var at = ids.indexOf(sheet.id);
+var next = ids.slice(); next[at] = id;
+change(next, 'Đã đổi ' + DISHES[sheet.id].name.toLowerCase() + ' thành ' + d.name.toLowerCase());
+} else {
+change(ids.concat([id]), 'Đã thêm ' + d.name.toLowerCase() + ' vào bữa');
+}
+}
+};
+}
+var savedItems = pool.filter(function (id) { return SAVED_IDS.indexOf(id) >= 0; }).map(item);
+var allItems = pool.filter(function (id) { return SAVED_IDS.indexOf(id) < 0; }).sort(function (a, b) { return DISHES[a].name.localeCompare(DISHES[b].name, 'vi'); }).map(item);
+var groups = [];
+if (savedItems.length) { groups.push({ label: 'Món bạn đã lưu', items: savedItems }); }
+if (allItems.length) { groups.push({ label: 'Tất cả món', items: allItems }); }
+return {
+theme: p.theme ?? 'system',
+meta: ids.length + ' món · ~' + total + ' phút · Bếp từ',
+saved: st.saved,
+saveFill: st.saved ? 'currentColor' : 'none',
+saveLabel: st.saved ? 'Bỏ lưu bữa' : 'Lưu bữa',
+toggleSave: function () { self.setState({ saved: !self.state.saved }); },
+tiles: mosaic(ids.map(function (id) { return DISHES[id].name; })),
+status: missing.length ? 'Thiếu ' + missing.length + ' thứ' : 'Đủ đồ',
+statusStyle: missing.length ? MISS_ON : HAVE_ON,
+dishTitle: 'Các món trong bữa (' + ids.length + ')',
+dishes: ids.map(function (id, i) {
+var d = DISHES[id];
+var miss = missingOf(id, full);
+return {
+name: d.name,
+meta: ROLE[d.role] + ' · ' + d.min + ' phút',
+have: miss.length ? 'Thiếu: ' + miss.join(', ') : 'Đủ đồ',
+haveStyle: miss.length ? MISS_ON : HAVE_ON,
+rowStyle: i < ids.length - 1 ? 'border-bottom: 1px solid var(--line);' : '',
+aria: d.name + ', ' + (miss.length ? 'thiếu ' + miss.join(', ') : 'đủ đồ') + '. Xem chi tiết món',
+swapLabel: 'Đổi ' + d.name,
+swap: function () { self.setState({ sheet: { mode: 'swap', id: id }, q: '', role: null }); },
+canRemove: ids.length > 1,
+removeLabel: 'Bỏ ' + d.name + ' khỏi bữa',
+remove: function () { change(ids.filter(function (x) { return x !== id; }), 'Đã bỏ ' + d.name.toLowerCase() + ' khỏi bữa'); }
+};
+}),
+openAdd: function () { self.setState({ sheet: { mode: 'add' }, q: '', role: null }); },
+hasMissing: missing.length > 0,
+missingTitle: 'Còn thiếu ' + missing.length + ' thứ',
+missing: missing.map(function (g, i) {
+var inShop = IN_SHOP.indexOf(g.name) >= 0 || st.added.indexOf(g.name) >= 0;
+return {
+name: g.name, qty: g.qty, uses: g.uses,
+tag: inShop ? 'Trong đi chợ' : 'Thiếu',
+tagStyle: inShop ? 'background: var(--herb-soft); color: var(--herb-ink);' : MISS_ON,
+rowStyle: i < missing.length - 1 ? 'border-bottom: 1px solid var(--line);' : ''
+};
+}),
+allAdded: newOnes.length === 0,
+addLabel: newOnes.length === 0 ? 'Đã có hết trong đi chợ' : 'Thêm ' + newOnes.length + ' thứ còn thiếu vào đi chợ',
+addMissing: function () {
+if (!newOnes.length) { return; }
+var skipped = missing.length - newOnes.length;
+self.setState({ added: self.state.added.concat(newOnes.map(function (g) { return g.name; })), bump: true });
+setTimeout(function () { self.setState({ bump: false }); }, 200);
+toast('Đã thêm ' + newOnes.length + ' thứ vào đi chợ' + (skipped ? ', ' + skipped + ' thứ đã có sẵn' : ''), false, true);
+},
+have: ings.filter(function (g) { return g.have; }),
+shopCount: shopCount,
+badgeStyle: st.bump ? 'transform: scale(1.2);' : '',
+fabLabel: 'Đi chợ, ' + shopCount + ' thứ cần mua',
+hasSnack: !!st.snack,
+snack: st.snack ? st.snack.text : '',
+snackUndo: !!(st.snack && st.snack.undo),
+snackSee: !!(st.snack && st.snack.see),
+undo: function () { if (snackTimer) { clearTimeout(snackTimer); } self.setState({ ids: self.state.prev, prev: null, snack: null }); },
+sheetOpen: !!sheet,
+sheetTitle: sheet ? (sheet.mode === 'swap' ? 'Đổi ' + DISHES[sheet.id].name.toLowerCase() + ' thành' : 'Thêm món vào bữa') : '',
+closeSheet: function () { self.setState({ sheet: null, q: '', role: null }); },
+q: st.q,
+setQ: function (e) { self.setState({ q: e && e.target ? e.target.value : '' }); },
+filters: [['all', 'Tất cả'], ['main', 'Món chính'], ['soup', 'Canh'], ['side', 'Rau, món phụ']].map(function (f) {
+var on = role === f[0];
+return { label: f[1], on: on, style: on ? 'border: 1px solid var(--chili-deep); background: var(--chili-soft); color: var(--chili-deep);' : 'border: 1px solid var(--outline); background: transparent; color: var(--ink);', pick: function () { self.setState({ role: f[0] }); } };
+}),
+groups: groups,
+noPick: groups.length === 0
+};
+}
+}
+</script>
+</body>
+</html>
