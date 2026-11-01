@@ -14,7 +14,10 @@ import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/system/system.dart';
 
 class TodayPrefsScreen extends ConsumerWidget {
-  const TodayPrefsScreen({super.key});
+  const TodayPrefsScreen({super.key, this.fromToday = false});
+
+  /// Mở từ Hôm nay ăn gì (nút sửa tiêu chí): xong thì quay lại màn đó thay vì mở màn mới.
+  final bool fromToday;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -161,7 +164,7 @@ class TodayPrefsScreen extends ConsumerWidget {
               ),
             ),
             // Footer
-            _Footer(state: state, vm: vm),
+            _Footer(state: state, vm: vm, fromToday: fromToday),
           ],
         ),
       ),
@@ -498,15 +501,17 @@ class _TagGroup extends StatelessWidget {
 }
 
 class _Footer extends ConsumerWidget {
-  const _Footer({required this.state, required this.vm});
+  const _Footer({required this.state, required this.vm, required this.fromToday});
 
   final TodayPrefsState state;
   final TodayPrefsViewModel vm;
+  final bool fromToday;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final ctaLabel = DiscoverStrings.prefsCta(state.prefs.meal.scale.phrase);
+    void done() => fromToday ? context.pop() : context.pushReplacement(todayLocation);
 
     return Container(
       color: colors.surfaceRaised,
@@ -523,7 +528,7 @@ class _Footer extends ConsumerWidget {
               children: [
                 AppButton.ghost(
                   label: DiscoverStrings.prefsSkip,
-                  onPressed: () => context.pushReplacement(todayLocation),
+                  onPressed: done,
                 ),
                 const SizedBox(width: AppSpacing.s2),
                 Expanded(
@@ -533,7 +538,7 @@ class _Footer extends ConsumerWidget {
                     block: true,
                     onPressed: () async {
                       await vm.submit();
-                      if (context.mounted) context.pushReplacement(todayLocation);
+                      if (context.mounted) done();
                     },
                   ),
                 ),

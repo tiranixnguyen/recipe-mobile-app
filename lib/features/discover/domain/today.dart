@@ -1,5 +1,7 @@
 import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/features/discover/data/today_prefs.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
+import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 
 /// Bữa sắp tới theo giờ: trước 10h là sáng, trước 15h là trưa, còn lại là tối.
 Meal mealForHour(int hour) => hour < 10
@@ -8,27 +10,63 @@ Meal mealForHour(int hour) => hour < 10
     ? Meal.lunch
     : Meal.dinner;
 
-/// Dòng lý do dưới món chính: "Bạn có đủ đồ · hợp bữa tối", "Thiếu hành lá · hợp bữa tối".
+/// Món thay cho ô [index] của bữa [dishes] khi bấm "Đổi", lấy theo thứ tự [ranked] (đã xếp hạng).
 ///
-/// [missing] là tên nguyên liệu còn thiếu (`Availability.missing`); null khi chưa tải danh mục.
-String todayReason(List<String>? missing, Meal meal) => switch (missing) {
-  null => DiscoverStrings.todayFitsMealOnly(meal.label.toLowerCase()),
-  [] => DiscoverStrings.todayReason(DiscoverStrings.todayHasAll, meal.label.toLowerCase()),
-  _ => DiscoverStrings.todayReason(
-    DiscoverStrings.todayMissing(missing),
-    meal.label.toLowerCase(),
-  ),
-};
+/// Ứng viên: cùng vai với món đang ở ô đó, chưa có trong bữa, không mang cảm giác ngược [feel]. Bỏ
+/// qua món đã thử ở ô này ([tried]); thử hết thì quay vòng từ đầu. Trả món mới kèm tập đã thử mới
+/// (gồm cả món vừa rời ô), null khi không có ứng viên nào.
+({Recipe recipe, Set<String> tried})? swapCandidate(
+  List<Recipe> ranked,
+  List<Recipe> dishes,
+  int index,
+  Set<String> tried, {
+  DishFeel? feel,
+}) {
+  final current = dishes[index];
+  final inMeal = {for (final d in dishes) d.id};
+  final opposite = feel?.opposite;
+  final candidates = [
+    for (final recipe in ranked)
+      if (recipe.role == current.role &&
+          !inMeal.contains(recipe.id) &&
+          (opposite == null || recipe.feel != opposite))
+        recipe,
+  ];
+  if (candidates.isEmpty) return null;
+  final fresh = candidates.where((r) => !tried.contains(r.id)).firstOrNull;
+  if (fresh != null) return (recipe: fresh, tried: {...tried, current.id, fresh.id});
+  final first = candidates.first;
+  return (recipe: first, tried: {current.id, first.id});
+}
 
-/// Món chính ở vị trí [index] (theo vòng) và tối đa 2 món kế tiếp cho "Hoặc thử".
+/// Tên một bữa trong "Hoặc thử": tối đa 2 tên, còn lại "+N món" ("A, B +1 món").
+String mealNames(List<String> names) => names.length <= 2
+    ? names.join(', ')
+    : DiscoverStrings.todayMoreDishes(names.take(2).join(', '), names.length - 2);
+
+/// Dải tiêu chí đang dùng ở đầu Hôm nay ăn gì: quy mô · thời gian · cảm giác · Dọn tủ lạnh · tag.
 ///
-/// Null khi [items] rỗng. Ít hơn 3 món thì "Hoặc thử" không lặp lại món chính.
-({T main, List<T> alternatives})? todayPick<T>(List<T> items, int index) {
-  if (items.isEmpty) return null;
-  final n = items.length;
-  final start = index % n;
-  return (
-    main: items[start],
-    alternatives: [for (var i = 1; i <= 2 && i < n; i++) items[(start + i) % n]],
-  );
+/// "Theo thời tiết" khi chưa bật thời tiết (#115) hiện "Theo giờ"; "Tuỳ bạn" không hiện chip.
+List<String> criteriaLabels(TodayPrefs prefs) {
+  final meal = prefs.meal;
+  return [
+    switch (meal.scale) {
+      MealScale.one => DiscoverStrings.prefsScaleOne,
+      MealScale.two => DiscoverStrings.prefsScaleTwo,
+      MealScale.tray => DiscoverStrings.prefsScaleTray,
+    },
+    switch (meal.maxMinutes) {
+      null => DiscoverStrings.prefsTimeNull,
+      15 => DiscoverStrings.prefsTime15,
+      30 => DiscoverStrings.prefsTime30,
+      final minutes => DiscoverStrings.todayUnderMinutes(minutes),
+    },
+    if (prefs.byWeather)
+      DiscoverStrings.todayByHour
+    else if (meal.feel case final feel?)
+      feel.label,
+    if (meal.fridge) DiscoverStrings.prefsFridge,
+    for (final tag in RecipeTag.values)
+      if (meal.tags.contains(tag)) tag.label,
+  ];
 }

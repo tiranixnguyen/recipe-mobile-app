@@ -67,21 +67,37 @@ abstract final class DiscoverStrings {
   static const shoppingEmptyPrompt = 'Bấm để mở danh sách';
   static String upcomingMeta(int count, int totalMinutes) => '$count món · ~$totalMinutes phút';
 
-  // Hôm nay ăn gì
-  static String mealLabel(String meal) => 'Bữa $meal';
-  static String todaySubtitle(String meal) => 'Bữa $meal · theo tủ đồ và bếp của bạn';
-  static const todayUnder30 = 'Dưới 30 phút';
-  static const todayAnyTime = 'Thoải mái';
-  static const todayEmpty = 'Chưa có món hợp bữa này. Bạn thử chọn thời gian khác.';
-  static const todayDislike = 'Không thích';
-  static const todayShuffle = 'Đổi món';
+  // Hôm nay ăn gì v2 (DSC-12)
+  static String todayTitle(String meal) => 'Bữa $meal nay';
+  static const todaySubtitle = 'Gợi ý theo tủ đồ, bếp và nhu cầu của bạn';
+  static String todayCriteriaAria(List<String> criteria) =>
+      'Tiêu chí: ${criteria.join(', ')}. Bấm để sửa';
+  static const todayByHour = 'Theo giờ';
+  static String todayUnderMinutes(int minutes) => 'Dưới $minutes phút';
+  static String todayMoreDishes(String names, int more) => '$names +$more món';
+  static const todayMealAria = 'Bữa gợi ý';
+  static String todayMealMeta(int count, int minutes, List<String> tools) =>
+      ['$count món', '~$minutes phút', ...tools].join(' · ');
+  static String todayAltMeta(int count, int minutes, {required bool ready}) =>
+      ['$count món', '~$minutes phút', if (ready) 'Đủ đồ'].join(' · ');
+  static const todayHasAll = 'Đủ đồ';
+  static String todayMissingCount(int count) => 'Thiếu $count thứ';
+  static String todayAboutMinutes(int minutes) => '~$minutes phút';
+  static const todaySwap = 'Đổi';
+  static String todaySwapAria(String name) => 'Đổi $name';
+  static const todayDislike = 'Không hợp';
+  static const todayShuffle = 'Đổi cả bữa';
   static const todayReasonsPrompt = 'Vì sao không hợp? App sẽ nhớ.';
   static const todayAlternatives = 'Hoặc thử';
-  static const todayCook = 'Nấu món này';
-  static const todayHasAll = 'Bạn có đủ đồ';
-  static String todayMissing(List<String> missing) => 'Thiếu ${missing.join(', ')}';
-  static String todayReason(String stock, String meal) => '$stock · hợp bữa $meal';
-  static String todayFitsMealOnly(String meal) => 'Hợp bữa $meal';
+  static const todaySave = 'Lưu lại';
+  static const todaySaved = 'Đã lưu';
+  static const todayAddToPlan = 'Thêm vào thực đơn';
+  static const todaySavedMeal = 'Đã lưu bữa vào Đã lưu';
+  static const todaySavedDish = 'Đã lưu món vào Đã lưu';
+  static const todayUnsaved = 'Đã bỏ lưu';
+  static const todayView = 'Xem';
+  static const todayEmpty =
+      'Chưa có bữa hợp tiêu chí của bạn. Bạn thử sửa tiêu chí hoặc thêm đồ vào Tủ đồ.';
   static String minutes(int minutes) => '$minutes phút';
   // Tìm kiếm
   static const clearQuery = 'Xoá từ khoá';
