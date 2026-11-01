@@ -4,6 +4,7 @@ import 'package:recipe_mobile_app/features/discover/presentation/discover/discov
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/search/search_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today/today_screen.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/today_prefs/today_prefs_screen.dart';
 
 const discoverLocation = '/';
 const todayLocation = '/today';
@@ -51,6 +52,6 @@ final discoverRoutes = <RouteBase>[
   ),
   GoRoute(
     path: todayPrefsLocation,
-    builder: (_, _) => const TodayScreen(),
+    builder: (_, _) => const TodayPrefsScreen(),
   ),
 ];
