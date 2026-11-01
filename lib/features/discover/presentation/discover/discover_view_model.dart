@@ -16,13 +16,12 @@ class DiscoverState {
     required this.now,
     required this.upcomingMeal,
     required this.upcomingDishes,
-    required this.upcomingTotalMinutes,
     required this.upcomingIdeas,
     required this.readyDishes,
     required this.nearDishes,
     required this.pantryIngredientNames,
-    required this.shoppingRequests,
-    required this.shoppingForDishes,
+    required this.shoppingCount,
+    required this.shoppingPreview,
     required this.addedShoppingIds,
   });
 
@@ -34,9 +33,6 @@ class DiscoverState {
 
   /// Các món đã lên thực đơn cho bữa sắp tới hôm nay.
   final List<Recipe> upcomingDishes;
-
-  /// Tổng thời gian nấu của bữa sắp tới.
-  final int upcomingTotalMinutes;
 
   /// Các món gợi ý nếu bữa sắp tới chưa có món.
   final List<Recipe> upcomingIdeas;
@@ -50,11 +46,11 @@ class DiscoverState {
   /// Tên các nguyên liệu đang có trong tủ đồ (phục vụ thẻ "Dọn tủ lạnh").
   final List<String> pantryIngredientNames;
 
-  /// Danh sách yêu cầu đi chợ hiện có.
-  final List<ShoppingRequest> shoppingRequests;
+  /// Số thứ cần mua, cùng số với badge nút Đi chợ.
+  final int shoppingCount;
 
-  /// Danh sách món được thêm vào đi chợ.
-  final List<Recipe> shoppingForDishes;
+  /// Tên các thứ cần mua, không kèm lượng, theo thứ tự trên màn Đi chợ (View lấy 3 tên đầu).
+  final List<String> shoppingPreview;
 
   /// Các món đã bấm "+ Đi chợ" trong phiên hiện tại.
   final Set<String> addedShoppingIds;
@@ -63,26 +59,24 @@ class DiscoverState {
     DateTime? now,
     Meal? upcomingMeal,
     List<Recipe>? upcomingDishes,
-    int? upcomingTotalMinutes,
     List<Recipe>? upcomingIdeas,
     List<Recipe>? readyDishes,
     List<NearMatch>? nearDishes,
     List<String>? pantryIngredientNames,
-    List<ShoppingRequest>? shoppingRequests,
-    List<Recipe>? shoppingForDishes,
+    int? shoppingCount,
+    List<String>? shoppingPreview,
     Set<String>? addedShoppingIds,
   }) {
     return DiscoverState(
       now: now ?? this.now,
       upcomingMeal: upcomingMeal ?? this.upcomingMeal,
       upcomingDishes: upcomingDishes ?? this.upcomingDishes,
-      upcomingTotalMinutes: upcomingTotalMinutes ?? this.upcomingTotalMinutes,
       upcomingIdeas: upcomingIdeas ?? this.upcomingIdeas,
       readyDishes: readyDishes ?? this.readyDishes,
       nearDishes: nearDishes ?? this.nearDishes,
       pantryIngredientNames: pantryIngredientNames ?? this.pantryIngredientNames,
-      shoppingRequests: shoppingRequests ?? this.shoppingRequests,
-      shoppingForDishes: shoppingForDishes ?? this.shoppingForDishes,
+      shoppingCount: shoppingCount ?? this.shoppingCount,
+      shoppingPreview: shoppingPreview ?? this.shoppingPreview,
       addedShoppingIds: addedShoppingIds ?? this.addedShoppingIds,
     );
   }
@@ -99,7 +93,8 @@ class DiscoverViewModel extends Notifier<AsyncValue<DiscoverState>> {
     final matchesAsync = ref.watch(pantryMatchesProvider);
     final planned = ref.watch(plannedMealsProvider);
     final pantryIds = ref.watch(pantryItemsProvider);
-    final shopping = ref.watch(shoppingProvider);
+    final shoppingCount = ref.watch(shoppingCountProvider);
+    final shoppingPreview = ref.watch(shoppingPreviewProvider);
 
     return switch ((recipesAsync, ingredientsAsync, matchesAsync)) {
       (AsyncError(:final error, :final stackTrace), _, _) ||
@@ -117,7 +112,8 @@ class DiscoverViewModel extends Notifier<AsyncValue<DiscoverState>> {
           matches: matches,
           planned: planned,
           pantryIds: pantryIds,
-          shopping: shopping,
+          shoppingCount: shoppingCount,
+          shoppingPreview: shoppingPreview,
         ),
       _ => const AsyncLoading(),
     };
@@ -130,7 +126,8 @@ class DiscoverViewModel extends Notifier<AsyncValue<DiscoverState>> {
     required PantryMatches matches,
     required List<PlannedMeal> planned,
     required Set<String> pantryIds,
-    required List<ShoppingRequest> shopping,
+    required int shoppingCount,
+    required List<String> shoppingPreview,
   }) {
     final meal = nextMeal(now);
     final today = dateOnly(now);
@@ -143,7 +140,6 @@ class DiscoverViewModel extends Notifier<AsyncValue<DiscoverState>> {
       for (final p in plannedUpcoming)
         if (recipeMap[p.recipeId] != null) recipeMap[p.recipeId]!,
     ];
-    final upcomingTotalMinutes = upcomingDishes.fold<int>(0, (sum, r) => sum + r.minutes);
 
     // Món gợi ý nếu chưa có món trong bữa tới
     final readyList = matches.ready;
@@ -161,12 +157,6 @@ class DiscoverViewModel extends Notifier<AsyncValue<DiscoverState>> {
         if (ingredientMap[id] != null) ingredientMap[id]!.name,
     ];
 
-    // Món đi chợ
-    final shoppingFor = [
-      for (final req in shopping)
-        if (recipeMap[req.recipeId] != null) recipeMap[req.recipeId]!,
-    ];
-
     ref.read(analyticsProvider).track('view_discover');
 
     return AsyncData(
@@ -174,13 +164,12 @@ class DiscoverViewModel extends Notifier<AsyncValue<DiscoverState>> {
         now: now,
         upcomingMeal: meal,
         upcomingDishes: upcomingDishes,
-        upcomingTotalMinutes: upcomingTotalMinutes,
         upcomingIdeas: ideas,
         readyDishes: matches.ready,
         nearDishes: matches.near,
         pantryIngredientNames: pantryNames,
-        shoppingRequests: shopping,
-        shoppingForDishes: shoppingFor,
+        shoppingCount: shoppingCount,
+        shoppingPreview: shoppingPreview,
         addedShoppingIds: Set.unmodifiable(_addedShoppingIds),
       ),
     );

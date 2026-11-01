@@ -66,6 +66,7 @@ class DiscoverScreen extends ConsumerWidget {
                 padding: const EdgeInsets.only(bottom: AppSpacing.s4),
                 children: [
                   const ResumeCookingBanner(),
+                  const GettingStartedCard(),
                   Padding(
                     padding: side,
                     child: SearchField(
@@ -75,19 +76,21 @@ class DiscoverScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.s3),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
+                  Padding(
                     padding: side,
-                    child: Row(
-                      spacing: AppSpacing.s2,
-                      children: [
-                        for (final (label, location) in _quickFilters)
-                          AppChip(
-                            label: label,
-                            selected: false,
-                            onTap: () => context.push(location),
-                          ),
-                      ],
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        spacing: AppSpacing.s2,
+                        children: [
+                          for (final (label, location) in _quickFilters)
+                            AppChip(
+                              label: label,
+                              selected: false,
+                              onTap: () => context.push(location),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                   gap,
@@ -111,7 +114,7 @@ class DiscoverScreen extends ConsumerWidget {
                       gap,
                       _UpcomingSection(state: value),
                       gap,
-                      _ReadyToCookSection(ready: value.readyDishes),
+                      _ReadyToCookSection(state: value),
                       gap,
                       _ShoppingSection(state: value),
                     ],
@@ -296,44 +299,7 @@ class _UpcomingSection extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.s2),
-              InkWell(
-                onTap: () => context.go(planLocation()),
-                borderRadius: AppRadius.smAll,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    DiscoverStrings.viewPlan,
-                    style: AppTextStyles.meta.copyWith(color: colors.chiliDeep),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          if (hasDishes) ...[
-            for (final dish in state.upcomingDishes) ...[
-              _DishTile(
-                recipe: dish,
-                onTap: () => context.push(recipeLocation(dish.id)),
-              ),
-              const SizedBox(height: AppSpacing.s2),
-            ],
-            const SizedBox(height: 2),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    DiscoverStrings.upcomingMeta(
-                      state.upcomingDishes.length,
-                      state.upcomingTotalMinutes,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.meta.copyWith(color: colors.inkMuted),
-                  ),
-                ),
+              if (hasDishes) ...[
                 const SizedBox(width: AppSpacing.s2),
                 _CookMealPill(
                   isMultiple: state.upcomingDishes.length > 1,
@@ -346,6 +312,24 @@ class _UpcomingSection extends StatelessWidget {
                   },
                 ),
               ],
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (hasDishes) ...[
+            Semantics(
+              button: true,
+              label: DiscoverStrings.openUpcomingPlan(mealLabel),
+              child: InkWell(
+                onTap: () => context.go(planLocation()),
+                borderRadius: AppRadius.mdAll,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: AppSpacing.s1,
+                  children: [
+                    for (final dish in state.upcomingDishes) _DishTile(recipe: dish),
+                  ],
+                ),
+              ),
             ),
           ] else ...[
             Text(
@@ -373,59 +357,54 @@ class _UpcomingSection extends StatelessWidget {
 }
 
 class _DishTile extends StatelessWidget {
-  const _DishTile({required this.recipe, required this.onTap});
+  const _DishTile({required this.recipe});
 
   final Recipe recipe;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
-    return InkWell(
-      onTap: onTap,
-      borderRadius: AppRadius.mdAll,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.s2),
-        decoration: BoxDecoration(
-          color: colors.surfaceRaised,
-          border: Border.all(color: colors.line),
-          borderRadius: AppRadius.mdAll,
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: AppRadius.smAll,
-              child: SizedBox(
-                width: 56,
-                height: 56,
-                child: RecipeCover(imageAsset: recipe.imageAsset, aspectRatio: 1),
-              ),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.s2),
+      decoration: BoxDecoration(
+        color: colors.surfaceRaised,
+        border: Border.all(color: colors.line),
+        borderRadius: AppRadius.mdAll,
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: AppRadius.smAll,
+            child: SizedBox(
+              width: 56,
+              height: 56,
+              child: RecipeCover(imageAsset: recipe.imageAsset, aspectRatio: 1),
             ),
-            const SizedBox(width: AppSpacing.s3),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    recipe.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.body.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: colors.ink,
-                    ),
+          ),
+          const SizedBox(width: AppSpacing.s3),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  recipe.name,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyles.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colors.ink,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    recipeMeta(recipe),
-                    style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  recipeMeta(recipe),
+                  style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -542,21 +521,21 @@ class _CookMealPill extends StatelessWidget {
         onTap: onTap,
         borderRadius: AppRadius.pillAll,
         child: Container(
-          height: 36,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          height: 32,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
-            color: colors.chili,
+            color: colors.chiliSoft,
             borderRadius: AppRadius.pillAll,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Symbols.skillet_rounded, size: 16, color: Colors.white),
+              Icon(Symbols.skillet_rounded, size: 14, color: colors.chiliDeep),
               const SizedBox(width: 6),
               Text(
                 label,
-                style: AppTextStyles.meta.copyWith(
-                  color: Colors.white,
+                style: AppTextStyles.caption.copyWith(
+                  color: colors.chiliDeep,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -569,13 +548,16 @@ class _CookMealPill extends StatelessWidget {
 }
 
 class _ReadyToCookSection extends StatelessWidget {
-  const _ReadyToCookSection({required this.ready});
+  const _ReadyToCookSection({required this.state});
 
-  final List<Recipe> ready;
+  final DiscoverState state;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final ready = state.readyDishes;
+    final isEmpty = ready.isEmpty;
+    final hasPantry = state.pantryIngredientNames.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -596,36 +578,55 @@ class _ReadyToCookSection extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.s2),
-              InkWell(
-                onTap: () => context.go(pantryLocation),
-                borderRadius: AppRadius.smAll,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    DiscoverStrings.openPantry,
-                    style: AppTextStyles.meta.copyWith(color: colors.chiliDeep),
+              if (!isEmpty) ...[
+                const SizedBox(width: AppSpacing.s2),
+                InkWell(
+                  onTap: () => context.go(pantryLocation),
+                  borderRadius: AppRadius.smAll,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Text(
+                      DiscoverStrings.openPantry,
+                      style: AppTextStyles.meta.copyWith(color: colors.chiliDeep),
+                    ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
         const SizedBox(height: 12),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
-          child: Row(
-            spacing: 12,
-            children: [
-              for (final dish in ready)
-                _ReadyCard(
-                  recipe: dish,
-                  onTap: () => context.push(recipeLocation(dish.id)),
-                ),
-            ],
+        if (isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
+            child: _EntryCard(
+              icon: AppIcons.fridge,
+              title: hasPantry
+                  ? DiscoverStrings.readyEmptyNoMatchTitle
+                  : DiscoverStrings.readyEmptyPantryTitle,
+              subtitle: hasPantry
+                  ? DiscoverStrings.readyEmptyNoMatchBody
+                  : DiscoverStrings.readyEmptyPantryBody,
+              onTap: () => context.go(pantryLocation),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                spacing: 12,
+                children: [
+                  for (final dish in ready)
+                    _ReadyCard(
+                      recipe: dish,
+                      onTap: () => context.push(recipeLocation(dish.id)),
+                    ),
+                ],
+              ),
+            ),
           ),
-        ),
       ],
     );
   }
@@ -710,109 +711,109 @@ class _ShoppingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final hasItems = state.shoppingRequests.isNotEmpty;
+    final hasItems = state.shoppingCount > 0;
     final title = hasItems
-        ? DiscoverStrings.shoppingNeedBuy(state.shoppingRequests.length)
+        ? DiscoverStrings.shoppingNeedBuy(state.shoppingCount)
         : DiscoverStrings.shoppingEmpty;
-    final sub1 = hasItems
-        ? state.shoppingForDishes.map((r) => r.name).join(', ')
+    final subtitle = hasItems
+        ? state.shoppingPreview.take(3).join(', ')
         : DiscoverStrings.shoppingEmptySub;
-    final sub2 = hasItems
-        ? 'Cho ${state.shoppingForDishes.map((r) => r.name).take(2).join(', ')}'
-        : DiscoverStrings.shoppingEmptyPrompt;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Semantics(
-                  header: true,
-                  child: Text(
-                    DiscoverStrings.shoppingTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.subtitle.copyWith(color: colors.ink),
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.s2),
-              InkWell(
-                onTap: () => context.push(shoppingLocation),
-                borderRadius: AppRadius.smAll,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text(
-                    DiscoverStrings.openShoppingList,
-                    style: AppTextStyles.meta.copyWith(color: colors.chiliDeep),
-                  ),
-                ),
-              ),
-            ],
+          Semantics(
+            header: true,
+            child: Text(
+              DiscoverStrings.shoppingTitle,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.subtitle.copyWith(color: colors.ink),
+            ),
           ),
           const SizedBox(height: 12),
-          InkWell(
+          _EntryCard(
+            icon: AppIcons.basket,
+            title: title,
+            subtitle: subtitle,
             onTap: () => context.push(shoppingLocation),
-            borderRadius: AppRadius.mdAll,
-            child: Container(
-              padding: const EdgeInsets.all(AppSpacing.s3),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Thẻ lối vào dạng icon tròn + tiêu đề + dòng phụ + chevron, cả thẻ bấm được. Dùng cho Đi chợ và
+/// trạng thái trống của Nấu được ngay.
+class _EntryCard extends StatelessWidget {
+  const _EntryCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: AppRadius.mdAll,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.s3),
+        decoration: BoxDecoration(
+          color: colors.surfaceRaised,
+          border: Border.all(color: colors.line),
+          borderRadius: AppRadius.mdAll,
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: colors.surfaceRaised,
-                border: Border.all(color: colors.line),
-                borderRadius: AppRadius.mdAll,
+                color: colors.chiliSoft,
+                shape: BoxShape.circle,
               ),
-              child: Row(
+              alignment: Alignment.center,
+              child: Icon(icon, size: 22, color: colors.chili),
+            ),
+            const SizedBox(width: AppSpacing.s3),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: colors.chiliSoft,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(AppIcons.basket, size: 22, color: colors.chili),
-                  ),
-                  const SizedBox(width: AppSpacing.s3),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: AppTextStyles.body.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: colors.ink,
-                          ),
-                        ),
-                        Text(
-                          sub1,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.meta.copyWith(
-                            fontWeight: FontWeight.w400,
-                            color: colors.inkMuted,
-                          ),
-                        ),
-                        Text(
-                          sub2,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
-                        ),
-                      ],
+                  Text(
+                    title,
+                    style: AppTextStyles.body.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: colors.ink,
                     ),
                   ),
-                  Icon(AppIcons.chevron, size: 20, color: colors.inkMuted),
+                  Text(
+                    subtitle,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.meta.copyWith(
+                      fontWeight: FontWeight.w400,
+                      color: colors.inkMuted,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-        ],
+            Icon(AppIcons.chevron, size: 20, color: colors.inkMuted),
+          ],
+        ),
       ),
     );
   }

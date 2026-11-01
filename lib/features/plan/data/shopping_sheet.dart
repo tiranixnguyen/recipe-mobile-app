@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
+import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/data/shopping.dart';
@@ -70,4 +71,20 @@ final shoppingCountProvider = Provider<int>((ref) {
   if (sheet == null) return ref.watch(shoppingItemsProvider).length;
   final done = ref.watch(shoppingDoneProvider);
   return sheet.groups.fold(0, (sum, g) => sum + g.rows.where((r) => !done.contains(r.id)).length);
+});
+
+/// Tên các dòng chưa tick trên màn Đi chợ, theo thứ tự hiển thị, không kèm lượng (banner Khám phá).
+/// Đang tải dữ liệu đóng gói thì trả rỗng.
+final shoppingPreviewProvider = Provider<List<String>>((ref) {
+  final sheet = ref.watch(shoppingSheetProvider).value;
+  if (sheet == null) return const [];
+  final ingredients = ref.watch(ingredientsProvider).value ?? const <Ingredient>[];
+  final namesById = {for (final i in ingredients) i.id: i.name};
+  final done = ref.watch(shoppingDoneProvider);
+  return [
+    for (final g in sheet.groups)
+      for (final row in g.rows)
+        if (!done.contains(row.id))
+          (row.ingredientId != null ? namesById[row.ingredientId] : null) ?? row.name,
+  ];
 });

@@ -12,6 +12,7 @@ import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_done_w
 import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_layout.dart';
 import 'package:recipe_mobile_app/features/cook/routes.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Nấu xong cả bữa: chấm từng món, ghi chú, rồi sang PantryUpdate.
 class MealDoneScreen extends ConsumerWidget {
@@ -69,6 +70,10 @@ class _MealDone extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.s5),
                   const SectionHeader(title: CookStrings.rateEach),
                   const SizedBox(height: AppSpacing.s2),
+                  const StartHint(
+                    StartHintSpot.rate,
+                    padding: EdgeInsets.only(bottom: AppSpacing.s2),
+                  ),
                   RowsBox(
                     rows: [
                       for (final (i, d) in state.dishes.indexed)

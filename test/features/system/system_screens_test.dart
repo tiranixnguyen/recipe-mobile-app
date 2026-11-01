@@ -242,7 +242,7 @@ void main() {
     await tester.tap(find.text(Tool.kettle.label));
     await tester.tap(find.text(Diet.values.first.label));
     await tester.pump();
-    await tester.tap(find.text('Xong, gợi ý món cho mình'));
+    await tester.tap(find.text('Xong, bắt đầu thôi'));
     await tester.pumpAndSettle();
 
     expect(find.text('Khám phá'), findsOneWidget);

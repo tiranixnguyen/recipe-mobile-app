@@ -86,7 +86,6 @@ void main() {
 
       state = sub.read().requireValue;
       expect(state.upcomingDishes.map((r) => r.id), ['trung-chien', 'canh-trung']);
-      expect(state.upcomingTotalMinutes, 25);
     });
 
     test('món nấu được ngay và món thiếu phản ánh từ Tủ đồ', () async {
@@ -102,6 +101,21 @@ void main() {
       expect(state.readyDishes.map((r) => r.id), contains('trung-chien'));
       expect(state.pantryIngredientNames, containsAll(['Trứng', 'Hành']));
     });
+
+    test(
+      'đồ kéo từ Tủ đồ vào đi chợ cũng được tính vào shoppingCount và shoppingPreview',
+      () async {
+        var state = await loaded();
+        expect(state.shoppingCount, 0);
+        expect(state.shoppingPreview, isEmpty);
+
+        await container.read(shoppingItemsProvider.notifier).addIngredient('rice');
+
+        state = sub.read().requireValue;
+        expect(state.shoppingCount, 1);
+        expect(state.shoppingPreview, ['Cơm']);
+      },
+    );
 
     test('addToShopping thêm món vào đi chợ và cập nhật addedShoppingIds', () async {
       final state = await loaded();
