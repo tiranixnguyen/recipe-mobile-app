@@ -10,14 +10,14 @@ import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 import 'package:recipe_mobile_app/core/widgets/empty_state.dart';
 import 'package:recipe_mobile_app/core/widgets/hold_draggable.dart';
 import 'package:recipe_mobile_app/core/widgets/meal_mosaic.dart';
-import 'package:recipe_mobile_app/core/widgets/recipe_card.dart';
+import 'package:recipe_mobile_app/core/widgets/search_field.dart';
 import 'package:recipe_mobile_app/core/widgets/tip_bubble.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/routes.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 
-/// Đã lưu v2 — tab Món ăn / Bữa ăn, nhấn giữ kéo vào thùng rác để bỏ lưu.
+/// Đã lưu — danh sách phẳng Món ăn + Bữa ăn, nhấn giữ kéo vào thùng rác để bỏ lưu.
 class SavedScreen extends ConsumerStatefulWidget {
   const SavedScreen({super.key});
 
@@ -25,28 +25,14 @@ class SavedScreen extends ConsumerStatefulWidget {
   ConsumerState<SavedScreen> createState() => _SavedScreenState();
 }
 
-class _SavedScreenState extends ConsumerState<SavedScreen> with SingleTickerProviderStateMixin {
-  late final TabController _tabs;
+class _SavedScreenState extends ConsumerState<SavedScreen> {
   final _searchCtrl = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    _tabs = TabController(length: 2, vsync: this);
-    _tabs.addListener(() {
-      if (!_tabs.indexIsChanging) setState(() {});
-    });
-  }
-
-  @override
   void dispose() {
-    _tabs.dispose();
     _searchCtrl.dispose();
     super.dispose();
   }
-
-  String get _tabWord =>
-      _tabs.index == 0 ? DiscoverStrings.savedTabWord : DiscoverStrings.savedMealTabWord;
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +42,7 @@ class _SavedScreenState extends ConsumerState<SavedScreen> with SingleTickerProv
     return switch (state) {
       AsyncData(:final value) => _Body(
         state: value,
-        tabs: _tabs,
         searchCtrl: _searchCtrl,
-        tabWord: _tabWord,
         onUnsave: _unsave,
       ),
       AsyncError() => Scaffold(
@@ -94,28 +78,22 @@ class _SavedScreenState extends ConsumerState<SavedScreen> with SingleTickerProv
 class _Body extends ConsumerWidget {
   const _Body({
     required this.state,
-    required this.tabs,
     required this.searchCtrl,
-    required this.tabWord,
     required this.onUnsave,
   });
 
   final SavedState state;
-  final TabController tabs;
   final TextEditingController searchCtrl;
-  final String tabWord;
   final Future<void> Function(BuildContext, UnsaveOutcome) onUnsave;
 
-  /// Mẹo chỉ hiện khi tab đang mở có ít nhất một thứ sau khi lọc (như prototype).
-  bool _showTip() {
-    if (tabs.index == 0) return state.filteredRecipes.isNotEmpty;
-    return state.filteredMeals.isNotEmpty;
-  }
+  bool _showTip() => state.filteredRecipes.isNotEmpty || state.filteredMeals.isNotEmpty;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final hasAny = state.recipes.isNotEmpty || state.meals.isNotEmpty;
+    final allEmpty = state.recipes.isEmpty && state.meals.isEmpty;
+    final filteredEmpty = state.filteredRecipes.isEmpty && state.filteredMeals.isEmpty;
 
     return Scaffold(
       body: Stack(
@@ -141,42 +119,49 @@ class _Body extends ConsumerWidget {
                     ),
                   ),
                 ),
-                // Tab bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
-                  child: _TabBar(tabs: tabs, state: state),
-                ),
-                const SizedBox(height: AppSpacing.s3),
-                // Search field — chỉ hiện khi có ít nhất một thứ đã lưu
-                if (hasAny)
+                if (hasAny) ...[
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s4),
-                    child: _SearchField(
+                    child: SearchField(
                       controller: searchCtrl,
+                      placeholder: DiscoverStrings.savedSearchPlaceholder,
+                      label: DiscoverStrings.savedSearchLabel,
                       onChanged: (q) => ref.read(savedViewModelProvider.notifier).setQuery(q),
-                      onClear: () {
-                        searchCtrl.clear();
-                        ref.read(savedViewModelProvider.notifier).clearQuery();
-                      },
                     ),
                   ),
-                if (hasAny) const SizedBox(height: AppSpacing.s3),
+                  const SizedBox(height: AppSpacing.s3),
+                ],
                 // Content
                 Expanded(
-                  child: TabBarView(
-                    controller: tabs,
-                    children: [
-                      _RecipesTab(state: state, onUnsave: onUnsave),
-                      _MealsTab(state: state, onUnsave: onUnsave),
-                    ],
-                  ),
+                  child: allEmpty
+                      ? Center(
+                          child: EmptyState(
+                            icon: AppIcons.bookmark,
+                            title: DiscoverStrings.savedEmptyTitle,
+                            message: DiscoverStrings.savedEmptyBody,
+                            actionLabel: DiscoverStrings.savedEmptyRecipesAction,
+                            onAction: () => context.go(searchLocation()),
+                          ),
+                        )
+                      : filteredEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(AppSpacing.s4),
+                            child: Text(
+                              DiscoverStrings.savedNoMatch(state.query),
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.body.copyWith(color: colors.inkMuted),
+                            ),
+                          ),
+                        )
+                      : _SavedList(state: state, onUnsave: onUnsave),
                 ),
               ],
             ),
           ),
           // Thùng rác: xuất hiện khi đang kéo
           _TrashOverlay(onUnsave: onUnsave),
-          // Mẹo: chỉ khi tab đang mở có thứ để kéo, ẩn khi đang kéo
+          // Mẹo: ẩn khi danh sách trống hoặc đang kéo
           if (_showTip())
             ValueListenableBuilder<Object?>(
               valueListenable: AppDrag.active,
@@ -192,7 +177,7 @@ class _Body extends ConsumerWidget {
                         ),
                         child: TipBubble(
                           id: savedDragTip,
-                          text: DiscoverStrings.savedDragTipText(tabWord),
+                          text: DiscoverStrings.savedDragTipText(),
                         ),
                       ),
                     )
@@ -205,180 +190,70 @@ class _Body extends ConsumerWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Tab bar (pill style)
+// Flat list: filteredRecipes rồi filteredMeals
 // ---------------------------------------------------------------------------
 
-class _TabBar extends StatelessWidget {
-  const _TabBar({required this.tabs, required this.state});
-
-  final TabController tabs;
-  final SavedState state;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      height: 44,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: colors.line,
-        borderRadius: AppRadius.pillAll,
-      ),
-      child: TabBar(
-        controller: tabs,
-        indicator: BoxDecoration(
-          color: colors.surfaceRaised,
-          borderRadius: AppRadius.pillAll,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
-              blurRadius: 4,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        indicatorSize: TabBarIndicatorSize.tab,
-        dividerColor: Colors.transparent,
-        labelStyle: AppTextStyles.label.copyWith(fontWeight: FontWeight.w600),
-        unselectedLabelStyle: AppTextStyles.label,
-        labelColor: colors.ink,
-        unselectedLabelColor: colors.inkMuted,
-        tabs: [
-          Tab(text: DiscoverStrings.savedTabRecipes(state.recipes.length)),
-          Tab(text: DiscoverStrings.savedTabMeals(state.meals.length)),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Search field
-// ---------------------------------------------------------------------------
-
-class _SearchField extends StatelessWidget {
-  const _SearchField({
-    required this.controller,
-    required this.onChanged,
-    required this.onClear,
-  });
-
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onClear;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Container(
-      height: 44,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.s3),
-      decoration: BoxDecoration(
-        color: colors.surfaceRaised,
-        border: Border.all(color: colors.outline),
-        borderRadius: AppRadius.mdAll,
-      ),
-      child: Row(
-        children: [
-          Icon(AppIcons.search, size: 20, color: colors.inkMuted),
-          const SizedBox(width: AppSpacing.s2),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              onChanged: onChanged,
-              decoration: InputDecoration(
-                hintText: DiscoverStrings.savedSearchPlaceholder,
-                hintStyle: AppTextStyles.body.copyWith(color: colors.inkMuted),
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
-              ),
-              style: AppTextStyles.body.copyWith(color: colors.ink),
-            ),
-          ),
-          ValueListenableBuilder<TextEditingValue>(
-            valueListenable: controller,
-            builder: (_, value, _) => value.text.isNotEmpty
-                ? IconButton(
-                    onPressed: onClear,
-                    icon: Icon(AppIcons.close, size: 18, color: colors.inkMuted),
-                    tooltip: DiscoverStrings.clearQuery,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Tab Món ăn
-// ---------------------------------------------------------------------------
-
-class _RecipesTab extends ConsumerWidget {
-  const _RecipesTab({required this.state, required this.onUnsave});
+class _SavedList extends ConsumerWidget {
+  const _SavedList({required this.state, required this.onUnsave});
 
   final SavedState state;
   final Future<void> Function(BuildContext, UnsaveOutcome) onUnsave;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (state.recipes.isEmpty) {
-      return Center(
-        child: EmptyState(
-          icon: AppIcons.bookmark,
-          title: DiscoverStrings.savedEmptyTitle,
-          message: DiscoverStrings.savedEmptyBody,
-          actionLabel: DiscoverStrings.savedEmptyRecipesAction,
-          onAction: () => context.go(searchLocation()),
-        ),
-      );
-    }
-    if (state.filteredRecipes.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.s4),
-          child: Text(
-            DiscoverStrings.savedNoMatch(state.query, DiscoverStrings.savedTabWord),
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(color: context.colors.inkMuted),
-          ),
-        ),
-      );
-    }
-    return GridView.builder(
+    final recipes = state.filteredRecipes;
+    final meals = state.filteredMeals;
+    final total = recipes.length + meals.length;
+
+    return ListView.builder(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.s4,
-        AppSpacing.s1,
+        0,
         AppSpacing.s4,
-        AppSpacing.s4,
+        AppSpacing.s6,
       ),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: AppSpacing.s3,
-        mainAxisSpacing: AppSpacing.s3,
-        childAspectRatio: 0.72,
-      ),
-      itemCount: state.filteredRecipes.length,
+      itemCount: total,
       itemBuilder: (context, i) {
-        final item = state.filteredRecipes[i];
-        return _DraggableRecipeCard(
-          item: item,
-          onUnsave: (outcome) => onUnsave(context, outcome),
-          onTap: () => context.push(recipeLocation(item.recipe.id)),
-          onAction: () async {
-            final vm = ref.read(savedViewModelProvider.notifier);
-            final outcome = await vm.unsaveRecipe(item.recipe);
-            if (context.mounted) await onUnsave(context, outcome);
-          },
+        if (i < recipes.length) {
+          final item = recipes[i];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.s2),
+            child: _DraggableRecipeCard(
+              item: item,
+              onUnsave: (outcome) => onUnsave(context, outcome),
+              onTap: () => context.push(recipeLocation(item.recipe.id)),
+              onAction: () async {
+                final vm = ref.read(savedViewModelProvider.notifier);
+                final outcome = await vm.unsaveRecipe(item.recipe);
+                if (context.mounted) await onUnsave(context, outcome);
+              },
+            ),
+          );
+        }
+        final item = meals[i - recipes.length];
+        final name = mealDisplayName(item);
+        return Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.s2),
+          child: _DraggableMealCard(
+            item: item,
+            name: name,
+            onUnsave: (outcome) => onUnsave(context, outcome),
+            onTap: () => context.go(todayPrefsLocation),
+            onAction: () async {
+              final vm = ref.read(savedViewModelProvider.notifier);
+              final outcome = await vm.unsaveMeal(item);
+              if (context.mounted) await onUnsave(context, outcome);
+            },
+          ),
         );
       },
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Recipe card (horizontal)
+// ---------------------------------------------------------------------------
 
 class _DraggableRecipeCard extends ConsumerWidget {
   const _DraggableRecipeCard({
@@ -404,84 +279,94 @@ class _DraggableRecipeCard extends ConsumerWidget {
         bindings: {
           const SingleActivator(LogicalKeyboardKey.delete): onAction,
         },
-        child: RecipeCard(
-          title: item.recipe.name,
-          minutes: item.recipe.minutes,
-          servings: item.recipe.servings,
-          tool: item.recipe.tools.firstOrNull?.shortLabel,
-          imageAsset: item.recipe.imageAsset,
-          badge: item.availability == null
-              ? null
-              : AvailabilityBadge(missing: item.availability!.missing),
-          onTap: onTap,
-        ),
+        child: _RecipeCard(item: item, onTap: onTap),
       ),
     );
   }
 }
 
-// ---------------------------------------------------------------------------
-// Tab Bữa ăn
-// ---------------------------------------------------------------------------
+class _RecipeCard extends StatelessWidget {
+  const _RecipeCard({required this.item, required this.onTap});
 
-class _MealsTab extends ConsumerWidget {
-  const _MealsTab({required this.state, required this.onUnsave});
-
-  final SavedState state;
-  final Future<void> Function(BuildContext, UnsaveOutcome) onUnsave;
+  final SavedRecipeItem item;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (state.meals.isEmpty) {
-      return Center(
-        child: EmptyState(
-          icon: AppIcons.bookmark,
-          title: DiscoverStrings.savedEmptyMealsTitle,
-          message: DiscoverStrings.savedEmptyMealsBody,
-          actionLabel: DiscoverStrings.savedEmptyMealsAction,
-          onAction: () => context.go(todayPrefsLocation),
-        ),
-      );
-    }
-    if (state.filteredMeals.isEmpty) {
-      return Center(
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final recipe = item.recipe;
+    final meta = DiscoverStrings.recipeMeta(
+      recipe.minutes,
+      recipe.servings,
+      recipe.tools.firstOrNull?.shortLabel,
+    );
+
+    return Material(
+      color: colors.surfaceRaised,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: colors.line),
+        borderRadius: AppRadius.mdAll,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.s4),
-          child: Text(
-            DiscoverStrings.savedNoMatch(state.query, DiscoverStrings.savedMealTabWord),
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body.copyWith(color: context.colors.inkMuted),
+          padding: const EdgeInsets.all(AppSpacing.s3),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 96,
+                height: 96,
+                child: ClipRRect(
+                  borderRadius: AppRadius.smAll,
+                  child: recipe.imageAsset.isNotEmpty
+                      ? Image.asset(recipe.imageAsset, fit: BoxFit.cover)
+                      : ColoredBox(
+                          color: colors.line,
+                          child: Center(
+                            child: Icon(AppIcons.bowl, size: 32, color: colors.inkMuted),
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.s3),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      recipe.name,
+                      style: AppTextStyles.body.copyWith(
+                        color: colors.ink,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: AppSpacing.s1),
+                    Text(
+                      meta,
+                      style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+                    ),
+                    if (item.availability != null) ...[
+                      const SizedBox(height: AppSpacing.s1),
+                      AvailabilityBadge(missing: item.availability!.missing),
+                    ],
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
-      );
-    }
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.s4,
-        AppSpacing.s1,
-        AppSpacing.s4,
-        AppSpacing.s4,
       ),
-      itemCount: state.filteredMeals.length,
-      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s3),
-      itemBuilder: (context, i) {
-        final item = state.filteredMeals[i];
-        final name = mealDisplayName(item);
-        return _DraggableMealCard(
-          item: item,
-          onUnsave: (outcome) => onUnsave(context, outcome),
-          onTap: () => context.go(todayPrefsLocation),
-          onAction: () async {
-            final vm = ref.read(savedViewModelProvider.notifier);
-            final outcome = await vm.unsaveMeal(item);
-            if (context.mounted) await onUnsave(context, outcome);
-          },
-          name: name,
-        );
-      },
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Meal card (horizontal, preserved from v2)
+// ---------------------------------------------------------------------------
 
 class _DraggableMealCard extends ConsumerWidget {
   const _DraggableMealCard({
@@ -503,7 +388,7 @@ class _DraggableMealCard extends ConsumerWidget {
     return HoldDraggable<SavedMealItem>(
       data: item,
       liftedRadius: AppRadius.mdAll,
-      semanticsActionLabel: DiscoverStrings.savedMealUnsaveAction,
+      semanticsActionLabel: DiscoverStrings.savedUnsaveAction,
       onSemanticsAction: onAction,
       child: CallbackShortcuts(
         bindings: {
@@ -543,7 +428,6 @@ class _MealCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Mosaic
               SizedBox(
                 width: 96,
                 height: 96,
@@ -556,7 +440,6 @@ class _MealCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.s3),
-              // Text info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -633,8 +516,6 @@ class _TrashOverlay extends ConsumerWidget {
       valueListenable: AppDrag.active,
       builder: (context, dragging, _) {
         final isDragging = dragging is SavedRecipeItem || dragging is SavedMealItem;
-        // IgnorePointer khi không kéo: AnimatedSlide dịch chuyển nhưng giữ hit-test cũ,
-        // nên cần IgnorePointer để không chặn tap trên nội dung.
         return IgnorePointer(
           ignoring: !isDragging,
           child: AnimatedSlide(

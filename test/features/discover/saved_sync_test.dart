@@ -12,7 +12,6 @@ import 'package:recipe_mobile_app/features/cook/cook.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
 import 'package:recipe_mobile_app/features/discover/routes.dart';
-import 'package:recipe_mobile_app/features/discover/strings.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 
 import '../../core/fake_analytics.dart';
@@ -186,12 +185,7 @@ void main() {
     router.go('/saved');
     await tester.pumpAndSettle();
 
-    // Tab Bữa ăn có 1 bữa
-    expect(find.text(DiscoverStrings.savedTabMeals(1)), findsOneWidget);
-    await tester.tap(find.text(DiscoverStrings.savedTabMeals(1)));
-    await tester.pumpAndSettle();
-
-    // Tên món xuất hiện trong thẻ bữa
+    // Danh sách gộp: tên món xuất hiện trong thẻ bữa
     expect(find.textContaining('Trứng chiên hành'), findsOneWidget);
   });
 }

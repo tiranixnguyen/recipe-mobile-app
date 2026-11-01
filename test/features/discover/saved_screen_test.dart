@@ -105,10 +105,9 @@ void main() {
   // Trống
   // ---------------------------------------------------------------------------
 
-  testWidgets('tab Món trống: EmptyState, nút Khám phá', (tester) async {
+  testWidgets('trống: EmptyState, nút Khám phá', (tester) async {
     await _pump(tester);
 
-    expect(find.text(DiscoverStrings.savedTabRecipes(0)), findsOneWidget);
     expect(find.byType(EmptyState), findsOneWidget);
     expect(find.text(DiscoverStrings.savedEmptyTitle), findsOneWidget);
     expect(find.text(DiscoverStrings.savedEmptyRecipesAction), findsOneWidget);
@@ -118,55 +117,46 @@ void main() {
     expect(find.text('khám phá'), findsOneWidget);
   });
 
-  testWidgets('tab Bữa trống: EmptyState, nút Gợi ý', (tester) async {
-    await _pump(tester, savedIds: ['trung-chien']);
-    await tester.tap(find.text(DiscoverStrings.savedTabMeals(0)));
-    await tester.pumpAndSettle();
-
-    expect(find.text(DiscoverStrings.savedEmptyMealsTitle), findsOneWidget);
-    await tester.tap(find.text(DiscoverStrings.savedEmptyMealsAction));
-    await tester.pumpAndSettle();
-    expect(find.text('gợi ý cho mình'), findsOneWidget);
-  });
-
   // ---------------------------------------------------------------------------
-  // Tab Món
+  // Danh sách gộp
   // ---------------------------------------------------------------------------
 
-  testWidgets('có món: hiện theo lưới 2 cột, search field xuất hiện', (tester) async {
+  testWidgets('có món: hiện thẻ ngang, search field xuất hiện', (tester) async {
     await _pump(tester, savedIds: ['trung-chien']);
 
     expect(find.text('Trứng chiên hành'), findsOneWidget);
     expect(find.byType(TextField), findsOneWidget);
-    // Không có SaveButton trên thẻ
     expect(find.byType(SaveButton), findsNothing);
   });
 
-  testWidgets('bấm thẻ mở Chi tiết món', (tester) async {
+  testWidgets('bấm thẻ món mở Chi tiết món', (tester) async {
     await _pump(tester, savedIds: ['trung-chien']);
     await tester.tap(find.text('Trứng chiên hành'));
     await tester.pumpAndSettle();
     expect(find.text('recipe/trung-chien'), findsOneWidget);
   });
 
-  testWidgets('đếm tab cập nhật khi có món', (tester) async {
-    await _pump(tester, savedIds: ['trung-chien', 'dau-phu-sot']);
-    expect(find.text(DiscoverStrings.savedTabRecipes(2)), findsOneWidget);
+  testWidgets('danh sách gộp hiện cả thẻ món lẫn thẻ bữa', (tester) async {
+    await _pump(
+      tester,
+      savedIds: ['trung-chien'],
+      savedMeals: [
+        const SavedMeal(recipeIds: ['dau-phu-sot'], servings: 2, tags: []),
+      ],
+    );
+
+    // Cả hai tên đều hiện
+    expect(find.text('Trứng chiên hành'), findsOneWidget);
+    expect(find.text('Đậu phụ sốt cà'), findsOneWidget);
   });
 
-  // ---------------------------------------------------------------------------
-  // Tab Bữa
-  // ---------------------------------------------------------------------------
-
-  testWidgets('tab Bữa hiện thẻ ngang với MealMosaic và tag', (tester) async {
+  testWidgets('thẻ bữa hiện MealMosaic và tag', (tester) async {
     await _pump(
       tester,
       savedMeals: [
         const SavedMeal(recipeIds: ['trung-chien'], servings: 1, tags: [RecipeTag.cheap]),
       ],
     );
-    await tester.tap(find.text(DiscoverStrings.savedTabMeals(1)));
-    await tester.pumpAndSettle();
 
     expect(find.text('Trứng chiên hành'), findsOneWidget);
     expect(find.text(RecipeTag.cheap.label), findsOneWidget);
@@ -179,8 +169,6 @@ void main() {
         const SavedMeal(recipeIds: ['trung-chien'], servings: 1),
       ],
     );
-    await tester.tap(find.text(DiscoverStrings.savedTabMeals(1)));
-    await tester.pumpAndSettle();
 
     await tester.tap(find.text('Trứng chiên hành'));
     await tester.pumpAndSettle();
@@ -191,7 +179,7 @@ void main() {
   // Tìm kiếm
   // ---------------------------------------------------------------------------
 
-  testWidgets('tìm lọc món theo tên (bỏ dấu)', (tester) async {
+  testWidgets('tìm lọc theo tên (bỏ dấu)', (tester) async {
     await _pump(tester, savedIds: ['trung-chien', 'dau-phu-sot']);
 
     await tester.enterText(find.byType(TextField), 'trung');
@@ -209,14 +197,18 @@ void main() {
     expect(find.text('Trứng chiên hành'), findsNothing);
   });
 
-  testWidgets('nút xoá từ khoá', (tester) async {
-    await _pump(tester, savedIds: ['trung-chien']);
+  testWidgets('tìm không ra trên danh sách gộp: hiện câu không thấy', (tester) async {
+    await _pump(
+      tester,
+      savedIds: ['trung-chien'],
+      savedMeals: [
+        const SavedMeal(recipeIds: ['dau-phu-sot'], servings: 1),
+      ],
+    );
 
-    await tester.enterText(find.byType(TextField), 'trung');
+    await tester.enterText(find.byType(TextField), 'xyzabc');
     await tester.pump();
-    await tester.tap(find.byTooltip(DiscoverStrings.clearQuery));
-    await tester.pump();
-    expect(find.text('Trứng chiên hành'), findsOneWidget);
+    expect(find.textContaining('xyzabc'), findsWidgets);
   });
 
   // ---------------------------------------------------------------------------
@@ -225,7 +217,6 @@ void main() {
 
   testWidgets('mẹo kéo thả xuất hiện khi có ít nhất một thứ đã lưu', (tester) async {
     final container = await _pump(tester, savedIds: ['trung-chien']);
-    // Mẹo chưa bị ẩn
     expect(container.read(tipsSeenProvider).contains(savedDragTip), isFalse);
     expect(
       find.textContaining('kéo vào thùng rác', findRichText: true),
@@ -234,7 +225,7 @@ void main() {
   });
 
   // ---------------------------------------------------------------------------
-  // Bỏ lưu qua action trợ năng (thay thế cho drag trong unit test)
+  // Bỏ lưu qua action trợ năng
   // ---------------------------------------------------------------------------
 
   testWidgets('action "Bỏ lưu" bỏ món khỏi danh sách + snackbar Hoàn tác', (tester) async {
