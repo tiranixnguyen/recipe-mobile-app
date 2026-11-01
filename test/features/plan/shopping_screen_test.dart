@@ -15,6 +15,20 @@ import 'package:recipe_mobile_app/features/plan/presentation/shopping/shopping_s
 Ingredient _ingredient(String id, String name, IngredientGroup group) =>
     Ingredient(id: id, name: name, group: group);
 
+Recipe _recipe(String id, String name) => Recipe(
+  id: id,
+  name: name,
+  description: '',
+  imageAsset: '',
+  minutes: 10,
+  servings: 1,
+  tools: const [],
+  diets: const [],
+  meals: const [],
+  ingredients: const [],
+  steps: const [],
+);
+
 void main() {
   testWidgets('hiển thị danh sách, tiến độ và tick dòng mua', (tester) async {
     final store = InMemoryLocalStore();
@@ -24,9 +38,12 @@ void main() {
         ingredientsProvider.overrideWith(
           (ref) async => [_ingredient('egg', 'Trứng', IngredientGroup.protein)],
         ),
+        recipesProvider.overrideWith(
+          (ref) async => [_recipe('fried-egg', 'Trứng chiên')],
+        ),
         shoppingListProvider.overrideWith(
           (ref) => const AsyncData([
-            ShoppingLine(ingredientId: 'egg', unit: 'quả', amount: 2, recipeIds: ['Trứng chiên']),
+            ShoppingLine(ingredientId: 'egg', unit: 'quả', amount: 2, recipeIds: ['fried-egg']),
           ]),
         ),
       ],

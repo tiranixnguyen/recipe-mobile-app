@@ -58,16 +58,19 @@ class ShoppingViewModel extends Notifier<AsyncValue<ShoppingState>> {
   AsyncValue<ShoppingState> build() {
     final list = ref.watch(shoppingListProvider);
     final ingredients = ref.watch(ingredientsProvider);
+    final recipes = ref.watch(recipesProvider);
     final customItems = ref.watch(shoppingItemsProvider);
     final pantry = ref.watch(pantryItemsProvider);
     final doneIds = _readDone();
-    if (list.isLoading || ingredients.isLoading) return const AsyncLoading();
+    if (list.isLoading || ingredients.isLoading || recipes.isLoading) return const AsyncLoading();
     if (list.hasError) return AsyncError(list.error!, list.stackTrace!);
     if (ingredients.hasError) return AsyncError(ingredients.error!, ingredients.stackTrace!);
+    if (recipes.hasError) return AsyncError(recipes.error!, recipes.stackTrace!);
     return AsyncData(
       _makeState(
         list.value ?? const [],
         ingredients.value ?? const [],
+        recipes.value ?? const [],
         customItems,
         pantry,
         doneIds,
@@ -83,11 +86,13 @@ class ShoppingViewModel extends Notifier<AsyncValue<ShoppingState>> {
   ShoppingState _makeState(
     List<ShoppingLine> lines,
     List<Ingredient> ingredients,
+    List<Recipe> recipes,
     List<ShoppingItem> customItems,
     Set<String> pantry,
     Set<String> doneIds,
   ) {
     final byId = {for (final i in ingredients) i.id: i};
+    final recipesById = {for (final recipe in recipes) recipe.id: recipe};
     final groups = <String, List<ShoppingEntry>>{};
     for (final line in lines) {
       final ingredient = byId[line.ingredientId];
@@ -98,7 +103,7 @@ class ShoppingViewModel extends Notifier<AsyncValue<ShoppingState>> {
         id: id,
         ingredientId: ingredient.id,
         name: '${ingredient.name} · $amount ${line.unit}',
-        subtitle: _recipeNames(line.recipeIds),
+        subtitle: _recipeNames(line.recipeIds, recipesById),
       );
       groups.putIfAbsent(ingredient.group.label, () => []).add(entry);
     }
@@ -135,7 +140,10 @@ class ShoppingViewModel extends Notifier<AsyncValue<ShoppingState>> {
     );
   }
 
-  String _recipeNames(List<String> ids) => ids.join(', ');
+  String _recipeNames(List<String> ids, Map<String, Recipe> recipesById) => [
+    for (final id in ids)
+      if (recipesById[id] case final recipe?) recipe.name,
+  ].join(', ');
 
   String _lineId(ShoppingLine line) => 'line:${line.ingredientId}:${line.unit}';
   String _itemId(ShoppingItem item) => 'item:${item.ingredientId ?? item.name}';
