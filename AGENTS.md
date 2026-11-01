@@ -110,6 +110,10 @@ thì ghi vào bảng này.
 | `save_meal` | Lưu cả bữa (Hôm nay ăn gì → Lưu lại) | `dishes` (số món), `tags` (số tiêu chí) |
 | `add_meal_to_plan` | Thêm cả bữa vào Thực đơn từ Hôm nay ăn gì | `dishes` (số món) |
 | `unsave` | Bỏ lưu món hoặc bữa từ Đã lưu | `kind` (`recipe`/`meal`), `undo` (bool) |
+| `cook_note` | Xong ở màn Done/MealDone (trước PantryUpdate) | `dish_notes` (số món có ghi chú), `meal_note` (bool) |
+| `view_history` | Mở màn Lịch sử | — |
+| `history_filter` | Đổi bộ lọc ở Lịch sử | `filter` (`all`/`good`/`note`) |
+| `history_delete` | Xoá một lần nấu ở Chi tiết lần nấu, hoặc bấm Hoàn tác | `undo` (bool) |
 
 ## 5 feature
 
