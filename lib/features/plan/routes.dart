@@ -2,9 +2,8 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:recipe_mobile_app/core/models/models.dart';
-import 'package:recipe_mobile_app/core/widgets/coming_soon_screen.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/plan/plan_screen.dart';
-import 'package:recipe_mobile_app/features/plan/strings.dart';
+import 'package:recipe_mobile_app/features/plan/presentation/shopping/shopping_screen.dart';
 
 const shoppingLocation = '/shopping';
 
@@ -50,6 +49,6 @@ final planTabRoutes = <RouteBase>[
 final planRoutes = <RouteBase>[
   GoRoute(
     path: shoppingLocation,
-    builder: (_, _) => const ComingSoonScreen(title: PlanStrings.shopping),
+    builder: (_, _) => const ShoppingScreen(),
   ),
 ];
