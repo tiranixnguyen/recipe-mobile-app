@@ -4,6 +4,7 @@
 /// - [cookPrepLocation]: màn Chuẩn bị nấu của món, mở từ Chi tiết.
 /// - [cookStepLocation]: nấu từng bước, mở ở bước đang dở.
 /// - [mealCookLocation]: nấu cả bữa của Thực đơn ("Nấu bữa này").
+/// - [mealCookDishesLocation]: nấu cả bữa từ danh sách món, ngoài Thực đơn (Chi tiết bữa).
 /// - [ResumeCookingBanner]: thanh "Đang nấu dở · Nấu tiếp" cho màn Khám phá; không nấu dở thì ẩn.
 /// - [cookHistoryProvider]: lịch sử nấu kèm đánh giá.
 /// - [historyTabRoutes]: routes cho tab Lịch sử, dùng trong [appTabs].
@@ -25,6 +26,7 @@ export 'routes.dart'
         historyEntryLocation,
         historyLocation,
         historyTabRoutes,
+        mealCookDishesLocation,
         mealCookLocation,
         pantryUpdateLocation,
         recipeLocation;

@@ -21,6 +21,45 @@ typedef CookDish = ({String recipeId, int servings});
 /// Bữa trong thực đơn đang nấu (Nấu cả bữa).
 typedef PlannedSlot = ({DateTime day, Meal meal});
 
+/// Nguồn món của màn Chuẩn bị nấu cả bữa (`MealCookPrep`).
+sealed class MealCookSource {
+  const MealCookSource();
+}
+
+/// Bữa [slot] trong Thực đơn: món lấy từ thực đơn, nấu xong thì đánh dấu đã nấu.
+@immutable
+class PlannedMealSource extends MealCookSource {
+  const PlannedMealSource(this.slot);
+
+  final PlannedSlot slot;
+
+  @override
+  bool operator ==(Object other) => other is PlannedMealSource && other.slot == slot;
+
+  @override
+  int get hashCode => slot.hashCode;
+}
+
+/// Các món [recipeIds] cho [servings] người, ngoài Thực đơn (Chi tiết bữa đã lưu). Bữa tính theo
+/// giờ bắt đầu nấu.
+@immutable
+class DishesMealSource extends MealCookSource {
+  DishesMealSource(List<String> recipeIds, this.servings)
+    : recipeIds = List.unmodifiable(recipeIds);
+
+  final List<String> recipeIds;
+  final int servings;
+
+  @override
+  bool operator ==(Object other) =>
+      other is DishesMealSource &&
+      listEquals(other.recipeIds, recipeIds) &&
+      other.servings == servings;
+
+  @override
+  int get hashCode => Object.hash(Object.hashAll(recipeIds), servings);
+}
+
 /// Phiên nấu đang dở: một món, hoặc nhiều món khi nấu cả bữa. Lưu để "Nấu tiếp" từ Khám phá và để
 /// các màn chế độ nấu không phải truyền state qua route.
 @immutable
@@ -31,6 +70,7 @@ class CookSession {
     List<int>? positions,
     Set<int> finished = const {},
     this.planned,
+    this.meal,
     required this.startedAt,
     Map<int, DateTime> timerEnds = const {},
     this.inPrep = false,
@@ -58,6 +98,10 @@ class CookSession {
 
   /// Bữa trong thực đơn khi nấu cả bữa; null khi nấu một món từ Chi tiết.
   final PlannedSlot? planned;
+
+  /// Bữa khi nấu cả bữa ngoài Thực đơn (Chi tiết bữa đã lưu); null khi có [planned] hoặc nấu một
+  /// món.
+  final Meal? meal;
   final DateTime startedAt;
 
   /// Mốc hết giờ của đồng hồ đang chạy, theo key `cookTimerKey(món, bước)`: mở lại màn nấu thì đồng
@@ -76,8 +120,11 @@ class CookSession {
   /// Đã bấm "Xong" / "Xong cả bữa": phiên chỉ còn chờ màn Hoàn thành.
   final bool done;
 
-  /// Nấu cả bữa (mở từ Thực đơn) thay vì một món.
-  bool get isMeal => planned != null || dishes.length > 1;
+  /// Nấu cả bữa (mở từ Thực đơn hay Chi tiết bữa) thay vì một món.
+  bool get isMeal => planned != null || meal != null || dishes.length > 1;
+
+  /// Bữa đang nấu khi nấu cả bữa: theo Thực đơn, hoặc theo giờ bắt đầu khi nấu ngoài Thực đơn.
+  Meal? get mealLabel => planned?.meal ?? meal;
 
   CookDish get currentDish => dishes[current];
 
@@ -100,6 +147,7 @@ class CookSession {
     positions: positions ?? this.positions,
     finished: finished ?? this.finished,
     planned: planned,
+    meal: meal,
     startedAt: startedAt,
     timerEnds: timerEnds ?? this.timerEnds,
     inPrep: inPrep ?? this.inPrep,
@@ -117,6 +165,7 @@ class CookSession {
     'finished': finished.toList(),
     if (planned case final p?)
       'planned': {'day': p.day.toIso8601String().substring(0, 10), 'meal': p.meal.id},
+    if (meal case final m?) 'meal': m.id,
     'startedAt': startedAt.toIso8601String(),
     if (timerEnds.isNotEmpty)
       'timerEnds': {for (final e in timerEnds.entries) '${e.key}': e.value.toIso8601String()},
@@ -162,6 +211,11 @@ class CookSession {
         if (date == null || parsedMeal == null) return null;
         planned = (day: date, meal: parsedMeal);
       }
+      // Phiên lưu trước khi nấu được cả bữa ngoài Thực đơn không có `meal`.
+      final meal = switch (json['meal']) {
+        final String id => Meal.tryParse(id),
+        _ => null,
+      };
       // Đồng hồ hỏng thì bỏ riêng đồng hồ đó.
       final timerEnds = <int, DateTime>{
         if (json['timerEnds'] case final Map<String, dynamic> raw)
@@ -178,6 +232,7 @@ class CookSession {
         positions: positions,
         finished: finished,
         planned: planned,
+        meal: meal,
         startedAt: startedAt,
         timerEnds: timerEnds,
         inPrep: json['inPrep'] == true,
@@ -202,6 +257,7 @@ class CookSession {
       listEquals(other.positions, positions) &&
       setEquals(other.finished, finished) &&
       other.planned == planned &&
+      other.meal == meal &&
       other.startedAt == startedAt &&
       mapEquals(other.timerEnds, timerEnds) &&
       other.inPrep == inPrep &&
@@ -216,6 +272,7 @@ class CookSession {
     Object.hashAll(positions),
     Object.hashAllUnordered(finished),
     planned,
+    meal,
     startedAt,
     Object.hashAllUnordered(timerEnds.entries.map((e) => Object.hash(e.key, e.value))),
     inPrep,
@@ -258,19 +315,31 @@ class CookSessionController extends Notifier<CookSession?> {
     ),
   );
 
-  /// Bắt đầu nấu cả bữa [planned]: [dishes] theo thứ tự nấu. [prep]: bữa có việc sơ chế thì bắt
-  /// đầu ở chặng Sơ chế.
-  Future<void> startMeal(List<CookDish> dishes, PlannedSlot planned, {bool prep = false}) => _save(
-    CookSession(
-      dishes: dishes,
-      planned: (
-        day: DateTime(planned.day.year, planned.day.month, planned.day.day),
-        meal: planned.meal,
+  /// Bắt đầu nấu cả bữa: [dishes] theo thứ tự nấu. Có đúng một trong hai: [planned] (bữa trong
+  /// Thực đơn) hoặc [meal] (nấu ngoài Thực đơn). [prep]: bữa có việc sơ chế thì bắt đầu ở chặng
+  /// Sơ chế.
+  Future<void> startMeal(
+    List<CookDish> dishes, {
+    PlannedSlot? planned,
+    Meal? meal,
+    bool prep = false,
+  }) {
+    assert((planned == null) != (meal == null), 'Cần đúng một trong planned và meal');
+    return _save(
+      CookSession(
+        dishes: dishes,
+        planned: planned == null
+            ? null
+            : (
+                day: DateTime(planned.day.year, planned.day.month, planned.day.day),
+                meal: planned.meal,
+              ),
+        meal: planned == null ? meal : null,
+        startedAt: ref.read(cookClockProvider)(),
+        inPrep: prep,
       ),
-      startedAt: ref.read(cookClockProvider)(),
-      inPrep: prep,
-    ),
-  );
+    );
+  }
 
   /// Sang bước [step] của món thứ [dish] (cũng là món đang nấu); rời chặng Sơ chế, Lưu ý nếu đang
   /// ở đó.

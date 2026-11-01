@@ -43,13 +43,24 @@ void main() {
       final (:items, :basicSpices) = detailIngredients(recipe, {'egg'}, _ingredients);
 
       expect(items, const [
-        DetailIngredient(name: 'Trứng gà', amountText: '2 quả', status: IngredientStatus.inPantry),
         DetailIngredient(
+          ingredientId: 'egg',
+          name: 'Trứng gà',
+          amountText: '2 quả',
+          status: IngredientStatus.inPantry,
+        ),
+        DetailIngredient(
+          ingredientId: 'scallion',
           name: 'Hành lá',
           amountText: '1,5 nhánh',
           status: IngredientStatus.missing,
         ),
-        DetailIngredient(name: 'Cà chua', amountText: '1 quả', status: IngredientStatus.optional),
+        DetailIngredient(
+          ingredientId: 'tomato',
+          name: 'Cà chua',
+          amountText: '1 quả',
+          status: IngredientStatus.optional,
+        ),
       ]);
       expect(basicSpices, ['Dầu ăn', 'nước mắm']);
     });
@@ -64,12 +75,32 @@ void main() {
       );
     });
 
+    test('thiếu mà đã trong đi chợ thì là Trong đi chợ; có trong tủ thì vẫn Có trong tủ', () {
+      final recipe = _recipe(const [
+        RecipeIngredient(id: 'egg', amount: 2, unit: 'quả'),
+        RecipeIngredient(id: 'scallion', amount: 1, unit: 'nhánh'),
+        RecipeIngredient(id: 'tomato', amount: 1, unit: 'quả'),
+      ]);
+      final (:items, basicSpices: _) = detailIngredients(
+        recipe,
+        {'egg'},
+        _ingredients,
+        {'egg', 'scallion'},
+      );
+      expect(items.map((i) => i.status), [
+        IngredientStatus.inPantry,
+        IngredientStatus.inShopping,
+        IngredientStatus.missing,
+      ]);
+    });
+
     test('id lạ hiện bằng id, không coi là gia vị', () {
       final recipe = _recipe(const [RecipeIngredient(id: 'xyz', amount: 100, unit: 'g')]);
       final (:items, :basicSpices) = detailIngredients(recipe, {}, _ingredients);
       expect(
         items.single,
         const DetailIngredient(
+          ingredientId: 'xyz',
           name: 'xyz',
           amountText: '100 g',
           status: IngredientStatus.missing,

@@ -114,6 +114,8 @@ thì ghi vào bảng này.
 | `view_history` | Mở màn Lịch sử | — |
 | `history_filter` | Đổi bộ lọc ở Lịch sử | `filter` (`all`/`good`/`note`) |
 | `history_delete` | Xoá một lần nấu ở Chi tiết lần nấu, hoặc bấm Hoàn tác | `undo` (bool) |
+| `add_to_shopping_from_discover` | Bấm thêm món vào đi chợ ở banner Khám phá | — |
+| `add_missing_to_shopping` | Bấm "Thêm n thứ còn thiếu vào đi chợ" ở Chi tiết món hoặc Chi tiết bữa, khi thêm được ít nhất một thứ | `from` (`detail`/`meal`), `items` (số thứ thêm được) |
 
 ## 5 feature
 

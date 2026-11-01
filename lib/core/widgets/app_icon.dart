@@ -71,7 +71,7 @@ abstract final class AppIcons {
   /// Giao diện Theo hệ thống.
   static const device = Symbols.smartphone_rounded;
 
-  /// Nút nổi Đi chợ (`ShoppingFab`). Prototype Pantry/MealPlan vẽ SVG riêng, README Icon chưa có.
+  /// Nút nổi Đi chợ (`ShoppingFab`). Prototype Pantry, Detail, MealDetail vẽ SVG riêng, README Icon chưa có.
   static const basket = Symbols.shopping_basket_rounded;
 
   /// Tên trong design → icon. Dùng cho test và trang xem theme.

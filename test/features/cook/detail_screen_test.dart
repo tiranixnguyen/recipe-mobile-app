@@ -6,8 +6,10 @@ import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
+import 'package:recipe_mobile_app/core/widgets/app_button.dart';
 import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 import 'package:recipe_mobile_app/core/widgets/empty_state.dart';
+import 'package:recipe_mobile_app/core/widgets/shopping_fab.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
@@ -31,6 +33,7 @@ Future<ProviderContainer> _pump(
     routes: [
       GoRoute(path: '/', builder: (_, _) => const Text('at /')),
       GoRoute(path: '/plan', builder: (_, state) => Text('at ${state.uri}')),
+      GoRoute(path: '/shopping', builder: (_, _) => const Text('at shopping')),
       ...cookRoutes,
     ],
   );
@@ -84,6 +87,51 @@ void main() {
     expect(find.text('Cách làm · 3 bước'), findsOneWidget);
     expect(find.text('Làm nóng dầu · 1 phút', findRichText: true), findsOneWidget);
     expect(find.text('Đánh trứng với hành', findRichText: true), findsOneWidget);
+  });
+
+  testWidgets('thêm đồ thiếu vào đi chợ: nút thành Đã thêm, FAB có badge, snackbar Xem', (
+    tester,
+  ) async {
+    final container = await _pump(tester);
+    expect(find.byKey(const ValueKey('shopping-fab-badge')), findsNothing);
+
+    await tester.tap(find.text(CookStrings.addMissing(1)));
+    await tester.pumpAndSettle();
+
+    expect(container.read(shoppingItemsProvider).map((i) => i.ingredientId), ['scallion']);
+    expect(find.text(CookStrings.addedMissing), findsOneWidget);
+    expect(find.text(CookStrings.inShopping), findsOneWidget);
+    expect(find.text(CookStrings.addedToShopping(1)), findsOneWidget);
+
+    // Snackbar nằm cạnh nút Đi chợ (cùng đáy, bên trái nút), không bị đẩy lên trên nút.
+    final snack = tester.getRect(
+      find.descendant(of: find.byType(SnackBar), matching: find.byType(Material)).first,
+    );
+    final fab = tester.getRect(find.byType(FloatingActionButton));
+    expect(snack.right, lessThanOrEqualTo(fab.left));
+    expect(snack.bottom, moreOrLessEquals(fab.bottom, epsilon: 1));
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('shopping-fab-badge')),
+        matching: find.text('1'),
+      ),
+      findsOneWidget,
+    );
+    final button = tester.widget<AppButton>(
+      find.widgetWithText(AppButton, CookStrings.addedMissing),
+    );
+    expect(button.onPressed, isNull);
+
+    await tester.tap(find.text(CookStrings.seeShopping));
+    await tester.pumpAndSettle();
+    expect(find.text('at shopping'), findsOneWidget);
+  });
+
+  testWidgets('FAB Đi chợ mở màn Đi chợ', (tester) async {
+    await _pump(tester);
+    await tester.tap(find.byTooltip(ShoppingFab.tooltip));
+    await tester.pumpAndSettle();
+    expect(find.text('at shopping'), findsOneWidget);
   });
 
   testWidgets('Lưu bật rồi tắt; Quay lại về màn trước', (tester) async {

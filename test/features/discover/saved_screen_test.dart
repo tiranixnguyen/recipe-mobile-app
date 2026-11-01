@@ -94,6 +94,7 @@ Future<ProviderContainer> _pump(
     initialLocation: location,
     routes: [
       ...savedTabRoutes,
+      ...discoverRoutes.whereType<GoRoute>().where((r) => r.path.contains('/meal/')),
       GoRoute(
         path: '/recipe/:id',
         builder: (_, state) => Text('recipe/${state.pathParameters['id']}'),
@@ -178,7 +179,7 @@ void main() {
     );
     await tester.tap(find.text('Trứng chiên hành + Đậu phụ sốt cà'));
     await tester.pumpAndSettle();
-    expect(find.text(DiscoverStrings.savedMealDishes), findsOneWidget);
+    expect(find.text(DiscoverStrings.mealDishesTitle(2)), findsOneWidget);
     expect(find.text(DiscoverStrings.savedMealAddToPlan), findsOneWidget);
   });
 

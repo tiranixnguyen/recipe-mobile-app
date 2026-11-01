@@ -33,14 +33,14 @@ final resumeCookingProvider = Provider.autoDispose<ResumeCooking?>((ref) {
   }
   // Nấu cả bữa: bước tính trên bước đứng bếp, chặng Sơ chế hiện "Bữa tối · sơ chế", chặng Lưu ý
   // hiện "Bữa tối · lưu ý".
-  final planned = session.planned;
+  final meal = session.mealLabel;
   final steps = cookSteps(recipe).length;
   if (steps == 0) return null;
   final step = session.positions[session.current].clamp(0, steps - 1);
   return (
-    text: switch (planned) {
-      final p? when session.inPrep => CookStrings.mealPrepStageTitle(p.meal),
-      final p? when session.inNotes => CookStrings.mealNotesStageTitle(p.meal),
+    text: switch (meal) {
+      final m? when session.inPrep => CookStrings.mealPrepStageTitle(m),
+      final m? when session.inNotes => CookStrings.mealNotesStageTitle(m),
       _ => CookStrings.resumeStep(recipe.name, step + 1, steps),
     },
     location: mealCookStepLocation,

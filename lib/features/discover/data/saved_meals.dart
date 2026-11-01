@@ -123,6 +123,22 @@ class SavedMealsController extends Notifier<List<SavedMeal>> {
     return true;
   }
 
+  /// Đổi bữa [old] đã lưu thành [next] (sửa món trong Chi tiết bữa): giữ giờ lưu và vị trí trong
+  /// danh sách, đổi khoá theo món mới. Trả `true` nếu [old] đang được lưu. Nếu [next] trùng một bữa
+  /// khác đã lưu thì chỉ bỏ [old], không để hai bữa cùng khoá.
+  Future<bool> replaceMeal(SavedMeal old, SavedMeal next) async {
+    final index = state.indexWhere((m) => listEquals(m.recipeIds, old.recipeIds));
+    if (index < 0) return false;
+    final others = [...state]..removeAt(index);
+    if (others.any((m) => listEquals(m.recipeIds, next.recipeIds))) {
+      await _save(others);
+      return true;
+    }
+    final kept = state[index].savedAt;
+    await _save(others..insert(index, kept == null ? next : next.withSavedAt(kept)));
+    return true;
+  }
+
   bool _contains(SavedMeal meal) => state.any((m) => listEquals(m.recipeIds, meal.recipeIds));
 
   Future<void> _save(List<SavedMeal> meals) async {

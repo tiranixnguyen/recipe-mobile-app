@@ -146,6 +146,40 @@ void main() {
       expect(container.read(savedMealsProvider).length, 1);
     });
 
+    test('replaceMeal giữ giờ lưu và vị trí, đổi khoá, lưu lại được', () async {
+      final at = DateTime(2026, 10, 1);
+      const first = SavedMeal(recipeIds: ['a', 'b'], servings: 2, tags: [RecipeTag.cheap]);
+      const second = SavedMeal(recipeIds: ['c'], servings: 1);
+      await notifier().saveMeal(first.withSavedAt(at));
+      await notifier().saveMeal(second);
+
+      const next = SavedMeal(recipeIds: ['a', 'x'], servings: 2, tags: [RecipeTag.cheap]);
+      expect(await notifier().replaceMeal(first, next), isTrue);
+
+      final meals = container.read(savedMealsProvider);
+      expect(meals.map((m) => m.key), ['c', 'a,x']);
+      expect(meals.last.savedAt, at);
+
+      container.invalidate(savedMealsProvider);
+      expect(container.read(savedMealsProvider).map((m) => m.key), ['c', 'a,x']);
+      expect(container.read(savedMealsProvider).last.savedAt, at);
+    });
+
+    test(
+      'replaceMeal: bữa cũ không còn thì không làm gì; trùng bữa khác thì chỉ bỏ bữa cũ',
+      () async {
+        const mealA = SavedMeal(recipeIds: ['a'], servings: 1);
+        const mealB = SavedMeal(recipeIds: ['b'], servings: 1);
+        expect(await notifier().replaceMeal(mealA, mealB), isFalse);
+        expect(container.read(savedMealsProvider), isEmpty);
+
+        await notifier().saveMeal(mealA);
+        await notifier().saveMeal(mealB);
+        expect(await notifier().replaceMeal(mealA, mealB), isTrue);
+        expect(container.read(savedMealsProvider), [mealB]);
+      },
+    );
+
     test('dữ liệu tồn tại trong LocalStore', () async {
       const meal = SavedMeal(recipeIds: ['a'], servings: 1, tags: [RecipeTag.veg]);
       await notifier().saveMeal(meal);

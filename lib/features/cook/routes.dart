@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/features/cook/data/cook_session.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/detail/detail_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/done/done_screen.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/history/history_screen.dart';
@@ -31,6 +32,13 @@ String mealCookLocation(DateTime day, Meal meal) => Uri(
     'day': '${day.year.toString().padLeft(4, '0')}-${_two(day.month)}-${_two(day.day)}',
     'meal': meal.id,
   },
+).toString();
+
+/// Nấu cả bữa gồm các món [recipeIds] cho [servings] người, ngoài Thực đơn (Chi tiết bữa đã lưu).
+/// Nấu xong không đánh dấu gì trong Thực đơn.
+String mealCookDishesLocation(List<String> recipeIds, int servings) => Uri(
+  path: _mealCookPath,
+  queryParameters: {'dishes': recipeIds.join(','), 'servings': '$servings'},
 ).toString();
 
 String _two(int n) => n.toString().padLeft(2, '0');
@@ -89,10 +97,22 @@ final cookRoutes = <RouteBase>[
   GoRoute(
     path: _mealCookPath,
     builder: (_, state) {
-      final day = DateTime.tryParse(state.uri.queryParameters['day'] ?? '');
-      final meal = Meal.tryParse(state.uri.queryParameters['meal'] ?? '');
+      final query = state.uri.queryParameters;
+      if (query['dishes'] case final dishes?) {
+        final ids = [
+          for (final id in dishes.split(','))
+            if (id.isNotEmpty) id,
+        ];
+        final servings = int.tryParse(query['servings'] ?? '');
+        if (ids.isEmpty || servings == null) return const NoMealScreen();
+        return MealPrepScreen(
+          source: DishesMealSource(ids, servings.clamp(minCookServings, maxCookServings)),
+        );
+      }
+      final day = DateTime.tryParse(query['day'] ?? '');
+      final meal = Meal.tryParse(query['meal'] ?? '');
       if (day == null || meal == null) return const NoMealScreen();
-      return MealPrepScreen(slot: (day: day, meal: meal));
+      return MealPrepScreen(source: PlannedMealSource((day: day, meal: meal)));
     },
     routes: [
       GoRoute(path: 'step', builder: (_, _) => const MealStepScreen()),

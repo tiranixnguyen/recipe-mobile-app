@@ -93,7 +93,7 @@ void main() {
     final plan = env.container.read(plannedMealsProvider.notifier);
     await plan.addToPlan('trung', _day, Meal.dinner);
     await plan.addToPlan('canh', _day, Meal.dinner, servings: 2);
-    final provider = mealPrepViewModelProvider(_slot);
+    final provider = mealPrepViewModelProvider(PlannedMealSource(_slot));
     await env.load(provider);
     await env.container.read(provider.notifier).start();
 
@@ -177,7 +177,7 @@ void main() {
     await env.container.read(cookSessionProvider.notifier).startMeal([
       (recipeId: 'canh', servings: 1),
       (recipeId: 'trung', servings: 1),
-    ], _slot);
+    ], planned: _slot);
     await env.load(mealDoneViewModelProvider);
     final viewModel = env.container.read(mealDoneViewModelProvider.notifier);
     viewModel.rate(0, CookRating.good);

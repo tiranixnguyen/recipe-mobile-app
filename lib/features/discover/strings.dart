@@ -47,12 +47,66 @@ abstract final class DiscoverStrings {
   static const savedGroupEarlier = 'Trước đó';
   static String savedMealMeta(int dishes, int servings) => '$dishes món · $servings người';
 
-  // Chi tiết bữa đã lưu
-  static const savedMealDishes = 'Các món trong bữa';
-  static const savedMealAddToPlan = 'Thêm vào thực đơn';
-  static const savedMealUnsave = 'Bỏ lưu';
+  // Chi tiết bữa (`MealDetail`)
+  static const savedMealTitle = 'Bữa của bạn';
+  static const savedMealBackLabel = 'Quay lại Đã lưu';
   static const savedMealNotFound = 'Bữa này không còn trong Đã lưu';
   static const savedMealBack = 'Về Đã lưu';
+  static const saveMeal = 'Lưu bữa';
+  static const unsaveMeal = 'Bỏ lưu bữa';
+  static String mealDetailMeta(int dishes, int minutes, String? tools) =>
+      ['$dishes món', '~$minutes phút', ?tools].join(' · ');
+  static String mealStatusMissing(int count) => 'Thiếu $count thứ';
+  static String mealServingsTools(int servings, String? tools) =>
+      ['$servings người', ?tools].join(' · ');
+  static String mealDishesTitle(int count) => 'Các món trong bữa ($count)';
+  static String dishRoleMeta(String role, int minutes) => '$role · $minutes phút';
+  static String dishLinkLabel(String name, List<String> missing) =>
+      '$name, ${missing.isEmpty ? 'đủ đồ' : 'thiếu ${missing.join(', ')}'}. Xem chi tiết món';
+  static const swap = 'Đổi';
+  static String swapLabel(String name) => 'Đổi $name';
+  static String removeLabel(String name) => 'Bỏ $name khỏi bữa';
+  static const mealAddDish = 'Thêm món';
+  static const mealIngredients = 'Nguyên liệu cả bữa';
+  static String mealServings(int servings) => '$servings người';
+  static String missingTitle(int count) => 'Còn thiếu $count thứ';
+  static const tagMissing = 'Thiếu';
+  static const tagInShopping = 'Trong đi chợ';
+  static String addMissing(int count) => 'Thêm $count thứ còn thiếu vào đi chợ';
+  static const allMissingInShopping = 'Đã có hết trong đi chợ';
+  static const haveTitle = 'Có trong tủ';
+  static const optionalTitle = 'Tuỳ chọn';
+  static const basicSpices = 'Gia vị cơ bản';
+  static String dishAdded(String name) => 'Đã thêm ${name.toLowerCase()} vào bữa';
+  static String dishRemoved(String name) => 'Đã bỏ ${name.toLowerCase()} khỏi bữa';
+  static String dishSwapped(String from, String to) =>
+      'Đã đổi ${from.toLowerCase()} thành ${to.toLowerCase()}';
+  static String addedToShopping(int added, int skipped) =>
+      'Đã thêm $added thứ vào đi chợ${skipped > 0 ? ', $skipped thứ đã có sẵn' : ''}';
+  static const seeShopping = 'Xem';
+  static const savedMealAddToPlan = 'Thêm vào thực đơn';
+  static const startCooking = 'Bắt đầu nấu';
+
+  // Sheet chọn món của Chi tiết bữa
+  static const pickAddTitle = 'Thêm món vào bữa';
+  static String pickSwapTitle(String name) => 'Đổi ${name.toLowerCase()} thành';
+  static const pickClose = 'Đóng';
+  static const pickSearch = 'Tìm món';
+  static const pickFilterLabel = 'Lọc theo loại món';
+  static const pickAll = 'Tất cả';
+  static const pickGroupSaved = 'Món bạn đã lưu';
+  static const pickGroupAll = 'Tất cả món';
+  static const pickNone = 'Không thấy món nào khớp.';
+  static const pickInMeal = 'Đã có trong bữa';
+  static const pickReady = 'Đủ đồ';
+  static String pickMissing(int count) => 'Thiếu $count';
+  static String pickLabel(String name, bool inMeal, List<String> missing) =>
+      name +
+      (inMeal
+          ? ', đã có trong bữa'
+          : missing.isEmpty
+          ? ', đủ đồ'
+          : ', thiếu ${missing.join(', ')}');
 
   // Khám phá v2 (DSC-11)
   static String upcomingTitle(String meal) => 'Sắp tới bữa $meal rồi';

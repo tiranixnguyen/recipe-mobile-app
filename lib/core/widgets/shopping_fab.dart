@@ -4,7 +4,7 @@ import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
 import 'package:recipe_mobile_app/core/widgets/hold_draggable.dart';
 
-/// Nút nổi Đi chợ ở Tủ đồ và Thực đơn (prototype `Pantry`, `MealPlan`): tròn 56, nền `chili`, icon
+/// Nút nổi Đi chợ ở Tủ đồ, Chi tiết món và Chi tiết bữa (prototype `Pantry`, `Detail`, `MealDetail`): tròn 56, nền `chili`, icon
 /// giỏ, badge đếm số thứ chưa mua.
 ///
 /// [count] do feature truyền vào (đếm dòng chưa tick từ public API của F4); core không đọc thẳng danh

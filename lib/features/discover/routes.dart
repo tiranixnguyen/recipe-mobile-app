@@ -49,18 +49,16 @@ final savedTabRoutes = <RouteBase>[
   GoRoute(
     path: _savedPath,
     builder: (_, state) => SavedScreen(highlightMeal: state.uri.queryParameters['new']),
-    routes: [
-      // Con của `/saved` để giữ thanh tab bên dưới.
-      GoRoute(
-        path: 'meal/:key',
-        builder: (_, state) => SavedMealScreen(mealKey: state.pathParameters['key']!),
-      ),
-    ],
   ),
 ];
 
-/// Màn toàn màn hình: Tìm kiếm (`Search`), Hôm nay ăn gì (`Today`).
+/// Màn toàn màn hình: Tìm kiếm (`Search`), Hôm nay ăn gì (`Today`), Chi tiết bữa (`MealDetail`).
 final discoverRoutes = <RouteBase>[
+  // Có footer riêng nên ẩn thanh tab, như Chi tiết món.
+  GoRoute(
+    path: '$_savedPath/meal/:key',
+    builder: (_, state) => SavedMealScreen(mealKey: state.pathParameters['key']!),
+  ),
   GoRoute(
     path: '/search',
     builder: (_, state) => SearchScreen(
