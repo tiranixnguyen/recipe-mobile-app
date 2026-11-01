@@ -2,12 +2,28 @@ import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/saved_meal/saved_meal_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/search/search_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/today/today_screen.dart';
+import 'package:recipe_mobile_app/features/discover/presentation/today_prefs/today_prefs_screen.dart';
 
 const discoverLocation = '/';
 const todayLocation = '/today';
 const todayPrefsLocation = '/today/prefs';
+
+/// Gợi ý cho mình mở từ dải tiêu chí của Hôm nay ăn gì: xong thì quay lại màn đó.
+const todayPrefsEditLocation = '$todayPrefsLocation?from=today';
+
+const _savedPath = '/saved';
+
+/// Đường dẫn tab Đã lưu; [highlightMeal] là `SavedMeal.key` của bữa vừa lưu, thẻ đó hiện "Mới thêm".
+String savedLocation({String? highlightMeal}) => Uri(
+  path: _savedPath,
+  queryParameters: highlightMeal == null ? null : {'new': highlightMeal},
+).toString();
+
+/// Chi tiết một bữa đã lưu, [key] là `SavedMeal.key`.
+String savedMealLocation(String key) => '$_savedPath/meal/${Uri.encodeComponent(key)}';
 
 /// Đường dẫn tới màn Tìm kiếm — feature khác dùng hàm này thay vì tự ghép chuỗi.
 ///
@@ -30,7 +46,17 @@ final discoverTabRoutes = <RouteBase>[
 
 /// Tab Đã lưu (prototype `Saved`).
 final savedTabRoutes = <RouteBase>[
-  GoRoute(path: '/saved', builder: (_, _) => const SavedScreen()),
+  GoRoute(
+    path: _savedPath,
+    builder: (_, state) => SavedScreen(highlightMeal: state.uri.queryParameters['new']),
+    routes: [
+      // Con của `/saved` để giữ thanh tab bên dưới.
+      GoRoute(
+        path: 'meal/:key',
+        builder: (_, state) => SavedMealScreen(mealKey: state.pathParameters['key']!),
+      ),
+    ],
+  ),
 ];
 
 /// Màn toàn màn hình: Tìm kiếm (`Search`), Hôm nay ăn gì (`Today`).
@@ -51,6 +77,7 @@ final discoverRoutes = <RouteBase>[
   ),
   GoRoute(
     path: todayPrefsLocation,
-    builder: (_, _) => const TodayScreen(),
+    builder: (_, state) =>
+        TodayPrefsScreen(fromToday: state.uri.queryParameters['from'] == 'today'),
   ),
 ];

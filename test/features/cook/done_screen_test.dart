@@ -28,7 +28,8 @@ Future<ProviderContainer> _pump(
   final router = GoRouter(
     initialLocation: cookDoneLocation('trung'),
     routes: [
-      GoRoute(path: '/plan', builder: (_, _) => const Text('at plan')),
+      GoRoute(path: discoverLocation, builder: (_, _) => const Text('at discover')),
+      GoRoute(path: '/history', builder: (_, _) => const Text('at history')),
       ...cookRoutes,
     ],
   );
@@ -64,44 +65,56 @@ Future<ProviderContainer> _pump(
 }
 
 void main() {
-  testWidgets('tick Hết, chấm Chê, lưu món; xong thì tủ bớt đồ, lịch sử có đánh giá', (
-    tester,
-  ) async {
+  testWidgets('chấm Chê, ghi chú, lưu món; xong thì sang PantryUpdate', (tester) async {
     final container = await _pump(tester);
 
     expect(find.text(CookStrings.doneTitle), findsOneWidget);
     expect(find.text('Trứng chiên hành · 2 người · 4 bước'), findsOneWidget);
-    expect(find.text('Đã dùng 4 quả'), findsOneWidget);
     expect(find.text(CookStrings.demotedNote), findsNothing);
 
-    await tester.tap(find.bySemanticsLabel(CookStrings.usedUpLabel('Hành lá')));
+    // Chấm Chê → chú thích hiện
     await tester.tap(find.text('Chê'));
     await tester.pump();
     expect(find.text(CookStrings.demotedNote), findsOneWidget);
 
+    // Lưu món
     await tester.tap(find.text(CookStrings.saveForLater));
     await tester.pump();
     expect(find.text(CookStrings.saved), findsOneWidget);
     expect(container.read(savedIdsProvider), {'trung'});
 
-    await tester.tap(find.text(CookStrings.finishAndUpdate));
+    // Sang PantryUpdate
+    await tester.tap(find.text(CookStrings.doneNoteToPantry));
     await tester.pumpAndSettle();
-    expect(container.read(pantryItemsProvider), {'egg'});
+
+    // PantryUpdate hiện đồ đã dùng
+    expect(find.text(CookStrings.pantryUpdateTitle), findsOneWidget);
+    expect(find.text('Đã dùng 4 quả'), findsOneWidget);
+    expect(find.text('Đã dùng 2 nắm'), findsOneWidget);
+
+    // Bỏ tick "Còn" cho trứng gà (tap vào row)
+    await tester.tap(find.text('Trứng gà'));
+    await tester.pump();
+
+    // Xong
+    await tester.tap(find.text(CookStrings.pantryUpdateFinish));
+    await tester.pumpAndSettle();
+
+    expect(container.read(pantryItemsProvider), {'scallion'});
     expect(container.read(cookHistoryProvider).single.rating, CookRating.bad);
-    expect(find.text('at plan'), findsOneWidget);
+    expect(find.text('at history'), findsOneWidget);
   });
 
   for (final (name, theme) in [('sáng', AppTheme.light), ('tối', AppTheme.dark)]) {
     testWidgets('màn 360dp, chữ 1.3, theme $name: không tràn', (tester) async {
       await _pump(tester, theme: theme, size: const Size(360, 640), textScale: 1.3);
-      // Danh sách dựng lười: cuộn tới cho dựng, rồi đưa hẳn lên trên footer.
       await tester.scrollUntilVisible(find.text('Chê'), 100);
       await tester.ensureVisible(find.text('Chê'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Chê'));
       await tester.pump();
       expect(tester.takeException(), isNull);
-      expect(find.text(CookStrings.finishAndUpdate), findsOneWidget);
+      expect(find.text(CookStrings.doneNoteToPantry), findsOneWidget);
     });
   }
 }

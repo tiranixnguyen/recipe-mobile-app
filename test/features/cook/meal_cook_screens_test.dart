@@ -63,6 +63,7 @@ Future<(ProviderContainer, GoRouter)> _pump(
       ),
       GoRoute(path: '/plan', builder: (_, _) => const Text('at plan')),
       GoRoute(path: shoppingLocation, builder: (_, _) => const Text('at shopping')),
+      GoRoute(path: '/history', builder: (_, _) => const Text('at history')),
       ...cookRoutes,
     ],
   );
@@ -339,15 +340,21 @@ void main() {
     expect(find.text(CookStrings.mealConfirmTitle), findsNothing);
     expect(find.text('Xong bữa tối! Ăn ngon nhé'), findsOneWidget);
     expect(find.text('2 món · 1 người · khoảng 35 phút'), findsOneWidget);
-    expect(find.text('Đã dùng 2,5 quả · 2 món'), findsOneWidget);
-
     await _tap(tester, find.byTooltip('Ngon · Canh cà chua trứng'));
     expect(find.text('Bạn chấm: Ngon'), findsOneWidget);
-    await _tap(tester, find.bySemanticsLabel(CookStrings.usedUpLabel('Cà chua')));
+
+    // Sang PantryUpdate
     await _tap(tester, find.text(CookStrings.finishAndUpdate));
+    await tester.pumpAndSettle();
+    expect(find.text(CookStrings.pantryUpdateTitle), findsOneWidget);
+
+    // Bỏ tick Cà chua (hết rồi) → sẽ bị xoá khỏi tủ
+    await _tap(tester, find.text('Cà chua'));
+    await _tap(tester, find.text(CookStrings.finishAndUpdate));
+    await tester.pumpAndSettle();
 
     expect(container.read(pantryItemsProvider), {'egg'});
-    expect(container.read(cookHistoryProvider), hasLength(2));
+    expect(container.read(cookHistoryProvider), hasLength(1));
     expect(container.read(plannedMealsProvider).every((p) => p.cooked), isTrue);
     expect(find.text(CookStrings.resumeTitle), findsNothing);
   });

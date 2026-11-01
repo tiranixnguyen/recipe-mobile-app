@@ -25,21 +25,34 @@ abstract final class DiscoverStrings {
   static const loadError = 'Không đọc được danh sách món. Thử mở lại app.';
   static const savedEmptyTitle = 'Chưa lưu món nào';
   static const savedEmptyBody =
-      'Bấm biểu tượng lưu trên món bạn thích. Món đã lưu được ưu tiên khi gợi ý và lên thực đơn.';
+      'Bấm biểu tượng lưu trên món bạn thích, hoặc Lưu lại cả bữa ở Hôm nay ăn gì.';
   static const savedEmptyAction = 'Tìm món để lưu';
 
-  // Đã lưu v2 (DSC-13)
+  // Đã lưu v3: một danh sách món + bữa, nhóm theo thời gian như Lịch sử
+  static String savedCount(int n) => '$n mục';
   static const savedSearchPlaceholder = 'Tìm trong đã lưu';
   static const savedSearchLabel = 'Tìm trong đã lưu';
   static const savedTrashHint = 'Kéo vào đây để bỏ lưu';
   static const savedTrashDanger = 'Thả để bỏ lưu';
   static String savedUnsaved(String name) => 'Đã bỏ lưu $name';
   static const savedUndo = 'Hoàn tác';
-  static const savedRecipeUnsaveAction = 'Bỏ lưu';
   static const savedUnsaveAction = 'Bỏ lưu';
   static String savedNoMatch(String q) => 'Không thấy "$q" trong đã lưu.';
-  static String savedDragTipText() => 'Nhấn giữ và kéo vào thùng rác để bỏ lưu.';
+  static const savedDragTipText = 'Nhấn giữ một mục rồi kéo vào thùng rác để bỏ lưu.';
   static const savedEmptyRecipesAction = 'Khám phá món';
+  static const savedJustAdded = 'Mới thêm';
+  static const savedGroupToday = 'Hôm nay';
+  static const savedGroupYesterday = 'Hôm qua';
+  static const savedGroupThisWeek = 'Tuần này';
+  static const savedGroupEarlier = 'Trước đó';
+  static String savedMealMeta(int dishes, int servings) => '$dishes món · $servings người';
+
+  // Chi tiết bữa đã lưu
+  static const savedMealDishes = 'Các món trong bữa';
+  static const savedMealAddToPlan = 'Thêm vào thực đơn';
+  static const savedMealUnsave = 'Bỏ lưu';
+  static const savedMealNotFound = 'Bữa này không còn trong Đã lưu';
+  static const savedMealBack = 'Về Đã lưu';
 
   // Khám phá v2 (DSC-11)
   static String upcomingTitle(String meal) => 'Sắp tới bữa $meal rồi';
@@ -59,21 +72,37 @@ abstract final class DiscoverStrings {
   static const shoppingEmptyPrompt = 'Bấm để mở danh sách';
   static String upcomingMeta(int count, int totalMinutes) => '$count món · ~$totalMinutes phút';
 
-  // Hôm nay ăn gì
-  static String mealLabel(String meal) => 'Bữa $meal';
-  static String todaySubtitle(String meal) => 'Bữa $meal · theo tủ đồ và bếp của bạn';
-  static const todayUnder30 = 'Dưới 30 phút';
-  static const todayAnyTime = 'Thoải mái';
-  static const todayEmpty = 'Chưa có món hợp bữa này. Bạn thử chọn thời gian khác.';
-  static const todayDislike = 'Không thích';
-  static const todayShuffle = 'Đổi món';
+  // Hôm nay ăn gì v2 (DSC-12)
+  static String todayTitle(String meal) => 'Bữa $meal nay';
+  static const todaySubtitle = 'Gợi ý theo tủ đồ, bếp và nhu cầu của bạn';
+  static String todayCriteriaAria(List<String> criteria) =>
+      'Tiêu chí: ${criteria.join(', ')}. Bấm để sửa';
+  static const todayByHour = 'Theo giờ';
+  static String todayUnderMinutes(int minutes) => 'Dưới $minutes phút';
+  static String todayMoreDishes(String names, int more) => '$names +$more món';
+  static const todayMealAria = 'Bữa gợi ý';
+  static String todayMealMeta(int count, int minutes, List<String> tools) =>
+      ['$count món', '~$minutes phút', ...tools].join(' · ');
+  static String todayAltMeta(int count, int minutes, {required bool ready}) =>
+      ['$count món', '~$minutes phút', if (ready) 'Đủ đồ'].join(' · ');
+  static const todayHasAll = 'Đủ đồ';
+  static String todayMissingCount(int count) => 'Thiếu $count thứ';
+  static String todayAboutMinutes(int minutes) => '~$minutes phút';
+  static const todaySwap = 'Đổi';
+  static String todaySwapAria(String name) => 'Đổi $name';
+  static const todayDislike = 'Không hợp';
+  static const todayShuffle = 'Đổi cả bữa';
   static const todayReasonsPrompt = 'Vì sao không hợp? App sẽ nhớ.';
   static const todayAlternatives = 'Hoặc thử';
-  static const todayCook = 'Nấu món này';
-  static const todayHasAll = 'Bạn có đủ đồ';
-  static String todayMissing(List<String> missing) => 'Thiếu ${missing.join(', ')}';
-  static String todayReason(String stock, String meal) => '$stock · hợp bữa $meal';
-  static String todayFitsMealOnly(String meal) => 'Hợp bữa $meal';
+  static const todaySave = 'Lưu lại';
+  static const todaySaved = 'Đã lưu';
+  static const todayAddToPlan = 'Thêm vào thực đơn';
+  static const todaySavedMeal = 'Đã lưu bữa vào Đã lưu';
+  static const todaySavedDish = 'Đã lưu món vào Đã lưu';
+  static const todayUnsaved = 'Đã bỏ lưu';
+  static const todayView = 'Xem';
+  static const todayEmpty =
+      'Chưa có bữa hợp tiêu chí của bạn. Bạn thử sửa tiêu chí hoặc thêm đồ vào Tủ đồ.';
   static String minutes(int minutes) => '$minutes phút';
   // Tìm kiếm
   static const clearQuery = 'Xoá từ khoá';
@@ -90,4 +119,58 @@ abstract final class DiscoverStrings {
   /// Dòng meta của món: "15 phút · 1 người · Bếp từ".
   static String recipeMeta(int minutes, int servings, String? tool) =>
       ['$minutes phút', '$servings người', ?tool].join(' · ');
+
+  // Gợi ý cho mình (DSC-12a)
+  static const prefsTitle = 'Hôm nay bạn muốn ăn thế nào?';
+  static const prefsSubtitle = 'Chọn nhanh, app lo phần còn lại';
+  static const prefsScaleLabel = 'Quy mô bữa';
+  static const prefsTimeLabel = 'Thời gian nấu';
+  static const prefsFeel = 'Cảm giác';
+  static const prefsFridge = 'Dọn tủ lạnh';
+  static const prefsFridgeDesc = 'Ưu tiên món dùng đồ bạn đang có';
+
+  // Quy mô
+  static const prefsScaleOne = '1 món gọn lẹ';
+  static const prefsScaleOneHint = 'Một món đơn giản, nhanh gọn';
+  static const prefsScaleTwo = 'Cơm nhà 2 món';
+  static const prefsScaleTwoHint = 'Món mặn kèm canh hoặc rau';
+  static const prefsScaleTray = 'Mâm cơm (3+ món)';
+  static const prefsScaleTrayHint = 'Món mặn, canh và rau đầy đủ';
+
+  // Thời gian
+  static const prefsTime15 = 'Siêu tốc';
+  static const prefsTime15Hint = 'Dưới 15 phút';
+  static const prefsTime30 = 'Nhanh gọn';
+  static const prefsTime30Hint = 'Trong vòng 30 phút';
+  static const prefsTimeNull = 'Thong thả';
+  static const prefsTimeNullHint = 'Không giới hạn thời gian';
+
+  // Cảm giác
+  static const prefsFeelWeather = 'Theo thời tiết';
+  static const prefsFeelWeatherHint = 'App chọn món hợp thời tiết hôm nay';
+  static const prefsFeelWeatherDisabled = 'Chưa bật';
+  static const prefsFeelCooling = 'Nóng bức · Giải nhiệt';
+  static const prefsFeelCoolingHint = 'Món mát, thanh nhẹ, ít dầu mỡ';
+  static const prefsFeelWarming = 'Mưa lạnh · Ấm bụng';
+  static const prefsFeelWarmingHint = 'Cháo, canh nóng, đậm đà';
+  static const prefsFeelAny = 'Tuỳ bạn';
+  static const prefsFeelAnyHint = 'Không lọc theo cảm giác';
+  static const prefsWeatherInvite =
+      'Gợi ý theo thời tiết đang tắt. Bật trong Cài đặt để app chọn món hợp trời hôm nay.';
+  static const prefsWeatherInviteAction = 'Mở Cài đặt';
+
+  // Tags
+  static const prefsTagsSectionCheap = 'Tiết kiệm';
+  static const prefsTagCheap = 'Hệ cuối tháng';
+  static const prefsTagsSectionTaste = 'Khẩu vị';
+  static const prefsTagHealthy = 'Healthy · Eat clean';
+  static const prefsTagVeg = 'Thanh đạm · Món chay';
+  static const prefsTagMild = 'Dịu nhẹ, không cay';
+  static const prefsTagsSectionOccasion = 'Dịp';
+  static const prefsTagSnack = 'Mồi bén · Lai rai';
+  static const prefsTagParty = 'Đãi bạn · Cuối tuần';
+
+  static String prefsMore(int n) => n > 0 ? 'Thêm tiêu chí ($n)' : 'Thêm tiêu chí';
+  static const prefsSkip = 'Bỏ qua';
+  static String prefsCta(String scale) => 'Gợi ý $scale';
 }

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/features/discover/data/saved_recipes.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
 
 void main() {
@@ -41,6 +42,42 @@ void main() {
       await saved.unsave('x');
       await saved.unsave('x'); // Gọi lại không lỗi
       expect(container.read(savedIdsProvider), isEmpty);
+    });
+
+    test('ghi giờ lưu khi lưu, xoá khi bỏ lưu, Hoàn tác giữ giờ cũ', () async {
+      final at = DateTime(2026, 11, 1, 8);
+      final c = ProviderContainer(
+        overrides: [
+          localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
+          savedClockProvider.overrideWithValue(() => at),
+        ],
+      );
+      addTearDown(c.dispose);
+      final saved = c.read(savedIdsProvider.notifier);
+
+      await saved.toggle('a');
+      expect(c.read(savedAtProvider), {'a': at});
+      expect(c.read(localStoreProvider).readList('discover.saved'), ['a']);
+
+      c.invalidate(savedAtProvider);
+      expect(c.read(savedAtProvider), {'a': at});
+
+      await saved.unsave('a');
+      expect(c.read(savedAtProvider), isEmpty);
+
+      final old = DateTime(2026, 10, 1);
+      await saved.save('a', at: old);
+      expect(c.read(savedAtProvider), {'a': old});
+    });
+
+    test('dữ liệu cũ không có giờ lưu vẫn đọc được', () async {
+      final store = InMemoryLocalStore();
+      await store.writeList('discover.saved', ['a']);
+      await store.writeString('discover.savedAt', 'không phải json');
+      final c = ProviderContainer(overrides: [localStoreProvider.overrideWith((ref) => store)]);
+      addTearDown(c.dispose);
+      expect(c.read(savedIdsProvider), {'a'});
+      expect(c.read(savedAtProvider), isEmpty);
     });
 
     test('xoá dữ liệu đưa về rỗng', () async {

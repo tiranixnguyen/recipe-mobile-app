@@ -347,15 +347,21 @@ void main() {
     await tester.tap(find.text(CookStrings.finish));
     await tester.pumpAndSettle();
 
-    expect(find.text('Đã dùng 4 quả'), findsOneWidget);
-    await tester.tap(find.bySemanticsLabel(CookStrings.usedUpLabel('Trứng gà')));
-    await tester.pump();
-    await tester.tap(find.text(CookStrings.finishAndUpdate));
+    // Màn Xong: chấm điểm, ghi chú, rồi sang PantryUpdate.
+    expect(find.text(CookStrings.doneTitle), findsOneWidget);
+    await tester.tap(find.text(CookStrings.doneNoteToPantry));
     await tester.pumpAndSettle();
 
-    expect(find.byType(PlanScreen), findsOneWidget);
+    // Màn PantryUpdate: đồ đã dùng hiển thị, bỏ tick trứng gà.
+    expect(find.text(CookStrings.pantryUpdateTitle), findsOneWidget);
+    expect(find.text('Đã dùng 4 quả'), findsOneWidget);
+    await tester.tap(find.text('Trứng gà').first);
+    await tester.pump();
+    await tester.tap(find.text(CookStrings.pantryUpdateFinish));
+    await tester.pumpAndSettle();
+
     expect(container.read(pantryItemsProvider), {'scallion'});
-    expect(container.read(cookHistoryProvider).single.recipeId, 'trung');
+    expect(container.read(cookHistoryProvider).single.dishes.single.recipeId, 'trung');
     expect(container.read(cookSessionProvider), isNull);
   });
 }

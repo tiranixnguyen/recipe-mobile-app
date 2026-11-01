@@ -15,6 +15,7 @@ import 'package:recipe_mobile_app/features/cook/domain/cook_step.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_done/meal_done_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_prep/meal_prep_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/presentation/meal_step/meal_step_view_model.dart';
+import 'package:recipe_mobile_app/features/cook/presentation/pantry_update/pantry_update_view_model.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
@@ -456,29 +457,33 @@ void main() {
       final viewModel = env.container.read(mealDoneViewModelProvider.notifier);
       var state = env.container.read(mealDoneViewModelProvider).requireValue;
       expect((state.servings, state.minutes), (2, 35));
-      expect(state.used.map((u) => (u.name, u.note)), [
-        ('Cà chua', 'Đã dùng 2 quả'),
-        ('Trứng gà', 'Đã dùng 5 quả'),
-      ]);
 
       viewModel.rate(0, CookRating.good);
       viewModel.rate(1, CookRating.bad);
       viewModel.rate(1, CookRating.bad);
       viewModel.rate(1, CookRating.ok);
-      viewModel.toggleUsedUp('tomato');
       state = env.container.read(mealDoneViewModelProvider).requireValue;
       expect(state.ratings, {0: CookRating.good, 1: CookRating.ok});
 
+      // MealDoneViewModel.finish() lưu vào pendingCookProvider; PantryUpdate xử lý phần còn lại.
       await viewModel.finish();
-      expect(env.container.read(pantryItemsProvider), {'egg'});
-      expect(env.container.read(cookHistoryProvider).map((r) => (r.recipeId, r.rating)), [
-        ('canh', CookRating.good),
-        ('trung', CookRating.ok),
-      ]);
-      expect(env.container.read(plannedMealsProvider).every((p) => p.cooked), isTrue);
       expect(env.container.read(cookSessionProvider), isNull);
       // Màn vẫn giữ bữa vừa nấu tới khi rời đi.
       expect(env.container.read(mealDoneViewModelProvider).hasValue, isTrue);
+
+      // PantryUpdate: bỏ tick tomato (hết rồi) rồi xong.
+      env.container.listen(pantryUpdateViewModelProvider, (_, _) {});
+      env.container.read(pantryUpdateViewModelProvider.notifier).toggleKeep('tomato');
+      await env.container.read(pantryUpdateViewModelProvider.notifier).finish();
+
+      expect(env.container.read(pantryItemsProvider), {'egg'});
+      final history = env.container.read(cookHistoryProvider);
+      expect(history, hasLength(1));
+      expect(
+        history.single.dishes.map((d) => (d.recipeId, d.rating)),
+        [('canh', CookRating.good), ('trung', CookRating.ok)],
+      );
+      expect(env.container.read(plannedMealsProvider).every((p) => p.cooked), isTrue);
     });
   });
 }

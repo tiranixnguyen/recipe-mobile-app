@@ -29,9 +29,11 @@ final pantryClockProvider = Provider<DateTime Function()>((ref) => DateTime.now)
 final _demotedProvider = Provider<Set<String>>((ref) {
   final since = ref.watch(pantryClockProvider)().subtract(demoteAfterBadRating);
   final latest = <String, CookRating>{};
-  for (final record in ref.watch(cookHistoryProvider)) {
-    final rating = record.rating;
-    if (rating != null && record.cookedAt.isAfter(since)) latest[record.recipeId] = rating;
+  for (final entry in ref.watch(cookHistoryProvider)) {
+    if (!entry.cookedAt.isAfter(since)) continue;
+    for (final dish in entry.dishes) {
+      if (dish.rating case final rating?) latest[dish.recipeId] = rating;
+    }
   }
   return {
     for (final MapEntry(:key, :value) in latest.entries)
@@ -115,8 +117,9 @@ final suggestionsProvider = FutureProvider.family<List<Recipe>, ({Meal meal, int
         if (recent(value.at)) key,
     },
     cooked: {
-      for (final record in ref.watch(cookHistoryProvider))
-        if (recent(record.cookedAt)) record.recipeId,
+      for (final entry in ref.watch(cookHistoryProvider))
+        if (recent(entry.cookedAt))
+          for (final dish in entry.dishes) dish.recipeId,
     },
   );
 }
