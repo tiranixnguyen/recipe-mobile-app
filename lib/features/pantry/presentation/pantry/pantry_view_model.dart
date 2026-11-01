@@ -8,6 +8,7 @@ import 'package:recipe_mobile_app/core/widgets/tip_bubble.dart';
 import 'package:recipe_mobile_app/features/pantry/data/pantry_items.dart';
 import 'package:recipe_mobile_app/features/pantry/domain/pantry_list.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Mẹo "nhấn giữ rồi kéo vào giỏ" cạnh nút Đi chợ; ẩn hẳn khi lần đầu thêm được bằng kéo thả.
 const pantryDragTip = 'pantry.dragToShop';
@@ -24,6 +25,7 @@ class PantryState {
     required this.have,
     required this.needed,
     required this.shoppingCount,
+    required this.shopHint,
   });
 
   final String query;
@@ -48,6 +50,9 @@ class PantryState {
 
   /// Badge nút Đi chợ.
   final int shoppingCount;
+
+  /// Banner "kéo vào nút Đi chợ" đang hiện, nên mẹo kéo thả ẩn đi để không nói hai lần.
+  final bool shopHint;
 
   bool get searching => query.trim().isNotEmpty;
 
@@ -93,6 +98,7 @@ class PantryViewModel extends Notifier<AsyncValue<PantryState>> {
     final shopping = ref.watch(shoppingItemsProvider);
     final shoppingCount = ref.watch(shoppingCountProvider);
     final needed = _ingredientIds(shopping);
+    final shopHint = ref.watch(startHintProvider(StartHintSpot.pantryShop));
     final customCount = shopping.where((i) => i.ingredientId == null).length;
     return ref
         .watch(ingredientsProvider)
@@ -118,6 +124,7 @@ class PantryViewModel extends Notifier<AsyncValue<PantryState>> {
             have: have,
             needed: needed,
             shoppingCount: shoppingCount,
+            shopHint: shopHint,
           ),
         );
   }

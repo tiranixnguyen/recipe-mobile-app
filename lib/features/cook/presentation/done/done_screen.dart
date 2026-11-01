@@ -14,6 +14,7 @@ import 'package:recipe_mobile_app/features/cook/presentation/widgets/cook_layout
 import 'package:recipe_mobile_app/features/cook/routes.dart';
 import 'package:recipe_mobile_app/features/cook/strings.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Nấu xong (prototype `CookDone`): đánh giá, ghi chú, rồi sang PantryUpdate.
 class DoneScreen extends ConsumerWidget {
@@ -109,6 +110,10 @@ class _DoneState extends ConsumerState<_Done> {
                   const SizedBox(height: AppSpacing.s6),
                   const SectionHeader(title: CookStrings.howWasIt),
                   const SizedBox(height: AppSpacing.s2),
+                  const StartHint(
+                    StartHintSpot.rate,
+                    padding: EdgeInsets.only(bottom: AppSpacing.s2),
+                  ),
                   RatingGrid(selected: state.rating, onSelect: viewModel.rate),
                   const SizedBox(height: AppSpacing.s4),
                   const SectionHeader(title: CookStrings.doneNote),

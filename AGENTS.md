@@ -116,6 +116,9 @@ thì ghi vào bảng này.
 | `history_delete` | Xoá một lần nấu ở Chi tiết lần nấu, hoặc bấm Hoàn tác | `undo` (bool) |
 | `add_to_shopping_from_discover` | Bấm thêm món vào đi chợ ở banner Khám phá | — |
 | `add_missing_to_shopping` | Bấm "Thêm n thứ còn thiếu vào đi chợ" ở Chi tiết món hoặc Chi tiết bữa, khi thêm được ít nhất một thứ | `from` (`detail`/`meal`), `items` (số thứ thêm được) |
+| `start_step_open` | Bấm nút của một dòng ở thẻ Bắt đầu (Khám phá) | `step` (`pantry`/`shopping`/`plan`/`cook`) |
+| `start_step_done` | Một bước của checklist Bắt đầu vừa đạt, chỉ khi checklist còn mở | `step` |
+| `start_hide` | Bấm Ẩn hoặc Đóng ở thẻ Bắt đầu | `done` (số bước đã xong lúc ẩn) |
 
 ## 5 feature
 

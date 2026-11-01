@@ -19,6 +19,7 @@ import 'package:recipe_mobile_app/features/pantry/domain/pantry_list.dart';
 import 'package:recipe_mobile_app/features/pantry/presentation/pantry/pantry_view_model.dart';
 import 'package:recipe_mobile_app/features/pantry/strings.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Tủ đồ (prototype `Pantry`): đánh dấu đồ đang có, kéo đồ cần mua vào nút Đi chợ.
 class PantryScreen extends ConsumerStatefulWidget {
@@ -103,6 +104,16 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _Header(state: value, query: _query),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.s4),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      StartHint(StartHintSpot.pantryAdd),
+                      StartHint(StartHintSpot.pantryShop),
+                    ],
+                  ),
+                ),
                 Expanded(
                   child: switch (state) {
                     AsyncData(:final value) => _Groups(
@@ -132,11 +143,13 @@ class _PantryScreenState extends ConsumerState<PantryScreen> {
                   valueListenable: AppDrag.active,
                   builder: (context, dragging, child) =>
                       dragging == null ? child! : const SizedBox.shrink(),
-                  child: const TipBubble(
-                    id: pantryDragTip,
-                    text: PantryStrings.dragTip,
-                    anchor: TipAnchor.right,
-                  ),
+                  child: value.shopHint
+                      ? const SizedBox.shrink()
+                      : const TipBubble(
+                          id: pantryDragTip,
+                          text: PantryStrings.dragTip,
+                          anchor: TipAnchor.right,
+                        ),
                 ),
               ),
               const Positioned(right: 12, bottom: 84, child: _DropHint()),

@@ -79,7 +79,7 @@ void main() {
     await tester.tap(find.text('Nồi cơm điện'));
     await tester.tap(find.text('Không ăn cay'));
     await tester.pump();
-    await tester.tap(find.text('Xong, gợi ý món cho mình'));
+    await tester.tap(find.text('Xong, bắt đầu thôi'));
     await tester.pumpAndSettle();
 
     expect(find.byType(DiscoverScreen), findsOneWidget);

@@ -4,11 +4,40 @@ import 'package:recipe_mobile_app/core/models/models.dart';
 abstract final class SystemStrings {
   static const onboardingStep = 'Bước 1/1 · Bếp của bạn';
   static const onboardingTitle = 'Phòng bạn có gì để nấu?';
-  static const onboardingIntro = 'App chỉ gợi ý món bạn nấu được. Đổi lại lúc nào cũng được.';
+  static const onboardingIntro =
+      'App chỉ gợi ý món bạn nấu được. Đổi lại lúc nào cũng được. Xong bước này, app dẫn bạn qua '
+      '4 bước đầu tiên.';
   static const onboardingTools = 'Dụng cụ';
   static const onboardingDiets = 'Chế độ ăn';
   static const onboardingSkip = 'Bỏ qua';
-  static const onboardingDone = 'Xong, gợi ý món cho mình';
+  static const onboardingDone = 'Xong, bắt đầu thôi';
+  // Làm quen lần đầu (thẻ "Bắt đầu" và gợi ý tại chỗ).
+  static const startTitle = 'Làm quen với Bếp Hoà Lạc';
+  static String startProgress(int done, int total) => '$done/$total bước';
+  static const startHide = 'Ẩn';
+  static const startClose = 'Đóng';
+  static const startDoneTitle = 'Xong cả 4 bước rồi';
+  static const startDoneBody =
+      'Bạn đã nắm hết cách dùng app. Món bạn chấm càng nhiều, gợi ý càng hợp khẩu vị.';
+  static const startPantry = 'Thêm đồ bạn đang có vào Tủ đồ';
+  static const startPantryAction = 'Mở Tủ đồ';
+  static const startShopping = 'Ghi đồ còn thiếu vào Đi chợ';
+  static const startShoppingAction = 'Mở Tủ đồ';
+  static const startPlan = 'Lên một bữa trong Thực đơn';
+  static const startPlanAction = 'Lên thực đơn';
+  static const startCook = 'Nấu xong một bữa và chấm món';
+  static const startCookAction = 'Nấu thôi';
+  static const startCookUnrated = 'Bạn nấu xong rồi, chấm món ở Lịch sử nhé';
+  static const startCookUnratedAction = 'Chấm món';
+  static String startRowDone(String title) => 'Đã xong: $title';
+
+  static const hintPantryAdd = 'Bấm vào đồ bạn đang có trong phòng để thêm vào tủ.';
+  static const hintPantryShop = 'Đồ còn thiếu thì kéo vào nút Đi chợ ở góc dưới.';
+  static const hintPlanAdd =
+      'Bấm Gợi ý món để app chọn theo đồ trong tủ, hoặc Thêm món để tự chọn.';
+  static const hintPlanCook = 'Bấm Nấu bữa này, app dẫn bạn từng bước.';
+  static const hintRate = 'Chấm món để lần sau app gợi ý hợp khẩu vị bạn hơn.';
+
   static const kitchenEditSave = 'Lưu';
   static const back = 'Quay lại';
   static const settings = 'Cài đặt';

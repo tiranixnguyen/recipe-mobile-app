@@ -148,7 +148,26 @@ void main() {
     expect(find.text(DiscoverStrings.addDish), findsWidgets);
   });
 
-  testWidgets('bữa tới đã có món: hiện món, thời gian và nút Nấu món này', (tester) async {
+  testWidgets('bữa tới đã có món: hiện món và nút Nấu món này, bấm vùng món thì sang Thực đơn', (
+    tester,
+  ) async {
+    final now = DateTime(2026, 10, 24, 18, 30);
+    final today = dateOnly(now);
+    final planned = [
+      PlannedMeal(day: today, meal: Meal.dinner, recipeId: 'trung-chien'),
+    ];
+
+    // Tủ chỉ có trứng: trung-chien không đủ đồ, nên tên món không lặp lại ở Nấu được ngay.
+    await _pump(tester, planned: planned, now: now, pantry: const ['egg']);
+
+    expect(find.text(_recipeReady.name), findsOneWidget);
+    expect(find.text(DiscoverStrings.cookDish), findsOneWidget);
+
+    // Bấm Nấu món này
+    await _tapAndExpect(tester, find.text(DiscoverStrings.cookDish), '/recipe/trung-chien/prep');
+  });
+
+  testWidgets('bữa tới đã có món: bấm vùng món (ngoài nút Nấu) thì sang Thực đơn', (tester) async {
     final now = DateTime(2026, 10, 24, 18, 30);
     final today = dateOnly(now);
     final planned = [
@@ -157,11 +176,11 @@ void main() {
 
     await _pump(tester, planned: planned, now: now);
 
-    expect(find.text('1 món · ~15 phút'), findsOneWidget);
-    expect(find.text(DiscoverStrings.cookDish), findsOneWidget);
-
-    // Bấm Nấu món này
-    await _tapAndExpect(tester, find.text(DiscoverStrings.cookDish), '/recipe/trung-chien/prep');
+    await _tapAndExpect(
+      tester,
+      find.bySemanticsLabel(RegExp('^${RegExp.escape(DiscoverStrings.openUpcomingPlan('tối'))}')),
+      '/plan',
+    );
   });
 
   testWidgets('Nấu được ngay: hiện món đủ đồ, bấm Mở tủ đồ chuyển sang tab Pantry', (tester) async {
@@ -169,14 +188,26 @@ void main() {
 
     expect(find.text(DiscoverStrings.readyToCook), findsOneWidget);
     expect(find.text(DiscoverStrings.openPantry), findsOneWidget);
+    expect(find.text(DiscoverStrings.readyEmptyPantryTitle), findsNothing);
     await _tapAndExpect(tester, find.text(DiscoverStrings.openPantry), '/pantry');
   });
 
-  testWidgets('Đi chợ: bấm vào mở màn Shopping', (tester) async {
+  testWidgets('Nấu được ngay: tủ trống thì hiện thẻ dẫn vào Tủ đồ, bấm chuyển sang tab Pantry', (
+    tester,
+  ) async {
+    await _pump(tester, pantry: const []);
+
+    expect(find.text(DiscoverStrings.readyToCook), findsOneWidget);
+    expect(find.text(DiscoverStrings.openPantry), findsNothing);
+    expect(find.text(DiscoverStrings.readyEmptyPantryTitle), findsOneWidget);
+    await _tapAndExpect(tester, find.text(DiscoverStrings.readyEmptyPantryTitle), '/pantry');
+  });
+
+  testWidgets('Đi chợ: bấm vào thẻ mở màn Shopping', (tester) async {
     await _pump(tester);
 
     expect(find.text(DiscoverStrings.shoppingTitle), findsOneWidget);
-    await _tapAndExpect(tester, find.text(DiscoverStrings.openShoppingList), '/shopping');
+    await _tapAndExpect(tester, find.text(DiscoverStrings.shoppingEmpty), '/shopping');
   });
 
   testWidgets('ô tìm mở Tìm kiếm', (tester) async {

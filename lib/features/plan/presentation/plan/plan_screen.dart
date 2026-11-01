@@ -17,6 +17,7 @@ import 'package:recipe_mobile_app/features/plan/presentation/plan/plan_view_mode
 import 'package:recipe_mobile_app/features/plan/presentation/plan/recipe_picker_sheet.dart';
 import 'package:recipe_mobile_app/features/plan/routes.dart';
 import 'package:recipe_mobile_app/features/plan/strings.dart';
+import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Thực đơn (prototype `MealPlan`): chế độ Ngày với một bữa tâm điểm; chế độ Tuần chờ #48.
 class PlanScreen extends ConsumerStatefulWidget {
@@ -496,6 +497,10 @@ class _OpenMeal extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: AppSpacing.s3,
           children: [
+            if (dishes.isEmpty && ref.watch(startHintProvider(StartHintSpot.planAdd)))
+              const StartHint(StartHintSpot.planAdd, padding: EdgeInsets.zero),
+            if (dishes.isNotEmpty && ref.watch(startHintProvider(StartHintSpot.planCook)))
+              const StartHint(StartHintSpot.planCook, padding: EdgeInsets.zero),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Row(

@@ -110,21 +110,22 @@ abstract final class DiscoverStrings {
 
   // Khám phá v2 (DSC-11)
   static String upcomingTitle(String meal) => 'Sắp tới bữa $meal rồi';
-  static const viewPlan = 'Xem thực đơn';
   static const cookMeal = 'Nấu bữa này';
   static const cookDish = 'Nấu món này';
+  static String openUpcomingPlan(String meal) => 'Mở thực đơn bữa $meal';
   static String upcomingEmpty(String meal) =>
       'Bữa $meal nay chưa có món. Thử mấy món nấu được với đồ bạn có:';
   static const addDish = '+ Thêm';
   static String addDishAria(String name, String meal) => 'Thêm $name vào bữa $meal';
   static const readyToCook = 'Nấu được ngay';
+  static const readyEmptyPantryTitle = 'Tủ đồ đang trống';
+  static const readyEmptyPantryBody = 'Thêm đồ bạn có, app tìm món nấu được ngay.';
+  static const readyEmptyNoMatchTitle = 'Chưa đủ đồ cho món nào';
+  static const readyEmptyNoMatchBody = 'Thêm vài thứ nữa vào tủ để app gợi ý.';
   static const shoppingTitle = 'Đi chợ';
-  static const openShoppingList = 'Mở danh sách';
   static String shoppingNeedBuy(int count) => 'Còn $count thứ cần mua';
   static const shoppingEmpty = 'Danh sách đi chợ đang trống';
   static const shoppingEmptySub = 'Lấy đồ còn thiếu từ thực đơn tuần này';
-  static const shoppingEmptyPrompt = 'Bấm để mở danh sách';
-  static String upcomingMeta(int count, int totalMinutes) => '$count món · ~$totalMinutes phút';
 
   // Hôm nay ăn gì v2 (DSC-12)
   static String todayTitle(String meal) => 'Bữa $meal nay';
