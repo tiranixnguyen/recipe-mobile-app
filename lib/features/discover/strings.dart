@@ -98,4 +98,58 @@ abstract final class DiscoverStrings {
   /// Dòng meta của món: "15 phút · 1 người · Bếp từ".
   static String recipeMeta(int minutes, int servings, String? tool) =>
       ['$minutes phút', '$servings người', ?tool].join(' · ');
+
+  // Gợi ý cho mình (DSC-12a)
+  static const prefsTitle = 'Hôm nay bạn muốn ăn thế nào?';
+  static const prefsSubtitle = 'Chọn nhanh, app lo phần còn lại';
+  static const prefsScaleLabel = 'Quy mô bữa';
+  static const prefsTimeLabel = 'Thời gian nấu';
+  static const prefsFeel = 'Cảm giác';
+  static const prefsFridge = 'Dọn tủ lạnh';
+  static const prefsFridgeDesc = 'Ưu tiên món dùng đồ bạn đang có';
+
+  // Quy mô
+  static const prefsScaleOne = '1 món gọn lẹ';
+  static const prefsScaleOneHint = 'Một món đơn giản, nhanh gọn';
+  static const prefsScaleTwo = 'Cơm nhà 2 món';
+  static const prefsScaleTwoHint = 'Món mặn kèm canh hoặc rau';
+  static const prefsScaleTray = 'Mâm cơm (3+ món)';
+  static const prefsScaleTrayHint = 'Món mặn, canh và rau đầy đủ';
+
+  // Thời gian
+  static const prefsTime15 = 'Siêu tốc';
+  static const prefsTime15Hint = 'Dưới 15 phút';
+  static const prefsTime30 = 'Nhanh gọn';
+  static const prefsTime30Hint = 'Trong vòng 30 phút';
+  static const prefsTimeNull = 'Thong thả';
+  static const prefsTimeNullHint = 'Không giới hạn thời gian';
+
+  // Cảm giác
+  static const prefsFeelWeather = 'Theo thời tiết';
+  static const prefsFeelWeatherHint = 'App chọn món hợp thời tiết hôm nay';
+  static const prefsFeelWeatherDisabled = 'Chưa bật';
+  static const prefsFeelCooling = 'Nóng bức · Giải nhiệt';
+  static const prefsFeelCoolingHint = 'Món mát, thanh nhẹ, ít dầu mỡ';
+  static const prefsFeelWarming = 'Mưa lạnh · Ấm bụng';
+  static const prefsFeelWarmingHint = 'Cháo, canh nóng, đậm đà';
+  static const prefsFeelAny = 'Tuỳ bạn';
+  static const prefsFeelAnyHint = 'Không lọc theo cảm giác';
+  static const prefsWeatherInvite =
+      'Gợi ý theo thời tiết đang tắt. Bật trong Cài đặt để app chọn món hợp trời hôm nay.';
+  static const prefsWeatherInviteAction = 'Mở Cài đặt';
+
+  // Tags
+  static const prefsTagsSectionCheap = 'Tiết kiệm';
+  static const prefsTagCheap = 'Hệ cuối tháng';
+  static const prefsTagsSectionTaste = 'Khẩu vị';
+  static const prefsTagHealthy = 'Healthy · Eat clean';
+  static const prefsTagVeg = 'Thanh đạm · Món chay';
+  static const prefsTagMild = 'Dịu nhẹ, không cay';
+  static const prefsTagsSectionOccasion = 'Dịp';
+  static const prefsTagSnack = 'Mồi bén · Lai rai';
+  static const prefsTagParty = 'Đãi bạn · Cuối tuần';
+
+  static String prefsMore(int n) => n > 0 ? 'Thêm tiêu chí ($n)' : 'Thêm tiêu chí';
+  static const prefsSkip = 'Bỏ qua';
+  static String prefsCta(String scale) => 'Gợi ý $scale';
 }
