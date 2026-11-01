@@ -113,7 +113,7 @@ thì ghi vào bảng này.
 | `cook_note` | Xong ở màn Done/MealDone (trước PantryUpdate) | `dish_notes` (số món có ghi chú), `meal_note` (bool) |
 | `view_history` | Mở màn Lịch sử | — |
 | `history_filter` | Đổi bộ lọc ở Lịch sử | `filter` (`all`/`good`/`note`) |
-| `history_delete` | Xoá một bản ghi trong Lịch sử | — |
+| `history_delete` | Xoá một lần nấu ở Chi tiết lần nấu, hoặc bấm Hoàn tác | `undo` (bool) |
 
 ## 5 feature
 

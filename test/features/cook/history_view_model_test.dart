@@ -78,10 +78,10 @@ void main() {
       CookRating.good,
     );
 
-    final removed = await vm.delete();
+    final undo = await vm.delete();
     expect(container.read(cookHistoryProvider), isEmpty);
 
-    await vm.restore(removed!);
+    await undo!();
     expect(container.read(cookHistoryProvider).single.mealNote, 'Nấu nhanh');
   });
 }

@@ -39,16 +39,20 @@ class HistoryEntryViewModel extends Notifier<HistoryEntryState> {
   Future<void> setMealNote(String note) =>
       ref.read(cookHistoryProvider.notifier).updateMealNote(entryId, note);
 
-  /// Xoá lần nấu; trả về mục đã xoá để Hoàn tác, null khi không có (đã xoá từ nơi khác).
-  Future<CookHistoryEntry?> delete() async {
-    final removed = await ref.read(cookHistoryProvider.notifier).delete(entryId);
-    if (removed != null) ref.read(analyticsProvider).track('history_delete', {'undo': false});
-    return removed;
-  }
-
-  Future<void> restore(CookHistoryEntry entry) async {
-    await ref.read(cookHistoryProvider.notifier).restore(entry);
-    ref.read(analyticsProvider).track('history_delete', {'undo': true});
+  /// Xoá lần nấu; trả về hàm Hoàn tác, null khi không có (đã xoá từ nơi khác).
+  ///
+  /// Hàm Hoàn tác giữ sẵn [cookHistoryProvider] (không autoDispose) và analytics, nên vẫn chạy
+  /// được sau khi màn này đóng và ViewModel bị huỷ.
+  Future<Future<void> Function()?> delete() async {
+    final history = ref.read(cookHistoryProvider.notifier);
+    final analytics = ref.read(analyticsProvider);
+    final removed = await history.delete(entryId);
+    if (removed == null) return null;
+    analytics.track('history_delete', {'undo': false});
+    return () async {
+      await history.restore(removed);
+      analytics.track('history_delete', {'undo': true});
+    };
   }
 }
 

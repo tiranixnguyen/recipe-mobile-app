@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
@@ -67,12 +66,8 @@ class _HistoryEntry extends ConsumerWidget {
 
     Future<void> delete() async {
       final router = GoRouter.of(context);
-      // `cookHistoryProvider` không autoDispose nên còn sống sau khi màn này đóng; dùng nó (không
-      // phải viewModel riêng theo id) cho Hoàn tác, tránh gọi vào provider đã bị huỷ.
-      final history = ref.read(cookHistoryProvider.notifier);
-      final analytics = ref.read(analyticsProvider);
-      final removed = await viewModel.delete();
-      if (removed == null) return;
+      final undo = await viewModel.delete();
+      if (undo == null) return;
       if (router.canPop()) {
         router.pop();
       } else {
@@ -82,10 +77,7 @@ class _HistoryEntry extends ConsumerWidget {
         AppSnackbar.show(
           context,
           CookStrings.historyDeleted,
-          action: SnackAction(CookStrings.undo, () {
-            history.restore(removed);
-            analytics.track('history_delete', {'undo': true});
-          }),
+          action: SnackAction(CookStrings.undo, undo),
         );
       }
     }
