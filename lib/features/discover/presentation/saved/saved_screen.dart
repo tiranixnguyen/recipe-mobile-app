@@ -172,15 +172,11 @@ class _Body extends ConsumerWidget {
             ValueListenableBuilder<Object?>(
               valueListenable: AppDrag.active,
               builder: (context, dragging, _) => dragging == null
+                  // Sát trên thanh tab, cách 16 như lề hai bên.
                   ? const Align(
                       alignment: Alignment.bottomCenter,
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          AppSpacing.s4,
-                          AppSpacing.s4,
-                          AppSpacing.s4,
-                          AppSpacing.s8 + AppSpacing.s4,
-                        ),
+                        padding: EdgeInsets.all(AppSpacing.s4),
                         child: TipBubble(id: savedDragTip, text: DiscoverStrings.savedDragTipText),
                       ),
                     )
