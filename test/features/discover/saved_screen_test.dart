@@ -11,7 +11,6 @@ import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/empty_state.dart';
 import 'package:recipe_mobile_app/core/widgets/tip_bubble.dart';
 import 'package:recipe_mobile_app/features/discover/discover.dart';
-import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_screen.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/saved/saved_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 
@@ -48,6 +47,7 @@ Future<ProviderContainer> _pump(
   List<SavedMeal> savedMeals = const [],
   Future<List<Recipe>> Function()? recipes,
   ThemeData? theme,
+  String location = '/saved',
 }) async {
   final store = InMemoryLocalStore();
   await store.writeList('discover.saved', savedIds);
@@ -71,9 +71,9 @@ Future<ProviderContainer> _pump(
   }
 
   final router = GoRouter(
-    initialLocation: '/saved',
+    initialLocation: location,
     routes: [
-      GoRoute(path: '/saved', builder: (_, _) => const SavedScreen()),
+      ...savedTabRoutes,
       GoRoute(
         path: '/recipe/:id',
         builder: (_, state) => Text('recipe/${state.pathParameters['id']}'),
@@ -169,6 +169,20 @@ void main() {
 
     expect(find.text('Trứng chiên hành'), findsOneWidget);
     expect(find.text(RecipeTag.cheap.label), findsOneWidget);
+  });
+
+  testWidgets('savedLocation(tab: meals) mở sẵn tab Bữa ăn', (tester) async {
+    expect(savedLocation(), '/saved');
+    await _pump(
+      tester,
+      location: savedLocation(tab: SavedTab.meals),
+      savedMeals: const [
+        SavedMeal(recipeIds: ['trung-chien', 'dau-phu-sot'], servings: 2),
+      ],
+    );
+    final tabs = tester.widget<TabBar>(find.byType(TabBar)).controller!;
+    expect(tabs.index, 1);
+    expect(find.text(DiscoverStrings.savedEmptyRecipesAction), findsNothing);
   });
 
   testWidgets('bấm thẻ bữa mở Gợi ý', (tester) async {

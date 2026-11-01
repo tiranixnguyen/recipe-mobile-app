@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_screen.dart';
@@ -9,6 +10,10 @@ import 'package:recipe_mobile_app/features/discover/presentation/today_prefs/tod
 const discoverLocation = '/';
 const todayLocation = '/today';
 const todayPrefsLocation = '/today/prefs';
+
+/// Đường dẫn tab Đã lưu, có thể mở sẵn tab Bữa ăn: `context.go(savedLocation(tab: SavedTab.meals))`.
+String savedLocation({SavedTab tab = SavedTab.recipes}) =>
+    tab == SavedTab.recipes ? '/saved' : '/saved?tab=${tab.name}';
 
 /// Đường dẫn tới màn Tìm kiếm — feature khác dùng hàm này thay vì tự ghép chuỗi.
 ///
@@ -31,7 +36,14 @@ final discoverTabRoutes = <RouteBase>[
 
 /// Tab Đã lưu (prototype `Saved`).
 final savedTabRoutes = <RouteBase>[
-  GoRoute(path: '/saved', builder: (_, _) => const SavedScreen()),
+  GoRoute(
+    path: '/saved',
+    builder: (_, state) => SavedScreen(
+      // Đổi tab qua đường dẫn thì dựng lại màn để mở đúng tab.
+      key: ValueKey(state.uri.queryParameters['tab']),
+      initialTab: SavedTab.tryParse(state.uri.queryParameters['tab']),
+    ),
+  ),
 ];
 
 /// Màn toàn màn hình: Tìm kiếm (`Search`), Hôm nay ăn gì (`Today`).
