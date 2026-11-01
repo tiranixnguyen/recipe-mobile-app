@@ -3,14 +3,21 @@ import 'package:flutter/foundation.dart';
 import 'package:recipe_mobile_app/core/format.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 
-/// Nguyên liệu so với Tủ đồ: "Có trong tủ", "Thiếu", "Tuỳ chọn".
-enum IngredientStatus { inPantry, missing, optional }
+/// Nguyên liệu so với Tủ đồ và danh sách đi chợ: "Có trong tủ", "Thiếu", "Trong đi chợ" (thiếu
+/// nhưng đã thêm vào đi chợ), "Tuỳ chọn".
+enum IngredientStatus { inPantry, missing, inShopping, optional }
 
 /// Một dòng trong khung Nguyên liệu của Chi tiết món: "Trứng gà · 2 quả".
 @immutable
 class DetailIngredient {
-  const DetailIngredient({required this.name, required this.amountText, required this.status});
+  const DetailIngredient({
+    required this.ingredientId,
+    required this.name,
+    required this.amountText,
+    required this.status,
+  });
 
+  final String ingredientId;
   final String name;
 
   /// Lượng kèm đơn vị cho khẩu phần chuẩn của món: "2 quả", "1,5 muỗng canh".
@@ -20,12 +27,13 @@ class DetailIngredient {
   @override
   bool operator ==(Object other) =>
       other is DetailIngredient &&
+      other.ingredientId == ingredientId &&
       other.name == name &&
       other.amountText == amountText &&
       other.status == status;
 
   @override
-  int get hashCode => Object.hash(name, amountText, status);
+  int get hashCode => Object.hash(ingredientId, name, amountText, status);
 
   @override
   String toString() => 'DetailIngredient($name · $amountText, $status)';
@@ -34,13 +42,15 @@ class DetailIngredient {
 /// Chia nguyên liệu của [recipe] thành dòng có trạng thái ([items]) và gia vị cơ bản
 /// ([basicSpices], gom thành một dòng "Dầu ăn, nước mắm" vì app coi như luôn có).
 ///
+/// Nguyên liệu chưa có trong [pantry] mà đã nằm trong [shoppingIds] là [IngredientStatus.inShopping].
 /// Nguyên liệu `optional` chưa có trong [pantry] là [IngredientStatus.optional]. Id không có trong
 /// [ingredientsById] thì hiện bằng id, như `availabilityFor`.
 ({List<DetailIngredient> items, List<String> basicSpices}) detailIngredients(
   Recipe recipe,
   Set<String> pantry,
-  Map<String, Ingredient> ingredientsById,
-) {
+  Map<String, Ingredient> ingredientsById, [
+  Set<String> shoppingIds = const {},
+]) {
   final items = <DetailIngredient>[];
   final spices = <String>[];
   for (final item in recipe.ingredients) {
@@ -52,10 +62,13 @@ class DetailIngredient {
     }
     items.add(
       DetailIngredient(
+        ingredientId: item.id,
         name: name,
         amountText: '${formatAmount(item.amount)} ${item.unit}',
         status: pantry.contains(item.id)
             ? IngredientStatus.inPantry
+            : shoppingIds.contains(item.id)
+            ? IngredientStatus.inShopping
             : item.optional
             ? IngredientStatus.optional
             : IngredientStatus.missing,

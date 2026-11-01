@@ -241,9 +241,9 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
 
   AsyncValue<MealStepState> _step(List<Recipe> recipes, List<Ingredient> ingredients) {
     final session = ref.watch(cookSessionProvider);
-    final planned = session?.planned;
+    final meal = session?.mealLabel;
     final byId = {for (final r in recipes) r.id: r};
-    if (session == null || planned == null) {
+    if (session == null || meal == null) {
       return AsyncError(const MealNotFound(), StackTrace.current);
     }
     final dishes = [
@@ -266,7 +266,7 @@ class MealStepViewModel extends Notifier<AsyncValue<MealStepState>> {
     final now = clock();
     return AsyncData(
       MealStepState(
-        meal: planned.meal,
+        meal: meal,
         dishes: List.unmodifiable(dishes),
         current: session.current,
         positions: List.unmodifiable(positions),

@@ -23,13 +23,13 @@ import 'package:recipe_mobile_app/features/system/system.dart';
 /// Chuẩn bị nấu cả bữa (prototype `MealCookPrep`): thứ tự nấu, khẩu phần cả bữa, "Lấy đồ ra · cả
 /// bữa"; dưới cùng "Bắt đầu sơ chế" ("Bắt đầu: tên món đầu" khi bữa không có gì để sơ chế).
 class MealPrepScreen extends ConsumerWidget {
-  const MealPrepScreen({super.key, required this.slot});
+  const MealPrepScreen({super.key, required this.source});
 
-  final PlannedSlot slot;
+  final MealCookSource source;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return switch (ref.watch(mealPrepViewModelProvider(slot))) {
+    return switch (ref.watch(mealPrepViewModelProvider(source))) {
       AsyncData(:final value) => _MealPrep(state: value),
       AsyncError(error: MealNotFound()) => const NoMealScreen(
         message: CookStrings.mealNotFoundBody,
@@ -47,8 +47,8 @@ class _MealPrep extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final viewModel = ref.read(mealPrepViewModelProvider(state.slot).notifier);
-    final dayName = DayStrip.fullNames[state.slot.day.weekday - 1];
+    final viewModel = ref.read(mealPrepViewModelProvider(state.source).notifier);
+    final dayName = DayStrip.fullNames[state.day.weekday - 1];
 
     Future<void> start() async {
       final router = GoRouter.of(context);
@@ -116,7 +116,7 @@ class _MealPrep extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             CookHeader(
-              title: CookStrings.mealTitle(state.slot.meal),
+              title: CookStrings.mealTitle(state.meal),
               subtitle: state.hasPrep
                   ? CookStrings.mealPrepMeta(
                       dayName,
@@ -131,7 +131,7 @@ class _MealPrep extends ConsumerWidget {
                       state.tools,
                     ),
               icon: AppIcons.back,
-              tooltip: CookStrings.backToPlan,
+              tooltip: state.fromPlan ? CookStrings.backToPlan : CookStrings.back,
               onPressed: () => context.canPop() ? context.pop() : context.go(planLocation()),
             ),
             Expanded(

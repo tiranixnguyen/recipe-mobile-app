@@ -5,13 +5,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
+import 'package:recipe_mobile_app/features/discover/data/saved_recipes.dart';
 
 const _savedMealsKey = 'discover.savedMeals';
 
 /// Bữa ăn đã lưu: danh sách id món, quy mô và tag tiêu chí khi lưu.
 @immutable
 class SavedMeal {
-  const SavedMeal({required this.recipeIds, required this.servings, this.tags = const []});
+  const SavedMeal({
+    required this.recipeIds,
+    required this.servings,
+    this.tags = const [],
+    this.savedAt,
+  });
+
+  /// Khoá của bữa trong đường dẫn ([key]) tính từ danh sách id món.
+  static String keyOf(List<String> recipeIds) => recipeIds.join(',');
 
   /// Id các món trong bữa, theo thứ tự hiển thị.
   final List<String> recipeIds;
@@ -22,10 +31,20 @@ class SavedMeal {
   /// Tag tiêu chí người dùng chọn ở màn TodayPrefs khi gợi ý bữa này.
   final List<RecipeTag> tags;
 
+  /// Giờ lưu; bữa lưu trước khi có trường này thì null. Không tính vào `==`.
+  final DateTime? savedAt;
+
+  /// Định danh bữa (hai bữa cùng danh sách món là một), dùng trong đường dẫn Chi tiết bữa.
+  String get key => keyOf(recipeIds);
+
+  SavedMeal withSavedAt(DateTime at) =>
+      SavedMeal(recipeIds: recipeIds, servings: servings, tags: tags, savedAt: at);
+
   Map<String, dynamic> toJson() => {
     'recipeIds': recipeIds,
     'servings': servings,
     'tags': [for (final t in tags) t.id],
+    if (savedAt case final at?) 'savedAt': at.toIso8601String(),
   };
 
   static SavedMeal? tryParse(Object? json) {
@@ -48,7 +67,13 @@ class SavedMeal {
               _ => [],
             },
     ];
-    return SavedMeal(recipeIds: List.unmodifiable(ids), servings: servings, tags: tags);
+    final rawAt = json['savedAt'];
+    return SavedMeal(
+      recipeIds: List.unmodifiable(ids),
+      servings: servings,
+      tags: tags,
+      savedAt: rawAt is String ? DateTime.tryParse(rawAt) : null,
+    );
   }
 
   @override
@@ -79,10 +104,11 @@ class SavedMealsController extends Notifier<List<SavedMeal>> {
     }
   }
 
-  /// Lưu bữa nếu chưa có; trả `true` nếu lưu được.
+  /// Lưu bữa nếu chưa có, ghi giờ lưu nếu [meal] chưa có; trả `true` nếu lưu được.
   Future<bool> saveMeal(SavedMeal meal) async {
     if (_contains(meal)) return false;
-    await _save([meal, ...state]);
+    final stamped = meal.savedAt == null ? meal.withSavedAt(ref.read(savedClockProvider)()) : meal;
+    await _save([stamped, ...state]);
     return true;
   }
 
@@ -90,10 +116,26 @@ class SavedMealsController extends Notifier<List<SavedMeal>> {
   Future<bool> unsaveMeal(SavedMeal meal) async {
     final next = [
       for (final m in state)
-        if (m != meal) m,
+        if (!listEquals(m.recipeIds, meal.recipeIds)) m,
     ];
     if (next.length == state.length) return false;
     await _save(next);
+    return true;
+  }
+
+  /// Đổi bữa [old] đã lưu thành [next] (sửa món trong Chi tiết bữa): giữ giờ lưu và vị trí trong
+  /// danh sách, đổi khoá theo món mới. Trả `true` nếu [old] đang được lưu. Nếu [next] trùng một bữa
+  /// khác đã lưu thì chỉ bỏ [old], không để hai bữa cùng khoá.
+  Future<bool> replaceMeal(SavedMeal old, SavedMeal next) async {
+    final index = state.indexWhere((m) => listEquals(m.recipeIds, old.recipeIds));
+    if (index < 0) return false;
+    final others = [...state]..removeAt(index);
+    if (others.any((m) => listEquals(m.recipeIds, next.recipeIds))) {
+      await _save(others);
+      return true;
+    }
+    final kept = state[index].savedAt;
+    await _save(others..insert(index, kept == null ? next : next.withSavedAt(kept)));
     return true;
   }
 

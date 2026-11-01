@@ -36,7 +36,7 @@ class _MealDone extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final viewModel = ref.read(mealDoneViewModelProvider.notifier);
-    final dayName = DayStrip.fullNames[state.slot.day.weekday - 1];
+    final planned = state.planned;
 
     Future<void> goToPantryUpdate() async {
       await viewModel.finish();
@@ -59,7 +59,7 @@ class _MealDone extends ConsumerWidget {
                 ),
                 children: [
                   DoneHero(
-                    title: CookStrings.mealDoneTitle(state.slot.meal),
+                    title: CookStrings.mealDoneTitle(state.meal),
                     meta: CookStrings.mealDoneMeta(
                       state.dishes.length,
                       state.servings,
@@ -97,11 +97,15 @@ class _MealDone extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: AppSpacing.s2,
                 children: [
-                  Text(
-                    CookStrings.mealMarked(state.slot.meal, dayName),
-                    textAlign: TextAlign.center,
-                    style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
-                  ),
+                  if (planned != null)
+                    Text(
+                      CookStrings.mealMarked(
+                        planned.meal,
+                        DayStrip.fullNames[planned.day.weekday - 1],
+                      ),
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.caption.copyWith(color: colors.inkMuted),
+                    ),
                   AppButton(
                     label: CookStrings.finishAndUpdate,
                     size: AppButtonSize.lg,

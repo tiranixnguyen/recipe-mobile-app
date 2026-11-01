@@ -21,9 +21,16 @@ a{color:var(--chili-deep)}
 .c1{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .c2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
 main{scrollbar-width:none}
+.fab{position:absolute;right:16px;bottom:96px;z-index:3;width:56px;height:56px;display:flex;align-items:center;justify-content:center;border-radius:999px;background:var(--chili);color:#FFFFFF;text-decoration:none;box-shadow:0 6px 16px rgba(20,14,10,.24)}
+.fab:hover{color:#FFFFFF}
+.fab:focus-visible{outline:2px solid var(--chili-deep);outline-offset:3px}
+.fab b{position:absolute;top:-4px;right:-4px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;border:2px solid var(--chili);background:var(--surface-raised);color:var(--chili-deep);font-size:12px;line-height:16px;font-weight:700;text-align:center;box-sizing:content-box;transition:transform .2s}
+.addmiss{min-height:44px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--outline);border-radius:12px;background:var(--surface-raised);color:var(--ink);cursor:pointer;font:600 15px/22px 'Be Vietnam Pro',sans-serif}
+.addmiss[disabled]{cursor:default;opacity:.55}
+.addmiss:focus-visible{outline:2px solid var(--chili);outline-offset:2px}
 </style>
 </helmet>
-<div data-theme="{{theme}}" style="width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
+<div data-theme="{{theme}}" style="position: relative; width: 390px; height: 844px; display: flex; flex-direction: column; background: var(--surface); color: var(--ink); font-family: 'Be Vietnam Pro', system-ui, sans-serif; overflow: hidden">
 
   <div style="height: 240px; flex-shrink: 0; position: relative; background: var(--line); display: flex; align-items: center; justify-content: center; color: var(--ink-muted); font-size: 12px; line-height: 16px">
     [Ảnh trứng chiên hành]
@@ -35,10 +42,10 @@ main{scrollbar-width:none}
     </button>
   </div>
 
-  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 16px 16px 16px 16px">
+  <main style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 16px 16px 88px 16px">
     <section style="display: flex; flex-direction: column; gap: 8px">
       <div style="display: flex; align-items: center; gap: 8px">
-        <span style="padding: 2px 8px; border-radius: 8px; background: var(--herb); color: #FFFFFF; font-size: 12px; line-height: 16px; font-weight: 600">Đủ đồ</span>
+        <span class="c1" style="flex-shrink: 1; padding: 2px 8px; border-radius: 8px; font-size: 12px; line-height: 16px; font-weight: 600; {{haveStyle}}">{{have}}</span>
         <span style="display: flex; align-items: center; gap: 4px; color: var(--ink-muted); font-size: 13px; line-height: 18px; font-weight: 600">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
           15 phút
@@ -59,11 +66,17 @@ main{scrollbar-width:none}
     <section style="display: flex; flex-direction: column; gap: 8px">
       <h2 style="margin: 0; font-size: 17px; line-height: 24px; font-weight: 600">Nguyên liệu</h2>
       <ul style="margin: 0; padding: 0 16px; list-style: none; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 12px">
-        <li style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 22px"><span>Trứng gà · 2 quả</span><span style="color: var(--herb-ink); font-weight: 600">Có trong tủ</span></li>
-        <li style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 22px"><span>Hành lá · 1 nắm</span><span style="color: var(--herb-ink); font-weight: 600">Có trong tủ</span></li>
-        <li style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 22px"><span>Cơm trắng · 1 suất</span><span style="color: var(--herb-ink); font-weight: 600">Có trong tủ</span></li>
+        <sc-for list="{{ings}}" as="g" hint-placeholder-count="3">
+          <li style="display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 15px; line-height: 22px"><span>{{g.label}}</span><span style="flex-shrink: 0; font-weight: 600; {{g.tagStyle}}">{{g.tag}}</span></li>
+        </sc-for>
         <li style="display: flex; justify-content: space-between; padding: 10px 0; font-size: 15px; line-height: 22px; color: var(--ink-muted)"><span>Dầu ăn, nước mắm, tiêu</span><span>Gia vị cơ bản</span></li>
       </ul>
+      <sc-if value="{{hasMissing}}" hint-placeholder-val="{{false}}">
+        <button class="addmiss" onClick="{{addMissing}}" disabled="{{added}}">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.6 9.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8z"></path><path d="M8.5 9l2-5M15.5 9l-2-5"></path></svg>
+          {{addLabel}}
+        </button>
+      </sc-if>
     </section>
 
     <section style="display: flex; flex-direction: column; gap: 8px">
@@ -77,6 +90,21 @@ main{scrollbar-width:none}
     </section>
   </main>
 
+  <!-- Flutter: ShoppingFab (core/widgets, #113) with the shopping count badge, same as Tủ đồ. "Thêm … vào đi chợ" calls
+       addToShopping (F4) for the missing ingredients, multiplied by servings; result shown with AppSnackbar (#112). -->
+  <a href="Shopping.dc.html" class="fab" aria-label="{{fabLabel}}">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h16l-1.6 9.2a2 2 0 0 1-2 1.8H7.6a2 2 0 0 1-2-1.8z"></path><path d="M8.5 9l2-5M15.5 9l-2-5"></path></svg>
+    <b aria-hidden="true" style="{{badgeStyle}}">{{shopCount}}</b>
+  </a>
+
+  <sc-if value="{{hasSnack}}" hint-placeholder-val="{{false}}">
+    <div role="status" aria-live="polite" style="position: absolute; left: 16px; right: 88px; bottom: 96px; z-index: 5; min-height: 48px; display: flex; align-items: center; gap: 10px; padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--ink); color: var(--surface); font-size: 13px; line-height: 18px; box-shadow: 0 6px 16px rgba(20,14,10,.2)">
+      <span style="display: flex; color: var(--herb-soft)"><x-import component-from-global-scope="BepHoaLac.Icon" name="check"></x-import></span>
+      <span style="flex: 1; padding: 7px 0">{{snack}}</span>
+      <a href="Shopping.dc.html" style="min-height: 40px; padding: 0 10px; display: flex; align-items: center; color: var(--chili-soft); font-weight: 700; text-decoration: none">Xem</a>
+    </div>
+  </sc-if>
+
   <footer style="flex-shrink: 0; display: flex; gap: 12px; padding: 12px 16px 16px 16px; background: var(--surface-raised); border-top: 1px solid var(--line)">
     <a href="AddToPlan.dc.html" style="flex: 1.2; height: 48px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--outline); border-radius: 12px; color: var(--ink); text-decoration: none; font-size: 15px; line-height: 22px; font-weight: 600">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M8 3v4M16 3v4"></path></svg>
@@ -86,7 +114,7 @@ main{scrollbar-width:none}
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"have":{"editor":"enum","options":["đủ đồ","thiếu đồ"],"default":"thiếu đồ"},"$preview":{"width":390,"height":844}}'>
 // Tweak 'sample' = 'tên dài, nhiều món' swaps in long dish names and extra dishes to stress the layout.
 var LONG = {
 'Đậu phụ sốt cà chua': 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm',
@@ -104,15 +132,50 @@ function summary(list) {
 var names = list.map(L);
 return names.length <= 2 ? names.join(', ') : names.slice(0, 2).join(', ') + ' +' + (names.length - 2) + ' món';
 }
+// 'have' tweak: ingredients of the dish and whether each is in the pantry.
+var INGS = [['Trứng gà', '2 quả', 'egg'], ['Hành lá', '1 nắm', 'onion'], ['Cơm trắng', '1 suất', 'rice']];
+var MISSING = ['egg', 'onion'];
+var SHOP_BASE = 3;
+var snackTimer = null;
 class Component extends DCLogic {
 constructor(props) {
 super(props);
-this.state = { saved: false };
+this.state = { saved: false, added: false, snack: null, bump: false };
 }
 renderVals() {
 STRESS = this.props.sample === 'tên dài, nhiều món';
 const saved = this.state.saved;
+var self = this;
+var st = this.state;
+var miss = this.props.have === 'đủ đồ' ? [] : MISSING;
+var missNames = INGS.filter(function (g) { return miss.indexOf(g[2]) >= 0; }).map(function (g) { return g[0].toLowerCase(); });
+var shopCount = SHOP_BASE + (st.added ? miss.length : 0);
 return {
+have: miss.length ? 'Thiếu: ' + missNames.join(', ') : 'Đủ đồ',
+haveStyle: miss.length ? 'background: var(--chili-soft); color: var(--chili-deep);' : 'background: var(--herb); color: #FFFFFF;',
+ings: INGS.map(function (g) {
+var m = miss.indexOf(g[2]) >= 0;
+return {
+label: g[0] + ' · ' + g[1],
+tag: m ? (st.added ? 'Trong đi chợ' : 'Thiếu') : 'Có trong tủ',
+tagStyle: m ? (st.added ? 'color: var(--herb-ink);' : 'color: var(--chili-deep);') : 'color: var(--herb-ink);'
+};
+}),
+hasMissing: miss.length > 0,
+added: st.added,
+addLabel: st.added ? 'Đã thêm vào đi chợ' : 'Thêm ' + miss.length + ' thứ còn thiếu vào đi chợ',
+addMissing: function () {
+if (self.state.added) { return; }
+if (snackTimer) { clearTimeout(snackTimer); }
+self.setState({ added: true, bump: true, snack: 'Đã thêm ' + miss.length + ' thứ vào đi chợ' });
+setTimeout(function () { self.setState({ bump: false }); }, 200);
+snackTimer = setTimeout(function () { self.setState({ snack: null }); }, 6000);
+},
+shopCount: shopCount,
+badgeStyle: st.bump ? 'transform: scale(1.2);' : '',
+fabLabel: 'Đi chợ, ' + shopCount + ' thứ cần mua',
+hasSnack: !!st.snack,
+snack: st.snack || '',
 title: L('Trứng chiên hành'),
 theme: this.props.theme ?? 'system',
 saved: saved,

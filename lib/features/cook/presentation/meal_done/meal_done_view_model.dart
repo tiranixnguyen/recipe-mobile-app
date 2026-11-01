@@ -15,7 +15,8 @@ import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 @immutable
 class MealDoneState {
   const MealDoneState({
-    required this.slot,
+    required this.meal,
+    this.planned,
     required this.dishes,
     required this.ratings,
     required this.dishNotes,
@@ -23,7 +24,10 @@ class MealDoneState {
     this.finishing = false,
   });
 
-  final PlannedSlot slot;
+  final Meal meal;
+
+  /// Bữa trong Thực đơn; null khi nấu ngoài Thực đơn (không đánh dấu gì).
+  final PlannedSlot? planned;
   final List<MealDish> dishes;
   final Map<int, CookRating> ratings;
   final Map<int, String> dishNotes;
@@ -62,9 +66,9 @@ class MealDoneViewModel extends Notifier<AsyncValue<MealDoneState>> {
 
   AsyncValue<MealDoneState> _done(List<Recipe> recipes, List<Ingredient> ingredients) {
     final session = _session ??= ref.read(cookSessionProvider);
-    final slot = session?.planned;
+    final meal = session?.mealLabel;
     final byId = {for (final r in recipes) r.id: r};
-    if (session == null || slot == null) {
+    if (session == null || meal == null) {
       return AsyncError(const MealNotFound(), StackTrace.current);
     }
     final dishes = [
@@ -74,7 +78,8 @@ class MealDoneViewModel extends Notifier<AsyncValue<MealDoneState>> {
     if (dishes.isEmpty) return AsyncError(const MealNotFound(), StackTrace.current);
     return AsyncData(
       MealDoneState(
-        slot: slot,
+        meal: meal,
+        planned: session.planned,
         dishes: List.unmodifiable(dishes),
         ratings: _ratings,
         dishNotes: _dishNotes,
@@ -132,10 +137,10 @@ class MealDoneViewModel extends Notifier<AsyncValue<MealDoneState>> {
                   ),
               ],
               isMeal: true,
-              meal: value.slot.meal,
+              meal: value.meal,
               minutes: value.minutes,
               mealNote: _mealNote,
-              planned: value.slot,
+              planned: value.planned,
               usedItems: used,
             ),
           );

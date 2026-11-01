@@ -48,6 +48,31 @@ void main() {
     ]);
   });
 
+  test('thêm đồ thiếu vào đi chợ: chỉ thứ chưa có, state và badge cập nhật', () async {
+    final container = _container();
+    await container.read(pantryItemsProvider.notifier).addToPantry('egg');
+    var state = (await _read(container, 'trung')).requireValue;
+    expect(state.missingIds, ['scallion']);
+    expect((state.allMissingInShopping, state.shoppingCount), (false, 0));
+
+    final viewModel = container.read(detailViewModelProvider('trung').notifier);
+    expect(await viewModel.addMissingToShopping(), 1);
+    state = container.read(detailViewModelProvider('trung')).requireValue;
+    expect(state.missingIds, isEmpty);
+    expect((state.allMissingInShopping, state.shoppingCount), (true, 1));
+    expect(state.ingredients.last.status, IngredientStatus.inShopping);
+    // Bấm lần nữa thì không thêm gì.
+    expect(await viewModel.addMissingToShopping(), 0);
+  });
+
+  test('đủ đồ thì không có nút thêm', () async {
+    final container = _container();
+    final pantry = container.read(pantryItemsProvider.notifier);
+    await pantry.addToPantry('egg');
+    await pantry.addToPantry('scallion');
+    expect((await _read(container, 'trung')).requireValue.hasMissing, isFalse);
+  });
+
   test('Tủ đồ đổi thì trạng thái đổi theo', () async {
     final container = _container();
     expect((await _read(container, 'trung')).requireValue.availability.isReady, isFalse);
