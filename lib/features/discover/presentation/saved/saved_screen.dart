@@ -120,7 +120,7 @@ class _Body extends ConsumerWidget {
                             title: DiscoverStrings.savedEmptyTitle,
                             message: DiscoverStrings.savedEmptyBody,
                             actionLabel: DiscoverStrings.savedEmptyRecipesAction,
-                            onAction: () => context.go(searchLocation()),
+                            onAction: () => context.push(searchLocation()),
                           ),
                         )
                       : groups.isEmpty

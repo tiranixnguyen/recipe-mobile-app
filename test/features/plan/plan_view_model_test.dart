@@ -158,14 +158,16 @@ void main() {
     expect(read().mode, PlanMode.week);
   });
 
-  test('thêm món vào ngày đang xem, nhãn tóm tắt, lưu lại', () async {
+  test('thêm món vào ngày đang xem, nhãn tóm tắt, lưu lại; món đã có trả duplicate', () async {
     create();
     await loaded();
     viewModel().selectDate(DateTime(2026, 10, 22));
-    await viewModel().addDish(Meal.dinner, 'a');
-    await viewModel().addDish(Meal.dinner, 'c');
-    await viewModel().addDish(Meal.dinner, 'd');
-    await viewModel().addDish(Meal.dinner, 'a');
+    expect((await viewModel().addDish(Meal.dinner, 'a')).kind, PlanAddKind.added);
+    expect((await viewModel().addDish(Meal.dinner, 'c')).kind, PlanAddKind.added);
+    expect((await viewModel().addDish(Meal.dinner, 'd')).kind, PlanAddKind.added);
+    final duplicate = await viewModel().addDish(Meal.dinner, 'a');
+    expect(duplicate.kind, PlanAddKind.duplicate);
+    expect(duplicate.name, 'a');
 
     expect(ids(Meal.dinner), ['a', 'c', 'd']);
     expect(read().summaries[Meal.dinner], '3 món · 50 phút · a, c +1 món');
@@ -198,20 +200,32 @@ void main() {
     expect(await viewModel().removeDish(Meal.lunch, 'a'), isNull);
   });
 
-  test('đổi món giữ vị trí và khẩu phần; món mới đã có thì chỉ bỏ món cũ', () async {
-    create();
-    await loaded();
-    await plan().addToPlan('a', _today, Meal.dinner);
-    await plan().addToPlan('c', _today, Meal.dinner, servings: 2);
-    await plan().addToPlan('d', _today, Meal.dinner);
+  test(
+    'đổi món giữ vị trí và khẩu phần; món mới đã có hoặc món cũ không còn thì không đổi gì',
+    () async {
+      create();
+      await loaded();
+      await plan().addToPlan('a', _today, Meal.dinner);
+      await plan().addToPlan('c', _today, Meal.dinner, servings: 2);
+      await plan().addToPlan('d', _today, Meal.dinner);
 
-    await viewModel().swapDish(Meal.dinner, 'c', 'b');
-    expect(ids(Meal.dinner), ['a', 'b', 'd']);
-    expect(read().meals[Meal.dinner]![1].servings, 2);
+      final swapped = await viewModel().swapDish(Meal.dinner, 'c', 'b');
+      expect(swapped.kind, PlanSwapKind.swapped);
+      expect((swapped.fromName, swapped.toName), ('c', 'b'));
+      expect(ids(Meal.dinner), ['a', 'b', 'd']);
+      expect(read().meals[Meal.dinner]![1].servings, 2);
 
-    await viewModel().swapDish(Meal.dinner, 'b', 'a');
-    expect(ids(Meal.dinner), ['a', 'd']);
-  });
+      // Món mới đã có trong bữa thì không âm thầm bỏ món cũ.
+      final duplicate = await viewModel().swapDish(Meal.dinner, 'b', 'a');
+      expect(duplicate.kind, PlanSwapKind.duplicate);
+      expect(ids(Meal.dinner), ['a', 'b', 'd']);
+
+      // Món cũ không còn trong bữa (đã bỏ/đổi) thì cũng không làm gì.
+      final none = await viewModel().swapDish(Meal.dinner, 'c', 'd');
+      expect(none.kind, PlanSwapKind.none);
+      expect(ids(Meal.dinner), ['a', 'b', 'd']);
+    },
+  );
 
   test('bữa đã nấu khi mọi món trong bữa đã nấu', () async {
     create();

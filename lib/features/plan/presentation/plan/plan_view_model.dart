@@ -31,6 +31,30 @@ class PlannedDish {
 /// Món vừa bỏ khỏi bữa, giữ lại để Hoàn tác đúng vị trí.
 typedef RemovedDish = ({PlannedMeal entry, int index});
 
+/// Kết quả [PlanViewModel.addDish]: món mới thêm hay đã có sẵn trong bữa.
+enum PlanAddKind { added, duplicate }
+
+@immutable
+class PlanAddResult {
+  const PlanAddResult({required this.kind, required this.name});
+
+  final PlanAddKind kind;
+  final String name;
+}
+
+/// Kết quả [PlanViewModel.swapDish]: đổi được, món mới đã có sẵn (không đổi), hoặc món cũ không
+/// còn trong bữa (không đổi).
+enum PlanSwapKind { swapped, duplicate, none }
+
+@immutable
+class PlanSwapResult {
+  const PlanSwapResult({required this.kind, required this.fromName, required this.toName});
+
+  final PlanSwapKind kind;
+  final String fromName;
+  final String toName;
+}
+
 @immutable
 class PlanState {
   const PlanState({
@@ -42,6 +66,7 @@ class PlanState {
     required this.meals,
     required this.cookedMeals,
     required this.title,
+    required this.headerTitle,
     required this.dayWord,
     required this.summaries,
     required this.metas,
@@ -67,6 +92,10 @@ class PlanState {
 
   /// "Thứ Ba, 27/10 · Hôm nay" (Ngày) hoặc "Tuần 26/10 – 1/11" (Tuần).
   final String title;
+
+  /// Như [title] nhưng không kèm "· Hôm nay" — hiện cạnh "Thực đơn" ở header khi dòng ngày trong
+  /// nội dung cuộn khuất, ngữ cảnh "đang xem" đã rõ nên không cần nhắc lại.
+  final String headerTitle;
 
   /// "nay" hoặc "thứ tư", ghép vào "Bữa sáng nay còn trống".
   final String dayWord;
@@ -115,6 +144,7 @@ class PlanViewModel extends Notifier<AsyncValue<PlanState>> {
               meal,
         },
         title: selection.mode == PlanMode.week ? weekTitle(date) : dayTitle(date, today),
+        headerTitle: selection.mode == PlanMode.week ? weekTitle(date) : dayMonthTitle(date),
         dayWord: dayWord(date, today),
         summaries: {
           for (final meal in Meal.values)
@@ -148,20 +178,45 @@ class PlanViewModel extends Notifier<AsyncValue<PlanState>> {
 
   void setMode(PlanMode mode) => _update((s) => s.copyWith(mode: mode));
 
-  /// Thêm [recipeId] vào cuối bữa [meal] của ngày đang xem; món đã có thì giữ nguyên.
-  Future<void> addDish(Meal meal, String recipeId) async {
+  /// Thêm [recipeId] vào cuối bữa [meal] của ngày đang xem; món đã có thì giữ nguyên, trả
+  /// [PlanAddKind.duplicate].
+  Future<PlanAddResult> addDish(Meal meal, String recipeId) async {
     final date = _date();
+    final name = _nameOf(recipeId);
     final exists = ref
         .read(plannedMealsProvider)
         .any((p) => p.day == date && p.meal == meal && p.recipeId == recipeId);
-    if (exists) return;
+    if (exists) return PlanAddResult(kind: PlanAddKind.duplicate, name: name);
     await ref.read(plannedMealsProvider.notifier).addToPlan(recipeId, date, meal);
     ref.read(analyticsProvider).track('plan_add', {'dishes': 1});
+    return PlanAddResult(kind: PlanAddKind.added, name: name);
   }
 
-  /// Đổi [oldId] trong bữa [meal] thành [newId], giữ vị trí và khẩu phần.
-  Future<void> swapDish(Meal meal, String oldId, String newId) =>
-      ref.read(plannedMealsProvider.notifier).replaceInPlan(_date(), meal, oldId, newId);
+  /// Đổi [oldId] trong bữa [meal] thành [newId], giữ vị trí và khẩu phần. [newId] đã có trong bữa
+  /// thì không đổi gì, trả [PlanSwapKind.duplicate] (không âm thầm bỏ [oldId]).
+  Future<PlanSwapResult> swapDish(Meal meal, String oldId, String newId) async {
+    final date = _date();
+    final fromName = _nameOf(oldId);
+    final toName = _nameOf(newId);
+    bool inSlot(PlannedMeal p, String id) => p.day == date && p.meal == meal && p.recipeId == id;
+    final planned = ref.read(plannedMealsProvider);
+    if (oldId == newId || !planned.any((p) => inSlot(p, oldId))) {
+      return PlanSwapResult(kind: PlanSwapKind.none, fromName: fromName, toName: toName);
+    }
+    if (planned.any((p) => inSlot(p, newId))) {
+      return PlanSwapResult(kind: PlanSwapKind.duplicate, fromName: fromName, toName: toName);
+    }
+    await ref.read(plannedMealsProvider.notifier).replaceInPlan(date, meal, oldId, newId);
+    return PlanSwapResult(kind: PlanSwapKind.swapped, fromName: fromName, toName: toName);
+  }
+
+  /// Tên món [recipeId]; dữ liệu hỏng (món không còn) thì trả lại chính id.
+  String _nameOf(String recipeId) {
+    for (final recipe in ref.read(recipesProvider).value ?? const <Recipe>[]) {
+      if (recipe.id == recipeId) return recipe.name;
+    }
+    return recipeId;
+  }
 
   /// Bỏ [recipeId] khỏi bữa [meal] của ngày đang xem, giữ các món khác. Trả bản ghi để [undoRemove];
   /// null khi món không có trong bữa.

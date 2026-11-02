@@ -2,10 +2,20 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/core/widgets/app_snackbar.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/plan/plan_screen.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/shopping/shopping_screen.dart';
 
 const shoppingLocation = '/shopping';
+
+/// Gửi kèm [goToPlanDay] (`extra` của route `/plan`): đánh dấu lần mở mới (luôn là instance mới,
+/// Thực đơn so bằng identity để biết mở lại), kèm thông báo hiện ngay khi tới nếu có.
+class PlanArrival {
+  PlanArrival({this.snackText, this.snackKind = SnackKind.success});
+
+  final String? snackText;
+  final SnackKind snackKind;
+}
 
 /// Tab Thực đơn; [date] mở sẵn ngày đó thay vì hôm nay, [meal] mở sẵn bữa đó:
 /// `/plan?date=2026-10-30&meal=dinner`.
@@ -21,11 +31,13 @@ String planLocation({DateTime? date, Meal? meal}) {
 String _two(int n) => n.toString().padLeft(2, '0');
 
 /// Sang tab Thực đơn và mở ngày [date] (và bữa [meal]), kể cả khi URL đang là ngày đó nhưng người
-/// dùng đã chọn ngày khác: mỗi lần gọi gửi một `extra` mới để màn biết là lần mở mới.
-void goToPlanDay(BuildContext context, DateTime date, {Meal? meal}) => context.go(
-  planLocation(date: date, meal: meal),
-  extra: Object(),
-);
+/// dùng đã chọn ngày khác: mỗi lần gọi gửi một [PlanArrival] mới để màn biết là lần mở mới. Có
+/// [arrival] với `snackText` thì Thực đơn báo kết quả ngay khi tới (sheet Thêm vào thực đơn).
+void goToPlanDay(BuildContext context, DateTime date, {Meal? meal, PlanArrival? arrival}) =>
+    context.go(
+      planLocation(date: date, meal: meal),
+      extra: arrival ?? PlanArrival(),
+    );
 
 /// Tab Thực đơn (prototype `MealPlan`).
 final planTabRoutes = <RouteBase>[
@@ -39,7 +51,7 @@ final planTabRoutes = <RouteBase>[
           final id? => Meal.tryParse(id),
           null => null,
         },
-        openRequest: state.extra,
+        arrival: state.extra is PlanArrival ? state.extra as PlanArrival : null,
       );
     },
   ),

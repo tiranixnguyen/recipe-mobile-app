@@ -13,6 +13,9 @@ import 'package:recipe_mobile_app/features/plan/strings.dart';
 /// Key family của sheet: id các món nối bằng dấu phẩy ("trung,canh"), một món thì là id đó.
 String addToPlanKey(Iterable<String> recipeIds) => recipeIds.join(',');
 
+/// Chữ đầu thường, phần còn lại giữ nguyên ("Trưa thứ Ba" → "trưa thứ Ba").
+String _lowerFirst(String text) => text.isEmpty ? text : text[0].toLowerCase() + text.substring(1);
+
 /// Một ô trong 7 ngày cuốn từ hôm nay.
 @immutable
 class DayOption {
@@ -45,6 +48,7 @@ class AddToPlanState {
     required this.mealSummaries,
     required this.joinText,
     required this.confirmLabel,
+    required this.mealWhen,
   });
 
   static const minServings = 1;
@@ -70,6 +74,10 @@ class AddToPlanState {
 
   /// "Thêm vào Tối nay".
   final String confirmLabel;
+
+  /// Bữa và ngày giữa câu, chữ thường đầu: "trưa thứ Ba", "sáng nay" — dùng cho thông báo sau khi
+  /// thêm (`PlanStrings.addedOne`…).
+  final String mealWhen;
 }
 
 /// Sheet "Thêm vào thực đơn" (prototype `AddToPlan`, tweak `source` món/bữa). Key là
@@ -128,6 +136,7 @@ class AddToPlanViewModel extends Notifier<AsyncValue<AddToPlanState>> {
         },
         joinText: joinText(dishesOf(meal), _ids),
         confirmLabel: PlanStrings.addConfirm(whenLabel(meal, date, today)),
+        mealWhen: _lowerFirst(whenLabel(meal, date, today)),
       );
     });
   }
@@ -142,17 +151,25 @@ class AddToPlanViewModel extends Notifier<AsyncValue<AddToPlanState>> {
     ),
   );
 
-  /// Thêm mọi món vào cuối bữa đang chọn với khẩu phần đang chọn. Trả ngày và bữa vừa thêm để mở
-  /// Thực đơn đúng chỗ; null khi chưa tải xong.
-  Future<({DateTime date, Meal meal})?> confirm() async {
+  /// Thêm mọi món vào cuối bữa đang chọn với khẩu phần đang chọn. Trả ngày, bữa vừa thêm (để mở
+  /// Thực đơn đúng chỗ) và tên món mới thêm/đã có sẵn (để báo kết quả); null khi chưa tải xong.
+  Future<({DateTime date, Meal meal, List<String> added, List<String> duplicate})?>
+  confirm() async {
     final current = state.value;
     if (current == null) return null;
     final plan = ref.read(plannedMealsProvider.notifier);
+    final planned = ref.read(plannedMealsProvider);
+    final added = <String>[];
+    final duplicate = <String>[];
     for (final recipe in current.recipes) {
+      final exists = planned.any(
+        (p) => p.day == current.date && p.meal == current.meal && p.recipeId == recipe.id,
+      );
+      (exists ? duplicate : added).add(recipe.name);
       await plan.addToPlan(recipe.id, current.date, current.meal, servings: current.servings);
     }
     ref.read(analyticsProvider).track('plan_add', {'dishes': current.recipes.length});
-    return (date: current.date, meal: current.meal);
+    return (date: current.date, meal: current.meal, added: added, duplicate: duplicate);
   }
 
   void _update(_Selection Function(_Selection) change) {

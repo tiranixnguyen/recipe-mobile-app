@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_button.dart';
+import 'package:recipe_mobile_app/core/widgets/app_snackbar.dart';
 import 'package:recipe_mobile_app/core/widgets/inline_banner.dart';
 import 'package:recipe_mobile_app/core/widgets/serving_stepper.dart';
 import 'package:recipe_mobile_app/features/plan/presentation/add_to_plan/add_to_plan_view_model.dart';
@@ -12,15 +13,15 @@ import 'package:recipe_mobile_app/features/plan/strings.dart';
 
 /// Mở sheet "Thêm vào thực đơn" cho [recipe] (prototype `AddToPlan`, từ Chi tiết món).
 ///
-/// Thêm xong thì chuyển sang tab Thực đơn, mở ngày và bữa vừa thêm, và trả true; trả false khi
-/// người dùng huỷ hoặc đóng sheet. [context] phải nằm dưới `GoRouter`.
+/// Thêm xong thì chuyển sang tab Thực đơn, mở ngày và bữa vừa thêm kèm thông báo kết quả, và trả
+/// true; trả false khi người dùng huỷ hoặc đóng sheet. [context] phải nằm dưới `GoRouter`.
 Future<bool> showAddToPlanSheet(BuildContext context, Recipe recipe) =>
     showAddMealToPlanSheet(context, [recipe]);
 
 /// Như [showAddToPlanSheet] nhưng thêm cả bữa [recipes] vào một bữa (Hôm nay ăn gì, Đã lưu).
 Future<bool> showAddMealToPlanSheet(BuildContext context, List<Recipe> recipes) async {
   assert(recipes.isNotEmpty, 'Cần ít nhất một món');
-  final added = await showModalBottomSheet<({DateTime date, Meal meal})>(
+  final result = await showModalBottomSheet<_SheetResult>(
     context: context,
     isScrollControlled: true,
     useRootNavigator: true,
@@ -28,9 +29,32 @@ Future<bool> showAddMealToPlanSheet(BuildContext context, List<Recipe> recipes) 
     showDragHandle: true,
     builder: (_) => AddToPlanSheet(recipeIds: [for (final r in recipes) r.id]),
   );
-  if (added == null) return false;
-  if (context.mounted) goToPlanDay(context, added.date, meal: added.meal);
+  if (result == null) return false;
+  if (context.mounted) {
+    goToPlanDay(
+      context,
+      result.date,
+      meal: result.meal,
+      arrival: PlanArrival(snackText: result.snackText, snackKind: result.snackKind),
+    );
+  }
   return true;
+}
+
+/// Kết quả [AddToPlanSheet]: ngày/bữa vừa mở và thông báo sẽ hiện ở Thực đơn sau khi tới đó.
+typedef _SheetResult = ({DateTime date, Meal meal, String snackText, SnackKind snackKind});
+
+/// Thông báo sau khi thêm: có món mới thì báo món mới (bỏ qua món trùng); toàn món trùng thì báo
+/// đã cập nhật khẩu phần. [when] là `state.mealWhen` ("trưa thứ Ba").
+String _message(List<String> added, List<String> duplicate, String when) {
+  if (added.isNotEmpty) {
+    return added.length == 1
+        ? PlanStrings.addedOne(added.single, when)
+        : PlanStrings.addedMany(added.length, when);
+  }
+  return duplicate.length == 1
+      ? PlanStrings.duplicateOne(duplicate.single, when)
+      : PlanStrings.duplicateMany(duplicate.length, when);
 }
 
 class AddToPlanSheet extends ConsumerWidget {
@@ -169,9 +193,16 @@ class _Content extends StatelessWidget {
                     label: state.confirmLabel,
                     block: true,
                     onPressed: () async {
-                      final added = await viewModel.confirm();
-                      // Trả ngày và bữa vừa thêm để mở đúng chỗ đó trên Thực đơn.
-                      if (context.mounted) Navigator.of(context).pop(added);
+                      final when = state.mealWhen;
+                      final result = await viewModel.confirm();
+                      if (!context.mounted || result == null) return;
+                      // Trả ngày, bữa vừa thêm và thông báo để hiện đúng chỗ đó trên Thực đơn.
+                      Navigator.of(context).pop((
+                        date: result.date,
+                        meal: result.meal,
+                        snackText: _message(result.added, result.duplicate, when),
+                        snackKind: result.added.isEmpty ? SnackKind.info : SnackKind.success,
+                      ));
                     },
                   ),
                 ),

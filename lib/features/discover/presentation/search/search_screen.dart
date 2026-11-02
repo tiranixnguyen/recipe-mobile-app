@@ -11,6 +11,7 @@ import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
 import 'package:recipe_mobile_app/core/widgets/search_field.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/search/search_view_model.dart';
+import 'package:recipe_mobile_app/features/discover/routes.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 
@@ -63,7 +64,11 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
               child: Row(
                 children: [
-                  BackButton(color: colors.ink),
+                  BackButton(
+                    color: colors.ink,
+                    onPressed: () =>
+                        context.canPop() ? context.pop() : context.go(discoverLocation),
+                  ),
                   Expanded(
                     child: SearchField(
                       controller: _controller,

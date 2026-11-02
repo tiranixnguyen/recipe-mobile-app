@@ -147,9 +147,12 @@ void main() {
       await listen(['trung']);
 
       viewModel(['trung']).setServings(2);
-      final added = await viewModel(['trung']).confirm();
+      final result = await viewModel(['trung']).confirm();
 
-      expect(added, (date: _today, meal: Meal.dinner));
+      expect(result!.date, _today);
+      expect(result.meal, Meal.dinner);
+      expect(result.added, ['Trứng chiên hành']);
+      expect(result.duplicate, isEmpty);
       expect(container.read(plannedMealsProvider), [
         PlannedMeal(day: _today, meal: Meal.dinner, recipeId: 'dau-phu'),
         PlannedMeal(day: _today, meal: Meal.dinner, recipeId: 'trung', servings: 2),
@@ -173,7 +176,11 @@ void main() {
       state = sub.read().requireValue;
       expect(state.joinText, 'Sẽ thêm cùng Đậu phụ sốt cà chua · bữa này thành 3 món');
 
-      expect(await viewModel(ids).confirm(), (date: _today, meal: Meal.lunch));
+      final result = await viewModel(ids).confirm();
+      expect(result!.date, _today);
+      expect(result.meal, Meal.lunch);
+      expect(result.added, ['Trứng chiên hành', 'Canh chua cà chua']);
+      expect(result.duplicate, isEmpty);
       expect(container.read(plannedMealsProvider).map((p) => (p.meal, p.recipeId, p.servings)), [
         (Meal.lunch, 'dau-phu', 1),
         (Meal.lunch, 'trung', 2),
@@ -185,6 +192,33 @@ void main() {
     test('món không có trong dữ liệu thì lỗi', () async {
       final sub = await listen(['trung', 'mon-cu']);
       expect(sub.read().hasError, isTrue);
+    });
+
+    test('confirm: món đã có trong bữa thì báo trùng, chỉ cập nhật khẩu phần', () async {
+      await container.read(plannedMealsProvider.notifier).addToPlan('trung', _today, Meal.dinner);
+      final ids = ['trung', 'canh'];
+      await listen(ids);
+      viewModel(ids).pickMeal(Meal.dinner);
+
+      final result = await viewModel(ids).confirm();
+      expect(result!.added, ['Canh chua cà chua']);
+      expect(result.duplicate, ['Trứng chiên hành']);
+      expect(container.read(plannedMealsProvider).map((p) => (p.meal, p.recipeId, p.servings)), [
+        (Meal.dinner, 'trung', 2),
+        (Meal.dinner, 'canh', 2),
+      ]);
+    });
+
+    test('mealWhen là chữ giữa câu, đầu chữ thường: "trưa thứ Ba", "tối nay"', () async {
+      final state = (await listen(['trung'])).read().requireValue;
+      expect(state.mealWhen, 'tối nay');
+
+      viewModel(['trung']).pickMeal(Meal.lunch);
+      viewModel(['trung']).pickDay(DateTime(2026, 10, 21));
+      expect(
+        container.read(addToPlanViewModelProvider(addToPlanKey(['trung']))).requireValue.mealWhen,
+        'trưa mai',
+      );
     });
   });
 
