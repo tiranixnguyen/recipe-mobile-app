@@ -71,19 +71,23 @@ main{scrollbar-width:none}
       <div style="margin: 0 16px; overflow: hidden; border-radius: 12px; touch-action: pan-y" onPointerDown="{{swDown}}" onPointerUp="{{swUp}}" onPointerCancel="{{swCancel}}">
         <div style="display: flex; transition: transform .35s ease; transform: translateX({{trackX}}%)">
           <sc-for list="{{slides}}" as="sl" hint-placeholder-count="3">
-            <article role="group" aria-roledescription="slide" aria-label="{{sl.aria}}" aria-hidden="{{sl.hidden}}" style="flex: 0 0 100%; min-height: 196px; padding: 18px 20px 16px 20px; display: flex; flex-direction: column; gap: 6px; background: var(--chili-soft); color: var(--ink)">
-              <span style="display: flex; align-items: center; gap: 6px; color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 700">
+            <article role="group" aria-roledescription="slide" aria-label="{{sl.aria}}" aria-hidden="{{sl.hidden}}" style="flex: 0 0 100%; min-height: 208px; padding: 18px 20px 16px 20px; display: flex; flex-direction: column; gap: 6px; background: var(--chili-soft); color: var(--ink); position: relative; overflow: hidden">
+              <sc-if value="{{sl.hasImg2}}" hint-placeholder-val="{{false}}">
+                <img src="{{sl.img2}}" alt="" aria-hidden="true" style="position: absolute; pointer-events: none; filter: drop-shadow(0 4px 8px rgba(42, 30, 22, .16)); {{sl.img2Style}}">
+              </sc-if>
+              <img src="{{sl.img}}" alt="" aria-hidden="true" style="position: absolute; pointer-events: none; filter: drop-shadow(0 6px 12px rgba(42, 30, 22, .18)); {{sl.imgStyle}}">
+              <span style="position: relative; display: flex; align-items: center; gap: 6px; color: var(--chili-deep); font-size: 12px; line-height: 16px; font-weight: 700">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{sl.icon}}"></path></svg>
                 {{sl.ctx}}
               </span>
-              <h2 class="c1" style="margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; color: var(--chili-deep)">{{sl.title}}</h2>
-              <p class="c2" style="margin: 0; font-size: 15px; line-height: 22px">{{sl.desc}}</p>
-              <span style="display: flex; flex-wrap: wrap; gap: 6px">
+              <h2 class="c2" style="position: relative; max-width: 214px; margin: 0; font-size: 22px; line-height: 28px; font-weight: 700; color: var(--chili-deep)">{{sl.title}}</h2>
+              <p class="c2" style="position: relative; max-width: 196px; margin: 0; font-size: 15px; line-height: 22px">{{sl.desc}}</p>
+              <span style="position: relative; max-width: 196px; display: flex; flex-wrap: wrap; gap: 6px">
                 <sc-for list="{{sl.tags}}" as="tg" hint-placeholder-count="2">
                   <span style="padding: 1px 8px; border-radius: 8px; background: var(--surface-raised); color: var(--chili-deep); font-size: 12px; line-height: 18px; font-weight: 600">{{tg}}</span>
                 </sc-for>
               </span>
-              <span style="margin-top: auto; padding-top: 6px; display: flex">
+              <span style="position: relative; margin-top: auto; padding-top: 6px; display: flex">
                 <sc-if value="{{sl.isAction}}" hint-placeholder-val="{{false}}">
                   <button onClick="{{sl.act}}" tabindex="{{sl.tab}}" style="height: 40px; padding: 0 16px; border: 0; border-radius: 12px; background: var(--chili); color: #FFFFFF; cursor: pointer; font: 600 15px/22px 'Be Vietnam Pro', sans-serif">{{sl.cta}}</button>
                 </sc-if>
@@ -245,7 +249,7 @@ main{scrollbar-width:none}
   </nav>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"showResume":{"editor":"boolean","default":false},"weather":{"editor":"enum","options":["nắng nóng","mưa lạnh","tắt"],"default":"nắng nóng"},"autoplay":{"editor":"boolean","default":true},"upcoming":{"editor":"enum","options":["có món","chưa có món"],"default":"có món"},"now":{"editor":"enum","options":["07:30","11:30","18:30"],"default":"18:30"},"shopping":{"editor":"enum","options":["có đồ","trống"],"default":"có đồ"},"$preview":{"width":390,"height":844}}'>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["system","light","dark"],"default":"system"},"sample":{"editor":"enum","options":["thường","tên dài, nhiều món"],"default":"thường"},"showResume":{"editor":"boolean","default":false},"weather":{"editor":"enum","options":["nắng nóng","mưa lạnh","tắt"],"default":"nắng nóng"},"autoplay":{"editor":"boolean","default":true},"upcoming":{"editor":"enum","options":["có món","chưa có món"],"default":"có món"},"now":{"editor":"enum","options":["07:30","11:30","18:30"],"default":"18:30"},"shopping":{"editor":"enum","options":["có đồ","trống"],"default":"có đồ"},"day":{"editor":"enum","options":["ngẫu nhiên","ngày 1","ngày 2","ngày 3"],"default":"ngẫu nhiên"},"$preview":{"width":390,"height":844}}'>
 // Tweak 'sample' = 'tên dài, nhiều món' swaps in long dish names and extra dishes to stress the layout.
 var LONG = {
 'Đậu phụ sốt cà chua': 'Đậu phụ non sốt cà chua nấm hương kiểu nhà làm',
@@ -280,6 +284,47 @@ leaf: 'M5 19c0-9 6-14 14-14c0 8-5 14-14 14zM5 19l7-7',
 pin: 'M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11zM12 8a2 2 0 1 0 0 4a2 2 0 1 0 0-4z'
 };
 var WEEKDAY_TODAY = 'thứ Ba';
+// Decorative cut-outs: circle crops of the bundled recipe photos (assets/images/recipes/<id>.jpg).
+var IMG = {
+mi_tron_xuc_xich: '/_blob/64b8602b4e5556aaa3c4782d20067b71',
+canh_rau_cai_thit_bam: '/_blob/4be978d2742c8f856a5188828edbb808',
+chao_trung_hanh: '/_blob/efb76a25601b246a474aeccbc3c725b4',
+banh_mi_trung_op: '/_blob/b065810e2a2e1a97ccaa115f96fb1702',
+com_rang_dua_cai: '/_blob/90ab0feb8a48afe4b56081dd966f44ce',
+dau_phu_sot_ca_chua: '/_blob/12f3c266d2beac39bf9b68323683d4d1',
+canh_ca_chua_trung: '/_blob/32fbe7f7a8bb27afe005656bb660c7b6',
+trung_chien_hanh: '/_blob/b5340a62745703081d040b24989f015b',
+khoai_lang_vi_song: '/_blob/48b147dbba511b8288a5e1120a213c1d',
+mi_trung_hanh: '/_blob/57975b550dc3ec65d85e6d65111c1ec9',
+mi_xao_rau_cai: '/_blob/cb994ae1ee18ea65a5dce8ca99b96723',
+com_xuc_xich_noi_com_dien: '/_blob/02ea075e78411ae4101054f05380938a',
+khoai_tay_xao_thit_bam: '/_blob/2a621943ff63971dc39b638fb83d2752',
+trung_hap_thit_bam: '/_blob/90c5a45149d3b4cbbd5e1a6b76486342',
+xuc_xich_sot_ca_chua: '/_blob/8f8b67b05ff5c280521fda15c72161f8'
+};
+// Each card has a small pool of fitting dishes; [a, b] = a pair (mâm cơm). Flutter: pick by date so the banner
+// changes a little each day (seed = day of year), never random per frame.
+var POOL = {
+sun: ['mi_tron_xuc_xich', 'mi_xao_rau_cai', 'mi_trung_hanh'],
+rain: ['canh_rau_cai_thit_bam', 'canh_ca_chua_trung', 'chao_trung_hanh'],
+ask: ['chao_trung_hanh', 'mi_trung_hanh'],
+morning: ['banh_mi_trung_op', 'chao_trung_hanh', 'mi_trung_hanh'],
+noon: ['com_rang_dua_cai', 'com_xuc_xich_noi_com_dien', 'khoai_tay_xao_thit_bam'],
+night: [['dau_phu_sot_ca_chua', 'canh_ca_chua_trung'], ['xuc_xich_sot_ca_chua', 'canh_rau_cai_thit_bam'], ['trung_hap_thit_bam', 'canh_ca_chua_trung']],
+fridge: ['trung_chien_hanh', 'canh_ca_chua_trung', 'trung_hap_thit_bam'],
+month: ['khoai_lang_vi_song', 'com_xuc_xich_noi_com_dien', 'khoai_tay_xao_thit_bam']
+};
+// Compositions, all kept in the right ~40% of the card so text and CTA stay clear. Neighbouring cards never share one.
+var LAYOUT_ONE = [
+'right: -24px; bottom: -24px; width: 148px; height: 148px; transform: rotate(-6deg);',
+'right: -34px; top: -30px; width: 140px; height: 140px; transform: rotate(10deg);',
+'right: -62px; top: 30px; width: 176px; height: 176px; transform: rotate(-14deg);'
+];
+var LAYOUT_TWO = [
+{ a: 'right: -24px; bottom: -24px; width: 140px; height: 140px; transform: rotate(-6deg);', b: 'right: 100px; bottom: -28px; width: 88px; height: 88px; transform: rotate(8deg);' },
+{ a: 'right: -20px; top: 12px; width: 120px; height: 120px; transform: rotate(8deg);', b: 'right: 70px; bottom: -22px; width: 84px; height: 84px; transform: rotate(-10deg);' }
+];
+function pick(list, seed) { return list[((seed % list.length) + list.length) % list.length]; }
 var AUTO_MS = 6000;
 var autoTimer = null;
 function reducedMotion() { try { return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
@@ -296,7 +341,7 @@ var NEAR = [
 class Component extends DCLogic {
 constructor(props) {
 super(props);
-this.state = { added: {}, slide: 0, paused: false, weatherOn: false };
+this.state = { added: {}, slide: 0, paused: false, weatherOn: false, seed: Math.floor(Math.random() * 6) };
 }
 renderVals() {
 STRESS = this.props.sample === 'tên dài, nhiều món';
@@ -316,22 +361,36 @@ var weatherOn = w !== 'tắt' || st.weatherOn;
 var wx = w === 'tắt' ? 'nắng nóng' : w;
 var slides = [];
 if (weatherOn && wx === 'nắng nóng') {
-slides.push({ icon: ICON.sun, ctx: Meal + ' ' + WEEKDAY_TODAY + ' · 35° nắng', title: Meal + ' nay ăn gì?', desc: '1 món gọn lẹ, giải nhiệt chỉ dưới 30 phút!', tags: ['1 món gọn lẹ', 'Giải nhiệt'], cta: 'Xem món' });
+slides.push({ icon: ICON.sun, ctx: Meal + ' ' + WEEKDAY_TODAY + ' · 35° nắng', title: Meal + ' nay ăn gì?', desc: '1 món gọn lẹ, giải nhiệt chỉ dưới 30 phút!', tags: ['1 món gọn lẹ', 'Giải nhiệt'], cta: 'Xem món', pool: POOL.sun });
 }
 if (weatherOn && wx === 'mưa lạnh') {
-slides.push({ icon: ICON.rain, ctx: Meal + ' ' + WEEKDAY_TODAY + ' · mưa 19°', title: Meal + ' nay mưa lạnh', desc: 'Combo cơm nhà 2 món, nóng hổi cho ấm bụng.', tags: ['Cơm nhà 2 món', 'Ấm bụng'], cta: 'Xem món' });
+slides.push({ icon: ICON.rain, ctx: Meal + ' ' + WEEKDAY_TODAY + ' · mưa 19°', title: Meal + ' nay mưa lạnh', desc: 'Combo cơm nhà 2 món, nóng hổi cho ấm bụng.', tags: ['Cơm nhà 2 món', 'Ấm bụng'], cta: 'Xem món', pool: POOL.rain });
 }
 if (!weatherOn) {
-slides.push({ icon: ICON.pin, ctx: 'Gợi ý theo thời tiết', title: 'Trời nóng hay mưa?', desc: 'Bật để app gợi ý món hợp thời tiết. Cần vị trí gần đúng và mạng.', tags: ['Tuỳ chọn'], cta: 'Bật', action: function () { self.setState({ weatherOn: true, slide: 0 }); } });
+slides.push({ icon: ICON.pin, ctx: 'Gợi ý theo thời tiết', title: 'Trời nóng hay mưa?', desc: 'Bật để app gợi ý món hợp thời tiết. Cần vị trí gần đúng và mạng.', tags: ['Tuỳ chọn'], cta: 'Bật', pool: POOL.ask, action: function () { self.setState({ weatherOn: true, slide: 0 }); } });
 }
 slides.push([
-{ icon: ICON.clock, ctx: 'Sáng ' + WEEKDAY_TODAY, title: 'Sáng nay vội?', desc: 'Siêu tốc dưới 15 phút, ít rửa bát.', tags: ['Siêu tốc', '1 món gọn lẹ'], cta: 'Xem món' },
-{ icon: ICON.clock, ctx: 'Nghỉ trưa ' + WEEKDAY_TODAY, title: 'Nghỉ trưa ngắn?', desc: 'Nhanh gọn dưới 30 phút, kịp ăn rồi nghỉ.', tags: ['Nhanh gọn'], cta: 'Xem món' },
-{ icon: ICON.clock, ctx: 'Tối ' + WEEKDAY_TODAY, title: 'Tối nay thong thả', desc: 'Mâm cơm 3 món, nấu cùng bạn cùng phòng.', tags: ['Mâm cơm', 'Thong thả'], cta: 'Xem món' }
+{ icon: ICON.clock, ctx: 'Sáng ' + WEEKDAY_TODAY, title: 'Sáng nay vội?', desc: 'Siêu tốc dưới 15 phút, ít rửa bát.', tags: ['Siêu tốc', '1 món gọn lẹ'], cta: 'Xem món', pool: POOL.morning },
+{ icon: ICON.clock, ctx: 'Nghỉ trưa ' + WEEKDAY_TODAY, title: 'Nghỉ trưa ngắn?', desc: 'Nhanh gọn dưới 30 phút, kịp ăn rồi nghỉ.', tags: ['Nhanh gọn'], cta: 'Xem món', pool: POOL.noon },
+{ icon: ICON.clock, ctx: 'Tối ' + WEEKDAY_TODAY, title: 'Tối nay thong thả', desc: 'Mâm cơm 3 món, nấu cùng bạn cùng phòng.', tags: ['Mâm cơm', 'Thong thả'], cta: 'Xem món', pool: POOL.night }
 ][mi]);
-slides.push({ icon: ICON.fridge, ctx: 'Dọn tủ lạnh', title: 'Tủ còn trứng, cà chua, hành', desc: '3 món nấu được ngay, không phải đi chợ.', tags: ['Dọn tủ lạnh'], cta: 'Xem món' });
-slides.push({ icon: ICON.leaf, ctx: 'Cuối tháng', title: 'Cuối tháng rồi', desc: 'Hệ tiết kiệm: tận dụng đồ sẵn có, ít phải mua thêm.', tags: ['Tiết kiệm'], cta: 'Xem món' });
+slides.push({ icon: ICON.fridge, ctx: 'Dọn tủ lạnh', title: 'Tủ còn trứng, cà chua, hành', desc: '3 món nấu được ngay, không phải đi chợ.', tags: ['Dọn tủ lạnh'], cta: 'Xem món', pool: POOL.fridge });
+slides.push({ icon: ICON.leaf, ctx: 'Cuối tháng', title: 'Cuối tháng rồi', desc: 'Hệ tiết kiệm: tận dụng đồ sẵn có, ít phải mua thêm.', tags: ['Tiết kiệm'], cta: 'Xem món', pool: POOL.month });
 var count = slides.length;
+// 'Ngày' tweak: each value is how the banner looks on a different day; 'ngẫu nhiên' re-rolls on each open.
+var dayV = this.props.day || 'ngẫu nhiên';
+var seed = dayV === 'ngẫu nhiên' ? st.seed : parseInt(dayV.replace(/[^0-9]/g, ''), 10) - 1;
+var single = 0;
+slides.forEach(function (sl, i) {
+var d = pick(sl.pool, seed + i);
+if (Array.isArray(d)) {
+var lt = pick(LAYOUT_TWO, seed);
+sl.img = IMG[d[0]]; sl.img2 = IMG[d[1]]; sl.imgStyle = lt.a; sl.img2Style = lt.b;
+} else {
+sl.img = IMG[d]; sl.imgStyle = pick(LAYOUT_ONE, seed + single); sl.img2Style = '';
+}
+single++;
+});
 var idx = ((st.slide % count) + count) % count;
 var go = function (i) { self.setState({ slide: ((i % count) + count) % count }); };
 // Auto-advance every 6s; paused while touched, hovered or focused, and off for reduced motion.
@@ -342,7 +401,7 @@ autoTimer = setTimeout(function () { autoTimer = null; self.setState({ slide: (s
 return {
 slides: slides.map(function (sl, i) {
 var on = i === idx;
-return { icon: sl.icon, ctx: sl.ctx, title: sl.title, desc: sl.desc, tags: sl.tags, cta: sl.cta, isAction: !!sl.action, isLink: !sl.action, act: sl.action || function () {}, aria: 'Thẻ ' + (i + 1) + ' trên ' + count + ': ' + sl.title, hidden: !on, tab: on ? 0 : -1 };
+return { img: sl.img, img2: sl.img2 || '', hasImg2: !!sl.img2, imgStyle: sl.imgStyle, img2Style: sl.img2Style, icon: sl.icon, ctx: sl.ctx, title: sl.title, desc: sl.desc, tags: sl.tags, cta: sl.cta, isAction: !!sl.action, isLink: !sl.action, act: sl.action || function () {}, aria: 'Thẻ ' + (i + 1) + ' trên ' + count + ': ' + sl.title, hidden: !on, tab: on ? 0 : -1 };
 }),
 trackX: -idx * 100,
 dots: slides.map(function (sl, i) {
