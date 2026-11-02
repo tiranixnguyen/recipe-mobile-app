@@ -231,6 +231,7 @@ class _SuggestionBannerState extends State<SuggestionBanner> {
                             item: item,
                             index: index,
                             total: widget.items.length,
+                            onAdvance: () => _goToPage((index + 1) % widget.items.length),
                           );
                         },
                       ),
@@ -366,11 +367,15 @@ class _SuggestionCard extends StatelessWidget {
     required this.item,
     required this.index,
     required this.total,
+    required this.onAdvance,
   });
 
   final SuggestionBannerItem item;
   final int index;
   final int total;
+
+  /// Bấm vào thân thẻ (ngoài nút CTA) thì sang thẻ sau.
+  final VoidCallback onAdvance;
 
   @override
   Widget build(BuildContext context) {
@@ -379,7 +384,6 @@ class _SuggestionCard extends StatelessWidget {
 
     return Semantics(
       label: '${DiscoverStrings.cardSemanticLabel(index + 1, total)}: ${item.title}',
-      button: item.onTap != null,
       child: DecoratedBox(
         decoration: BoxDecoration(
           color: colors.chiliSoft,
@@ -399,7 +403,7 @@ class _SuggestionCard extends StatelessWidget {
             Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: item.onTap,
+                onTap: total > 1 ? onAdvance : null,
                 child: Padding(
                   padding: _cardPadding,
                   child: Column(
@@ -472,43 +476,63 @@ class _SuggestionCard extends StatelessWidget {
                         ),
                       ],
                       const Spacer(),
-                      Container(
-                        height: _ctaHeight,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        decoration: BoxDecoration(
-                          color: colors.chili,
-                          borderRadius: AppRadius.mdAll,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              item.ctaLabel,
-                              style: const TextStyle(
-                                fontFamily: AppFonts.sans,
-                                fontSize: 15,
-                                height: 22 / 15,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                            if (item.hasTrailingArrow) ...[
-                              const SizedBox(width: 6),
-                              const Icon(
-                                Symbols.arrow_forward_rounded,
-                                size: 18,
-                                color: Colors.white,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
+                      _CtaButton(item: item),
                     ],
                   ),
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Nút hành động của thẻ: chỉ nút này mới chuyển màn ([SuggestionBannerItem.onTap]).
+class _CtaButton extends StatelessWidget {
+  const _CtaButton({required this.item});
+
+  final SuggestionBannerItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Semantics(
+      button: true,
+      child: Material(
+        color: colors.chili,
+        borderRadius: AppRadius.mdAll,
+        child: InkWell(
+          onTap: item.onTap,
+          borderRadius: AppRadius.mdAll,
+          child: Container(
+            height: _ctaHeight,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  item.ctaLabel,
+                  style: const TextStyle(
+                    fontFamily: AppFonts.sans,
+                    fontSize: 15,
+                    height: 22 / 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                if (item.hasTrailingArrow) ...[
+                  const SizedBox(width: 6),
+                  const Icon(
+                    Symbols.arrow_forward_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );

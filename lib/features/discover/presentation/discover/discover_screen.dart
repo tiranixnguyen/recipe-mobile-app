@@ -227,10 +227,13 @@ class _BannerCarousel extends StatelessWidget {
 
     final pantryCount = state.readyDishes.length;
     final pantryNames = state.pantryIngredientNames;
-    final fridgeTitle = pantryNames.isNotEmpty
-        ? 'Tủ còn ${pantryNames.take(3).join(', ')}'
-        : 'Dọn tủ lạnh';
-    final fridgeDesc = '$pantryCount món nấu được ngay, không phải đi chợ.';
+    final pantryEmpty = pantryNames.isEmpty;
+    final fridgeTitle = pantryEmpty
+        ? DiscoverStrings.fridgeEmptyTitle
+        : DiscoverStrings.fridgeTitle(pantryNames.take(3).join(', '));
+    final fridgeDesc = pantryEmpty
+        ? DiscoverStrings.fridgeEmptyDesc
+        : DiscoverStrings.fridgeDesc(pantryCount);
 
     final items = [
       SuggestionBannerItem(
@@ -245,9 +248,9 @@ class _BannerCarousel extends StatelessWidget {
       SuggestionBannerItem(
         title: fridgeTitle,
         description: fridgeDesc,
-        contextText: 'Dọn tủ lạnh',
+        contextText: DiscoverStrings.prefsFridge,
         icon: AppIcons.fridge,
-        tags: const ['Dọn tủ lạnh'],
+        ctaLabel: pantryEmpty ? DiscoverStrings.fridgeEmptyCta : DiscoverStrings.viewDish,
         art: state.bannerArt[BannerCard.fridge],
         onTap: onTapPantry,
       ),

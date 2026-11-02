@@ -125,26 +125,30 @@ void main() {
     expect(find.text('Sáng nay vội?'), findsOneWidget);
   });
 
-  testWidgets('bấm thẻ gọi callback onTap', (tester) async {
+  testWidgets('chỉ nút CTA gọi onTap, bấm thân thẻ thì sang thẻ sau và vòng lại', (tester) async {
     var tapped = 0;
     final items = [
-      SuggestionBannerItem(
-        title: 'Món có callback',
-        description: 'Mô tả',
-        onTap: () => tapped++,
-      ),
+      SuggestionBannerItem(title: 'Thẻ một', description: 'Mô tả', onTap: () => tapped++),
+      SuggestionBannerItem(title: 'Thẻ hai', description: 'Mô tả', onTap: () => tapped++),
     ];
 
     await pumpBanner(tester, items: items);
 
-    await tester.tap(find.text('Món có callback'));
-    await tester.pump();
-    expect(tapped, 1);
+    await tester.tap(find.text('Thẻ một'));
+    await tester.pumpAndSettle();
+    expect(tapped, 0);
+    expect(find.text('Thẻ hai'), findsOneWidget);
+    expect(find.text('Thẻ một'), findsNothing);
 
-    // Bấm nút CTA Xem món cũng gọi callback
+    // Thẻ cuối bấm thân thẻ thì về thẻ đầu
+    await tester.tap(find.text('Thẻ hai'));
+    await tester.pumpAndSettle();
+    expect(find.text('Thẻ một'), findsOneWidget);
+
     await tester.tap(find.text('Xem món'));
-    await tester.pump();
-    expect(tapped, 2);
+    await tester.pumpAndSettle();
+    expect(tapped, 1);
+    expect(find.text('Thẻ một'), findsOneWidget);
   });
 
   testWidgets('bấm Gợi ý cho mình gọi callback onPreferencesTap', (tester) async {

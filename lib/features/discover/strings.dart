@@ -182,6 +182,13 @@ abstract final class DiscoverStrings {
   static const prefsTimeLabel = 'Thời gian nấu';
   static const prefsFeel = 'Cảm giác';
   static const prefsFridge = 'Dọn tủ lạnh';
+
+  // Thẻ Dọn tủ lạnh ở banner Khám phá
+  static String fridgeTitle(String names) => 'Tủ còn $names';
+  static String fridgeDesc(int count) => '$count món nấu được ngay, không phải đi chợ.';
+  static const fridgeEmptyTitle = 'Tủ đồ còn trống';
+  static const fridgeEmptyDesc = 'Thêm đồ đang có để app gợi ý món nấu được ngay.';
+  static const fridgeEmptyCta = 'Mở Tủ đồ';
   static const prefsFridgeDesc = 'Ưu tiên món dùng đồ bạn đang có';
 
   // Quy mô
