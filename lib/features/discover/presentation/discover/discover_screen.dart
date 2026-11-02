@@ -13,6 +13,7 @@ import 'package:recipe_mobile_app/core/widgets/availability_badge.dart';
 import 'package:recipe_mobile_app/core/widgets/recipe_cover.dart';
 import 'package:recipe_mobile_app/core/widgets/search_field.dart';
 import 'package:recipe_mobile_app/features/cook/cook.dart';
+import 'package:recipe_mobile_app/features/discover/domain/banner_art.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_view_model.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/suggestion_banner.dart';
 import 'package:recipe_mobile_app/features/discover/routes.dart';
@@ -218,6 +219,12 @@ class _BannerCarousel extends StatelessWidget {
       ),
     };
 
+    final timeCard = switch (state.upcomingMeal) {
+      Meal.breakfast => BannerCard.breakfast,
+      Meal.lunch => BannerCard.lunch,
+      Meal.dinner => BannerCard.dinner,
+    };
+
     final pantryCount = state.readyDishes.length;
     final pantryNames = state.pantryIngredientNames;
     final fridgeTitle = pantryNames.isNotEmpty
@@ -232,6 +239,7 @@ class _BannerCarousel extends StatelessWidget {
         contextText: timeCtx,
         icon: AppIcons.clock,
         tags: timeTags,
+        art: state.bannerArt[timeCard],
         onTap: () => onTapCard('time'),
       ),
       SuggestionBannerItem(
@@ -240,6 +248,7 @@ class _BannerCarousel extends StatelessWidget {
         contextText: 'Dọn tủ lạnh',
         icon: AppIcons.fridge,
         tags: const ['Dọn tủ lạnh'],
+        art: state.bannerArt[BannerCard.fridge],
         onTap: onTapPantry,
       ),
       SuggestionBannerItem(
@@ -248,6 +257,7 @@ class _BannerCarousel extends StatelessWidget {
         contextText: 'Cuối tháng',
         icon: Symbols.eco_rounded,
         tags: const ['Tiết kiệm'],
+        art: state.bannerArt[BannerCard.endOfMonth],
         onTap: () => onTapCard('cheap'),
       ),
       SuggestionBannerItem(
@@ -258,6 +268,7 @@ class _BannerCarousel extends StatelessWidget {
         tags: const ['Tuỳ chọn'],
         ctaLabel: 'Bật',
         hasTrailingArrow: false,
+        art: state.bannerArt[BannerCard.weatherOptIn],
         onTap: onTapSettings,
       ),
     ];

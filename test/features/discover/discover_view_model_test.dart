@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
 import 'package:recipe_mobile_app/core/storage/local_store.dart';
+import 'package:recipe_mobile_app/features/discover/domain/banner_art.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/discover_view_model.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
@@ -13,11 +14,11 @@ const _ingredients = [
   Ingredient(id: 'rice', name: 'Cơm', group: IngredientGroup.starch),
 ];
 
-Recipe _recipe(String id, int minutes, List<String> needs) => Recipe(
+Recipe _recipe(String id, int minutes, List<String> needs, {String imageAsset = ''}) => Recipe(
   id: id,
   name: id,
   description: '',
-  imageAsset: '',
+  imageAsset: imageAsset,
   minutes: minutes,
   servings: 1,
   tools: const [Tool.stove],
@@ -129,6 +130,71 @@ void main() {
         container.read(shoppingProvider).map((s) => s.recipeId),
         contains(recipe.id),
       );
+    });
+  });
+
+  group('bannerArt', () {
+    final allIds = {
+      for (final pool in bannerPools.values)
+        for (final g in pool) ...g,
+    };
+    List<Recipe> poolRecipes([Set<String>? skip]) => [
+      for (final id in allIds)
+        if (!(skip ?? {}).contains(id)) _recipe(id, 10, const [], imageAsset: 'img/$id.jpg'),
+    ];
+
+    ProviderContainer make(DateTime now, List<Recipe> recipes) {
+      final c = ProviderContainer(
+        overrides: [
+          localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
+          discoverNowProvider.overrideWithValue(now),
+          ingredientsProvider.overrideWith((ref) async => _ingredients),
+          recipesProvider.overrideWith((ref) async => recipes),
+        ],
+      );
+      addTearDown(c.dispose);
+      return c;
+    }
+
+    Future<DiscoverState> load(ProviderContainer c) async {
+      final sub = c.listen(discoverViewModelProvider, (_, _) {});
+      addTearDown(sub.close);
+      await c.read(recipesProvider.future);
+      await c.read(ingredientsProvider.future);
+      return sub.read().requireValue;
+    }
+
+    final now = DateTime(2026, 10, 24, 18, 30); // Tối
+
+    test('thẻ giờ, tủ lạnh, cuối tháng, thời tiết lấy imageAsset và kiểu theo dayOfYear', () async {
+      final state = await load(make(now, poolRecipes()));
+      final cards = [
+        BannerCard.dinner,
+        BannerCard.fridge,
+        BannerCard.endOfMonth,
+        BannerCard.weatherOptIn,
+      ];
+      final expected = pickBannerArt(
+        cards: cards,
+        seed: dayOfYear(now),
+        imageById: {for (final id in allIds) id: 'img/$id.jpg'},
+      );
+      expect(state.bannerArt.keys, unorderedEquals(cards));
+      for (var i = 0; i < cards.length; i++) {
+        expect(state.bannerArt[cards[i]], expected[i]);
+      }
+      expect(state.bannerArt[BannerCard.dinner]!.imageAssets.first, startsWith('img/'));
+    });
+
+    test('đổi ngày thì ảnh đổi', () async {
+      final a = await load(make(now, poolRecipes()));
+      final b = await load(make(now.add(const Duration(days: 1)), poolRecipes()));
+      expect(b.bannerArt, isNot(a.bannerArt));
+    });
+
+    test('thiếu recipe thì thẻ đó không có key', () async {
+      final state = await load(make(now, poolRecipes(allIds)));
+      expect(state.bannerArt, isEmpty);
     });
   });
 }

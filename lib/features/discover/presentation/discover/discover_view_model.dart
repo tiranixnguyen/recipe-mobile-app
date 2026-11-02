@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:recipe_mobile_app/core/analytics.dart';
 import 'package:recipe_mobile_app/core/data/recipe_repository.dart';
 import 'package:recipe_mobile_app/core/models/models.dart';
+import 'package:recipe_mobile_app/features/discover/domain/banner_art.dart';
 import 'package:recipe_mobile_app/features/pantry/pantry.dart';
 import 'package:recipe_mobile_app/features/plan/plan.dart';
 
@@ -23,6 +24,7 @@ class DiscoverState {
     required this.shoppingCount,
     required this.shoppingPreview,
     required this.addedShoppingIds,
+    this.bannerArt = const {},
   });
 
   /// Giờ hiện tại để xác định bữa và thứ trong tuần.
@@ -55,6 +57,9 @@ class DiscoverState {
   /// Các món đã bấm "+ Đi chợ" trong phiên hiện tại.
   final Set<String> addedShoppingIds;
 
+  /// Ảnh món cắt tròn của từng thẻ banner, cố định trong ngày. Thẻ không đủ dữ liệu thì không có key.
+  final Map<BannerCard, BannerArt> bannerArt;
+
   DiscoverState copyWith({
     DateTime? now,
     Meal? upcomingMeal,
@@ -66,6 +71,7 @@ class DiscoverState {
     int? shoppingCount,
     List<String>? shoppingPreview,
     Set<String>? addedShoppingIds,
+    Map<BannerCard, BannerArt>? bannerArt,
   }) {
     return DiscoverState(
       now: now ?? this.now,
@@ -78,6 +84,7 @@ class DiscoverState {
       shoppingCount: shoppingCount ?? this.shoppingCount,
       shoppingPreview: shoppingPreview ?? this.shoppingPreview,
       addedShoppingIds: addedShoppingIds ?? this.addedShoppingIds,
+      bannerArt: bannerArt ?? this.bannerArt,
     );
   }
 }
@@ -157,6 +164,27 @@ class DiscoverViewModel extends Notifier<AsyncValue<DiscoverState>> {
         if (ingredientMap[id] != null) ingredientMap[id]!.name,
     ];
 
+    // Thứ tự thẻ trùng với thứ tự View vẽ (hot/rainy thêm sau khi #115 xong).
+    final cards = [
+      switch (meal) {
+        Meal.breakfast => BannerCard.breakfast,
+        Meal.lunch => BannerCard.lunch,
+        Meal.dinner => BannerCard.dinner,
+      },
+      BannerCard.fridge,
+      BannerCard.endOfMonth,
+      BannerCard.weatherOptIn,
+    ];
+    final arts = pickBannerArt(
+      cards: cards,
+      seed: dayOfYear(now),
+      imageById: {for (final r in recipes) r.id: r.imageAsset},
+    );
+    final bannerArt = {
+      for (var i = 0; i < cards.length; i++)
+        if (arts[i] != null) cards[i]: arts[i]!,
+    };
+
     ref.read(analyticsProvider).track('view_discover');
 
     return AsyncData(
@@ -171,6 +199,7 @@ class DiscoverViewModel extends Notifier<AsyncValue<DiscoverState>> {
         shoppingCount: shoppingCount,
         shoppingPreview: shoppingPreview,
         addedShoppingIds: Set.unmodifiable(_addedShoppingIds),
+        bannerArt: bannerArt,
       ),
     );
   }
