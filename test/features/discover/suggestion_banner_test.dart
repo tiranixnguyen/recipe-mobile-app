@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:recipe_mobile_app/core/theme/theme.dart';
 import 'package:recipe_mobile_app/core/widgets/app_icon.dart';
+import 'package:recipe_mobile_app/features/discover/domain/banner_art.dart';
 import 'package:recipe_mobile_app/features/discover/presentation/discover/suggestion_banner.dart';
 import 'package:recipe_mobile_app/features/discover/strings.dart';
 
@@ -124,26 +125,30 @@ void main() {
     expect(find.text('Sáng nay vội?'), findsOneWidget);
   });
 
-  testWidgets('bấm thẻ gọi callback onTap', (tester) async {
+  testWidgets('chỉ nút CTA gọi onTap, bấm thân thẻ thì sang thẻ sau và vòng lại', (tester) async {
     var tapped = 0;
     final items = [
-      SuggestionBannerItem(
-        title: 'Món có callback',
-        description: 'Mô tả',
-        onTap: () => tapped++,
-      ),
+      SuggestionBannerItem(title: 'Thẻ một', description: 'Mô tả', onTap: () => tapped++),
+      SuggestionBannerItem(title: 'Thẻ hai', description: 'Mô tả', onTap: () => tapped++),
     ];
 
     await pumpBanner(tester, items: items);
 
-    await tester.tap(find.text('Món có callback'));
-    await tester.pump();
-    expect(tapped, 1);
+    await tester.tap(find.text('Thẻ một'));
+    await tester.pumpAndSettle();
+    expect(tapped, 0);
+    expect(find.text('Thẻ hai'), findsOneWidget);
+    expect(find.text('Thẻ một'), findsNothing);
 
-    // Bấm nút CTA Xem món cũng gọi callback
+    // Thẻ cuối bấm thân thẻ thì về thẻ đầu
+    await tester.tap(find.text('Thẻ hai'));
+    await tester.pumpAndSettle();
+    expect(find.text('Thẻ một'), findsOneWidget);
+
     await tester.tap(find.text('Xem món'));
-    await tester.pump();
-    expect(tapped, 2);
+    await tester.pumpAndSettle();
+    expect(tapped, 1);
+    expect(find.text('Thẻ một'), findsOneWidget);
   });
 
   testWidgets('bấm Gợi ý cho mình gọi callback onPreferencesTap', (tester) async {
@@ -271,4 +276,99 @@ void main() {
       expect(find.text('Xem món'), findsOneWidget);
     });
   }
+
+  group('ảnh cut-out', () {
+    const twoArt = BannerArt(
+      imageAssets: [
+        'assets/images/recipes/canh_ca_chua_trung.jpg',
+        'assets/images/recipes/banh_mi_trung_op.jpg',
+      ],
+      layout: BannerArtLayout.twoBottom,
+    );
+    const oneArt = BannerArt(
+      imageAssets: ['assets/images/recipes/canh_rau_cai_thit_bam.jpg'],
+      layout: BannerArtLayout.oneTilted,
+    );
+    const artItems = [
+      SuggestionBannerItem(
+        title: 'Tối nay thong thả',
+        description: 'Mâm cơm 3 món, nấu cùng bạn cùng phòng.',
+        contextText: 'Tối Thứ Năm',
+        icon: AppIcons.clock,
+        tags: ['Mâm cơm', 'Thong thả'],
+        art: twoArt,
+      ),
+      SuggestionBannerItem(
+        title: 'Cuối tháng rồi',
+        description: 'Hệ tiết kiệm.',
+        art: oneArt,
+      ),
+    ];
+
+    testWidgets('thẻ đôi vẽ 2 ClipOval, ảnh không vào cây trợ năng và không nhận chạm', (
+      tester,
+    ) async {
+      await pumpBanner(tester, items: artItems);
+      expect(find.byType(ClipOval), findsNWidgets(2));
+      for (final oval in find.byType(ClipOval).evaluate()) {
+        final element = oval;
+        expect(
+          find.ancestor(of: find.byWidget(element.widget), matching: find.byType(ExcludeSemantics)),
+          findsWidgets,
+        );
+        expect(
+          find.ancestor(of: find.byWidget(element.widget), matching: find.byType(IgnorePointer)),
+          findsWidgets,
+        );
+      }
+    });
+
+    testWidgets('vuốt trên vùng ảnh vẫn chuyển thẻ', (tester) async {
+      await pumpBanner(tester, items: artItems);
+      final oval = find.byType(ClipOval).first;
+      await tester.drag(oval, const Offset(-300, 0));
+      await tester.pumpAndSettle();
+      expect(find.text('Cuối tháng rồi'), findsOneWidget);
+    });
+
+    testWidgets('chữ to 1.3 và tiêu đề dài không overflow, thẻ cao ≥ 208', (tester) async {
+      tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: MediaQuery(
+            data: const MediaQueryData(
+              size: Size(390, 844),
+              textScaler: TextScaler.linear(1.3),
+              disableAnimations: true,
+            ),
+            child: const Scaffold(
+              body: SingleChildScrollView(
+                child: SuggestionBanner(
+                  items: [
+                    SuggestionBannerItem(
+                      title: 'Tủ còn trứng, cà chua, hành lá, đậu phụ non',
+                      description:
+                          'Một mô tả khá dài để chiếm đủ hai dòng trong thẻ gợi ý này nhé.',
+                      contextText: 'Dọn tủ lạnh',
+                      icon: AppIcons.fridge,
+                      tags: ['Dọn tủ lạnh', 'Siêu tốc', 'Một món gọn lẹ'],
+                      art: twoArt,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      final title = tester.widget<Text>(find.textContaining('Tủ còn trứng'));
+      expect(title.maxLines, 2);
+      expect(tester.getSize(find.byType(PageView)).height, greaterThanOrEqualTo(208));
+    });
+  });
 }
