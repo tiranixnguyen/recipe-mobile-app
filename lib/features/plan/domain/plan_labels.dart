@@ -40,11 +40,13 @@ String mealMeta(int count, int minutes) => count == 0 ? 'Còn trống' : '$count
 /// "d/m", ví dụ "27/10".
 String dayMonth(DateTime date) => '${date.day}/${date.month}';
 
+/// "Thứ Ba, 27/10" không kèm "Hôm nay" — dùng khi ngữ cảnh đã rõ là ngày đang xem (ví dụ cạnh
+/// "Thực đơn" ở header khi dòng ngày trong nội dung cuộn khuất).
+String dayMonthTitle(DateTime date) => '${weekdayNames[weekdayIndex(date)]}, ${dayMonth(date)}';
+
 /// Tiêu đề ngày đang xem: "Thứ Ba, 27/10 · Hôm nay", ngày khác thì không có "· Hôm nay".
-String dayTitle(DateTime date, DateTime today) {
-  final title = '${weekdayNames[weekdayIndex(date)]}, ${dayMonth(date)}';
-  return _day(date) == _day(today) ? '$title · Hôm nay' : title;
-}
+String dayTitle(DateTime date, DateTime today) =>
+    _day(date) == _day(today) ? '${dayMonthTitle(date)} · Hôm nay' : dayMonthTitle(date);
 
 /// Tiêu đề tuần chứa [date]: "Tuần 26/10 – 1/11".
 String weekTitle(DateTime date) {

@@ -48,6 +48,10 @@ abstract final class PlanStrings {
   static const confirmCookLabel = 'Tiếp tục nấu';
   static const confirmAddWhenCooked = 'Bạn đã nấu bữa này rồi. Tiếp tục thêm món?';
   static const confirmAddLabel = 'Tiếp tục thêm';
+  static const confirmSwapWhenCooked = 'Bạn đã nấu bữa này rồi. Tiếp tục đổi món?';
+  static const confirmSwapLabel = 'Tiếp tục đổi';
+  static const confirmRemoveWhenCooked = 'Bạn đã nấu bữa này rồi. Tiếp tục bỏ món?';
+  static const confirmRemoveLabel = 'Tiếp tục bỏ';
   static String cookDishLabel(Meal meal, String name) =>
       'Nấu món ${meal.label.toLowerCase()}: $name';
   static String cookMealLabel(Meal meal, List<String> names) =>
@@ -61,6 +65,23 @@ abstract final class PlanStrings {
   static String removed(String name, Meal meal) =>
       'Đã bỏ $name khỏi bữa ${meal.label.toLowerCase()}';
   static const undo = 'Hoàn tác';
+
+  // Thông báo thêm/đổi món trong bữa đang mở.
+  static String dishAdded(String name, Meal meal) =>
+      'Đã thêm $name vào bữa ${meal.label.toLowerCase()}';
+  static String dishAlreadyInMeal(String name, Meal meal) =>
+      '$name đã có trong bữa ${meal.label.toLowerCase()}';
+  static String dishSwapped(String from, String to) => 'Đã đổi $from thành $to';
+  static String suggestAdded(int count, Meal meal) =>
+      'Đã thêm $count món vào bữa ${meal.label.toLowerCase()}';
+
+  // Thông báo sheet Thêm vào thực đơn, [when] là "trưa thứ Ba", "sáng nay"…
+  static String addedOne(String name, String when) => 'Đã thêm $name vào bữa $when';
+  static String addedMany(int count, String when) => 'Đã thêm $count món vào bữa $when';
+  static String duplicateOne(String name, String when) =>
+      '$name đã có trong bữa $when, đã cập nhật khẩu phần';
+  static String duplicateMany(int count, String when) =>
+      '$count món đã có trong bữa $when, đã cập nhật khẩu phần';
 
   static const calendarTitle = 'Chọn ngày';
   static const previousMonth = 'Tháng trước';

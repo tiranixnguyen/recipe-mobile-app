@@ -21,7 +21,7 @@ import 'package:recipe_mobile_app/features/system/system.dart';
 
 /// Thực đơn (prototype `MealPlan`): chế độ Ngày với một bữa tâm điểm; chế độ Tuần chờ #48.
 class PlanScreen extends ConsumerStatefulWidget {
-  const PlanScreen({super.key, this.initialDate, this.initialMeal, this.openRequest});
+  const PlanScreen({super.key, this.initialDate, this.initialMeal, this.arrival});
 
   /// Ngày mở sẵn (`/plan?date=2026-10-30`, sau khi thêm món); null là giữ ngày đang xem.
   final DateTime? initialDate;
@@ -29,39 +29,54 @@ class PlanScreen extends ConsumerStatefulWidget {
   /// Bữa mở sẵn của [initialDate] (`&meal=dinner`).
   final Meal? initialMeal;
 
-  /// `extra` của lần điều hướng ([goToPlanDay]); đổi thì mở lại [initialDate] dù ngày không đổi.
-  final Object? openRequest;
+  /// `extra` của lần điều hướng ([goToPlanDay]); đổi thì mở lại [initialDate] dù ngày không đổi,
+  /// kèm thông báo nếu [PlanArrival.snackText] có giá trị.
+  final PlanArrival? arrival;
 
   @override
   ConsumerState<PlanScreen> createState() => _PlanScreenState();
 }
 
 class _PlanScreenState extends ConsumerState<PlanScreen> {
+  // Tiêu đề ngày trong nội dung cuộn khuất thì hiện lại cạnh "Thực đơn" ở header.
+  final _titleVisible = ValueNotifier(false);
+
   @override
   void initState() {
     super.initState();
-    _showInitialDate();
+    _handleArrival();
   }
 
   @override
   void didUpdateWidget(PlanScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Tab giữ màn khi chuyển tab, nên `go(planLocation(date: …))` lần sau tới đây. So cả
-    // [openRequest] vì thêm món vào cùng ngày lần nữa thì URL không đổi.
+    // [arrival] vì thêm món vào cùng ngày lần nữa thì URL không đổi.
     if (widget.initialDate != oldWidget.initialDate ||
         widget.initialMeal != oldWidget.initialMeal ||
-        !identical(widget.openRequest, oldWidget.openRequest)) {
-      _showInitialDate();
+        !identical(widget.arrival, oldWidget.arrival)) {
+      _handleArrival();
     }
   }
 
-  /// Đổi state của ViewModel sau frame, Riverpod không cho sửa provider lúc đang dựng cây widget.
-  void _showInitialDate() {
+  @override
+  void dispose() {
+    _titleVisible.dispose();
+    super.dispose();
+  }
+
+  /// Đổi state của ViewModel và báo kết quả sau frame, Riverpod không cho sửa provider lúc đang
+  /// dựng cây widget.
+  void _handleArrival() {
     final date = widget.initialDate;
-    if (date == null) return;
     final meal = widget.initialMeal;
+    final text = widget.arrival?.snackText;
+    final kind = widget.arrival?.snackKind ?? SnackKind.success;
+    if (date == null && text == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) ref.read(planViewModelProvider.notifier).selectDate(date, meal: meal);
+      if (!mounted) return;
+      if (date != null) ref.read(planViewModelProvider.notifier).selectDate(date, meal: meal);
+      if (text != null) AppSnackbar.show(context, text, kind: kind);
     });
   }
 
@@ -77,10 +92,10 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _Header(state: value),
+            _Header(state: value, titleVisible: _titleVisible),
             Expanded(
               child: switch (state) {
-                AsyncData(:final value) => _Body(state: value),
+                AsyncData(:final value) => _Body(state: value, titleVisible: _titleVisible),
                 AsyncError() => Padding(
                   padding: const EdgeInsets.all(AppSpacing.s4),
                   child: Text(
@@ -98,11 +113,13 @@ class _PlanScreenState extends ConsumerState<PlanScreen> {
   }
 }
 
-/// "Thực đơn", công tắc Ngày | Tuần, nút lịch.
+/// "Thực đơn", công tắc Ngày | Tuần, nút lịch; ngày đang xem hiện lên đây khi dòng ngày trong nội
+/// dung cuộn khuất ([titleVisible]).
 class _Header extends ConsumerWidget {
-  const _Header({required this.state});
+  const _Header({required this.state, required this.titleVisible});
 
   final PlanState? state;
+  final ValueNotifier<bool> titleVisible;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -129,13 +146,47 @@ class _Header extends ConsumerWidget {
       child: Row(
         spacing: AppSpacing.s2,
         children: [
+          // Một Expanded duy nhất chừa đúng chỗ cho nút lịch dù "Thực đơn" + ngày chiếm ít hơn: hai
+          // `Flexible` cùng cấp (title, Spacer) sẽ chia đôi chỗ trống thay vì nhường hết cho nút.
           Expanded(
-            child: Semantics(
-              header: true,
-              child: Text(
-                PlanStrings.title,
-                style: AppTextStyles.title.copyWith(color: colors.ink),
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: AppSpacing.s2,
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(
+                    PlanStrings.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.title.copyWith(color: colors.ink),
+                  ),
+                ),
+                if (state != null)
+                  Flexible(
+                    child: ValueListenableBuilder<bool>(
+                      valueListenable: titleVisible,
+                      builder: (context, visible, _) =>
+                          // `Offstage` để màn lọc theo text (`find.text`) không thấy bản sao khi
+                          // đang ẩn; cùng lúc tắt opacity 0 → 1 nên vẫn mờ dần lúc hiện ra.
+                          Offstage(
+                            offstage: !visible,
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 150),
+                              opacity: visible ? 1 : 0,
+                              child: ExcludeSemantics(
+                                child: Text(
+                                  state.headerTitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.meta.copyWith(color: colors.inkMuted),
+                                ),
+                              ),
+                            ),
+                          ),
+                    ),
+                  ),
+              ],
             ),
           ),
           if (state != null)
@@ -152,9 +203,10 @@ class _Header extends ConsumerWidget {
 }
 
 class _Body extends ConsumerStatefulWidget {
-  const _Body({required this.state});
+  const _Body({required this.state, required this.titleVisible});
 
   final PlanState state;
+  final ValueNotifier<bool> titleVisible;
 
   @override
   ConsumerState<_Body> createState() => _BodyState();
@@ -162,6 +214,24 @@ class _Body extends ConsumerStatefulWidget {
 
 class _BodyState extends ConsumerState<_Body> {
   final _scroll = ScrollController();
+  final _dateRowKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    // Đo sau khi layout frame này xong: dòng ngày có thể đang bị sliver bỏ mount (cuộn xa) nên đo
+    // ngay lúc nhận sự kiện cuộn có thể ra null, nhất là ngay sau `jumpTo(0)`.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final box = _dateRowKey.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null) return;
+      widget.titleVisible.value = _scroll.offset >= box.size.height;
+    });
+  }
 
   @override
   void didUpdateWidget(_Body oldWidget) {
@@ -200,6 +270,7 @@ class _BodyState extends ConsumerState<_Body> {
       ),
       children: [
         Row(
+          key: _dateRowKey,
           spacing: AppSpacing.s1,
           children: [
             Transform.translate(
@@ -441,20 +512,72 @@ class _OpenMeal extends ConsumerWidget {
       );
       if (!ok || !context.mounted) return;
       final id = await showRecipePicker(context, meal);
-      if (id != null) await viewModel.addDish(meal, id);
+      if (id == null || !context.mounted) return;
+      final result = await viewModel.addDish(meal, id);
+      if (!context.mounted) return;
+      switch (result.kind) {
+        case PlanAddKind.added:
+          AppSnackbar.show(
+            context,
+            PlanStrings.dishAdded(result.name, meal),
+            action: SnackAction(PlanStrings.undo, () => viewModel.removeDish(meal, id)),
+          );
+        case PlanAddKind.duplicate:
+          AppSnackbar.show(
+            context,
+            PlanStrings.dishAlreadyInMeal(result.name, meal),
+            kind: SnackKind.info,
+          );
+      }
     }
 
     Future<void> suggest() async {
       final added = await viewModel.suggestMeal(meal);
-      if (added == 0 && context.mounted) _showSuggestNone(context);
+      if (!context.mounted) return;
+      if (added == 0) {
+        _showSuggestNone(context);
+      } else {
+        AppSnackbar.show(context, PlanStrings.suggestAdded(added, meal));
+      }
     }
 
     Future<void> act(_DishAction action, Recipe recipe) async {
       switch (action) {
         case _DishAction.swap:
+          final ok = await confirmIfCooked(
+            message: PlanStrings.confirmSwapWhenCooked,
+            confirmLabel: PlanStrings.confirmSwapLabel,
+          );
+          if (!ok || !context.mounted) return;
           final id = await showRecipePicker(context, meal);
-          if (id != null) await viewModel.swapDish(meal, recipe.id, id);
+          if (id == null || !context.mounted) return;
+          final result = await viewModel.swapDish(meal, recipe.id, id);
+          if (!context.mounted) return;
+          switch (result.kind) {
+            case PlanSwapKind.swapped:
+              AppSnackbar.show(
+                context,
+                PlanStrings.dishSwapped(result.fromName, result.toName),
+                action: SnackAction(
+                  PlanStrings.undo,
+                  () => viewModel.swapDish(meal, id, recipe.id),
+                ),
+              );
+            case PlanSwapKind.duplicate:
+              AppSnackbar.show(
+                context,
+                PlanStrings.dishAlreadyInMeal(result.toName, meal),
+                kind: SnackKind.info,
+              );
+            case PlanSwapKind.none:
+              break;
+          }
         case _DishAction.remove:
+          final ok = await confirmIfCooked(
+            message: PlanStrings.confirmRemoveWhenCooked,
+            confirmLabel: PlanStrings.confirmRemoveLabel,
+          );
+          if (!ok || !context.mounted) return;
           final removed = await viewModel.removeDish(meal, recipe.id);
           if (removed == null || !context.mounted) return;
           AppSnackbar.show(
@@ -510,12 +633,22 @@ class _OpenMeal extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Semantics(
-                          header: true,
-                          child: Text(
-                            meal.label,
-                            style: AppTextStyles.subtitle.copyWith(color: colors.ink),
-                          ),
+                        Row(
+                          spacing: AppSpacing.s2,
+                          children: [
+                            Flexible(
+                              child: Semantics(
+                                header: true,
+                                child: Text(
+                                  meal.label,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: AppTextStyles.subtitle.copyWith(color: colors.ink),
+                                ),
+                              ),
+                            ),
+                            if (cooked) _CookedLabel(meal: meal),
+                          ],
                         ),
                         Text(
                           state.metas[meal]!,
@@ -526,7 +659,6 @@ class _OpenMeal extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  if (cooked) _CookedLabel(meal: meal),
                   ?cookWidget,
                 ],
               ),
