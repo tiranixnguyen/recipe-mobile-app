@@ -114,7 +114,10 @@ class _HistoryEntry extends ConsumerWidget {
             height: 168,
             child: MealMosaic(
               radius: AppRadius.mdAll,
-              dishes: [for (final d in entry.dishes) MosaicDish(nameOf(d.recipeId))],
+              dishes: [
+                for (final d in entry.dishes)
+                  MosaicDish(nameOf(d.recipeId), recipes[d.recipeId]?.imageAsset),
+              ],
             ),
           ),
           const SizedBox(height: AppSpacing.s2),

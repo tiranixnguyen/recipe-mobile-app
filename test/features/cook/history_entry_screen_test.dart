@@ -10,6 +10,22 @@ import 'package:recipe_mobile_app/features/cook/cook.dart';
 
 import 'fixtures.dart';
 
+final _imageRecipe = Recipe(
+  id: cookRecipeFixture.id,
+  name: cookRecipeFixture.name,
+  description: cookRecipeFixture.description,
+  imageAsset: 'assets/images/recipes/trung_chien_hanh.jpg',
+  minutes: cookRecipeFixture.minutes,
+  servings: cookRecipeFixture.servings,
+  tools: cookRecipeFixture.tools,
+  diets: cookRecipeFixture.diets,
+  meals: cookRecipeFixture.meals,
+  ingredients: cookRecipeFixture.ingredients,
+  steps: cookRecipeFixture.steps,
+  prepMinutes: cookRecipeFixture.prepMinutes,
+  notes: cookRecipeFixture.notes,
+);
+
 void main() {
   testWidgets('HistoryEntryScreen hiển thị món, sửa đánh giá, ghi chú và bấm Nấu lại', (
     tester,
@@ -17,7 +33,7 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         localStoreProvider.overrideWith((ref) => InMemoryLocalStore()),
-        recipesProvider.overrideWith((ref) async => const [cookRecipeFixture]),
+        recipesProvider.overrideWith((ref) async => [_imageRecipe]),
       ],
     );
     addTearDown(container.dispose);
@@ -74,6 +90,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Trứng chiên hành'), findsWidgets);
+    expect(find.byType(Image), findsOneWidget);
+    final image = tester.widget<Image>(find.byType(Image));
+    expect((image.image as AssetImage).assetName, 'assets/images/recipes/trung_chien_hanh.jpg');
     expect(find.text('Nấu lại món này'), findsOneWidget);
     expect(find.text('Thêm vào thực đơn'), findsOneWidget);
 
